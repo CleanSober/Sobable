@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppStoreBadges from "@/components/AppStoreBadges";
+import appIcon from "@/assets/app-icon.png";
+import phoneMockup1 from "@/assets/phone-mockup-1.png";
+import phoneMockup2 from "@/assets/phone-mockup-2.png";
 const features = [
   {
     icon: Calendar,
@@ -76,85 +79,118 @@ const Landing = () => {
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
         </div>
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-              <Shield className="w-4 h-4 text-primary" />
-              <span className="text-sm text-primary font-medium">Your Journey to Recovery</span>
-            </div>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
-          >
-            Every Sober Day is a{" "}
-            <span className="text-gradient">Victory</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto"
-          >
-            Track your sobriety, celebrate your progress, and build a healthier life—one day at a time.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Link to="/app">
-              <Button size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
-                Start Your Journey
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="px-8 py-6 text-lg border-border/50 hover:bg-secondary/50"
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+        <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left side - Text content */}
+          <div className="text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              Learn More
-            </Button>
-          </motion.div>
-
-          {/* App Store Badges */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-8"
-          >
-            <p className="text-sm text-muted-foreground mb-4">Coming soon to mobile</p>
-            <AppStoreBadges size="md" />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto"
-          >
-            {[
-              { value: "100%", label: "Free" },
-              { value: "24/7", label: "Support" },
-              { value: "100%", label: "Private" },
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
+                <img src={appIcon} alt="Sober Days" className="w-6 h-6 rounded-lg" />
+                <span className="text-sm text-primary font-medium">Your Journey to Recovery</span>
               </div>
-            ))}
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
+            >
+              Every Sober Day is a{" "}
+              <span className="text-gradient">Victory</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl lg:max-w-none"
+            >
+              Track your sobriety, celebrate your progress, and build a healthier life—one day at a time.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+            >
+              <Link to="/app">
+                <Button size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
+                  Start Your Journey
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="px-8 py-6 text-lg border-border/50 hover:bg-secondary/50"
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Learn More
+              </Button>
+            </motion.div>
+
+            {/* App Store Badges */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="mt-8"
+            >
+              <p className="text-sm text-muted-foreground mb-4">Coming soon to mobile</p>
+              <AppStoreBadges size="md" className="justify-center lg:justify-start" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="mt-12 grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0"
+            >
+              {[
+                { value: "100%", label: "Free" },
+                { value: "24/7", label: "Support" },
+                { value: "100%", label: "Private" },
+              ].map((stat, index) => (
+                <div key={index} className="text-center lg:text-left">
+                  <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right side - Phone mockups */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="relative hidden lg:flex justify-center items-center"
+          >
+            <div className="relative">
+              {/* Main phone mockup */}
+              <motion.img
+                src={phoneMockup1}
+                alt="Sober Days App - Sobriety Counter"
+                className="w-72 h-auto rounded-3xl shadow-2xl relative z-10"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+              {/* Secondary phone mockup */}
+              <motion.img
+                src={phoneMockup2}
+                alt="Sober Days App - Daily Motivation"
+                className="absolute -right-20 top-20 w-56 h-auto rounded-3xl shadow-xl opacity-80"
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              />
+              {/* Decorative glow behind phones */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 blur-3xl -z-10 scale-150" />
+            </div>
           </motion.div>
         </div>
       </section>
