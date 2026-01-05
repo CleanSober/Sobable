@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, Leaf } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
@@ -11,6 +11,7 @@ import { ProgressView } from "@/components/ProgressView";
 import { MotivationView } from "@/components/MotivationView";
 import { TriggerLogger } from "@/components/TriggerLogger";
 import { PatternAnalysis } from "@/components/PatternAnalysis";
+import { UserProfile } from "@/components/UserProfile";
 import {
   getUserData,
   calculateDaysSober,
@@ -188,16 +189,7 @@ const Index = () => {
               Clean & Sober
             </span>
           </div>
-          <button
-            onClick={() => {
-              localStorage.clear();
-              window.location.reload();
-            }}
-            className="p-2 rounded-lg hover:bg-secondary transition-colors"
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
+          <UserProfile />
         </div>
       </motion.header>
 
