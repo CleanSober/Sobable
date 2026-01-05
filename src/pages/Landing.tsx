@@ -13,7 +13,7 @@ import {
   Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import AppStoreBadges from "@/components/AppStoreBadges";
 const features = [
   {
     icon: Calendar,
@@ -129,7 +129,16 @@ const Landing = () => {
             </Button>
           </motion.div>
 
-          {/* Stats */}
+          {/* App Store Badges */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="mt-8"
+          >
+            <p className="text-sm text-muted-foreground mb-4">Coming soon to mobile</p>
+            <AppStoreBadges size="md" />
+          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -324,6 +333,10 @@ const Landing = () => {
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
+            <div className="mt-8">
+              <p className="text-sm text-muted-foreground mb-4">Or download the app</p>
+              <AppStoreBadges size="sm" />
+            </div>
           </div>
         </motion.div>
       </section>
