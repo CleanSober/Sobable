@@ -9,6 +9,8 @@ import { Onboarding } from "@/components/Onboarding";
 import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { ProgressView } from "@/components/ProgressView";
 import { MotivationView } from "@/components/MotivationView";
+import { TriggerLogger } from "@/components/TriggerLogger";
+import { PatternAnalysis } from "@/components/PatternAnalysis";
 import {
   getUserData,
   calculateDaysSober,
@@ -99,6 +101,26 @@ const Index = () => {
               </p>
             </motion.div>
             <MoodCheckIn />
+          </div>
+        );
+
+      case "triggers":
+        return (
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-2"
+            >
+              <h1 className="text-2xl font-bold text-foreground mb-1">
+                Triggers & Patterns
+              </h1>
+              <p className="text-muted-foreground">
+                Know yourself to protect yourself
+              </p>
+            </motion.div>
+            <TriggerLogger />
+            <PatternAnalysis />
           </div>
         );
 
