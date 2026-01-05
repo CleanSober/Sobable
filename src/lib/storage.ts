@@ -1,4 +1,5 @@
 export interface UserData {
+  name?: string;
   substances: string[];
   sobrietyStartDate: string;
   dailySpending: number;

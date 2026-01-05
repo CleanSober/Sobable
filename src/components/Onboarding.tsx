@@ -21,6 +21,8 @@ interface OnboardingProps {
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [step, setStep] = useState(1);
+  const [name, setName] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
   const [startDate, setStartDate] = useState("");
   const [dailySpending, setDailySpending] = useState("");
@@ -36,12 +38,13 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const handleComplete = () => {
     const userData: UserData = {
+      name: isAnonymous ? undefined : name.trim().slice(0, 50) || undefined,
       substances: selectedSubstances,
       sobrietyStartDate: startDate,
       dailySpending: parseFloat(dailySpending) || 0,
-      personalReminder: personalReminder.trim() || undefined,
-      sponsorPhone: sponsorPhone.trim() || undefined,
-      emergencyContact: emergencyContact.trim() || undefined,
+      personalReminder: personalReminder.trim().slice(0, 500) || undefined,
+      sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
+      emergencyContact: emergencyContact.trim().slice(0, 20) || undefined,
       onboardingComplete: true,
     };
     saveUserData(userData);
@@ -51,10 +54,14 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   const canProceed = () => {
     switch (step) {
       case 1:
-        return selectedSubstances.length > 0;
+        return isAnonymous || name.trim().length > 0;
       case 2:
-        return startDate !== "";
+        return selectedSubstances.length > 0;
       case 3:
+        return startDate !== "";
+      case 4:
+        return true;
+      case 5:
         return true;
       default:
         return true;
@@ -67,17 +74,17 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
         {/* Progress */}
         <div className="mb-8">
           <div className="flex justify-between mb-2">
-            {[1, 2, 3, 4].map((s) => (
+            {[1, 2, 3, 4, 5].map((s) => (
               <div
                 key={s}
-                className={`w-1/4 h-1 rounded-full mx-1 transition-colors ${
+                className={`flex-1 h-1 rounded-full mx-1 transition-colors ${
                   s <= step ? "gradient-primary" : "bg-secondary"
                 }`}
               />
             ))}
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            Step {step} of 4
+            Step {step} of 5
           </p>
         </div>
 
@@ -97,7 +104,52 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                   Welcome to Clean & Sober
                 </h1>
                 <p className="text-muted-foreground">
+                  What should we call you?
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  disabled={isAnonymous}
+                  maxLength={50}
+                  className="text-center text-lg bg-secondary/50 border-border/50"
+                />
+                
+                <button
+                  onClick={() => {
+                    setIsAnonymous(!isAnonymous);
+                    if (!isAnonymous) setName("");
+                  }}
+                  className={`w-full p-3 rounded-xl text-sm transition-all border ${
+                    isAnonymous
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border/50 bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {isAnonymous ? "✓ Staying anonymous" : "Prefer to stay anonymous"}
+                </button>
+              </div>
+
+              <div className="text-center p-4 rounded-xl bg-primary/10 border border-primary/20">
+                <p className="text-sm text-muted-foreground">
+                  Your privacy matters. You can change this anytime in settings.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold text-foreground mb-2">
                   What are you recovering from?
+                </h1>
+                <p className="text-muted-foreground">
+                  Select all that apply
                 </p>
               </div>
 
@@ -125,7 +177,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -154,7 +206,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -174,6 +226,8 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                   value={dailySpending}
                   onChange={(e) => setDailySpending(e.target.value)}
                   placeholder="0"
+                  min="0"
+                  max="10000"
                   className="text-center text-2xl pl-8 bg-secondary/50 border-border/50"
                 />
               </div>
@@ -184,7 +238,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -206,6 +260,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                     placeholder="For my family, for my health..."
                     className="bg-secondary/50 border-border/50 resize-none"
                     rows={2}
+                    maxLength={500}
                   />
                 </div>
 
@@ -219,6 +274,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                     onChange={(e) => setSponsorPhone(e.target.value)}
                     placeholder="Optional"
                     className="bg-secondary/50 border-border/50"
+                    maxLength={20}
                   />
                 </div>
 
@@ -232,6 +288,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                     onChange={(e) => setEmergencyContact(e.target.value)}
                     placeholder="Optional"
                     className="bg-secondary/50 border-border/50"
+                    maxLength={20}
                   />
                 </div>
               </div>
@@ -250,7 +307,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               </Button>
             )}
 
-            {step < 4 ? (
+            {step < 5 ? (
               <Button
                 onClick={() => setStep(step + 1)}
                 disabled={!canProceed()}
