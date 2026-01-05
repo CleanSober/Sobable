@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RotateCcw, Settings2, Phone, DollarSign, Calendar } from "lucide-react";
+import { RotateCcw, Settings2, Phone, DollarSign, Calendar, User } from "lucide-react";
 import { getUserData, saveUserData } from "@/lib/storage";
 import {
   DropdownMenu,
@@ -25,13 +25,15 @@ export const UserProfile = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [userData, setUserData] = useState(getUserData());
   
+  const [name, setName] = useState(userData?.name || "");
   const [sobrietyDate, setSobrietyDate] = useState(userData?.sobrietyStartDate || "");
   const [dailySpending, setDailySpending] = useState(userData?.dailySpending?.toString() || "0");
   const [sponsorPhone, setSponsorPhone] = useState(userData?.sponsorPhone || "");
   const [emergencyContact, setEmergencyContact] = useState(userData?.emergencyContact || "");
   const [personalReminder, setPersonalReminder] = useState(userData?.personalReminder || "");
 
-  const initials = "ME";
+  const displayName = userData?.name || "Friend";
+  const initials = userData?.name ? userData.name.slice(0, 2).toUpperCase() : "ME";
 
   const handleResetProgress = () => {
     if (confirm("Are you sure you want to reset all your progress? This cannot be undone.")) {
@@ -51,6 +53,7 @@ export const UserProfile = () => {
 
     const updatedData = {
       ...userData,
+      name: name.trim().slice(0, 50) || undefined,
       sobrietyStartDate: sobrietyDate,
       dailySpending: spending,
       sponsorPhone: sponsorPhone.slice(0, 20),
@@ -71,6 +74,7 @@ export const UserProfile = () => {
     // Refresh data when opening
     const freshData = getUserData();
     setUserData(freshData);
+    setName(freshData?.name || "");
     setSobrietyDate(freshData?.sobrietyStartDate || "");
     setDailySpending(freshData?.dailySpending?.toString() || "0");
     setSponsorPhone(freshData?.sponsorPhone || "");
@@ -92,15 +96,15 @@ export const UserProfile = () => {
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium text-foreground hidden sm:inline">
-              Profile
+            <span className="text-sm font-medium text-foreground hidden sm:inline truncate max-w-[80px]">
+              {displayName}
             </span>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <div className="px-2 py-1.5">
-            <p className="text-sm font-medium text-foreground">Your Profile</p>
-            <p className="text-xs text-muted-foreground">Manage your journey</p>
+            <p className="text-sm font-medium text-foreground">{displayName}</p>
+            <p className="text-xs text-muted-foreground">Your recovery journey</p>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={openSettings} className="cursor-pointer">
@@ -128,6 +132,25 @@ export const UserProfile = () => {
           </SheetHeader>
           
           <div className="space-y-6 mt-6">
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                Display Name
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Leave empty for anonymous"
+                maxLength={50}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty to stay anonymous
+              </p>
+            </div>
+
             {/* Sobriety Date */}
             <div className="space-y-2">
               <Label htmlFor="sobrietyDate" className="flex items-center gap-2">
