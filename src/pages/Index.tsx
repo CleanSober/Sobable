@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Leaf } from "lucide-react";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
-import { DailyMotivation } from "@/components/DailyMotivation";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
 import { EmergencyButton } from "@/components/EmergencyButton";
 import { Onboarding } from "@/components/Onboarding";
+import { BottomTabs, type TabId } from "@/components/BottomTabs";
+import { ProgressView } from "@/components/ProgressView";
+import { MotivationView } from "@/components/MotivationView";
 import {
   getUserData,
   calculateDaysSober,
@@ -16,6 +18,7 @@ import {
 const Index = () => {
   const [userData, setUserData] = useState(getUserData());
   const [showOnboarding, setShowOnboarding] = useState(!userData?.onboardingComplete);
+  const [activeTab, setActiveTab] = useState<TabId>("home");
 
   useEffect(() => {
     const data = getUserData();
@@ -41,6 +44,110 @@ const Index = () => {
     userData.sobrietyStartDate,
     userData.dailySpending
   );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "home":
+        return (
+          <div className="space-y-6">
+            {/* Greeting */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-2"
+            >
+              <p className="text-muted-foreground mb-1">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <h1 className="text-2xl font-bold text-foreground">
+                You're doing amazing! 🌟
+              </h1>
+            </motion.div>
+
+            <SobrietyCounter
+              daysSober={daysSober}
+              startDate={userData.sobrietyStartDate}
+            />
+
+            {userData.dailySpending > 0 && (
+              <MoneySaved
+                totalSaved={moneySaved}
+                dailySpending={userData.dailySpending}
+                daysSober={daysSober}
+              />
+            )}
+          </div>
+        );
+
+      case "checkin":
+        return (
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-2"
+            >
+              <h1 className="text-2xl font-bold text-foreground mb-1">
+                Daily Check-In
+              </h1>
+              <p className="text-muted-foreground">
+                How are you feeling today?
+              </p>
+            </motion.div>
+            <MoodCheckIn />
+          </div>
+        );
+
+      case "progress":
+        return (
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-2"
+            >
+              <h1 className="text-2xl font-bold text-foreground mb-1">
+                Your Journey
+              </h1>
+              <p className="text-muted-foreground">
+                Every step counts
+              </p>
+            </motion.div>
+            <ProgressView
+              daysSober={daysSober}
+              totalSaved={moneySaved}
+              dailySpending={userData.dailySpending}
+            />
+          </div>
+        );
+
+      case "motivation":
+        return (
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-2"
+            >
+              <h1 className="text-2xl font-bold text-foreground mb-1">
+                Stay Inspired
+              </h1>
+              <p className="text-muted-foreground">
+                Fuel for your journey
+              </p>
+            </motion.div>
+            <MotivationView />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,47 +180,22 @@ const Index = () => {
       </motion.header>
 
       {/* Main Content */}
-      <main className="container max-w-2xl mx-auto px-4 py-6 pb-24 space-y-6">
-        {/* Greeting */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="text-center py-4"
-        >
-          <p className="text-muted-foreground mb-1">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
-          <h1 className="text-2xl font-bold text-foreground">
-            You're doing amazing! 🌟
-          </h1>
-        </motion.div>
-
-        {/* Sobriety Counter */}
-        <SobrietyCounter
-          daysSober={daysSober}
-          startDate={userData.sobrietyStartDate}
-        />
-
-        {/* Money Saved */}
-        {userData.dailySpending > 0 && (
-          <MoneySaved
-            totalSaved={moneySaved}
-            dailySpending={userData.dailySpending}
-            daysSober={daysSober}
-          />
-        )}
-
-        {/* Daily Motivation */}
-        <DailyMotivation />
-
-        {/* Mood Check-In */}
-        <MoodCheckIn />
+      <main className="container max-w-2xl mx-auto px-4 py-6 pb-28">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {renderTabContent()}
+          </motion.div>
+        </AnimatePresence>
       </main>
+
+      {/* Bottom Tabs */}
+      <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Emergency Button */}
       <EmergencyButton />
