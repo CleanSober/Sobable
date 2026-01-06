@@ -17,6 +17,7 @@ import AppStoreBadges from "@/components/AppStoreBadges";
 import appIcon from "@/assets/app-icon.png";
 import phoneMockup1 from "@/assets/phone-mockup-1.png";
 import phoneMockup2 from "@/assets/phone-mockup-2.png";
+import phoneMockupSquare from "@/assets/phone-mockup-square.png";
 const features = [
   {
     icon: Calendar,
@@ -197,7 +198,7 @@ const Landing = () => {
 
       {/* Features Section */}
       <section id="features" className="py-24 px-6 bg-card/30">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -213,23 +214,46 @@ const Landing = () => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="gradient-card p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 group"
-              >
-                <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-shadow duration-300">
-                  <feature.icon className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </motion.div>
-            ))}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Phone mockup showcase */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative flex justify-center"
+            >
+              <div className="relative">
+                <motion.img
+                  src={phoneMockupSquare}
+                  alt="Sober Days App Features"
+                  className="w-full max-w-md rounded-3xl shadow-2xl"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 blur-3xl -z-10 scale-110" />
+              </div>
+            </motion.div>
+
+            {/* Features grid */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="gradient-card p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 group"
+                >
+                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-shadow duration-300">
+                    <feature.icon className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
