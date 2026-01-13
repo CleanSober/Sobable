@@ -1,17 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, AlertTriangle, Clock, X, Check, ChevronDown, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  saveTriggerEntry,
-  getTriggerEntries,
-  deleteTriggerEntry,
-  getCopingStrategies,
-  type TriggerEntry,
-} from "@/lib/storage";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { getCopingStrategies } from "@/lib/storage";
 import { toast } from "sonner";
+
+interface TriggerEntry {
+  id: string;
+  date: string;
+  time: string;
+  trigger: string;
+  situation: string;
+  emotion: string;
+  intensity: number;
+  coping_used?: string;
+  outcome?: string;
+  notes?: string;
+}
 
 const triggerOptions = [
   "Stress", "Social pressure", "Seeing substance", "Location/Place",
@@ -29,9 +38,11 @@ const situationOptions = [
 ];
 
 export const TriggerLogger = () => {
+  const { user } = useAuth();
   const [isLogging, setIsLogging] = useState(false);
-  const [entries, setEntries] = useState<TriggerEntry[]>(getTriggerEntries());
+  const [entries, setEntries] = useState<TriggerEntry[]>([]);
   const [showStrategies, setShowStrategies] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   
   // Form state
   const [trigger, setTrigger] = useState("");
@@ -39,8 +50,38 @@ export const TriggerLogger = () => {
   const [emotion, setEmotion] = useState("");
   const [intensity, setIntensity] = useState(5);
   const [copingUsed, setCopingUsed] = useState("");
-  const [outcome, setOutcome] = useState<"resisted" | "struggled" | "relapsed" | "">("");
+  const [outcome, setOutcome] = useState<"stayed_sober" | "struggled" | "relapsed" | "">("");
   const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    fetchEntries();
+  }, [user]);
+
+  const fetchEntries = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("trigger_entries")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (data) {
+      setEntries(data.map(e => ({
+        id: e.id,
+        date: e.date,
+        time: e.time,
+        trigger: e.trigger,
+        situation: e.situation,
+        emotion: e.emotion,
+        intensity: e.intensity,
+        coping_used: e.coping_used || undefined,
+        outcome: e.outcome || undefined,
+        notes: e.notes || undefined,
+      })));
+    }
+  };
 
   const resetForm = () => {
     setTrigger("");
@@ -53,36 +94,65 @@ export const TriggerLogger = () => {
     setIsLogging(false);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) return;
     if (!trigger || !situation || !emotion) {
       toast.error("Please fill in trigger, situation, and emotion");
       return;
     }
 
+    setLoading(true);
     const now = new Date();
-    const entry: TriggerEntry = {
-      id: Date.now().toString(),
-      date: now.toISOString().split("T")[0],
-      time: now.toTimeString().slice(0, 5),
-      trigger,
-      situation,
-      emotion,
-      intensity,
-      copingUsed: copingUsed || undefined,
-      outcome: outcome || undefined,
-      notes: notes || undefined,
-    };
+    const today = now.toISOString().split("T")[0];
 
-    saveTriggerEntry(entry);
-    setEntries(getTriggerEntries());
+    const { error } = await supabase
+      .from("trigger_entries")
+      .insert({
+        user_id: user.id,
+        date: today,
+        time: now.toTimeString().slice(0, 5),
+        trigger,
+        situation,
+        emotion,
+        intensity,
+        coping_used: copingUsed || null,
+        outcome: outcome || null,
+        notes: notes || null,
+      });
+
+    if (error) {
+      toast.error("Failed to save trigger");
+      setLoading(false);
+      return;
+    }
+
+    // Update daily goals
+    await supabase
+      .from("daily_goals")
+      .upsert({
+        user_id: user.id,
+        date: today,
+        trigger_logged: true,
+      }, {
+        onConflict: "user_id,date"
+      });
+
+    await fetchEntries();
     resetForm();
+    setLoading(false);
     toast.success("Trigger logged. You're building self-awareness! 💪");
   };
 
-  const handleDelete = (id: string) => {
-    deleteTriggerEntry(id);
-    setEntries(getTriggerEntries());
-    toast.success("Entry removed");
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from("trigger_entries")
+      .delete()
+      .eq("id", id);
+
+    if (!error) {
+      setEntries(entries.filter(e => e.id !== id));
+      toast.success("Entry removed");
+    }
   };
 
   const strategies = emotion ? getCopingStrategies(emotion, trigger) : [];
@@ -232,7 +302,7 @@ export const TriggerLogger = () => {
               </label>
               <div className="flex gap-2">
                 {[
-                  { value: "resisted", label: "Resisted 💪", color: "bg-success text-success-foreground" },
+                  { value: "stayed_sober", label: "Stayed Sober 💪", color: "bg-success text-success-foreground" },
                   { value: "struggled", label: "Struggled 😓", color: "bg-warning text-warning-foreground" },
                   { value: "relapsed", label: "Slipped 🔄", color: "bg-destructive text-destructive-foreground" },
                 ].map((opt) => (
@@ -268,8 +338,9 @@ export const TriggerLogger = () => {
               onClick={handleSubmit}
               className="w-full gradient-primary text-primary-foreground font-semibold"
               size="lg"
+              disabled={loading}
             >
-              Save Entry
+              {loading ? "Saving..." : "Save Entry"}
             </Button>
           </motion.div>
         )}
@@ -307,14 +378,14 @@ export const TriggerLogger = () => {
                     {entry.outcome && (
                       <span
                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          entry.outcome === "resisted"
+                          entry.outcome === "stayed_sober"
                             ? "bg-success/20 text-success"
                             : entry.outcome === "struggled"
                             ? "bg-warning/20 text-warning"
                             : "bg-destructive/20 text-destructive"
                         }`}
                       >
-                        {entry.outcome}
+                        {entry.outcome === "stayed_sober" ? "resisted" : entry.outcome}
                       </span>
                     )}
                     <button

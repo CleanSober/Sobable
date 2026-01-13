@@ -1,32 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Zap, MessageCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { saveMoodEntry, getTodaysMoodEntry, type MoodEntry } from "@/lib/storage";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const moodEmojis = ["😔", "😕", "😐", "🙂", "😊", "😄", "🤗", "😁", "🥳", "🌟"];
 const cravingLevels = ["None", "Low", "Medium", "High", "Intense"];
 
 export const MoodCheckIn = () => {
-  const existingEntry = getTodaysMoodEntry();
-  const [completed, setCompleted] = useState(!!existingEntry);
-  const [mood, setMood] = useState(existingEntry?.mood || 5);
-  const [craving, setCraving] = useState(existingEntry?.cravingLevel || 0);
-  const [note, setNote] = useState(existingEntry?.note || "");
+  const { user } = useAuth();
+  const [completed, setCompleted] = useState(false);
+  const [mood, setMood] = useState(5);
+  const [craving, setCraving] = useState(0);
+  const [note, setNote] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    const entry: MoodEntry = {
-      date: new Date().toISOString().split("T")[0],
-      mood,
-      cravingLevel: craving,
-      note: note.trim() || undefined,
-    };
-    saveMoodEntry(entry);
+  useEffect(() => {
+    if (!user) return;
+    checkExistingEntry();
+  }, [user]);
+
+  const checkExistingEntry = async () => {
+    if (!user) return;
+    const today = new Date().toISOString().split("T")[0];
+    
+    const { data } = await supabase
+      .from("mood_entries")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .maybeSingle();
+
+    if (data) {
+      setMood(data.mood);
+      setCraving(data.craving_level);
+      setNote(data.note || "");
+      setCompleted(true);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!user) return;
+    setLoading(true);
+
+    const today = new Date().toISOString().split("T")[0];
+    
+    const { error } = await supabase
+      .from("mood_entries")
+      .upsert({
+        user_id: user.id,
+        date: today,
+        mood,
+        craving_level: craving,
+        note: note.trim() || null,
+      }, {
+        onConflict: "user_id,date"
+      });
+
+    if (error) {
+      toast.error("Failed to save check-in");
+      setLoading(false);
+      return;
+    }
+
+    // Update daily goals
+    await supabase
+      .from("daily_goals")
+      .upsert({
+        user_id: user.id,
+        date: today,
+        mood_logged: true,
+      }, {
+        onConflict: "user_id,date"
+      });
+
     setCompleted(true);
     setIsExpanded(false);
+    setLoading(false);
     toast.success("Check-in saved! Keep going strong 💪");
   };
 
@@ -148,8 +202,9 @@ export const MoodCheckIn = () => {
             onClick={handleSubmit}
             className="w-full gradient-primary text-primary-foreground font-semibold"
             size="lg"
+            disabled={loading}
           >
-            Save Check-In
+            {loading ? "Saving..." : "Save Check-In"}
           </Button>
         </motion.div>
       </AnimatePresence>

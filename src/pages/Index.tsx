@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf } from "lucide-react";
+import { Leaf, Loader2 } from "lucide-react";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
@@ -22,10 +22,13 @@ import { SleepTracker } from "@/components/SleepTracker";
 import { GuidedMeditations } from "@/components/GuidedMeditations";
 import { Challenges } from "@/components/Challenges";
 import { CommunityFeed } from "@/components/CommunityFeed";
+import { DailyGoals } from "@/components/DailyGoals";
+import { SmartInsights } from "@/components/SmartInsights";
+import { QuickActions } from "@/components/QuickActions";
+import { MotivationalBanner } from "@/components/MotivationalBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
-import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -108,8 +111,12 @@ const Index = () => {
                 {profile?.display_name ? `Keep going, ${profile.display_name}!` : "You're doing amazing!"} 🌟
               </h1>
             </motion.div>
+            <MotivationalBanner />
+            <QuickActions />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            <DailyGoals />
+            <SmartInsights />
             <AchievementBadges daysSober={daysSober} />
             <WeeklyReport userData={userData} />
           </div>
