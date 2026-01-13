@@ -14,7 +14,249 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      challenge_progress: {
+        Row: {
+          challenge_id: string
+          completed_tasks: string[] | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_tasks?: string[] | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_tasks?: string[] | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      community_posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          likes: number | null
+          post_type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          likes?: number | null
+          post_type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          likes?: number | null
+          post_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mood_entries: {
+        Row: {
+          craving_level: number
+          created_at: string | null
+          date: string
+          id: string
+          mood: number
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          craving_level: number
+          created_at?: string | null
+          date: string
+          id?: string
+          mood: number
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          craving_level?: number
+          created_at?: string | null
+          date?: string
+          id?: string
+          mood?: number
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prevention_plans: {
+        Row: {
+          coping_strategies: string[] | null
+          created_at: string | null
+          emergency_contacts: Json | null
+          id: string
+          personal_reasons: string[] | null
+          safe_activities: string[] | null
+          updated_at: string | null
+          user_id: string
+          warning_signals: string[] | null
+        }
+        Insert: {
+          coping_strategies?: string[] | null
+          created_at?: string | null
+          emergency_contacts?: Json | null
+          id?: string
+          personal_reasons?: string[] | null
+          safe_activities?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          warning_signals?: string[] | null
+        }
+        Update: {
+          coping_strategies?: string[] | null
+          created_at?: string | null
+          emergency_contacts?: Json | null
+          id?: string
+          personal_reasons?: string[] | null
+          safe_activities?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          warning_signals?: string[] | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          daily_spending: number | null
+          display_name: string | null
+          emergency_contact: string | null
+          id: string
+          onboarding_complete: boolean | null
+          personal_reminder: string | null
+          sobriety_start_date: string | null
+          sponsor_phone: string | null
+          substances: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          daily_spending?: number | null
+          display_name?: string | null
+          emergency_contact?: string | null
+          id?: string
+          onboarding_complete?: boolean | null
+          personal_reminder?: string | null
+          sobriety_start_date?: string | null
+          sponsor_phone?: string | null
+          substances?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          daily_spending?: number | null
+          display_name?: string | null
+          emergency_contact?: string | null
+          id?: string
+          onboarding_complete?: boolean | null
+          personal_reminder?: string | null
+          sobriety_start_date?: string | null
+          sponsor_phone?: string | null
+          substances?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sleep_entries: {
+        Row: {
+          bedtime: string
+          created_at: string | null
+          date: string
+          hours_slept: number
+          id: string
+          quality: number
+          user_id: string
+          wake_time: string
+        }
+        Insert: {
+          bedtime: string
+          created_at?: string | null
+          date: string
+          hours_slept: number
+          id?: string
+          quality: number
+          user_id: string
+          wake_time: string
+        }
+        Update: {
+          bedtime?: string
+          created_at?: string | null
+          date?: string
+          hours_slept?: number
+          id?: string
+          quality?: number
+          user_id?: string
+          wake_time?: string
+        }
+        Relationships: []
+      }
+      trigger_entries: {
+        Row: {
+          coping_used: string | null
+          created_at: string | null
+          date: string
+          emotion: string
+          id: string
+          intensity: number
+          notes: string | null
+          outcome: string | null
+          situation: string
+          time: string
+          trigger: string
+          user_id: string
+        }
+        Insert: {
+          coping_used?: string | null
+          created_at?: string | null
+          date: string
+          emotion: string
+          id?: string
+          intensity: number
+          notes?: string | null
+          outcome?: string | null
+          situation: string
+          time: string
+          trigger: string
+          user_id: string
+        }
+        Update: {
+          coping_used?: string | null
+          created_at?: string | null
+          date?: string
+          emotion?: string
+          id?: string
+          intensity?: number
+          notes?: string | null
+          outcome?: string | null
+          situation?: string
+          time?: string
+          trigger?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
