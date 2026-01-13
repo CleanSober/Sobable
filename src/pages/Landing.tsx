@@ -119,7 +119,7 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
-              <Link to="/app">
+              <Link to="/auth">
                 <Button size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
                   Start Your Journey
                   <ArrowRight className="ml-2 w-5 h-5" />

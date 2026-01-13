@@ -4,7 +4,6 @@ import { ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { saveUserData, type UserData } from "@/lib/storage";
 
 const substances = [
   { id: "alcohol", label: "Alcohol", emoji: "🍺" },
@@ -15,8 +14,18 @@ const substances = [
   { id: "other", label: "Other", emoji: "🔄" },
 ];
 
+interface OnboardingData {
+  name: string;
+  substances: string[];
+  sobrietyStartDate: string;
+  dailySpending: number;
+  sponsorPhone?: string;
+  emergencyContact?: string;
+  personalReminder?: string;
+}
+
 interface OnboardingProps {
-  onComplete: () => void;
+  onComplete: (data: OnboardingData) => void;
 }
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
@@ -37,18 +46,16 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const handleComplete = () => {
-    const userData: UserData = {
-      name: isAnonymous ? undefined : name.trim().slice(0, 50) || undefined,
+    const data: OnboardingData = {
+      name: isAnonymous ? "" : name.trim().slice(0, 50),
       substances: selectedSubstances,
       sobrietyStartDate: startDate,
       dailySpending: parseFloat(dailySpending) || 0,
       personalReminder: personalReminder.trim().slice(0, 500) || undefined,
       sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
       emergencyContact: emergencyContact.trim().slice(0, 20) || undefined,
-      onboardingComplete: true,
     };
-    saveUserData(userData);
-    onComplete();
+    onComplete(data);
   };
 
   const canProceed = () => {
