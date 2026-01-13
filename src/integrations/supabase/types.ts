@@ -68,6 +68,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_goals: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          journal_written: boolean
+          meditation_done: boolean
+          mood_logged: boolean
+          trigger_logged: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          journal_written?: boolean
+          meditation_done?: boolean
+          mood_logged?: boolean
+          trigger_logged?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          journal_written?: boolean
+          meditation_done?: boolean
+          mood_logged?: boolean
+          trigger_logged?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mood_entries: {
         Row: {
           craving_level: number
@@ -253,6 +289,39 @@ export type Database = {
           situation?: string
           time?: string
           trigger?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          longest_streak: number
+          streak_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_type?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

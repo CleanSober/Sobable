@@ -4,6 +4,9 @@ import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon } from "lu
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface Meditation {
   id: string;
@@ -55,6 +58,7 @@ const meditations: Meditation[] = [
 ];
 
 export const GuidedMeditations = () => {
+  const { user } = useAuth();
   const [activeMeditation, setActiveMeditation] = useState<Meditation | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -66,11 +70,29 @@ export const GuidedMeditations = () => {
       intervalRef.current = setInterval(() => {
         setTimeRemaining((prev) => prev - 1);
       }, 1000);
-    } else if (timeRemaining === 0 && activeMeditation) {
+    } else if (timeRemaining === 0 && activeMeditation && isPlaying) {
       setIsPlaying(false);
+      completeMeditation();
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isPlaying, timeRemaining, activeMeditation]);
+
+  const completeMeditation = async () => {
+    if (!user) return;
+    const today = new Date().toISOString().split("T")[0];
+    
+    await supabase
+      .from("daily_goals")
+      .upsert({
+        user_id: user.id,
+        date: today,
+        meditation_done: true,
+      }, {
+        onConflict: "user_id,date"
+      });
+    
+    toast.success("Meditation complete! Great job taking care of yourself 🧘");
+  };
 
   useEffect(() => {
     if (isPlaying && activeMeditation) {
