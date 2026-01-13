@@ -1,32 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Send, Heart, MessageCircle } from "lucide-react";
+import { Users, Send, Heart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-interface Post { id: string; content: string; likes: number; timestamp: Date; type: "win" | "struggle" | "support"; }
-
-const samplePosts: Post[] = [
-  { id: "1", content: "30 days sober today! Never thought I'd make it this far. 🎉", likes: 24, timestamp: new Date(Date.now() - 3600000), type: "win" },
-  { id: "2", content: "Had a rough day but made it through without slipping. One day at a time.", likes: 18, timestamp: new Date(Date.now() - 7200000), type: "struggle" },
-  { id: "3", content: "Remember: every sober day is a victory, no matter how small it feels.", likes: 32, timestamp: new Date(Date.now() - 10800000), type: "support" },
-];
+interface Post {
+  id: string;
+  content: string;
+  post_type: string;
+  likes: number;
+  created_at: string;
+  user_id: string;
+}
 
 export const CommunityFeed = () => {
-  const [posts, setPosts] = useState<Post[]>(samplePosts);
+  const { user } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState("");
   const [postType, setPostType] = useState<"win" | "struggle" | "support">("win");
+  const [loading, setLoading] = useState(false);
 
-  const addPost = () => {
-    if (!newPost.trim()) return;
-    const post: Post = { id: Date.now().toString(), content: newPost, likes: 0, timestamp: new Date(), type: postType };
-    setPosts([post, ...posts]);
-    setNewPost("");
+  const fetchPosts = async () => {
+    const { data } = await supabase
+      .from("community_posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (data) setPosts(data);
   };
 
-  const likePost = (id: string) => {
-    setPosts(posts.map((p) => (p.id === id ? { ...p, likes: p.likes + 1 } : p)));
+  useEffect(() => {
+    fetchPosts();
+
+    const channel = supabase
+      .channel("community_posts_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "community_posts" },
+        () => fetchPosts()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const addPost = async () => {
+    if (!newPost.trim() || !user) return;
+
+    setLoading(true);
+    const { error } = await supabase.from("community_posts").insert({
+      content: newPost.trim(),
+      post_type: postType,
+      user_id: user.id,
+    });
+
+    if (error) {
+      toast.error("Failed to post. Please try again.");
+    } else {
+      setNewPost("");
+      toast.success("Posted!");
+    }
+    setLoading(false);
+  };
+
+  const likePost = async (id: string, currentLikes: number) => {
+    await supabase
+      .from("community_posts")
+      .update({ likes: currentLikes + 1 })
+      .eq("id", id);
   };
 
   const getTypeStyle = (type: string) => {
@@ -38,8 +85,8 @@ export const CommunityFeed = () => {
     }
   };
 
-  const timeAgo = (date: Date) => {
-    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+  const timeAgo = (dateStr: string) => {
+    const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
     if (mins < 60) return `${mins}m ago`;
     if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
     return `${Math.floor(mins / 1440)}d ago`;
@@ -55,32 +102,63 @@ export const CommunityFeed = () => {
         <p className="text-sm text-muted-foreground">Share anonymously with others on the same journey</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            {(["win", "struggle", "support"] as const).map((type) => (
-              <Button key={type} size="sm" variant={postType === type ? "default" : "outline"} onClick={() => setPostType(type)} className="capitalize">
-                {type === "win" ? "🎉" : type === "struggle" ? "💪" : "💙"} {type}
-              </Button>
-            ))}
+        {user && (
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              {(["win", "struggle", "support"] as const).map((type) => (
+                <Button
+                  key={type}
+                  size="sm"
+                  variant={postType === type ? "default" : "outline"}
+                  onClick={() => setPostType(type)}
+                  className="capitalize"
+                >
+                  {type === "win" ? "🎉" : type === "struggle" ? "💪" : "💙"} {type}
+                </Button>
+              ))}
+            </div>
+            <Textarea
+              placeholder="Share your thoughts..."
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              className="resize-none"
+              rows={2}
+            />
+            <Button onClick={addPost} disabled={!newPost.trim() || loading} className="w-full">
+              <Send className="w-4 h-4 mr-2" />
+              Share
+            </Button>
           </div>
-          <Textarea placeholder="Share your thoughts..." value={newPost} onChange={(e) => setNewPost(e.target.value)} className="resize-none" rows={2} />
-          <Button onClick={addPost} disabled={!newPost.trim()} className="w-full">
-            <Send className="w-4 h-4 mr-2" />Share
-          </Button>
-        </div>
+        )}
 
         <div className="space-y-3 max-h-80 overflow-y-auto">
-          {posts.map((post, index) => (
-            <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className={`p-4 rounded-xl border-l-4 ${getTypeStyle(post.type)}`}>
-              <p className="text-sm mb-2">{post.content}</p>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{timeAgo(post.timestamp)}</span>
-                <button onClick={() => likePost(post.id)} className="flex items-center gap-1 hover:text-primary transition-colors">
-                  <Heart className="w-4 h-4" fill={post.likes > 0 ? "currentColor" : "none"} /> {post.likes}
-                </button>
-              </div>
-            </motion.div>
-          ))}
+          {posts.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">
+              Be the first to share! 💪
+            </p>
+          ) : (
+            posts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`p-4 rounded-xl border-l-4 ${getTypeStyle(post.post_type)}`}
+              >
+                <p className="text-sm mb-2">{post.content}</p>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{timeAgo(post.created_at)}</span>
+                  <button
+                    onClick={() => likePost(post.id, post.likes)}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    <Heart className="w-4 h-4" fill={post.likes > 0 ? "currentColor" : "none"} />
+                    {post.likes}
+                  </button>
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
       </CardContent>
     </Card>
