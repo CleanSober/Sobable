@@ -12,6 +12,15 @@ import { MotivationView } from "@/components/MotivationView";
 import { TriggerLogger } from "@/components/TriggerLogger";
 import { PatternAnalysis } from "@/components/PatternAnalysis";
 import { UserProfile } from "@/components/UserProfile";
+import { AchievementBadges } from "@/components/AchievementBadges";
+import { CravingTimer } from "@/components/CravingTimer";
+import { CalendarHeatmap } from "@/components/CalendarHeatmap";
+import { RelapsePreventionPlan } from "@/components/RelapsePreventionPlan";
+import { WeeklyReport } from "@/components/WeeklyReport";
+import { SleepTracker } from "@/components/SleepTracker";
+import { GuidedMeditations } from "@/components/GuidedMeditations";
+import { Challenges } from "@/components/Challenges";
+import { CommunityFeed } from "@/components/CommunityFeed";
 import {
   getUserData,
   calculateDaysSober,
@@ -53,75 +62,43 @@ const Index = () => {
       case "home":
         return (
           <div className="space-y-6">
-            {/* Greeting */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-2"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
               <p className="text-muted-foreground mb-1">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
-              <h1 className="text-2xl font-bold text-foreground">
-                You're doing amazing! 🌟
-              </h1>
+              <h1 className="text-2xl font-bold text-foreground">You're doing amazing! 🌟</h1>
             </motion.div>
-
-            <SobrietyCounter
-              daysSober={daysSober}
-              startDate={userData.sobrietyStartDate}
-            />
-
-            {userData.dailySpending > 0 && (
-              <MoneySaved
-                totalSaved={moneySaved}
-                dailySpending={userData.dailySpending}
-                daysSober={daysSober}
-              />
-            )}
+            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
+            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            <AchievementBadges daysSober={daysSober} />
+            <WeeklyReport userData={userData} />
           </div>
         );
 
       case "checkin":
         return (
           <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-2"
-            >
-              <h1 className="text-2xl font-bold text-foreground mb-1">
-                Daily Check-In
-              </h1>
-              <p className="text-muted-foreground">
-                How are you feeling today?
-              </p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
+              <h1 className="text-2xl font-bold text-foreground mb-1">Daily Check-In</h1>
+              <p className="text-muted-foreground">How are you feeling today?</p>
             </motion.div>
             <MoodCheckIn />
+            <SleepTracker />
+            <CalendarHeatmap startDate={userData.sobrietyStartDate} />
           </div>
         );
 
       case "triggers":
         return (
           <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-2"
-            >
-              <h1 className="text-2xl font-bold text-foreground mb-1">
-                Triggers & Patterns
-              </h1>
-              <p className="text-muted-foreground">
-                Know yourself to protect yourself
-              </p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
+              <h1 className="text-2xl font-bold text-foreground mb-1">Triggers & Coping</h1>
+              <p className="text-muted-foreground">Know yourself to protect yourself</p>
             </motion.div>
+            <CravingTimer />
             <TriggerLogger />
             <PatternAnalysis />
+            <RelapsePreventionPlan />
           </div>
         );
 
@@ -151,19 +128,14 @@ const Index = () => {
       case "motivation":
         return (
           <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-2"
-            >
-              <h1 className="text-2xl font-bold text-foreground mb-1">
-                Stay Inspired
-              </h1>
-              <p className="text-muted-foreground">
-                Fuel for your journey
-              </p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
+              <h1 className="text-2xl font-bold text-foreground mb-1">Stay Inspired</h1>
+              <p className="text-muted-foreground">Fuel for your journey</p>
             </motion.div>
             <MotivationView />
+            <GuidedMeditations />
+            <Challenges />
+            <CommunityFeed />
           </div>
         );
 
