@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, Settings2, Phone, DollarSign, Calendar, User, LogOut } from "lucide-react";
+import { RotateCcw, Settings2, Phone, DollarSign, Calendar, User, LogOut, Bell } from "lucide-react";
+import NotificationSettings from "@/components/NotificationSettings";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -228,9 +229,17 @@ export const UserProfile = () => {
                 id="personalReminder"
                 value={personalReminder}
                 onChange={(e) => setPersonalReminder(e.target.value.slice(0, 500))}
-                placeholder="Why I'm doing this..."
+              placeholder="Why I'm doing this..."
                 maxLength={500}
               />
+            </div>
+
+            <div className="pt-4 border-t border-border">
+              <h3 className="text-sm font-medium text-foreground mb-4 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Notifications
+              </h3>
+              <NotificationSettings sobrietyStartDate={sobrietyDate} />
             </div>
 
             <Button onClick={handleSaveSettings} className="w-full">
