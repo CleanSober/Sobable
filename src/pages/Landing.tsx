@@ -15,9 +15,13 @@ import {
 import { Button } from "@/components/ui/button";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import appIcon from "@/assets/app-icon.png";
+import appIconWebp from "@/assets/app-icon.webp";
 import phoneMockup1 from "@/assets/phone-mockup-1.png";
+import phoneMockup1Webp from "@/assets/phone-mockup-1.webp";
 import phoneMockup2 from "@/assets/phone-mockup-2.png";
+import phoneMockup2Webp from "@/assets/phone-mockup-2.webp";
 import phoneMockupSquare from "@/assets/phone-mockup-square.png";
+import phoneMockupSquareWebp from "@/assets/phone-mockup-square.webp";
 const features = [
   {
     icon: Calendar,
@@ -89,13 +93,16 @@ const Landing = () => {
               transition={{ duration: 0.8 }}
             >
               <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-                <img 
-                  src={appIcon} 
-                  alt="Sober Days" 
-                  width={24} 
-                  height={24} 
-                  className="w-6 h-6 rounded-lg" 
-                />
+                <picture>
+                  <source srcSet={appIconWebp} type="image/webp" />
+                  <img 
+                    src={appIcon} 
+                    alt="Sober Days" 
+                    width={24} 
+                    height={24} 
+                    className="w-6 h-6 rounded-lg" 
+                  />
+                </picture>
                 <span className="text-sm text-primary font-medium">Your Journey to Recovery</span>
               </div>
             </motion.div>
@@ -180,27 +187,43 @@ const Landing = () => {
           >
             <div className="relative">
               {/* Main phone mockup */}
-              <motion.img
-                src={phoneMockup1}
-                alt="Sober Days App - Sobriety Counter"
-                width={288}
-                height={512}
-                className="w-72 h-auto rounded-3xl shadow-2xl relative z-10"
+              <motion.picture
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                fetchPriority="high"
-              />
+                className="relative z-10"
+              >
+                <source 
+                  srcSet={`${phoneMockup1Webp} 1x, ${phoneMockup1Webp} 2x`} 
+                  type="image/webp" 
+                />
+                <img
+                  src={phoneMockup1}
+                  alt="Sober Days App - Sobriety Counter"
+                  width={288}
+                  height={512}
+                  className="w-72 h-auto rounded-3xl shadow-2xl"
+                  fetchPriority="high"
+                />
+              </motion.picture>
               {/* Secondary phone mockup - LCP element */}
-              <motion.img
-                src={phoneMockup2}
-                alt="Sober Days App - Daily Motivation"
-                width={224}
-                height={398}
-                fetchPriority="high"
-                className="absolute -right-20 top-20 w-56 h-auto rounded-3xl shadow-xl opacity-80"
+              <motion.picture
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              />
+                className="absolute -right-20 top-20"
+              >
+                <source 
+                  srcSet={`${phoneMockup2Webp} 1x, ${phoneMockup2Webp} 2x`} 
+                  type="image/webp" 
+                />
+                <img
+                  src={phoneMockup2}
+                  alt="Sober Days App - Daily Motivation"
+                  width={224}
+                  height={398}
+                  fetchPriority="high"
+                  className="w-56 h-auto rounded-3xl shadow-xl opacity-80"
+                />
+              </motion.picture>
               {/* Decorative glow behind phones */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 blur-3xl -z-10 scale-150" />
             </div>
@@ -236,16 +259,23 @@ const Landing = () => {
               className="relative flex justify-center"
             >
               <div className="relative">
-                <motion.img
-                  src={phoneMockupSquare}
-                  alt="Sober Days App Features"
-                  width={448}
-                  height={448}
-                  loading="lazy"
-                  className="w-full max-w-md rounded-3xl shadow-2xl"
+                <motion.picture
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                />
+                >
+                  <source 
+                    srcSet={`${phoneMockupSquareWebp} 1x, ${phoneMockupSquareWebp} 2x`} 
+                    type="image/webp" 
+                  />
+                  <img
+                    src={phoneMockupSquare}
+                    alt="Sober Days App Features"
+                    width={448}
+                    height={448}
+                    loading="lazy"
+                    className="w-full max-w-md rounded-3xl shadow-2xl"
+                  />
+                </motion.picture>
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 blur-3xl -z-10 scale-110" />
               </div>
             </motion.div>
