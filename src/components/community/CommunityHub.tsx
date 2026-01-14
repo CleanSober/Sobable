@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Users, MessageSquare, Crown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumStatus } from "@/hooks/useCommunity";
 import { PremiumGate } from "./PremiumGate";
 import { ForumList } from "./ForumList";
 import { ForumView } from "./ForumView";
@@ -19,36 +18,9 @@ interface Forum {
 }
 
 export const CommunityHub = () => {
-  const { user } = useAuth();
-  const [isPremium, setIsPremium] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { isPremium, loading } = usePremiumStatus();
   const [selectedForum, setSelectedForum] = useState<Forum | null>(null);
-
-  useEffect(() => {
-    checkPremiumStatus();
-  }, [user]);
-
-  const checkPremiumStatus = async () => {
-    if (!user) {
-      setIsPremium(false);
-      setLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("subscriptions")
-      .select("plan_type, status")
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .single();
-
-    if (!error && data) {
-      setIsPremium(data.plan_type === "premium" || data.plan_type === "pro");
-    } else {
-      setIsPremium(false);
-    }
-    setLoading(false);
-  };
+  const [activeTab, setActiveTab] = useState("chat");
 
   const handleUpgrade = () => {
     toast.info("Premium upgrade coming soon! Stay tuned.");
@@ -56,8 +28,11 @@ export const CommunityHub = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="flex items-center justify-center min-h-[60vh]" role="status" aria-label="Loading">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading community...</p>
+        </div>
       </div>
     );
   }
@@ -81,31 +56,39 @@ export const CommunityHub = () => {
       animate={{ opacity: 1 }}
       className="space-y-6"
     >
-      <div className="text-center py-2">
+      {/* Header */}
+      <header className="text-center py-2">
         <div className="flex items-center justify-center gap-2 mb-1">
-          <Crown className="w-5 h-5 text-amber-500" />
+          <Crown className="w-5 h-5 text-amber-500" aria-hidden="true" />
           <h1 className="text-2xl font-bold text-foreground">Community</h1>
         </div>
         <p className="text-muted-foreground">Connect with others on the journey</p>
-      </div>
+      </header>
 
-      <Tabs defaultValue="chat" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="chat" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Live Chat
+      {/* Tabs navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 h-12">
+          <TabsTrigger 
+            value="chat" 
+            className="flex items-center gap-2 data-[state=active]:bg-primary/10"
+          >
+            <MessageSquare className="w-4 h-4" aria-hidden="true" />
+            <span>Live Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="forums" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Forums
+          <TabsTrigger 
+            value="forums" 
+            className="flex items-center gap-2 data-[state=active]:bg-primary/10"
+          >
+            <Users className="w-4 h-4" aria-hidden="true" />
+            <span>Forums</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chat" className="mt-4">
+        <TabsContent value="chat" className="mt-4 focus-visible:outline-none">
           <LiveChat />
         </TabsContent>
 
-        <TabsContent value="forums" className="mt-4">
+        <TabsContent value="forums" className="mt-4 focus-visible:outline-none">
           <ForumList
             onSelectForum={setSelectedForum}
             onCreateForum={() => toast.info("Forum creation coming soon!")}
