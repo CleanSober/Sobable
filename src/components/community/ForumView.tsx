@@ -3,12 +3,12 @@ import { motion } from "framer-motion";
 import { ArrowLeft, MessageCircle, Send, Plus, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent } from "@/hooks/useCommunity";
+import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent, createMentionNotifications } from "@/hooks/useCommunity";
 import { PostCard } from "./PostCard";
 
 interface Forum {

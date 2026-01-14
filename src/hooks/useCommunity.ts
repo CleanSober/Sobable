@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getDisplayName } from "@/lib/anonymousNames";
@@ -34,10 +34,36 @@ export interface ForumPost {
   forum_id: string;
 }
 
+export interface ForumReply {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  likes: number;
+  created_at: string;
+}
+
 export interface Reaction {
   emoji: string;
   count: number;
   hasReacted: boolean;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  from_user_id: string;
+  notification_type: "mention" | "reply" | "reaction";
+  target_type: "forum_post" | "forum_reply" | "chat_message";
+  target_id: string;
+  content_preview: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface TypingUser {
+  id: string;
+  displayName: string;
 }
 
 // Custom hook for premium status check with caching
@@ -116,11 +142,15 @@ export const useUserProfiles = () => {
     [profiles]
   );
 
-  return { profiles, fetchProfiles, getDisplayNameForUser };
+  const getAllProfiles = useCallback(() => {
+    return Array.from(profiles.values());
+  }, [profiles]);
+
+  return { profiles, fetchProfiles, getDisplayNameForUser, getAllProfiles };
 };
 
 // Custom hook for reactions with realtime updates
-export const useReactions = (targetId: string, targetType: "forum_post" | "chat_message") => {
+export const useReactions = (targetId: string, targetType: "forum_post" | "chat_message" | "forum_reply") => {
   const { user } = useAuth();
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -209,6 +239,201 @@ export const useReactions = (targetId: string, targetType: "forum_post" | "chat_
   );
 
   return { reactions, loading, toggleReaction };
+};
+
+// Custom hook for typing indicators
+export const useTypingIndicator = (roomId: string) => {
+  const { user } = useAuth();
+  const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  useEffect(() => {
+    if (!user || !roomId) return;
+
+    const channel = supabase.channel(`typing-${roomId}`, {
+      config: {
+        presence: { key: user.id },
+      },
+    });
+
+    channelRef.current = channel;
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        const users: TypingUser[] = [];
+        
+        Object.entries(state).forEach(([userId, presences]) => {
+          if (userId !== user.id && Array.isArray(presences)) {
+            const presence = presences[0] as { isTyping?: boolean; displayName?: string };
+            if (presence?.isTyping) {
+              users.push({ id: userId, displayName: presence.displayName || "Someone" });
+            }
+          }
+        });
+        
+        setTypingUsers(users);
+      })
+      .subscribe();
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [roomId, user?.id]);
+
+  const startTyping = useCallback(async (displayName: string) => {
+    if (!channelRef.current || !user) return;
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Track typing status
+    await channelRef.current.track({ isTyping: true, displayName });
+
+    // Auto-stop typing after 3 seconds
+    typingTimeoutRef.current = setTimeout(async () => {
+      await channelRef.current?.track({ isTyping: false, displayName });
+    }, 3000);
+  }, [user]);
+
+  const stopTyping = useCallback(async (displayName: string) => {
+    if (!channelRef.current) return;
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    await channelRef.current.track({ isTyping: false, displayName });
+  }, []);
+
+  return { typingUsers, startTyping, stopTyping };
+};
+
+// Custom hook for notifications
+export const useNotifications = () => {
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (data) {
+      setNotifications(data as Notification[]);
+      setUnreadCount(data.filter((n) => !n.is_read).length);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchNotifications();
+
+    if (!user) return;
+
+    // Subscribe to new notifications
+    const channel = supabase
+      .channel(`notifications-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => fetchNotifications()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchNotifications, user?.id]);
+
+  const markAsRead = useCallback(async (notificationId: string) => {
+    if (!user) return;
+
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", notificationId)
+      .eq("user_id", user.id);
+
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+    );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+  }, [user?.id]);
+
+  const markAllAsRead = useCallback(async () => {
+    if (!user) return;
+
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadCount(0);
+  }, [user?.id]);
+
+  return { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead };
+};
+
+// Utility to extract mentions from text
+export const extractMentions = (text: string): string[] => {
+  const mentionRegex = /@(\w+)/g;
+  const matches = text.match(mentionRegex);
+  return matches ? matches.map((m) => m.slice(1)) : [];
+};
+
+// Utility to create notifications for mentions
+export const createMentionNotifications = async (
+  text: string,
+  fromUserId: string,
+  targetType: "forum_post" | "forum_reply" | "chat_message",
+  targetId: string,
+  profiles: UserProfile[]
+) => {
+  const mentionedNames = extractMentions(text);
+  if (mentionedNames.length === 0) return;
+
+  // Find matching user IDs
+  const mentionedUsers = profiles.filter((p) => {
+    const displayName = getDisplayName(p.display_name, p.user_id);
+    return mentionedNames.some(
+      (name) => displayName.toLowerCase() === name.toLowerCase()
+    );
+  });
+
+  // Create notifications for each mentioned user (except self)
+  const notifications = mentionedUsers
+    .filter((u) => u.user_id !== fromUserId)
+    .map((u) => ({
+      user_id: u.user_id,
+      from_user_id: fromUserId,
+      notification_type: "mention" as const,
+      target_type: targetType,
+      target_id: targetId,
+      content_preview: text.slice(0, 100),
+    }));
+
+  if (notifications.length > 0) {
+    await supabase.from("notifications").insert(notifications);
+  }
 };
 
 // Input sanitization utilities
