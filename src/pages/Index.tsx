@@ -9,7 +9,6 @@ import { EmergencyButton } from "@/components/EmergencyButton";
 import { Onboarding } from "@/components/Onboarding";
 import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { ProgressView } from "@/components/ProgressView";
-import { MotivationView } from "@/components/MotivationView";
 import { TriggerLogger } from "@/components/TriggerLogger";
 import { PatternAnalysis } from "@/components/PatternAnalysis";
 import { UserProfile } from "@/components/UserProfile";
@@ -17,15 +16,11 @@ import { AchievementBadges } from "@/components/AchievementBadges";
 import { CravingTimer } from "@/components/CravingTimer";
 import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 import { RelapsePreventionPlan } from "@/components/RelapsePreventionPlan";
-import { WeeklyReport } from "@/components/WeeklyReport";
 import { SleepTracker } from "@/components/SleepTracker";
-import { GuidedMeditations } from "@/components/GuidedMeditations";
-import { Challenges } from "@/components/Challenges";
-import { CommunityFeed } from "@/components/CommunityFeed";
 import { DailyGoals } from "@/components/DailyGoals";
-import { SmartInsights } from "@/components/SmartInsights";
 import { QuickActions } from "@/components/QuickActions";
 import { MotivationalBanner } from "@/components/MotivationalBanner";
+import { CommunityHub } from "@/components/community/CommunityHub";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
@@ -112,13 +107,11 @@ const Index = () => {
               </h1>
             </motion.div>
             <MotivationalBanner />
-            <QuickActions />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            <QuickActions />
             <DailyGoals />
-            <SmartInsights />
             <AchievementBadges daysSober={daysSober} />
-            <WeeklyReport userData={userData} />
           </div>
         );
 
@@ -160,19 +153,8 @@ const Index = () => {
           </div>
         );
 
-      case "motivation":
-        return (
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-              <h1 className="text-2xl font-bold text-foreground mb-1">Stay Inspired</h1>
-              <p className="text-muted-foreground">Fuel for your journey</p>
-            </motion.div>
-            <MotivationView />
-            <GuidedMeditations />
-            <Challenges />
-            <CommunityFeed />
-          </div>
-        );
+      case "community":
+        return <CommunityHub />;
 
       default:
         return null;
