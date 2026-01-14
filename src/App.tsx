@@ -13,6 +13,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const BrandAssets = lazy(() => import("./components/BrandAssets"));
 const AppStoreGuide = lazy(() => import("./components/AppStoreGuide"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/brand" element={<BrandAssets />} />
               <Route path="/app-store-guide" element={<AppStoreGuide />} />
+              <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
