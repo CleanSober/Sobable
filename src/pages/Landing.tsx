@@ -89,7 +89,13 @@ const Landing = () => {
               transition={{ duration: 0.8 }}
             >
               <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-                <img src={appIcon} alt="Sober Days" className="w-6 h-6 rounded-lg" />
+                <img 
+                  src={appIcon} 
+                  alt="Sober Days" 
+                  width={24} 
+                  height={24} 
+                  className="w-6 h-6 rounded-lg" 
+                />
                 <span className="text-sm text-primary font-medium">Your Journey to Recovery</span>
               </div>
             </motion.div>
@@ -177,14 +183,20 @@ const Landing = () => {
               <motion.img
                 src={phoneMockup1}
                 alt="Sober Days App - Sobriety Counter"
+                width={288}
+                height={512}
                 className="w-72 h-auto rounded-3xl shadow-2xl relative z-10"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                fetchPriority="high"
               />
               {/* Secondary phone mockup */}
               <motion.img
                 src={phoneMockup2}
                 alt="Sober Days App - Daily Motivation"
+                width={224}
+                height={398}
+                loading="lazy"
                 className="absolute -right-20 top-20 w-56 h-auto rounded-3xl shadow-xl opacity-80"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
@@ -227,6 +239,9 @@ const Landing = () => {
                 <motion.img
                   src={phoneMockupSquare}
                   alt="Sober Days App Features"
+                  width={448}
+                  height={448}
+                  loading="lazy"
                   className="w-full max-w-md rounded-3xl shadow-2xl"
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
