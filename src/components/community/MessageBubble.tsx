@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { getInitials, getAvatarColor } from "@/lib/anonymousNames";
 import { EmojiReactions } from "./EmojiReactions";
 import { MentionText } from "./MentionInput";
+import { UserActionsMenu } from "./UserActionsMenu";
 import { formatTime } from "@/hooks/useCommunity";
 
 interface MessageBubbleProps {
@@ -37,9 +38,19 @@ export const MessageBubble = memo(({
         </div>
         
         <div className="flex flex-col">
-          <p className={`text-xs font-medium mb-1 ${isOwn ? "text-right" : "text-left"} text-muted-foreground`}>
-            {isOwn ? "You" : displayName}
-          </p>
+          <div className={`flex items-center gap-1 mb-1 ${isOwn ? "justify-end" : "justify-start"}`}>
+            <p className="text-xs font-medium text-muted-foreground">
+              {isOwn ? "You" : displayName}
+            </p>
+            {!isOwn && (
+              <UserActionsMenu
+                userId={userId}
+                targetType="chat_message"
+                targetId={id}
+                compact
+              />
+            )}
+          </div>
           
           <div
             className={`rounded-2xl px-4 py-2.5 shadow-sm ${
