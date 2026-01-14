@@ -132,12 +132,12 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
-              <Link to="/auth">
-                <Button size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
+              <Button asChild size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
+                <Link to="/auth">
                   Start Your Journey
                   <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
@@ -432,12 +432,12 @@ const Landing = () => {
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
               Every journey begins with a single step. Take yours today.
             </p>
-            <Link to="/app">
-              <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
+            <Button asChild size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
+              <Link to="/app">
                 Get Started Free
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <div className="mt-8">
               <p className="text-sm text-muted-foreground mb-4">Or download the app</p>
               <AppStoreBadges size="sm" />
