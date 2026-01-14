@@ -232,6 +232,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
               userId={post.user_id}
               isOwn={isOwnPost(post.user_id)}
               index={index}
+              onPostUpdated={fetchPosts}
+              onPostDeleted={fetchPosts}
             />
           ))}
         </section>
