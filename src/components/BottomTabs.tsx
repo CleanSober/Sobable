@@ -1,7 +1,7 @@
-import { Home, Heart, TrendingUp, Sparkles, Brain } from "lucide-react";
+import { Home, Heart, TrendingUp, Users, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 
-export type TabId = "home" | "checkin" | "triggers" | "progress" | "motivation";
+export type TabId = "home" | "checkin" | "triggers" | "progress" | "community";
 
 interface Tab {
   id: TabId;
@@ -14,7 +14,7 @@ const tabs: Tab[] = [
   { id: "checkin", label: "Check-In", icon: Heart },
   { id: "triggers", label: "Triggers", icon: Brain },
   { id: "progress", label: "Progress", icon: TrendingUp },
-  { id: "motivation", label: "Inspire", icon: Sparkles },
+  { id: "community", label: "Community", icon: Users },
 ];
 
 interface BottomTabsProps {
