@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, MessageCircle, Users } from "lucide-react";
+import { Send, MessageCircle, Users, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,36 +8,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { getDisplayName, getInitials, getAvatarColor } from "@/lib/anonymousNames";
-import { EmojiReactions } from "./EmojiReactions";
+import { useUserProfiles, ChatMessage, ChatRoom, validateMessageLength } from "@/hooks/useCommunity";
+import { MessageBubble } from "./MessageBubble";
 
-interface ChatMessage {
-  id: string;
-  user_id: string;
-  message: string;
-  created_at: string;
-}
-
-interface ChatRoom {
-  id: string;
-  name: string;
-  description: string | null;
-}
-
-interface UserProfile {
-  user_id: string;
-  display_name: string | null;
-}
+const MAX_MESSAGE_LENGTH = 2000;
 
 export const LiveChat = () => {
   const { user } = useAuth();
+  const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchRoom();
@@ -50,7 +36,7 @@ export const LiveChat = () => {
 
     // Subscribe to real-time messages
     const channel = supabase
-      .channel("chat-messages")
+      .channel(`chat-messages-${room.id}`)
       .on(
         "postgres_changes",
         {
@@ -61,10 +47,7 @@ export const LiveChat = () => {
         },
         async (payload) => {
           const newMsg = payload.new as ChatMessage;
-          // Fetch profile for new message if not cached
-          if (!profiles.has(newMsg.user_id)) {
-            await fetchProfileForUser(newMsg.user_id);
-          }
+          await fetchProfiles([newMsg.user_id]);
           setMessages((prev) => [...prev, newMsg]);
         }
       )
@@ -73,196 +56,198 @@ export const LiveChat = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [room]);
+  }, [room?.id, fetchProfiles]);
 
   useEffect(() => {
     // Auto-scroll to bottom when new messages arrive
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollElement = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollElement) {
+        scrollElement.scrollTop = scrollElement.scrollHeight;
+      }
     }
   }, [messages]);
 
   const fetchRoom = async () => {
-    const { data, error } = await supabase
-      .from("chat_rooms")
-      .select("*")
-      .eq("is_active", true)
-      .limit(1)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("chat_rooms")
+        .select("id, name, description")
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle();
 
-    if (!error && data) {
-      setRoom(data);
-    }
-    setLoading(false);
-  };
-
-  const fetchProfileForUser = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("user_id, display_name")
-      .eq("user_id", userId)
-      .single();
-
-    if (data) {
-      setProfiles((prev) => new Map(prev).set(userId, data));
+      if (error) throw error;
+      if (data) setRoom(data);
+    } catch (err) {
+      setError("Failed to load chat room");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!room) return;
 
-    const { data, error } = await supabase
-      .from("chat_messages")
-      .select("*")
-      .eq("room_id", room.id)
-      .order("created_at", { ascending: true })
-      .limit(100);
+    try {
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("id, user_id, message, created_at, room_id")
+        .eq("room_id", room.id)
+        .order("created_at", { ascending: true })
+        .limit(100);
 
-    if (!error && data) {
-      setMessages(data);
+      if (error) throw error;
       
-      // Fetch all unique user profiles
-      const userIds = [...new Set(data.map((m) => m.user_id))];
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("user_id, display_name")
-        .in("user_id", userIds);
-
-      if (profilesData) {
-        const profileMap = new Map<string, UserProfile>();
-        profilesData.forEach((p) => profileMap.set(p.user_id, p));
-        setProfiles(profileMap);
+      if (data) {
+        setMessages(data);
+        const userIds = [...new Set(data.map((m) => m.user_id))];
+        await fetchProfiles(userIds);
       }
+    } catch {
+      setError("Failed to load messages");
     }
-  };
+  }, [room?.id, fetchProfiles]);
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user || !room) return;
+    const trimmedMessage = newMessage.trim();
+    
+    if (!trimmedMessage || !user || !room) return;
+    
+    if (!validateMessageLength(trimmedMessage, MAX_MESSAGE_LENGTH)) {
+      toast.error(`Message must be between 1 and ${MAX_MESSAGE_LENGTH} characters`);
+      return;
+    }
 
     setSending(true);
-    const { error } = await supabase.from("chat_messages").insert({
-      room_id: room.id,
-      user_id: user.id,
-      message: newMessage.trim(),
-    });
+    
+    try {
+      const { error } = await supabase.from("chat_messages").insert({
+        room_id: room.id,
+        user_id: user.id,
+        message: trimmedMessage,
+      });
 
-    if (error) {
-      toast.error("Failed to send message");
-    } else {
+      if (error) throw error;
       setNewMessage("");
+      inputRef.current?.focus();
+    } catch {
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
 
-  const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
   const isOwnMessage = (userId: string) => userId === user?.id;
-
-  const getUserDisplayName = (userId: string) => {
-    const profile = profiles.get(userId);
-    return getDisplayName(profile?.display_name, userId);
-  };
+  const remainingChars = MAX_MESSAGE_LENGTH - newMessage.length;
+  const isNearLimit = remainingChars < 100;
 
   if (loading) {
     return (
       <Card className="gradient-card border-border/50 h-[500px]">
         <CardContent className="flex items-center justify-center h-full">
-          <div className="animate-pulse text-muted-foreground">Loading chat...</div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-muted-foreground">Loading chat...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="gradient-card border-destructive/50 h-[500px]">
+        <CardContent className="flex items-center justify-center h-full">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <AlertCircle className="w-10 h-10 text-destructive" />
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <Button variant="outline" size="sm" onClick={fetchRoom}>
+              Try again
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
+    <Card className="gradient-card border-border/50 overflow-hidden">
+      <CardHeader className="pb-3 border-b border-border/30">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <MessageCircle className="w-5 h-5 text-primary" />
+          <MessageCircle className="w-5 h-5 text-primary" aria-hidden="true" />
           {room?.name || "Live Chat"}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">{room?.description}</p>
+        {room?.description && (
+          <p className="text-sm text-muted-foreground">{room.description}</p>
+        )}
       </CardHeader>
+      
       <CardContent className="p-0">
-        <ScrollArea className="h-[350px] px-4" ref={scrollRef}>
-          <div className="space-y-3 py-4">
+        <ScrollArea className="h-[350px]" ref={scrollRef}>
+          <div className="space-y-3 p-4">
             {messages.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p>No messages yet. Start the conversation!</p>
+                <Users className="w-12 h-12 mx-auto mb-3 opacity-40" aria-hidden="true" />
+                <p className="font-medium">No messages yet</p>
+                <p className="text-sm mt-1">Start the conversation!</p>
               </div>
             ) : (
               <AnimatePresence mode="popLayout">
-                {messages.map((msg) => {
-                  const displayName = getUserDisplayName(msg.user_id);
-                  const isOwn = isOwnMessage(msg.user_id);
-                  
-                  return (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-                    >
-                      <div className={`flex gap-2 max-w-[85%] ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
-                        {/* Avatar */}
-                        <div 
-                          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${getAvatarColor(msg.user_id)}`}
-                        >
-                          {getInitials(displayName)}
-                        </div>
-                        
-                        {/* Message bubble */}
-                        <div>
-                          {/* Username */}
-                          <p className={`text-xs font-medium mb-1 ${isOwn ? "text-right" : "text-left"} text-muted-foreground`}>
-                            {isOwn ? "You" : displayName}
-                          </p>
-                          <div
-                            className={`rounded-2xl px-4 py-2 ${
-                              isOwn
-                                ? "bg-primary text-primary-foreground rounded-br-md"
-                                : "bg-secondary text-secondary-foreground rounded-bl-md"
-                            }`}
-                          >
-                            <p className="text-sm">{msg.message}</p>
-                            <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                              {formatTime(msg.created_at)}
-                            </p>
-                          </div>
-                          {/* Emoji reactions */}
-                          <div className={`mt-1 ${isOwn ? "flex justify-end" : ""}`}>
-                            <EmojiReactions targetId={msg.id} targetType="chat_message" compact />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                {messages.map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    id={msg.id}
+                    message={msg.message}
+                    createdAt={msg.created_at}
+                    displayName={getDisplayNameForUser(msg.user_id)}
+                    userId={msg.user_id}
+                    isOwn={isOwnMessage(msg.user_id)}
+                  />
+                ))}
               </AnimatePresence>
             )}
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-border/50">
+        <div className="p-4 border-t border-border/50 bg-card/50">
           <div className="flex gap-2">
-            <Input
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={sending}
-            />
-            <Button onClick={sendMessage} disabled={!newMessage.trim() || sending} size="icon">
-              <Send className="w-4 h-4" />
+            <div className="relative flex-1">
+              <Input
+                ref={inputRef}
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={sending}
+                maxLength={MAX_MESSAGE_LENGTH}
+                aria-label="Message input"
+                className="pr-16"
+              />
+              {isNearLimit && (
+                <span 
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${
+                    remainingChars < 20 ? "text-destructive" : "text-muted-foreground"
+                  }`}
+                >
+                  {remainingChars}
+                </span>
+              )}
+            </div>
+            <Button 
+              onClick={sendMessage} 
+              disabled={!newMessage.trim() || sending} 
+              size="icon"
+              aria-label="Send message"
+            >
+              <Send className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

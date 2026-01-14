@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, MessageCircle, Send, Plus } from "lucide-react";
+import { ArrowLeft, MessageCircle, Send, Plus, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { getDisplayName, getInitials, getAvatarColor } from "@/lib/anonymousNames";
-import { EmojiReactions } from "./EmojiReactions";
+import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent } from "@/hooks/useCommunity";
+import { PostCard } from "./PostCard";
 
 interface Forum {
   id: string;
@@ -18,31 +18,20 @@ interface Forum {
   slug: string;
 }
 
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  likes: number;
-  reply_count: number;
-  created_at: string;
-  user_id: string;
-}
-
-interface UserProfile {
-  user_id: string;
-  display_name: string | null;
-}
-
 interface ForumViewProps {
   forum: Forum;
   onBack: () => void;
 }
 
+const MAX_TITLE_LENGTH = 200;
+const MAX_CONTENT_LENGTH = 10000;
+
 export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
+  const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
+  const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showNewPost, setShowNewPost] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -52,174 +41,200 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     fetchPosts();
   }, [forum.id]);
 
-  const fetchPosts = async () => {
-    const { data, error } = await supabase
-      .from("forum_posts")
-      .select("*")
-      .eq("forum_id", forum.id)
-      .order("created_at", { ascending: false });
+  const fetchPosts = useCallback(async () => {
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from("forum_posts")
+        .select("id, title, content, likes, reply_count, created_at, user_id, forum_id")
+        .eq("forum_id", forum.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
 
-    if (!error && data) {
-      setPosts(data);
+      if (error) throw error;
       
-      // Fetch all unique user profiles
-      const userIds = [...new Set(data.map((p) => p.user_id))];
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("user_id, display_name")
-          .in("user_id", userIds);
-
-        if (profilesData) {
-          const profileMap = new Map<string, UserProfile>();
-          profilesData.forEach((p) => profileMap.set(p.user_id, p));
-          setProfiles(profileMap);
+      if (data) {
+        setPosts(data);
+        const userIds = [...new Set(data.map((p) => p.user_id))];
+        if (userIds.length > 0) {
+          await fetchProfiles(userIds);
         }
       }
+    } catch {
+      setError("Failed to load posts");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [forum.id, fetchProfiles]);
 
   const createPost = async () => {
-    if (!newTitle.trim() || !newContent.trim() || !user) return;
+    const trimmedTitle = newTitle.trim();
+    const trimmedContent = newContent.trim();
+    
+    if (!trimmedTitle || !trimmedContent || !user) return;
+
+    if (!validatePostTitle(trimmedTitle)) {
+      toast.error(`Title must be between 1 and ${MAX_TITLE_LENGTH} characters`);
+      return;
+    }
+
+    if (!validatePostContent(trimmedContent)) {
+      toast.error(`Content must be between 1 and ${MAX_CONTENT_LENGTH} characters`);
+      return;
+    }
 
     setSubmitting(true);
-    const { error } = await supabase.from("forum_posts").insert({
-      forum_id: forum.id,
-      user_id: user.id,
-      title: newTitle.trim(),
-      content: newContent.trim(),
-    });
+    
+    try {
+      const { error } = await supabase.from("forum_posts").insert({
+        forum_id: forum.id,
+        user_id: user.id,
+        title: trimmedTitle,
+        content: trimmedContent,
+      });
 
-    if (error) {
-      toast.error("Failed to create post");
-    } else {
+      if (error) throw error;
+      
       toast.success("Post created!");
       setNewTitle("");
       setNewContent("");
       setShowNewPost(false);
-      fetchPosts();
+      await fetchPosts();
+    } catch {
+      toast.error("Failed to create post. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
-  };
-
-  const timeAgo = (dateStr: string) => {
-    const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
-    return `${Math.floor(mins / 1440)}d ago`;
-  };
-
-  const getUserDisplayName = (userId: string) => {
-    const profile = profiles.get(userId);
-    return getDisplayName(profile?.display_name, userId);
   };
 
   const isOwnPost = (userId: string) => userId === user?.id;
+  const titleRemaining = MAX_TITLE_LENGTH - newTitle.length;
+  const contentRemaining = MAX_CONTENT_LENGTH - newContent.length;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
+      {/* Header */}
+      <header className="flex items-center gap-3">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onBack}
+          aria-label="Go back to forum list"
+        >
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
         </Button>
-        <div>
-          <h2 className="text-lg font-semibold">{forum.title}</h2>
-          <p className="text-sm text-muted-foreground">{forum.description}</p>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg font-semibold truncate">{forum.title}</h2>
+          {forum.description && (
+            <p className="text-sm text-muted-foreground truncate">{forum.description}</p>
+          )}
         </div>
-      </div>
+      </header>
 
+      {/* Create post section */}
       {!showNewPost ? (
-        <Button onClick={() => setShowNewPost(true)} className="w-full">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button 
+          onClick={() => setShowNewPost(true)} 
+          className="w-full"
+          aria-label="Create a new post"
+        >
+          <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
           Create Post
         </Button>
       ) : (
         <Card className="gradient-card border-border/50">
           <CardContent className="p-4 space-y-3">
-            <Input
-              placeholder="Post title..."
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-            />
-            <Textarea
-              placeholder="What's on your mind?"
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
-              rows={3}
-            />
+            <div>
+              <Input
+                placeholder="Post title..."
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                maxLength={MAX_TITLE_LENGTH}
+                aria-label="Post title"
+              />
+              {titleRemaining < 50 && (
+                <p className={`text-xs mt-1 text-right ${titleRemaining < 10 ? "text-destructive" : "text-muted-foreground"}`}>
+                  {titleRemaining} characters remaining
+                </p>
+              )}
+            </div>
+            <div>
+              <Textarea
+                placeholder="What's on your mind?"
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+                rows={4}
+                maxLength={MAX_CONTENT_LENGTH}
+                aria-label="Post content"
+              />
+              {contentRemaining < 500 && (
+                <p className={`text-xs mt-1 text-right ${contentRemaining < 100 ? "text-destructive" : "text-muted-foreground"}`}>
+                  {contentRemaining} characters remaining
+                </p>
+              )}
+            </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowNewPost(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowNewPost(false);
+                  setNewTitle("");
+                  setNewContent("");
+                }}
+              >
                 Cancel
               </Button>
-              <Button onClick={createPost} disabled={submitting || !newTitle.trim() || !newContent.trim()}>
-                <Send className="w-4 h-4 mr-2" />
-                Post
+              <Button 
+                onClick={createPost} 
+                disabled={submitting || !newTitle.trim() || !newContent.trim()}
+              >
+                <Send className="w-4 h-4 mr-2" aria-hidden="true" />
+                {submitting ? "Posting..." : "Post"}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
+      {/* Posts list */}
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" aria-label="Loading posts">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 rounded-xl bg-secondary/50 animate-pulse" />
+            <div key={i} className="h-32 rounded-xl bg-secondary/50 animate-pulse" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <AlertCircle className="w-12 h-12 mx-auto mb-3 text-destructive" />
+          <p className="text-muted-foreground">{error}</p>
+          <Button variant="outline" size="sm" onClick={fetchPosts} className="mt-3">
+            Try again
+          </Button>
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>No posts yet. Be the first to share!</p>
+          <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-40" aria-hidden="true" />
+          <p className="font-medium">No posts yet</p>
+          <p className="text-sm mt-1">Be the first to share!</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {posts.map((post, index) => {
-            const displayName = getUserDisplayName(post.user_id);
-            const isOwn = isOwnPost(post.user_id);
-            
-            return (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className="gradient-card border-border/50">
-                  <CardContent className="p-4">
-                    {/* Author info */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div 
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${getAvatarColor(post.user_id)}`}
-                      >
-                        {getInitials(displayName)}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-foreground">
-                          {isOwn ? "You" : displayName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Post content */}
-                    <h3 className="font-medium text-foreground mb-1">{post.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{post.content}</p>
-                    
-                    {/* Reactions and actions */}
-                    <div className="flex items-center justify-between">
-                      <EmojiReactions targetId={post.id} targetType="forum_post" />
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MessageCircle className="w-4 h-4" />
-                        {post.reply_count}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
+        <section className="space-y-3" aria-label="Forum posts">
+          {posts.map((post, index) => (
+            <PostCard
+              key={post.id}
+              id={post.id}
+              title={post.title}
+              content={post.content}
+              replyCount={post.reply_count}
+              createdAt={post.created_at}
+              displayName={getDisplayNameForUser(post.user_id)}
+              userId={post.user_id}
+              isOwn={isOwnPost(post.user_id)}
+              index={index}
+            />
+          ))}
+        </section>
       )}
     </div>
   );
