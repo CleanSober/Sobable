@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Heart, MessageCircle, Send, Plus } from "lucide-react";
+import { ArrowLeft, MessageCircle, Send, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { getDisplayName, getInitials, getAvatarColor } from "@/lib/anonymousNames";
+import { EmojiReactions } from "./EmojiReactions";
 
 interface Forum {
   id: string;
@@ -100,14 +101,6 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       fetchPosts();
     }
     setSubmitting(false);
-  };
-
-  const likePost = async (postId: string, currentLikes: number) => {
-    await supabase
-      .from("forum_posts")
-      .update({ likes: currentLikes + 1 })
-      .eq("id", postId);
-    fetchPosts();
   };
 
   const timeAgo = (dateStr: string) => {
@@ -213,16 +206,10 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
                     <h3 className="font-medium text-foreground mb-1">{post.title}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{post.content}</p>
                     
-                    {/* Actions */}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <button
-                        onClick={() => likePost(post.id, post.likes)}
-                        className="flex items-center gap-1 hover:text-primary transition-colors"
-                      >
-                        <Heart className="w-4 h-4" fill={post.likes > 0 ? "currentColor" : "none"} />
-                        {post.likes}
-                      </button>
-                      <span className="flex items-center gap-1">
+                    {/* Reactions and actions */}
+                    <div className="flex items-center justify-between">
+                      <EmojiReactions targetId={post.id} targetType="forum_post" />
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MessageCircle className="w-4 h-4" />
                         {post.reply_count}
                       </span>

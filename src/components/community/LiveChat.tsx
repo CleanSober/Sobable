@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { getDisplayName, getInitials, getAvatarColor } from "@/lib/anonymousNames";
+import { EmojiReactions } from "./EmojiReactions";
 
 interface ChatMessage {
   id: string;
@@ -236,6 +237,10 @@ export const LiveChat = () => {
                             <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                               {formatTime(msg.created_at)}
                             </p>
+                          </div>
+                          {/* Emoji reactions */}
+                          <div className={`mt-1 ${isOwn ? "flex justify-end" : ""}`}>
+                            <EmojiReactions targetId={msg.id} targetType="chat_message" compact />
                           </div>
                         </div>
                       </div>
