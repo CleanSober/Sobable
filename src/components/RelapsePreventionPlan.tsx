@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Plus, X, Edit2, Save, AlertTriangle, Phone, Heart, Lightbulb } from "lucide-react";
+import { Shield, Plus, X, Edit2, Save, AlertTriangle, Phone, Heart, Lightbulb, RefreshCw, Cloud } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { usePreventionPlan, useRealtimeSync } from "@/hooks/useUserData";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface PreventionPlan {
   warningSignals: string[];
@@ -13,8 +15,6 @@ interface PreventionPlan {
   safeActivities: string[];
   personalReasons: string[];
 }
-
-const STORAGE_KEY = "cleanSober_preventionPlan";
 
 const defaultPlan: PreventionPlan = {
   warningSignals: ["Feeling isolated", "Skipping meals", "Not sleeping well"],
@@ -25,21 +25,91 @@ const defaultPlan: PreventionPlan = {
 };
 
 export const RelapsePreventionPlan = () => {
+  const { user } = useAuth();
+  const { getPlan, savePlan: savePlanToDb } = usePreventionPlan();
   const [plan, setPlan] = useState<PreventionPlan>(defaultPlan);
   const [editSection, setEditSection] = useState<keyof PreventionPlan | null>(null);
   const [newItem, setNewItem] = useState("");
   const [newContact, setNewContact] = useState({ name: "", phone: "" });
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+
+  const loadPlan = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const data = await getPlan();
+      if (data) {
+        setPlan({
+          warningSignals: data.warning_signals || defaultPlan.warningSignals,
+          copingStrategies: data.coping_strategies || defaultPlan.copingStrategies,
+          emergencyContacts: (data.emergency_contacts as { name: string; phone: string }[]) || defaultPlan.emergencyContacts,
+          safeActivities: data.safe_activities || defaultPlan.safeActivities,
+          personalReasons: data.personal_reasons || defaultPlan.personalReasons,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading prevention plan:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, getPlan]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setPlan(JSON.parse(saved));
-    }
-  }, []);
+    loadPlan();
+  }, [loadPlan]);
 
-  const savePlan = (updated: PreventionPlan) => {
+  // Real-time sync for cross-device updates
+  useRealtimeSync<{
+    warning_signals: string[];
+    coping_strategies: string[];
+    emergency_contacts: { name: string; phone: string }[];
+    safe_activities: string[];
+    personal_reasons: string[];
+  }>(
+    "prevention_plans",
+    user?.id,
+    useCallback((data) => {
+      if (data) {
+        setPlan({
+          warningSignals: data.warning_signals || [],
+          copingStrategies: data.coping_strategies || [],
+          emergencyContacts: data.emergency_contacts || [],
+          safeActivities: data.safe_activities || [],
+          personalReasons: data.personal_reasons || [],
+        });
+        toast.success("Plan synced from another device", {
+          icon: <Cloud className="w-4 h-4" />,
+        });
+      }
+    }, [])
+  );
+
+  const savePlan = async (updated: PreventionPlan) => {
+    if (!user) {
+      toast.error("Please sign in to save your plan");
+      return;
+    }
+
+    setSyncing(true);
     setPlan(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    const { error } = await savePlanToDb({
+      warning_signals: updated.warningSignals,
+      coping_strategies: updated.copingStrategies,
+      emergency_contacts: updated.emergencyContacts,
+      safe_activities: updated.safeActivities,
+      personal_reasons: updated.personalReasons,
+    });
+
+    if (error) {
+      toast.error("Failed to save plan. Please try again.");
+    }
+    
+    setSyncing(false);
   };
 
   const addItem = (section: keyof PreventionPlan) => {
@@ -113,12 +183,24 @@ export const RelapsePreventionPlan = () => {
     },
   ];
 
+  if (loading) {
+    return (
+      <Card className="gradient-card border-border/50">
+        <CardContent className="py-8 flex justify-center">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="gradient-card border-border/50">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Shield className="w-5 h-5 text-primary" />
           Relapse Prevention Plan
+          {syncing && <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground ml-auto" />}
+          {!syncing && user && <Cloud className="w-4 h-4 text-green-500 ml-auto" aria-label="Synced across devices" />}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Your personalized safety toolkit
@@ -177,7 +259,7 @@ export const RelapsePreventionPlan = () => {
                 onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
               />
               <div className="flex gap-2">
-                <Button size="sm" onClick={addContact}>
+                <Button size="sm" onClick={addContact} disabled={syncing}>
                   <Save className="w-4 h-4 mr-1" />
                   Save
                 </Button>
@@ -254,7 +336,7 @@ export const RelapsePreventionPlan = () => {
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addItem(section.key)}
                   />
-                  <Button size="sm" onClick={() => addItem(section.key)}>
+                  <Button size="sm" onClick={() => addItem(section.key)} disabled={syncing}>
                     <Plus className="w-4 h-4" />
                   </Button>
                 </motion.div>

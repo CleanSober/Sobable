@@ -1,53 +1,87 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Moon, Sun, Bed, Clock, TrendingUp, Save } from "lucide-react";
+import { Moon, Sun, Bed, TrendingUp, Save, RefreshCw, Cloud } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useSleepEntries, useRealtimeSync } from "@/hooks/useUserData";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface SleepEntry {
   date: string;
   bedtime: string;
-  wakeTime: string;
+  wake_time: string;
   quality: number;
-  hoursSlept: number;
+  hours_slept: number;
 }
 
-const STORAGE_KEY = "cleanSober_sleepEntries";
-
-const getSleepEntries = (): SleepEntry[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-};
-
-const saveSleepEntry = (entry: SleepEntry) => {
-  const entries = getSleepEntries();
-  const todayIndex = entries.findIndex((e) => e.date === entry.date);
-  if (todayIndex >= 0) {
-    entries[todayIndex] = entry;
-  } else {
-    entries.push(entry);
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-};
-
 export const SleepTracker = () => {
+  const { user } = useAuth();
+  const { getSleepEntries, saveSleepEntry } = useSleepEntries();
   const today = new Date().toISOString().split("T")[0];
   const [bedtime, setBedtime] = useState("22:00");
   const [wakeTime, setWakeTime] = useState("06:00");
   const [quality, setQuality] = useState([7]);
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState<SleepEntry[]>([]);
 
-  const entries = useMemo(() => getSleepEntries(), [saved]);
-  const todayEntry = entries.find((e) => e.date === today);
+  const loadEntries = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const data = await getSleepEntries();
+      setEntries(data as SleepEntry[]);
+      
+      const todayEntry = data.find((e: SleepEntry) => e.date === today);
+      if (todayEntry) {
+        setBedtime(todayEntry.bedtime);
+        setWakeTime(todayEntry.wake_time);
+        setQuality([todayEntry.quality]);
+      }
+    } catch (error) {
+      console.error("Error loading sleep entries:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, getSleepEntries, today]);
 
   useEffect(() => {
-    if (todayEntry) {
-      setBedtime(todayEntry.bedtime);
-      setWakeTime(todayEntry.wakeTime);
-      setQuality([todayEntry.quality]);
-    }
-  }, []);
+    loadEntries();
+  }, [loadEntries]);
+
+  // Real-time sync for cross-device updates
+  useRealtimeSync<SleepEntry>(
+    "sleep_entries",
+    user?.id,
+    useCallback((data) => {
+      if (data) {
+        setEntries(prev => {
+          const index = prev.findIndex(e => e.date === data.date);
+          if (index >= 0) {
+            const updated = [...prev];
+            updated[index] = data;
+            return updated;
+          }
+          return [data, ...prev];
+        });
+        
+        if (data.date === today) {
+          setBedtime(data.bedtime);
+          setWakeTime(data.wake_time);
+          setQuality([data.quality]);
+        }
+        
+        toast.success("Sleep data synced from another device", {
+          icon: <Cloud className="w-4 h-4" />,
+        });
+      }
+    }, [today])
+  );
 
   const calculateHoursSlept = () => {
     const [bedH, bedM] = bedtime.split(":").map(Number);
@@ -57,7 +91,7 @@ export const SleepTracker = () => {
     let wakeMinutes = wakeH * 60 + wakeM;
     
     if (wakeMinutes <= bedMinutes) {
-      wakeMinutes += 24 * 60; // Add a day
+      wakeMinutes += 24 * 60;
     }
     
     return (wakeMinutes - bedMinutes) / 60;
@@ -65,17 +99,30 @@ export const SleepTracker = () => {
 
   const hoursSlept = calculateHoursSlept();
 
-  const handleSave = () => {
-    const entry: SleepEntry = {
+  const handleSave = async () => {
+    if (!user) {
+      toast.error("Please sign in to track your sleep");
+      return;
+    }
+
+    setSaving(true);
+    
+    const { error } = await saveSleepEntry({
       date: today,
       bedtime,
-      wakeTime,
+      wake_time: wakeTime,
       quality: quality[0],
-      hoursSlept,
-    };
-    saveSleepEntry(entry);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+      hours_slept: hoursSlept,
+    });
+
+    if (error) {
+      toast.error("Failed to save. Please try again.");
+    } else {
+      toast.success("Sleep logged successfully!");
+      loadEntries();
+    }
+    
+    setSaving(false);
   };
 
   const getQualityLabel = (q: number) => {
@@ -98,11 +145,21 @@ export const SleepTracker = () => {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const weekEntries = entries.filter((e) => e.date >= weekAgo);
   const avgHours = weekEntries.length
-    ? weekEntries.reduce((sum, e) => sum + e.hoursSlept, 0) / weekEntries.length
+    ? weekEntries.reduce((sum, e) => sum + e.hours_slept, 0) / weekEntries.length
     : 0;
   const avgQuality = weekEntries.length
     ? weekEntries.reduce((sum, e) => sum + e.quality, 0) / weekEntries.length
     : 0;
+
+  if (loading) {
+    return (
+      <Card className="gradient-card border-border/50">
+        <CardContent className="py-8 flex justify-center">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="gradient-card border-border/50">
@@ -110,6 +167,8 @@ export const SleepTracker = () => {
         <CardTitle className="flex items-center gap-2 text-lg">
           <Moon className="w-5 h-5 text-primary" />
           Sleep Tracker
+          {saving && <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground ml-auto" />}
+          {!saving && user && <Cloud className="w-4 h-4 text-green-500 ml-auto" aria-label="Synced across devices" />}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Quality sleep supports your recovery
@@ -190,18 +249,12 @@ export const SleepTracker = () => {
         <Button
           onClick={handleSave}
           className="w-full gradient-primary"
-          disabled={saved}
+          disabled={saving || !user}
         >
-          {saved ? (
+          {saving ? (
             <>
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="mr-2"
-              >
-                ✓
-              </motion.span>
-              Saved!
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
             </>
           ) : (
             <>
@@ -210,6 +263,12 @@ export const SleepTracker = () => {
             </>
           )}
         </Button>
+
+        {!user && (
+          <p className="text-xs text-center text-muted-foreground">
+            Sign in to sync your sleep data across devices
+          </p>
+        )}
 
         {/* Weekly Stats */}
         {weekEntries.length > 0 && (
