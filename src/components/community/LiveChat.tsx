@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { getDisplayName, getInitials, getAvatarColor } from "@/lib/anonymousNames";
 
 interface ChatMessage {
   id: string;
@@ -22,10 +23,16 @@ interface ChatRoom {
   description: string | null;
 }
 
+interface UserProfile {
+  user_id: string;
+  display_name: string | null;
+}
+
 export const LiveChat = () => {
   const { user } = useAuth();
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -51,8 +58,12 @@ export const LiveChat = () => {
           table: "chat_messages",
           filter: `room_id=eq.${room.id}`,
         },
-        (payload) => {
+        async (payload) => {
           const newMsg = payload.new as ChatMessage;
+          // Fetch profile for new message if not cached
+          if (!profiles.has(newMsg.user_id)) {
+            await fetchProfileForUser(newMsg.user_id);
+          }
           setMessages((prev) => [...prev, newMsg]);
         }
       )
@@ -84,6 +95,18 @@ export const LiveChat = () => {
     setLoading(false);
   };
 
+  const fetchProfileForUser = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, display_name")
+      .eq("user_id", userId)
+      .single();
+
+    if (data) {
+      setProfiles((prev) => new Map(prev).set(userId, data));
+    }
+  };
+
   const fetchMessages = async () => {
     if (!room) return;
 
@@ -96,6 +119,19 @@ export const LiveChat = () => {
 
     if (!error && data) {
       setMessages(data);
+      
+      // Fetch all unique user profiles
+      const userIds = [...new Set(data.map((m) => m.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
+
+      if (profilesData) {
+        const profileMap = new Map<string, UserProfile>();
+        profilesData.forEach((p) => profileMap.set(p.user_id, p));
+        setProfiles(profileMap);
+      }
     }
   };
 
@@ -130,6 +166,11 @@ export const LiveChat = () => {
 
   const isOwnMessage = (userId: string) => userId === user?.id;
 
+  const getUserDisplayName = (userId: string) => {
+    const profile = profiles.get(userId);
+    return getDisplayName(profile?.display_name, userId);
+  };
+
   if (loading) {
     return (
       <Card className="gradient-card border-border/50 h-[500px]">
@@ -159,27 +200,48 @@ export const LiveChat = () => {
               </div>
             ) : (
               <AnimatePresence mode="popLayout">
-                {messages.map((msg) => (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className={`flex ${isOwnMessage(msg.user_id) ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                        isOwnMessage(msg.user_id)
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-secondary text-secondary-foreground rounded-bl-md"
-                      }`}
+                {messages.map((msg) => {
+                  const displayName = getUserDisplayName(msg.user_id);
+                  const isOwn = isOwnMessage(msg.user_id);
+                  
+                  return (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
                     >
-                      <p className="text-sm">{msg.message}</p>
-                      <p className={`text-xs mt-1 ${isOwnMessage(msg.user_id) ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                        {formatTime(msg.created_at)}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className={`flex gap-2 max-w-[85%] ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                        {/* Avatar */}
+                        <div 
+                          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${getAvatarColor(msg.user_id)}`}
+                        >
+                          {getInitials(displayName)}
+                        </div>
+                        
+                        {/* Message bubble */}
+                        <div>
+                          {/* Username */}
+                          <p className={`text-xs font-medium mb-1 ${isOwn ? "text-right" : "text-left"} text-muted-foreground`}>
+                            {isOwn ? "You" : displayName}
+                          </p>
+                          <div
+                            className={`rounded-2xl px-4 py-2 ${
+                              isOwn
+                                ? "bg-primary text-primary-foreground rounded-br-md"
+                                : "bg-secondary text-secondary-foreground rounded-bl-md"
+                            }`}
+                          >
+                            <p className="text-sm">{msg.message}</p>
+                            <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                              {formatTime(msg.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             )}
           </div>
