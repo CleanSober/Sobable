@@ -35,7 +35,7 @@ export const EmergencyButton = () => {
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:shadow-xl transition-shadow"
+        className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:shadow-xl transition-shadow"
         aria-label="Emergency Support"
       >
         <Shield className="w-6 h-6" />
