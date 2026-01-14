@@ -25,6 +25,7 @@ import { getInitials, getAvatarColor } from "@/lib/anonymousNames";
 import { EmojiReactions } from "./EmojiReactions";
 import { ForumReplies } from "./ForumReplies";
 import { MentionText } from "./MentionInput";
+import { UserActionsMenu } from "./UserActionsMenu";
 import { formatTimeAgo, validatePostTitle, validatePostContent } from "@/hooks/useCommunity";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -158,7 +159,7 @@ export const PostCard = memo(({
               </div>
               
               {/* Actions menu for own posts */}
-              {isOwn && !isEditing && (
+              {isOwn && !isEditing ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -180,7 +181,13 @@ export const PostCard = memo(({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              ) : !isOwn && !isEditing ? (
+                <UserActionsMenu
+                  userId={userId}
+                  targetType="forum_post"
+                  targetId={id}
+                />
+              ) : null}
             </header>
             
             {/* Post content */}

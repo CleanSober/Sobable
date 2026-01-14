@@ -15,6 +15,7 @@ import {
 import { getInitials, getAvatarColor } from "@/lib/anonymousNames";
 import { EmojiReactions } from "./EmojiReactions";
 import { MentionInput, MentionText } from "./MentionInput";
+import { UserActionsMenu } from "./UserActionsMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -303,7 +304,7 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
                             </span>
                             
                             {/* Actions menu for own replies */}
-                            {isOwn && !isEditing && (
+                            {isOwn && !isEditing ? (
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" size="icon" className="h-5 w-5 ml-auto">
@@ -325,7 +326,16 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
-                            )}
+                            ) : !isOwn && !isEditing ? (
+                              <div className="ml-auto">
+                                <UserActionsMenu
+                                  userId={reply.user_id}
+                                  targetType="forum_reply"
+                                  targetId={reply.id}
+                                  compact
+                                />
+                              </div>
+                            ) : null}
                           </div>
                           
                           {isEditing ? (
