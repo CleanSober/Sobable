@@ -25,6 +25,13 @@ export const EmergencyButton = () => {
     }
   }, []);
 
+  // Trigger haptic feedback
+  const triggerHaptic = (pattern: number | number[] = 50) => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(pattern);
+    }
+  };
+
   // Save position when it changes
   const handleDragEnd = (_: any, info: { offset: { x: number; y: number } }) => {
     const newPosition = {
@@ -35,6 +42,18 @@ export const EmergencyButton = () => {
     localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(newPosition));
     // Small delay to prevent click from firing
     setTimeout(() => setIsDragging(false), 100);
+  };
+
+  const handleButtonClick = () => {
+    if (!isDragging) {
+      triggerHaptic([50, 30, 50]); // Double pulse pattern
+      setIsOpen(true);
+    }
+  };
+
+  const handleDragStart = () => {
+    triggerHaptic(30); // Light feedback when starting drag
+    setIsDragging(true);
   };
 
   const resources = [
@@ -72,13 +91,9 @@ export const EmergencyButton = () => {
         initial={{ scale: 0, x: position.x, y: position.y }}
         animate={{ scale: 1, x: position.x, y: position.y }}
         transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 }}
-        onDragStart={() => setIsDragging(true)}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onClick={() => {
-          if (!isDragging) {
-            setIsOpen(true);
-          }
-        }}
+        onClick={handleButtonClick}
         className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:shadow-xl transition-shadow cursor-grab active:cursor-grabbing touch-none"
         aria-label="Emergency Support - Drag to reposition"
         whileDrag={{ scale: 1.1 }}
