@@ -1,10 +1,105 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Brain, AlertTriangle, Clock, Heart, TrendingUp, Shield } from "lucide-react";
-import { analyzePatterns, getTriggerEntries } from "@/lib/storage";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface PatternAnalysis {
+  topTriggers: { name: string; count: number }[];
+  topEmotions: { name: string; count: number }[];
+  topSituations: { name: string; count: number }[];
+  highRiskTimes: { name: string; count: number }[];
+  successRate: number;
+  totalEntries: number;
+}
 
 export const PatternAnalysis = () => {
-  const analysis = analyzePatterns();
+  const { user } = useAuth();
+  const [analysis, setAnalysis] = useState<PatternAnalysis>({
+    topTriggers: [],
+    topEmotions: [],
+    topSituations: [],
+    highRiskTimes: [],
+    successRate: 0,
+    totalEntries: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    analyzePatterns();
+  }, [user]);
+
+  const analyzePatterns = async () => {
+    if (!user) return;
+
+    const { data: entries } = await supabase
+      .from("trigger_entries")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!entries || entries.length === 0) {
+      setLoading(false);
+      return;
+    }
+
+    const triggerCounts: Record<string, number> = {};
+    const emotionCounts: Record<string, number> = {};
+    const situationCounts: Record<string, number> = {};
+    const timeCounts: Record<string, number> = {};
+    let resistedCount = 0;
+
+    entries.forEach((entry) => {
+      triggerCounts[entry.trigger] = (triggerCounts[entry.trigger] || 0) + 1;
+      emotionCounts[entry.emotion] = (emotionCounts[entry.emotion] || 0) + 1;
+      situationCounts[entry.situation] = (situationCounts[entry.situation] || 0) + 1;
+      
+      const hour = parseInt(entry.time.split(":")[0]);
+      const timeSlot = hour < 6 ? "Night (12-6am)" : hour < 12 ? "Morning (6am-12pm)" : hour < 18 ? "Afternoon (12-6pm)" : "Evening (6pm-12am)";
+      timeCounts[timeSlot] = (timeCounts[timeSlot] || 0) + 1;
+      
+      // Check for both "stayed_sober" and "resisted" for backwards compatibility
+      if (entry.outcome === "stayed_sober" || entry.outcome === "resisted") {
+        resistedCount++;
+      }
+    });
+
+    const sortByCount = (obj: Record<string, number>) =>
+      Object.entries(obj)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    setAnalysis({
+      topTriggers: sortByCount(triggerCounts),
+      topEmotions: sortByCount(emotionCounts),
+      topSituations: sortByCount(situationCounts),
+      highRiskTimes: sortByCount(timeCounts),
+      successRate: entries.length > 0 ? (resistedCount / entries.length) * 100 : 0,
+      totalEntries: entries.length,
+    });
+    setLoading(false);
+  };
+
   const hasData = analysis.totalEntries > 0;
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl gradient-card shadow-card border border-border/50 p-6 text-center"
+      >
+        <div className="p-4 rounded-full bg-primary/10 inline-block mb-4">
+          <Brain className="w-8 h-8 text-primary animate-pulse" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          Analyzing patterns...
+        </h3>
+      </motion.div>
+    );
+  }
 
   if (!hasData) {
     return (

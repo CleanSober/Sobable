@@ -25,7 +25,7 @@ export interface TriggerEntry {
   emotion: string;
   intensity: number;
   copingUsed?: string;
-  outcome?: "resisted" | "struggled" | "relapsed";
+  outcome?: "resisted" | "stayed_sober" | "struggled" | "relapsed";
   notes?: string;
 }
 
@@ -110,8 +110,8 @@ export const analyzePatterns = (): PatternAnalysis => {
     const hour = parseInt(entry.time.split(":")[0]);
     const timeSlot = hour < 6 ? "Night (12-6am)" : hour < 12 ? "Morning (6am-12pm)" : hour < 18 ? "Afternoon (12-6pm)" : "Evening (6pm-12am)";
     timeCounts[timeSlot] = (timeCounts[timeSlot] || 0) + 1;
-    
-    if (entry.outcome === "resisted") resistedCount++;
+    // Check for both "stayed_sober" and "resisted" for backwards compatibility
+    if (entry.outcome === "resisted" || entry.outcome === "stayed_sober") resistedCount++;
   });
 
   const sortByCount = (obj: Record<string, number>) =>
@@ -166,18 +166,42 @@ export const getMotivationalQuote = (): { quote: string; author: string } => {
 export const getMilestones = (daysSober: number): { reached: string[]; next: { name: string; days: number } | null } => {
   const milestones = [
     { name: "1 Day", days: 1 },
+    { name: "3 Days", days: 3 },
     { name: "1 Week", days: 7 },
     { name: "2 Weeks", days: 14 },
+    { name: "21 Days", days: 21 },
     { name: "1 Month", days: 30 },
+    { name: "45 Days", days: 45 },
     { name: "2 Months", days: 60 },
+    { name: "75 Days", days: 75 },
     { name: "3 Months", days: 90 },
+    { name: "100 Days", days: 100 },
+    { name: "4 Months", days: 120 },
+    { name: "5 Months", days: 150 },
     { name: "6 Months", days: 180 },
+    { name: "200 Days", days: 200 },
     { name: "9 Months", days: 270 },
+    { name: "300 Days", days: 300 },
     { name: "1 Year", days: 365 },
     { name: "18 Months", days: 548 },
     { name: "2 Years", days: 730 },
     { name: "3 Years", days: 1095 },
+    { name: "4 Years", days: 1460 },
     { name: "5 Years", days: 1825 },
+    { name: "6 Years", days: 2190 },
+    { name: "7 Years", days: 2555 },
+    { name: "8 Years", days: 2920 },
+    { name: "9 Years", days: 3285 },
+    { name: "10 Years", days: 3650 },
+    { name: "15 Years", days: 5475 },
+    { name: "20 Years", days: 7300 },
+    { name: "25 Years", days: 9125 },
+    { name: "30 Years", days: 10950 },
+    { name: "40 Years", days: 14600 },
+    { name: "50 Years", days: 18250 },
+    { name: "60 Years", days: 21900 },
+    { name: "75 Years", days: 27375 },
+    { name: "100 Years", days: 36500 },
   ];
 
   const reached = milestones.filter((m) => daysSober >= m.days).map((m) => m.name);

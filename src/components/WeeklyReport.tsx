@@ -1,22 +1,75 @@
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FileText, TrendingUp, TrendingDown, Minus, Calendar, DollarSign, Brain, Heart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getMoodEntries, getTriggerEntries, calculateDaysSober, calculateMoneySaved, type UserData } from "@/lib/storage";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { calculateDaysSober, type UserData } from "@/lib/storage";
 
 interface WeeklyReportProps {
   userData: UserData;
 }
 
+interface MoodEntry {
+  date: string;
+  mood: number;
+  craving_level: number;
+}
+
+interface TriggerEntry {
+  date: string;
+  outcome: string | null;
+}
+
 export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
-  const report = useMemo(() => {
+  const { user } = useAuth();
+  const [report, setReport] = useState({
+    avgMoodThisWeek: 0,
+    avgMoodLastWeek: 0,
+    moodTrend: 0,
+    avgCravingThisWeek: 0,
+    avgCravingLastWeek: 0,
+    cravingTrend: 0,
+    successRateThisWeek: 100,
+    successRateLastWeek: 100,
+    successTrend: 0,
+    checkInDays: 0,
+    moneySavedThisWeek: userData.dailySpending * 7,
+    triggersThisWeek: 0,
+    totalDaysSober: calculateDaysSober(userData.sobrietyStartDate),
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchData();
+  }, [user, userData]);
+
+  const fetchData = async () => {
+    if (!user) return;
+
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const moodEntries = getMoodEntries();
-    const triggerEntries = getTriggerEntries();
+    // Fetch mood entries
+    const { data: moodData } = await supabase
+      .from("mood_entries")
+      .select("date, mood, craving_level")
+      .eq("user_id", user.id)
+      .gte("date", twoWeeksAgo.toISOString().split("T")[0])
+      .order("date", { ascending: true });
+
+    // Fetch trigger entries
+    const { data: triggerData } = await supabase
+      .from("trigger_entries")
+      .select("date, outcome")
+      .eq("user_id", user.id)
+      .gte("date", twoWeeksAgo.toISOString().split("T")[0]);
+
+    const moodEntries: MoodEntry[] = moodData || [];
+    const triggerEntries: TriggerEntry[] = triggerData || [];
 
     // This week's data
     const thisWeekMoods = moodEntries.filter((e) => new Date(e.date) >= weekAgo);
@@ -39,19 +92,23 @@ export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
       : 0;
 
     const avgCravingThisWeek = thisWeekMoods.length
-      ? thisWeekMoods.reduce((sum, e) => sum + e.cravingLevel, 0) / thisWeekMoods.length
+      ? thisWeekMoods.reduce((sum, e) => sum + e.craving_level, 0) / thisWeekMoods.length
       : 0;
     const avgCravingLastWeek = lastWeekMoods.length
-      ? lastWeekMoods.reduce((sum, e) => sum + e.cravingLevel, 0) / lastWeekMoods.length
+      ? lastWeekMoods.reduce((sum, e) => sum + e.craving_level, 0) / lastWeekMoods.length
       : 0;
 
-    // Success rate
-    const resistedThisWeek = thisWeekTriggers.filter((e) => e.outcome === "resisted").length;
+    // Success rate - check for both "stayed_sober" and "resisted" for backwards compatibility
+    const resistedThisWeek = thisWeekTriggers.filter(
+      (e) => e.outcome === "stayed_sober" || e.outcome === "resisted"
+    ).length;
     const successRateThisWeek = thisWeekTriggers.length
       ? (resistedThisWeek / thisWeekTriggers.length) * 100
       : 100;
 
-    const resistedLastWeek = lastWeekTriggers.filter((e) => e.outcome === "resisted").length;
+    const resistedLastWeek = lastWeekTriggers.filter(
+      (e) => e.outcome === "stayed_sober" || e.outcome === "resisted"
+    ).length;
     const successRateLastWeek = lastWeekTriggers.length
       ? (resistedLastWeek / lastWeekTriggers.length) * 100
       : 100;
@@ -62,7 +119,7 @@ export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
     // Money saved this week
     const moneySavedThisWeek = userData.dailySpending * 7;
 
-    return {
+    setReport({
       avgMoodThisWeek,
       avgMoodLastWeek,
       moodTrend: avgMoodThisWeek - avgMoodLastWeek,
@@ -76,8 +133,9 @@ export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
       moneySavedThisWeek,
       triggersThisWeek: thisWeekTriggers.length,
       totalDaysSober: calculateDaysSober(userData.sobrietyStartDate),
-    };
-  }, [userData]);
+    });
+    setLoading(false);
+  };
 
   const getTrendIcon = (trend: number, inverse = false) => {
     const isPositive = inverse ? trend < 0 : trend > 0;
@@ -135,6 +193,19 @@ export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
       bgColor: "bg-blue-500/10",
     },
   ];
+
+  if (loading) {
+    return (
+      <Card className="gradient-card border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="w-5 h-5 text-primary animate-pulse" />
+            Loading report...
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card className="gradient-card border-border/50">
