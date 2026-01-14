@@ -1,18 +1,44 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getMoodEntries, type MoodEntry } from "@/lib/storage";
-import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CalendarHeatmapProps {
   startDate: string;
 }
 
+interface MoodEntry {
+  date: string;
+  mood: number;
+  craving_level: number;
+}
+
 export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
+  const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const moodEntries = useMemo(() => getMoodEntries(), []);
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchMoodEntries();
+  }, [user]);
+
+  const fetchMoodEntries = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("mood_entries")
+      .select("date, mood, craving_level")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false });
+
+    setMoodEntries(data || []);
+    setLoading(false);
+  };
 
   const getMoodColor = (mood: number | undefined) => {
     if (mood === undefined) return "bg-muted/30";
@@ -93,6 +119,19 @@ export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
   };
 
   const stats = getStats();
+
+  if (loading) {
+    return (
+      <Card className="gradient-card border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Calendar className="w-5 h-5 text-primary animate-pulse" />
+            Loading calendar...
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card className="gradient-card border-border/50">

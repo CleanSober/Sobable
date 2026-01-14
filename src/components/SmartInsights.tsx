@@ -125,7 +125,10 @@ export const SmartInsights = () => {
       .gte("date", weekAgo.toISOString().split("T")[0]);
 
     if (triggerData && triggerData.length > 0) {
-      const successfulCopes = triggerData.filter(t => t.outcome === "stayed_sober").length;
+      // Check for both "stayed_sober" and "resisted" for backwards compatibility
+      const successfulCopes = triggerData.filter(
+        t => t.outcome === "stayed_sober" || t.outcome === "resisted"
+      ).length;
       const successRate = (successfulCopes / triggerData.length) * 100;
 
       if (successRate >= 80) {
