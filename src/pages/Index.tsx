@@ -110,8 +110,10 @@ const Index = () => {
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            <StreakTracker />
             <QuickActions />
             <DailyGoals />
+            <SmartInsights />
             <AchievementBadges daysSober={daysSober} />
           </div>
         );
@@ -125,6 +127,8 @@ const Index = () => {
             </motion.div>
             <MoodCheckIn />
             <SleepTracker />
+            <BreathingExercise />
+            <GuidedMeditations />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
           </div>
         );
@@ -140,6 +144,7 @@ const Index = () => {
             <TriggerLogger />
             <PatternAnalysis />
             <RelapsePreventionPlan />
+            <CrisisResources />
           </div>
         );
 
@@ -151,6 +156,8 @@ const Index = () => {
               <p className="text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+            <DataInsights />
+            <ProgressSharing />
           </div>
         );
 
@@ -199,6 +206,7 @@ const Index = () => {
 
       <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <EmergencyButton />
+      <AIRecoveryCoach />
     </div>
   );
 };
