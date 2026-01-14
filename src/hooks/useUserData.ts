@@ -265,3 +265,81 @@ export const usePreventionPlan = () => {
 
   return { getPlan, savePlan };
 };
+
+export const useChallengeProgress = () => {
+  const { user } = useAuth();
+
+  const getChallengeProgress = async (challengeId: string) => {
+    if (!user) return null;
+    const { data } = await supabase
+      .from("challenge_progress")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("challenge_id", challengeId)
+      .single();
+    return data;
+  };
+
+  const saveChallengeProgress = async (challengeId: string, completedTasks: string[]) => {
+    if (!user) return { error: new Error("Not authenticated") };
+
+    const { data: existing } = await supabase
+      .from("challenge_progress")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("challenge_id", challengeId)
+      .single();
+
+    if (existing) {
+      const { error } = await supabase
+        .from("challenge_progress")
+        .update({ completed_tasks: completedTasks })
+        .eq("user_id", user.id)
+        .eq("challenge_id", challengeId);
+      return { error };
+    } else {
+      const { error } = await supabase
+        .from("challenge_progress")
+        .insert({ 
+          challenge_id: challengeId, 
+          completed_tasks: completedTasks, 
+          user_id: user.id 
+        });
+      return { error };
+    }
+  };
+
+  return { getChallengeProgress, saveChallengeProgress };
+};
+
+// Real-time sync hook for cross-device updates
+export const useRealtimeSync = <T>(
+  tableName: string,
+  userId: string | undefined,
+  onUpdate: (data: T) => void
+) => {
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`${tableName}-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: tableName,
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log(`Realtime update on ${tableName}:`, payload);
+          onUpdate(payload.new as T);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tableName, userId, onUpdate]);
+};
