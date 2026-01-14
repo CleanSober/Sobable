@@ -1,10 +1,11 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { MoreHorizontal, Pencil, Trash2, X, Check } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, X, Check, Pin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,10 @@ import { EmojiReactions } from "./EmojiReactions";
 import { ForumReplies } from "./ForumReplies";
 import { MentionText } from "./MentionInput";
 import { UserActionsMenu } from "./UserActionsMenu";
+import { BookmarkButton } from "./BookmarkButton";
+import { SubscribeButton } from "./SubscribeButton";
+import { FollowButton } from "./FollowButton";
+import { PollDisplay } from "./PollDisplay";
 import { formatTimeAgo, validatePostTitle, validatePostContent } from "@/hooks/useCommunity";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -40,6 +45,8 @@ interface PostCardProps {
   userId: string;
   isOwn: boolean;
   index: number;
+  isPinned?: boolean;
+  tags?: string[];
   onReplyAdded?: () => void;
   onPostUpdated?: () => void;
   onPostDeleted?: () => void;
@@ -58,6 +65,8 @@ export const PostCard = memo(({
   userId, 
   isOwn,
   index,
+  isPinned = false,
+  tags = [],
   onReplyAdded,
   onPostUpdated,
   onPostDeleted
@@ -247,12 +256,19 @@ export const PostCard = memo(({
               </>
             )}
             
-            {/* Footer with reactions */}
+            {/* Footer with reactions and actions */}
             {!isEditing && (
-              <footer className="flex items-center justify-between">
+              <footer className="flex items-center justify-between gap-2 flex-wrap">
                 <EmojiReactions targetId={id} targetType="forum_post" />
+                <div className="flex items-center gap-1">
+                  <BookmarkButton postId={id} compact />
+                  <SubscribeButton postId={id} compact />
+                </div>
               </footer>
             )}
+
+            {/* Poll if exists */}
+            {!isEditing && <PollDisplay postId={id} />}
 
             {/* Replies section */}
             {!isEditing && (
