@@ -362,6 +362,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          content_preview: string | null
+          created_at: string
+          from_user_id: string
+          id: string
+          is_read: boolean
+          notification_type: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          content_preview?: string | null
+          created_at?: string
+          from_user_id: string
+          id?: string
+          is_read?: boolean
+          notification_type: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          content_preview?: string | null
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          is_read?: boolean
+          notification_type?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prevention_plans: {
         Row: {
           coping_strategies: string[] | null

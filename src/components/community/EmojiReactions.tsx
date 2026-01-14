@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SmilePlus } from "lucide-react";
 import { useReactions } from "@/hooks/useCommunity";
@@ -7,13 +7,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
 
 const EMOJI_OPTIONS = ["❤️", "👍", "🎉", "💪", "🙏", "🤗"] as const;
 
 interface EmojiReactionsProps {
   targetId: string;
-  targetType: "forum_post" | "chat_message";
+  targetType: "forum_post" | "chat_message" | "forum_reply";
   compact?: boolean;
 }
 

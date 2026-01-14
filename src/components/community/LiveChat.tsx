@@ -3,19 +3,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, MessageCircle, Users, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useUserProfiles, ChatMessage, ChatRoom, validateMessageLength } from "@/hooks/useCommunity";
+import { 
+  useUserProfiles, 
+  useTypingIndicator,
+  ChatMessage, 
+  ChatRoom, 
+  validateMessageLength,
+  createMentionNotifications
+} from "@/hooks/useCommunity";
 import { MessageBubble } from "./MessageBubble";
+import { TypingIndicator } from "./TypingIndicator";
+import { MentionInput } from "./MentionInput";
 
 const MAX_MESSAGE_LENGTH = 2000;
 
 export const LiveChat = () => {
   const { user } = useAuth();
-  const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
+  const { fetchProfiles, getDisplayNameForUser, getAllProfiles } = useUserProfiles();
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -23,7 +31,12 @@ export const LiveChat = () => {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get current user's display name for typing indicator
+  const currentUserDisplayName = user ? getDisplayNameForUser(user.id) : "";
+  
+  // Typing indicator hook
+  const { typingUsers, startTyping, stopTyping } = useTypingIndicator(room?.id || "");
 
   useEffect(() => {
     fetchRoom();
@@ -120,17 +133,31 @@ export const LiveChat = () => {
     }
 
     setSending(true);
+    stopTyping(currentUserDisplayName);
     
     try {
-      const { error } = await supabase.from("chat_messages").insert({
-        room_id: room.id,
-        user_id: user.id,
-        message: trimmedMessage,
-      });
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .insert({
+          room_id: room.id,
+          user_id: user.id,
+          message: trimmedMessage,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      
+      // Create mention notifications
+      await createMentionNotifications(
+        trimmedMessage,
+        user.id,
+        "chat_message",
+        data.id,
+        getAllProfiles()
+      );
+      
       setNewMessage("");
-      inputRef.current?.focus();
     } catch {
       toast.error("Failed to send message. Please try again.");
     } finally {
@@ -142,6 +169,15 @@ export const LiveChat = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const handleInputChange = (value: string) => {
+    setNewMessage(value);
+    if (value.trim()) {
+      startTyping(currentUserDisplayName);
+    } else {
+      stopTyping(currentUserDisplayName);
     }
   };
 
@@ -217,19 +253,26 @@ export const LiveChat = () => {
           </div>
         </ScrollArea>
 
+        {/* Typing indicator */}
+        <AnimatePresence>
+          {typingUsers.length > 0 && (
+            <TypingIndicator typingUsers={typingUsers} />
+          )}
+        </AnimatePresence>
+
         <div className="p-4 border-t border-border/50 bg-card/50">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Input
-                ref={inputRef}
-                placeholder="Type a message..."
+              <MentionInput
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                placeholder="Type a message... Use @ to mention"
                 disabled={sending}
                 maxLength={MAX_MESSAGE_LENGTH}
+                profiles={getAllProfiles()}
                 aria-label="Message input"
-                className="pr-16"
+                className={isNearLimit ? "pr-16" : ""}
               />
               {isNearLimit && (
                 <span 

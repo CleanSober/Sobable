@@ -4,6 +4,8 @@ import { MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getInitials, getAvatarColor } from "@/lib/anonymousNames";
 import { EmojiReactions } from "./EmojiReactions";
+import { ForumReplies } from "./ForumReplies";
+import { MentionText } from "./MentionInput";
 import { formatTimeAgo } from "@/hooks/useCommunity";
 
 interface PostCardProps {
@@ -16,6 +18,7 @@ interface PostCardProps {
   userId: string;
   isOwn: boolean;
   index: number;
+  onReplyAdded?: () => void;
 }
 
 export const PostCard = memo(({ 
@@ -27,7 +30,8 @@ export const PostCard = memo(({
   displayName, 
   userId, 
   isOwn,
-  index 
+  index,
+  onReplyAdded
 }: PostCardProps) => {
   return (
     <motion.article
@@ -57,19 +61,22 @@ export const PostCard = memo(({
           
           {/* Post content */}
           <h3 className="font-semibold text-foreground mb-1.5 leading-snug">{title}</h3>
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">{content}</p>
+          <MentionText 
+            text={content} 
+            className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed block" 
+          />
           
-          {/* Footer with reactions and reply count */}
-          <footer className="flex items-center justify-between pt-2 border-t border-border/30">
+          {/* Footer with reactions */}
+          <footer className="flex items-center justify-between">
             <EmojiReactions targetId={id} targetType="forum_post" />
-            <span 
-              className="flex items-center gap-1.5 text-xs text-muted-foreground"
-              aria-label={`${replyCount} replies`}
-            >
-              <MessageCircle className="w-4 h-4" aria-hidden="true" />
-              {replyCount}
-            </span>
           </footer>
+
+          {/* Replies section */}
+          <ForumReplies 
+            postId={id} 
+            replyCount={replyCount} 
+            onReplyAdded={onReplyAdded || (() => {})} 
+          />
         </CardContent>
       </Card>
     </motion.article>
