@@ -1,12 +1,41 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Heart, MessageCircle, X, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import { Phone, Heart, MessageCircle, X, Shield, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUserData } from "@/lib/storage";
 
+const POSITION_STORAGE_KEY = 'emergency-button-position';
+
 export const EmergencyButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const userData = getUserData();
+  const dragControls = useDragControls();
+
+  // Load saved position on mount
+  useEffect(() => {
+    const savedPosition = localStorage.getItem(POSITION_STORAGE_KEY);
+    if (savedPosition) {
+      try {
+        setPosition(JSON.parse(savedPosition));
+      } catch (e) {
+        console.error('Failed to parse saved position');
+      }
+    }
+  }, []);
+
+  // Save position when it changes
+  const handleDragEnd = (_: any, info: { offset: { x: number; y: number } }) => {
+    const newPosition = {
+      x: position.x + info.offset.x,
+      y: position.y + info.offset.y,
+    };
+    setPosition(newPosition);
+    localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(newPosition));
+    // Small delay to prevent click from firing
+    setTimeout(() => setIsDragging(false), 100);
+  };
 
   const resources = [
     {
@@ -31,12 +60,28 @@ export const EmergencyButton = () => {
     <>
       {/* Floating Emergency Button */}
       <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
+        drag
+        dragMomentum={false}
+        dragElastic={0.1}
+        dragConstraints={{
+          top: -window.innerHeight + 100,
+          left: -window.innerWidth + 100,
+          right: 0,
+          bottom: 0,
+        }}
+        initial={{ scale: 0, x: position.x, y: position.y }}
+        animate={{ scale: 1, x: position.x, y: position.y }}
         transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 }}
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:shadow-xl transition-shadow"
-        aria-label="Emergency Support"
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={handleDragEnd}
+        onClick={() => {
+          if (!isDragging) {
+            setIsOpen(true);
+          }
+        }}
+        className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:shadow-xl transition-shadow cursor-grab active:cursor-grabbing touch-none"
+        aria-label="Emergency Support - Drag to reposition"
+        whileDrag={{ scale: 1.1 }}
       >
         <Shield className="w-6 h-6" />
       </motion.button>
