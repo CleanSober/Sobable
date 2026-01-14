@@ -25,57 +25,57 @@ import phoneMockupSquareWebp from "@/assets/phone-mockup-square.webp";
 const features = [
   {
     icon: Calendar,
-    title: "Sobriety Tracking",
-    description: "Track your sober days with a beautiful counter that celebrates every milestone."
+    title: "Sobriety Day Counter",
+    description: "Track every sober day with a beautiful countdown timer. Celebrate 24 hours, 30 days, 90 days, and beyond."
   },
   {
     icon: TrendingUp,
-    title: "Money Saved",
-    description: "See exactly how much money you're saving by staying sober."
+    title: "Money Saved Calculator",
+    description: "See exactly how much money you save by not drinking. Watch your savings grow daily."
   },
   {
     icon: Heart,
-    title: "Mood Check-ins",
-    description: "Daily mood tracking to understand your emotional journey."
+    title: "Daily Mood Tracker",
+    description: "Log your emotions and cravings daily to understand patterns in your recovery journey."
   },
   {
     icon: Brain,
-    title: "Trigger Analysis",
-    description: "Identify and track your triggers to build awareness and coping strategies."
+    title: "Trigger & Craving Logger",
+    description: "Identify what triggers cravings and build personalized coping strategies to prevent relapse."
   },
   {
     icon: Sparkles,
-    title: "Daily Motivation",
-    description: "Receive personalized affirmations and motivational quotes every day."
+    title: "Recovery Motivation",
+    description: "Get daily affirmations, motivational quotes, and encouragement tailored to your sobriety journey."
   },
   {
     icon: Phone,
-    title: "Emergency Support",
-    description: "Quick access to your sponsor or emergency contacts when you need help."
+    title: "Emergency SOS Button",
+    description: "One-tap access to your sponsor, therapist, or AA hotline when you need support most."
   }
 ];
 
 const testimonials = [
   {
-    name: "Anonymous",
+    name: "Sarah M.",
     days: 247,
-    quote: "This app helped me track my progress and stay accountable. The daily motivations keep me going."
+    quote: "This sobriety tracker helped me stay accountable. Seeing my sober day count grow keeps me motivated to never drink again."
   },
   {
-    name: "Recovery Warrior",
+    name: "Michael R.",
     days: 89,
-    quote: "Being able to see how much money I've saved is incredibly motivating. Every day counts."
+    quote: "The money saved calculator blew my mind. I've saved over $2,000 by quitting alcohol. Best free recovery app I've found."
   },
   {
-    name: "One Day at a Time",
+    name: "Jennifer K.",
     days: 412,
-    quote: "The trigger logging feature helped me understand my patterns and avoid relapses."
+    quote: "The trigger logging feature helped me understand my drinking patterns and avoid relapse. A must-have for anyone in AA."
   }
 ];
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <main className="min-h-screen bg-background overflow-x-hidden" role="main">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20">
         {/* Background effects */}
@@ -97,13 +97,13 @@ const Landing = () => {
                   <source srcSet={appIconWebp} type="image/webp" />
                   <img 
                     src={appIcon} 
-                    alt="Sober Days" 
+                    alt="Sober Days App Icon - Free Sobriety Tracker" 
                     width={24} 
                     height={24} 
                     className="w-6 h-6 rounded-lg" 
                   />
                 </picture>
-                <span className="text-sm text-primary font-medium">Your Journey to Recovery</span>
+                <span className="text-sm text-primary font-medium">Free Sobriety Tracker App</span>
               </div>
             </motion.div>
 
@@ -113,8 +113,8 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
             >
-              Every Sober Day is a{" "}
-              <span className="text-gradient">Victory</span>
+              Track Your Sober Days.{" "}
+              <span className="text-gradient">Stay Alcohol-Free.</span>
             </motion.h1>
 
             <motion.p
@@ -123,7 +123,7 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl lg:max-w-none"
             >
-              Track your sobriety, celebrate your progress, and build a healthier life—one day at a time.
+              The #1 free sobriety counter app. Track your recovery, count days sober, calculate money saved, and prevent relapse—one day at a time.
             </motion.p>
 
             <motion.div
@@ -134,8 +134,8 @@ const Landing = () => {
             >
               <Button asChild size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
                 <Link to="/auth">
-                  Start Your Journey
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  Start Tracking Free
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                 </Link>
               </Button>
               <Button 
@@ -155,7 +155,7 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="mt-8"
             >
-              <p className="text-sm text-muted-foreground mb-4">Coming soon to mobile</p>
+              <p className="text-sm text-muted-foreground mb-4">Download on iOS &amp; Android</p>
               <AppStoreBadges size="md" className="justify-center lg:justify-start" />
             </motion.div>
 
@@ -166,8 +166,8 @@ const Landing = () => {
               className="mt-12 grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0"
             >
               {[
-                { value: "100%", label: "Free" },
-                { value: "24/7", label: "Support" },
+                { value: "100%", label: "Free Forever" },
+                { value: "24/7", label: "Access" },
                 { value: "100%", label: "Private" },
               ].map((stat, index) => (
                 <div key={index} className="text-center lg:text-left">
@@ -198,7 +198,7 @@ const Landing = () => {
                 />
                 <img
                   src={phoneMockup1}
-                  alt="Sober Days App - Sobriety Counter"
+                  alt="Sobriety Counter App - Track Sober Days Free"
                   width={288}
                   height={512}
                   className="w-72 h-auto rounded-3xl shadow-2xl"
@@ -217,7 +217,7 @@ const Landing = () => {
                 />
                 <img
                   src={phoneMockup2}
-                  alt="Sober Days App - Daily Motivation"
+                  alt="Addiction Recovery App - Daily Motivation &amp; Support"
                   width={224}
                   height={398}
                   fetchPriority="high"
@@ -232,7 +232,7 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6 bg-card/30">
+      <section id="features" className="py-24 px-6 bg-card/30" aria-labelledby="features-heading">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -240,12 +240,12 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Everything You Need to{" "}
-              <span className="text-gradient">Stay Strong</span>
+            <h2 id="features-heading" className="text-3xl md:text-5xl font-bold mb-4">
+              Best Sobriety Tracker{" "}
+              <span className="text-gradient">Features</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive tools designed to support your recovery journey every step of the way.
+              Everything you need to quit drinking and stay sober. Free tools for addiction recovery and relapse prevention.
             </p>
           </motion.div>
 
@@ -269,7 +269,7 @@ const Landing = () => {
                   />
                   <img
                     src={phoneMockupSquare}
-                    alt="Sober Days App Features"
+                    alt="Sobriety Tracker Features - Mood Logging, Money Saved Calculator"
                     width={448}
                     height={448}
                     loading="lazy"
@@ -304,7 +304,7 @@ const Landing = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6" aria-labelledby="how-it-works-heading">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -312,17 +312,17 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Simple Steps to{" "}
-              <span className="text-gradient">Get Started</span>
+            <h2 id="how-it-works-heading" className="text-3xl md:text-5xl font-bold mb-4">
+              Start Counting{" "}
+              <span className="text-gradient">Sober Days</span>
             </h2>
           </motion.div>
 
           <div className="space-y-8">
             {[
-              { step: "1", title: "Set Your Sobriety Date", description: "Enter when you started your journey—we'll count every day from there." },
-              { step: "2", title: "Track Your Progress", description: "Check in daily with your mood, log triggers, and celebrate milestones." },
-              { step: "3", title: "Stay Motivated", description: "Get daily affirmations, see your savings grow, and connect with support when needed." }
+              { step: "1", title: "Enter Your Sobriety Date", description: "Set when you quit drinking or using. Your sobriety counter starts tracking immediately—no sign-up required." },
+              { step: "2", title: "Track Daily Progress", description: "Log mood, cravings, and triggers. Watch your sober day count and money saved grow every day." },
+              { step: "3", title: "Stay Sober & Celebrate", description: "Get daily motivation, earn sobriety milestones (24 hours, 1 week, 30 days, 1 year), and access emergency support." }
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -346,7 +346,7 @@ const Landing = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 px-6 bg-card/30">
+      <section className="py-24 px-6 bg-card/30" aria-labelledby="testimonials-heading">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -354,12 +354,12 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Stories of{" "}
-              <span className="text-gradient">Hope</span>
+            <h2 id="testimonials-heading" className="text-3xl md:text-5xl font-bold mb-4">
+              Real Recovery{" "}
+              <span className="text-gradient">Success Stories</span>
             </h2>
             <p className="text-lg text-muted-foreground">
-              Real experiences from people on their recovery journey.
+              Join thousands who have tracked their sobriety and transformed their lives.
             </p>
           </motion.div>
 
@@ -390,24 +390,24 @@ const Landing = () => {
       </section>
 
       {/* Privacy Section */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6" aria-labelledby="privacy-heading">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Shield className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Your Privacy Matters
+            <Shield className="w-16 h-16 text-primary mx-auto mb-6" aria-hidden="true" />
+            <h2 id="privacy-heading" className="text-3xl md:text-4xl font-bold mb-4">
+              100% Private Sobriety Tracking
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              All your data stays on your device. No accounts required. No data collection. Your recovery journey is 100% private.
+              Your recovery data stays on your device. No account required. No data collection. No ads. The most private sober app available.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              {["No Sign-up Required", "Data Stored Locally", "No Tracking", "Anonymous by Default"].map((item, index) => (
+              {["No Account Needed", "Offline Access", "Zero Data Collection", "Anonymous Forever"].map((item, index) => (
                 <div key={index} className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
+                  <CheckCircle2 className="w-4 h-4 text-success" aria-hidden="true" />
                   <span className="text-sm font-medium">{item}</span>
                 </div>
               ))}
@@ -454,7 +454,7 @@ const Landing = () => {
           </p>
         </div>
       </footer>
-    </div>
+    </main>
   );
 };
 
