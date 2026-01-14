@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Image, Smartphone, Share2, FileText } from "lucide-react";
+import { Download, Image, Smartphone, Share2, FileText, Play, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,12 +13,73 @@ import twitterHeader from "@/assets/brand/twitter-header.png";
 import splashScreen from "@/assets/brand/splash-screen.png";
 import facebookCover from "@/assets/brand/facebook-cover.png";
 
+// Import videos
+import appPreviewVideo from "@/assets/brand/videos/app-preview-portrait.mp4";
+import heroAnimationVideo from "@/assets/brand/videos/hero-animation.mp4";
+import logoAnimationVideo from "@/assets/brand/videos/logo-animation.mp4";
+import storyAnimationVideo from "@/assets/brand/videos/story-animation.mp4";
+
 interface AssetCardProps {
   title: string;
   dimensions: string;
   image: string;
   usage: string;
 }
+
+interface VideoCardProps {
+  title: string;
+  duration: string;
+  video: string;
+  usage: string;
+  poster?: string;
+}
+
+const VideoCard = ({ title, duration, video, usage, poster }: VideoCardProps) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="group"
+  >
+    <Card className="overflow-hidden bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all">
+      <div className="aspect-video relative overflow-hidden bg-muted">
+        <video
+          src={video}
+          poster={poster}
+          className="w-full h-full object-cover"
+          controls
+          playsInline
+          muted
+          loop
+        />
+        <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+          <Play className="w-3 h-3" />
+          {duration}
+        </div>
+      </div>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-foreground">{title}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{usage}</p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href = video;
+              link.download = `${title.toLowerCase().replace(/\s+/g, "-")}.mp4`;
+              link.click();
+            }}
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
+);
 
 const AssetCard = ({ title, dimensions, image, usage }: AssetCardProps) => (
   <motion.div
@@ -86,10 +147,14 @@ export const BrandAssets = () => {
         </motion.div>
 
         <Tabs defaultValue="assets" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 max-w-xl mx-auto">
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl mx-auto">
             <TabsTrigger value="assets" className="gap-2">
               <Image className="w-4 h-4" />
               Assets
+            </TabsTrigger>
+            <TabsTrigger value="videos" className="gap-2">
+              <Video className="w-4 h-4" />
+              Videos
             </TabsTrigger>
             <TabsTrigger value="social" className="gap-2">
               <Share2 className="w-4 h-4" />
@@ -104,6 +169,41 @@ export const BrandAssets = () => {
               Guidelines
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="videos" className="space-y-6">
+            <h2 className="text-2xl font-semibold text-foreground">Promotional Videos</h2>
+            <p className="text-muted-foreground">App store previews and marketing animations</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <VideoCard
+                title="App Store Preview"
+                duration="5s"
+                video={appPreviewVideo}
+                poster={splashScreen}
+                usage="iOS & Android app store preview"
+              />
+              <VideoCard
+                title="Hero Animation"
+                duration="5s"
+                video={heroAnimationVideo}
+                poster={socialHero}
+                usage="Website hero, landing pages"
+              />
+              <VideoCard
+                title="Logo Animation"
+                duration="5s"
+                video={logoAnimationVideo}
+                poster={appIcon}
+                usage="Intro/outro, brand reveal"
+              />
+              <VideoCard
+                title="Story Animation"
+                duration="5s"
+                video={storyAnimationVideo}
+                poster={instagramStory}
+                usage="Instagram/TikTok stories"
+              />
+            </div>
+          </TabsContent>
 
           <TabsContent value="assets" className="space-y-6">
             <h2 className="text-2xl font-semibold text-foreground">Core Brand Assets</h2>
