@@ -286,8 +286,10 @@ export type Database = {
           created_at: string
           forum_id: string
           id: string
+          is_pinned: boolean
           likes: number
           reply_count: number
+          tags: string[] | null
           title: string
           updated_at: string
           user_id: string
@@ -297,8 +299,10 @@ export type Database = {
           created_at?: string
           forum_id: string
           id?: string
+          is_pinned?: boolean
           likes?: number
           reply_count?: number
+          tags?: string[] | null
           title: string
           updated_at?: string
           user_id: string
@@ -308,8 +312,10 @@ export type Database = {
           created_at?: string
           forum_id?: string
           id?: string
+          is_pinned?: boolean
           likes?: number
           reply_count?: number
+          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -460,6 +466,105 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          allows_multiple: boolean
+          created_at: string
+          ends_at: string | null
+          id: string
+          options: Json
+          post_id: string
+          question: string
+        }
+        Insert: {
+          allows_multiple?: boolean
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          options?: Json
+          post_id: string
+          question: string
+        }
+        Update: {
+          allows_multiple?: boolean
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          options?: Json
+          post_id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_bookmarks_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prevention_plans: {
         Row: {
@@ -641,6 +746,35 @@ export type Database = {
         }
         Relationships: []
       }
+      thread_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_subscriptions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trigger_entries: {
         Row: {
           coping_used: string | null
@@ -682,6 +816,87 @@ export type Database = {
           situation?: string
           time?: string
           trigger?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_description: string | null
+          badge_name: string
+          badge_type: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_name: string
+          badge_type: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_description?: string | null
+          badge_name?: string
+          badge_type?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      user_karma: {
+        Row: {
+          helpful_votes: number
+          id: string
+          posts_count: number
+          reactions_received: number
+          replies_count: number
+          total_karma: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          helpful_votes?: number
+          id?: string
+          posts_count?: number
+          reactions_received?: number
+          replies_count?: number
+          total_karma?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          helpful_votes?: number
+          id?: string
+          posts_count?: number
+          reactions_received?: number
+          replies_count?: number
+          total_karma?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
