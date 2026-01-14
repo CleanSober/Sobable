@@ -21,6 +21,7 @@ import { DailyGoals } from "@/components/DailyGoals";
 import { QuickActions } from "@/components/QuickActions";
 import { MotivationalBanner } from "@/components/MotivationalBanner";
 import { CommunityHub } from "@/components/community/CommunityHub";
+import { NotificationsBell } from "@/components/community/NotificationsBell";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
@@ -175,7 +176,10 @@ const Index = () => {
             </div>
             <span className="text-lg font-semibold text-foreground">Clean & Sober</span>
           </div>
-          <UserProfile />
+          <div className="flex items-center gap-1">
+            <NotificationsBell />
+            <UserProfile />
+          </div>
         </div>
       </motion.header>
 
