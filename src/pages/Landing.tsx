@@ -190,13 +190,13 @@ const Landing = () => {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 fetchPriority="high"
               />
-              {/* Secondary phone mockup */}
+              {/* Secondary phone mockup - LCP element */}
               <motion.img
                 src={phoneMockup2}
                 alt="Sober Days App - Daily Motivation"
                 width={224}
                 height={398}
-                loading="lazy"
+                fetchPriority="high"
                 className="absolute -right-20 top-20 w-56 h-auto rounded-3xl shadow-xl opacity-80"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
