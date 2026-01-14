@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { getDisplayName, getInitials, getAvatarColor } from "@/lib/anonymousNames";
 
 interface Forum {
   id: string;
@@ -26,6 +27,11 @@ interface Post {
   user_id: string;
 }
 
+interface UserProfile {
+  user_id: string;
+  display_name: string | null;
+}
+
 interface ForumViewProps {
   forum: Forum;
   onBack: () => void;
@@ -34,6 +40,7 @@ interface ForumViewProps {
 export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -53,6 +60,21 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
 
     if (!error && data) {
       setPosts(data);
+      
+      // Fetch all unique user profiles
+      const userIds = [...new Set(data.map((p) => p.user_id))];
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, display_name")
+          .in("user_id", userIds);
+
+        if (profilesData) {
+          const profileMap = new Map<string, UserProfile>();
+          profilesData.forEach((p) => profileMap.set(p.user_id, p));
+          setProfiles(profileMap);
+        }
+      }
     }
     setLoading(false);
   };
@@ -94,6 +116,13 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
     return `${Math.floor(mins / 1440)}d ago`;
   };
+
+  const getUserDisplayName = (userId: string) => {
+    const profile = profiles.get(userId);
+    return getDisplayName(profile?.display_name, userId);
+  };
+
+  const isOwnPost = (userId: string) => userId === user?.id;
 
   return (
     <div className="space-y-4">
@@ -152,20 +181,40 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
         </div>
       ) : (
         <div className="space-y-3">
-          {posts.map((post, index) => (
-            <motion.div
-              key={post.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Card className="gradient-card border-border/50">
-                <CardContent className="p-4">
-                  <h3 className="font-medium text-foreground mb-1">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{post.content}</p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{timeAgo(post.created_at)}</span>
-                    <div className="flex items-center gap-4">
+          {posts.map((post, index) => {
+            const displayName = getUserDisplayName(post.user_id);
+            const isOwn = isOwnPost(post.user_id);
+            
+            return (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card className="gradient-card border-border/50">
+                  <CardContent className="p-4">
+                    {/* Author info */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${getAvatarColor(post.user_id)}`}
+                      >
+                        {getInitials(displayName)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-foreground">
+                          {isOwn ? "You" : displayName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Post content */}
+                    <h3 className="font-medium text-foreground mb-1">{post.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{post.content}</p>
+                    
+                    {/* Actions */}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <button
                         onClick={() => likePost(post.id, post.likes)}
                         className="flex items-center gap-1 hover:text-primary transition-colors"
@@ -178,11 +227,11 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
                         {post.reply_count}
                       </span>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       )}
     </div>
