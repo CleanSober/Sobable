@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Users, MessageSquare, Crown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePremiumStatus } from "@/hooks/useCommunity";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./PremiumGate";
 import { ForumList } from "./ForumList";
 import { ForumView } from "./ForumView";

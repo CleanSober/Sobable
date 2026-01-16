@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Crown, Sparkles, Shield, MessageSquare, Users, Heart } from "lucide-react";
+import { Crown, Shield, MessageSquare, Users, Heart, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -9,10 +9,10 @@ interface PremiumGateProps {
 }
 
 const features = [
+  { icon: Bot, text: "AI Recovery Coach" },
   { icon: MessageSquare, text: "Unlimited forum access" },
   { icon: Users, text: "Real-time chat rooms" },
   { icon: Heart, text: "Connect with peers" },
-  { icon: Shield, text: "Priority support" },
 ] as const;
 
 export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {

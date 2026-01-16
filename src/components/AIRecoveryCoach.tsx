@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, X, Sparkles, Loader2, MessageCircle, RefreshCw } from "lucide-react";
+import { Bot, Send, X, Sparkles, Loader2, RefreshCw, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { calculateDaysSober } from "@/lib/storage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PremiumGate } from "@/components/community/PremiumGate";
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -26,12 +28,26 @@ const quickPrompts = [
 export const AIRecoveryCoach = () => {
   const { user } = useAuth();
   const { profile } = useUserData();
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const [isOpen, setIsOpen] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleOpenChat = () => {
+    if (!isPremium && !premiumLoading) {
+      setShowUpgrade(true);
+    } else {
+      setIsOpen(true);
+    }
+  };
+
+  const handleUpgrade = () => {
+    toast.info("Premium upgrade coming soon! Stay tuned.");
+  };
 
   const daysSober = profile?.sobriety_start_date
     ? calculateDaysSober(profile.sobriety_start_date)
@@ -180,13 +196,46 @@ Whether you need help managing a craving, want to talk through a tough moment, o
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpenChat}
         className="fixed bottom-24 left-6 z-40 p-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/40 transition-shadow"
         aria-label="Open AI Recovery Coach"
       >
         <Bot className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-300 rounded-full animate-pulse" />
+        <Crown className="absolute -top-1 -right-1 w-4 h-4 text-amber-300" />
       </motion.button>
+
+      {/* Premium Upgrade Modal */}
+      <AnimatePresence>
+        {showUpgrade && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowUpgrade(false)}
+              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="fixed inset-4 z-50 flex items-center justify-center"
+            >
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowUpgrade(false)}
+                  className="absolute top-2 right-2 z-10"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+                <PremiumGate onUpgrade={handleUpgrade} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Chat Modal */}
       <AnimatePresence>
