@@ -1,20 +1,21 @@
-import { Home, Heart, TrendingUp, Users, Brain } from "lucide-react";
+import { Home, Heart, TrendingUp, Users, Brain, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 
-export type TabId = "home" | "checkin" | "triggers" | "progress" | "community";
+export type TabId = "home" | "checkin" | "community" | "triggers" | "progress";
 
 interface Tab {
   id: TabId;
   label: string;
   icon: React.ElementType;
+  isPremium?: boolean;
 }
 
 const tabs: Tab[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "checkin", label: "Check-In", icon: Heart },
+  { id: "community", label: "Community", icon: Users, isPremium: true },
   { id: "triggers", label: "Triggers", icon: Brain },
   { id: "progress", label: "Progress", icon: TrendingUp },
-  { id: "community", label: "Community", icon: Users },
 ];
 
 interface BottomTabsProps {
@@ -30,6 +31,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
+            const isPremium = tab.isPremium;
 
             return (
               <button
@@ -40,18 +42,27 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 rounded-xl bg-primary/10"
+                    className={`absolute inset-0 rounded-xl ${isPremium ? "bg-amber-500/10" : "bg-primary/10"}`}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-                <Icon
-                  className={`w-6 h-6 relative z-10 transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  }`}
-                />
+                <div className="relative">
+                  <Icon
+                    className={`w-6 h-6 relative z-10 transition-colors ${
+                      isPremium 
+                        ? isActive ? "text-amber-500" : "text-amber-500/70"
+                        : isActive ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  />
+                  {isPremium && (
+                    <Crown className="absolute -top-1 -right-1 w-3 h-3 text-amber-500" />
+                  )}
+                </div>
                 <span
                   className={`text-xs mt-1 font-medium relative z-10 transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    isPremium
+                      ? isActive ? "text-amber-500" : "text-amber-500/70"
+                      : isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   {tab.label}

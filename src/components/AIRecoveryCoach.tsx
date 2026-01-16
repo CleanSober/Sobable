@@ -174,18 +174,18 @@ Whether you need help managing a craving, want to talk through a tough moment, o
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button - Premium Gold */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 left-6 z-40 p-4 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl transition-shadow"
+        className="fixed bottom-24 left-6 z-40 p-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/40 transition-shadow"
         aria-label="Open AI Recovery Coach"
       >
         <Bot className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse" />
+        <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-300 rounded-full animate-pulse" />
       </motion.button>
 
       {/* Chat Modal */}
