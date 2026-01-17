@@ -45,9 +45,7 @@ export const AIRecoveryCoach = () => {
     }
   };
 
-  const handleUpgrade = () => {
-    toast.info("Premium upgrade coming soon! Stay tuned.");
-  };
+  // Let PremiumGate handle the upgrade flow directly
 
   const daysSober = profile?.sobriety_start_date
     ? calculateDaysSober(profile.sobriety_start_date)
@@ -230,7 +228,7 @@ Whether you need help managing a craving, want to talk through a tough moment, o
                 >
                   <X className="w-5 h-5" />
                 </Button>
-                <PremiumGate onUpgrade={handleUpgrade} />
+                <PremiumGate />
               </div>
             </motion.div>
           </>

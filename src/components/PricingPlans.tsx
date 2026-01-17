@@ -44,7 +44,7 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
             <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
               <Crown className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground">You're Premium!</h2>
+            <h2 className="text-2xl font-bold text-foreground">You're in the Sober Club!</h2>
             <p className="text-muted-foreground">
               You have full access to all features with your {planName} plan.
             </p>
@@ -69,7 +69,7 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
       className="max-w-lg mx-auto p-4 space-y-6"
     >
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">Upgrade to Premium</h2>
+        <h2 className="text-2xl font-bold text-foreground">Join Sober Club</h2>
         <p className="text-muted-foreground">
           Unlock all features and accelerate your recovery journey
         </p>
@@ -110,7 +110,7 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
           <div className="flex items-center justify-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-500" />
             <CardTitle className="text-lg">
-              {selectedPlan === "monthly" ? "Premium Monthly" : "Premium Yearly"}
+              {selectedPlan === "monthly" ? "Sober Club Monthly" : "Sober Club Yearly"}
             </CardTitle>
           </div>
           <CardDescription>
@@ -154,7 +154,7 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
             ) : (
               <>
                 <Crown className="w-4 h-4 mr-2" />
-                Subscribe Now
+                Join Sober Club
               </>
             )}
           </Button>

@@ -22,9 +22,7 @@ export const CommunityHub = () => {
   const [selectedForum, setSelectedForum] = useState<Forum | null>(null);
   const [activeTab, setActiveTab] = useState("chat");
 
-  const handleUpgrade = () => {
-    toast.info("Premium upgrade coming soon! Stay tuned.");
-  };
+  // Let PremiumGate handle the upgrade flow directly
 
   if (loading) {
     return (
@@ -38,7 +36,7 @@ export const CommunityHub = () => {
   }
 
   if (!isPremium) {
-    return <PremiumGate onUpgrade={handleUpgrade} />;
+    return <PremiumGate />;
   }
 
   if (selectedForum) {
