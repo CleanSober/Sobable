@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Brain, AlertTriangle, Clock, Heart, TrendingUp, Shield } from "lucide-react";
+import { Brain, AlertTriangle, Clock, Heart, TrendingUp, Shield, Lock, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PremiumGate } from "./community/PremiumGate";
 
 interface PatternAnalysis {
   topTriggers: { name: string; count: number }[];
@@ -15,6 +18,7 @@ interface PatternAnalysis {
 
 export const PatternAnalysis = () => {
   const { user } = useAuth();
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const [analysis, setAnalysis] = useState<PatternAnalysis>({
     topTriggers: [],
     topEmotions: [],
@@ -84,7 +88,56 @@ export const PatternAnalysis = () => {
 
   const hasData = analysis.totalEntries > 0;
 
-  if (loading) {
+  // Premium gate for advanced pattern analysis
+  if (!premiumLoading && !isPremium) {
+    return (
+      <Card className="gradient-card border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Brain className="w-5 h-5 text-primary" />
+            Pattern Analysis
+            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-amber-500">
+              <Crown className="w-4 h-4" />
+              Sober Club
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            {/* Blurred preview */}
+            <div className="blur-sm pointer-events-none opacity-50">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="p-4 rounded-xl bg-secondary/50 text-center">
+                  <p className="text-2xl font-bold">12</p>
+                  <p className="text-xs text-muted-foreground">Triggers</p>
+                </div>
+                <div className="p-4 rounded-xl bg-success/10 text-center">
+                  <p className="text-2xl font-bold text-success">85%</p>
+                  <p className="text-xs text-muted-foreground">Resisted</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-8 bg-secondary/30 rounded-lg" />
+                <div className="h-8 bg-secondary/30 rounded-lg" />
+              </div>
+            </div>
+            
+            {/* Overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
+              <Lock className="w-8 h-8 text-amber-500 mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Unlock Pattern Analysis</h3>
+              <p className="text-sm text-muted-foreground text-center mb-4 px-4">
+                Understand your triggers, emotions, and high-risk situations
+              </p>
+              <PremiumGate />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loading || premiumLoading) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
