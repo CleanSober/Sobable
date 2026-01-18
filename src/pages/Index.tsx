@@ -29,6 +29,8 @@ import { GuidedMeditations } from "@/components/GuidedMeditations";
 import { CrisisResources } from "@/components/CrisisResources";
 import { DataInsights } from "@/components/DataInsights";
 import { ProgressSharing } from "@/components/ProgressSharing";
+import { PremiumAnalytics } from "@/components/PremiumAnalytics";
+import { WeeklyReport } from "@/components/WeeklyReport";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
@@ -164,6 +166,8 @@ const Index = () => {
               <p className="text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+            <WeeklyReport userData={userData} />
+            <PremiumAnalytics />
             <DataInsights />
             <ProgressSharing />
           </div>
