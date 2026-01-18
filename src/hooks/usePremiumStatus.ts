@@ -2,12 +2,21 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+// TEMPORARY: Set to true to bypass paywall for testing
+const BYPASS_PAYWALL = true;
+
 export const usePremiumStatus = () => {
   const { user } = useAuth();
-  const [isPremium, setIsPremium] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState<boolean | null>(BYPASS_PAYWALL ? true : null);
+  const [loading, setLoading] = useState(!BYPASS_PAYWALL);
 
   useEffect(() => {
+    // Skip check if bypassing paywall
+    if (BYPASS_PAYWALL) {
+      setIsPremium(true);
+      setLoading(false);
+      return;
+    }
     const checkPremiumStatus = async () => {
       if (!user) {
         setIsPremium(false);
