@@ -31,6 +31,7 @@ import { DataInsights } from "@/components/DataInsights";
 import { ProgressSharing } from "@/components/ProgressSharing";
 import { PremiumAnalytics } from "@/components/PremiumAnalytics";
 import { WeeklyReport } from "@/components/WeeklyReport";
+import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
@@ -165,6 +166,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold text-foreground mb-1">Your Journey</h1>
               <p className="text-muted-foreground">Every step counts</p>
             </motion.div>
+            <PersonalizedRecommendations />
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
             <WeeklyReport userData={userData} />
             <PremiumAnalytics />
