@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Heart, 
   Shield, 
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppStoreBadges from "@/components/AppStoreBadges";
+import { useAuth } from "@/contexts/AuthContext";
 import appIcon from "@/assets/app-icon.png";
 import appIconWebp from "@/assets/app-icon.webp";
 import phoneMockup1 from "@/assets/phone-mockup-1.png";
@@ -22,6 +24,7 @@ import phoneMockup2 from "@/assets/phone-mockup-2.png";
 import phoneMockup2Webp from "@/assets/phone-mockup-2.webp";
 import phoneMockupSquare from "@/assets/phone-mockup-square.png";
 import phoneMockupSquareWebp from "@/assets/phone-mockup-square.webp";
+
 const features = [
   {
     icon: Calendar,
@@ -74,6 +77,15 @@ const testimonials = [
 ];
 
 const Landing = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Auto-redirect authenticated users to the app
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/app");
+    }
+  }, [user, loading, navigate]);
   return (
     <main className="min-h-screen bg-background overflow-x-hidden" role="main">
       {/* Hero Section */}
