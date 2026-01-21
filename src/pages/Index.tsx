@@ -33,6 +33,7 @@ import { PremiumAnalytics } from "@/components/PremiumAnalytics";
 import { WeeklyReport } from "@/components/WeeklyReport";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
+import { Journal } from "@/components/Journal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
@@ -137,6 +138,7 @@ const Index = () => {
               <p className="text-muted-foreground">How are you feeling today?</p>
             </motion.div>
             <MoodCheckIn />
+            <Journal daysSober={daysSober} />
             <SleepTracker />
             <BreathingExercise />
             <GuidedMeditations />

@@ -1,1 +1,22 @@
 project_id = "rfgcvuuhmfkebjfjmswd"
+
+[functions.ambient-music]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.personalized-recommendations]
+verify_jwt = false
+
+[functions.recovery-coach]
+verify_jwt = false
+
+[functions.journal-ai]
+verify_jwt = false
