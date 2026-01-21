@@ -401,6 +401,48 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_entries: {
+        Row: {
+          ai_prompt: string | null
+          content: string
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          mood_analysis: string | null
+          mood_score: number | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_prompt?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          mood_analysis?: string | null
+          mood_score?: number | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_prompt?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          mood_analysis?: string | null
+          mood_score?: number | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mood_entries: {
         Row: {
           craving_level: number
