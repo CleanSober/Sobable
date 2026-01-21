@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon } from "lucide-react";
+import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon, Music, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { toast } from "sonner";
 
 interface Meditation {
@@ -64,6 +65,15 @@ export const GuidedMeditations = () => {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const { 
+    isLoading: musicLoading, 
+    isPlaying: musicPlaying, 
+    generateAndPlay, 
+    pause: pauseMusic, 
+    play: playMusic, 
+    stop: stopMusic 
+  } = useAmbientMusic();
 
   useEffect(() => {
     if (isPlaying && timeRemaining > 0) {
@@ -72,10 +82,11 @@ export const GuidedMeditations = () => {
       }, 1000);
     } else if (timeRemaining === 0 && activeMeditation && isPlaying) {
       setIsPlaying(false);
+      stopMusic();
       completeMeditation();
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [isPlaying, timeRemaining, activeMeditation]);
+  }, [isPlaying, timeRemaining, activeMeditation, stopMusic]);
 
   const completeMeditation = async () => {
     if (!user) return;
@@ -103,11 +114,29 @@ export const GuidedMeditations = () => {
     }
   }, [isPlaying, activeMeditation]);
 
-  const startMeditation = (meditation: Meditation) => {
+  const startMeditation = async (meditation: Meditation) => {
     setActiveMeditation(meditation);
     setTimeRemaining(meditation.duration);
     setIsPlaying(true);
     setCurrentStep(0);
+    
+    // Generate and play ambient music for this meditation type
+    await generateAndPlay(meditation.id, 60);
+  };
+
+  const handlePauseResume = () => {
+    setIsPlaying(!isPlaying);
+    if (isPlaying) {
+      pauseMusic();
+    } else {
+      playMusic();
+    }
+  };
+
+  const handleEnd = () => {
+    setActiveMeditation(null);
+    setIsPlaying(false);
+    stopMusic();
   };
 
   const formatTime = (seconds: number) => {
@@ -139,10 +168,27 @@ export const GuidedMeditations = () => {
               <p className="font-medium">{activeMeditation.instructions[currentStep]}</p>
             </motion.div>
             <div className="flex gap-3 justify-center">
-              <Button onClick={() => setIsPlaying(!isPlaying)} variant="outline">
+              <Button onClick={handlePauseResume} variant="outline">
                 {isPlaying ? <><Pause className="w-4 h-4 mr-2" />Pause</> : <><Play className="w-4 h-4 mr-2" />Resume</>}
               </Button>
-              <Button onClick={() => { setActiveMeditation(null); setIsPlaying(false); }} variant="ghost">
+              
+              {/* Music toggle */}
+              <Button 
+                onClick={() => musicPlaying ? pauseMusic() : playMusic()} 
+                variant={musicPlaying ? "secondary" : "ghost"}
+                disabled={musicLoading}
+              >
+                {musicLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : musicPlaying ? (
+                  <Volume2 className="w-4 h-4 mr-2" />
+                ) : (
+                  <VolumeX className="w-4 h-4 mr-2" />
+                )}
+                {musicLoading ? "Loading..." : musicPlaying ? "Music On" : "Music Off"}
+              </Button>
+              
+              <Button onClick={handleEnd} variant="ghost">
                 <RotateCcw className="w-4 h-4 mr-2" />End
               </Button>
             </div>

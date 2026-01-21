@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wind, Play, Pause, RotateCcw, Check, X } from "lucide-react";
+import { Wind, Play, Pause, RotateCcw, Check, X, Music, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 
 type BreathingPhase = "inhale" | "hold" | "exhale" | "rest";
 type BreathingTechnique = "478" | "box" | "calm" | "energize";
@@ -82,6 +84,9 @@ export const BreathingExercise = () => {
   const [currentCycle, setCurrentCycle] = useState(1);
   const [countdown, setCountdown] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  
+  const { isLoading: musicLoading, isPlaying: musicPlaying, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic } = useAmbientMusic();
 
   const currentPhase = selectedTechnique?.phases[currentPhaseIndex];
   const totalCycles = selectedTechnique?.cycles || 0;
@@ -92,9 +97,10 @@ export const BreathingExercise = () => {
     setCurrentCycle(1);
     setCountdown(0);
     setCompleted(false);
-  }, []);
+    stopMusic();
+  }, [stopMusic]);
 
-  const startExercise = (technique: Technique) => {
+  const startExercise = async (technique: Technique) => {
     setSelectedTechnique(technique);
     setCurrentPhaseIndex(0);
     setCurrentCycle(1);
@@ -105,6 +111,11 @@ export const BreathingExercise = () => {
     // Haptic feedback
     if ("vibrate" in navigator) {
       navigator.vibrate(50);
+    }
+    
+    // Start ambient music
+    if (musicEnabled) {
+      await generateAndPlay(technique.id, 60);
     }
   };
 
@@ -295,10 +306,40 @@ export const BreathingExercise = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setIsActive(!isActive)}
+                  onClick={() => {
+                    setIsActive(!isActive);
+                    if (isActive) {
+                      pauseMusic();
+                    } else {
+                      playMusic();
+                    }
+                  }}
                 >
                   {isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 </Button>
+                
+                {/* Music toggle */}
+                <Button
+                  variant={musicPlaying ? "secondary" : "ghost"}
+                  size="icon"
+                  onClick={() => {
+                    if (musicPlaying) {
+                      pauseMusic();
+                    } else if (musicEnabled) {
+                      playMusic();
+                    }
+                  }}
+                  disabled={musicLoading}
+                >
+                  {musicLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : musicPlaying ? (
+                    <Volume2 className="w-4 h-4" />
+                  ) : (
+                    <VolumeX className="w-4 h-4" />
+                  )}
+                </Button>
+                
                 <Button
                   variant="ghost"
                   size="icon"
