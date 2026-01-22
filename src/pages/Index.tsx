@@ -30,10 +30,11 @@ import { CrisisResources } from "@/components/CrisisResources";
 import { DataInsights } from "@/components/DataInsights";
 import { ProgressSharing } from "@/components/ProgressSharing";
 import { PremiumAnalytics } from "@/components/PremiumAnalytics";
-import { WeeklyReport } from "@/components/WeeklyReport";
+import { WeeklyProgressSummary } from "@/components/WeeklyProgressSummary";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
+import { HabitLoopCard } from "@/components/HabitLoopCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
@@ -119,12 +120,12 @@ const Index = () => {
                 {profile?.display_name ? `Keep going, ${profile.display_name}!` : "You're doing amazing!"} 🌟
               </h1>
             </motion.div>
+            <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
-            <StreakTracker />
-            <QuickActions />
             <DailyGoals />
+            <QuickActions />
             <SmartInsights />
             <AchievementBadges daysSober={daysSober} />
           </div>
@@ -169,8 +170,8 @@ const Index = () => {
               <p className="text-muted-foreground">Every step counts</p>
             </motion.div>
             <PersonalizedRecommendations />
+            <WeeklyProgressSummary userData={userData} />
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
-            <WeeklyReport userData={userData} />
             <PremiumAnalytics />
             <DataInsights />
             <ProgressSharing />
