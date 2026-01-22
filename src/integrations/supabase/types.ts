@@ -749,6 +749,36 @@ export type Database = {
         }
         Relationships: []
       }
+      streak_freezes: {
+        Row: {
+          created_at: string
+          id: string
+          protected_date: string
+          streak_type: string
+          used_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          protected_date: string
+          streak_type?: string
+          used_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          protected_date?: string
+          streak_type?: string
+          used_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -947,8 +977,10 @@ export type Database = {
         Row: {
           created_at: string
           current_streak: number
+          freeze_used_this_week: boolean | null
           id: string
           last_activity_date: string | null
+          last_freeze_week: string | null
           longest_streak: number
           streak_type: string
           updated_at: string
@@ -957,8 +989,10 @@ export type Database = {
         Insert: {
           created_at?: string
           current_streak?: number
+          freeze_used_this_week?: boolean | null
           id?: string
           last_activity_date?: string | null
+          last_freeze_week?: string | null
           longest_streak?: number
           streak_type: string
           updated_at?: string
@@ -967,8 +1001,10 @@ export type Database = {
         Update: {
           created_at?: string
           current_streak?: number
+          freeze_used_this_week?: boolean | null
           id?: string
           last_activity_date?: string | null
+          last_freeze_week?: string | null
           longest_streak?: number
           streak_type?: string
           updated_at?: string
@@ -981,10 +1017,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_use_streak_freeze: {
+        Args: { check_streak_type?: string; check_user_id: string }
+        Returns: boolean
+      }
       is_premium_user: { Args: { check_user_id: string }; Returns: boolean }
       is_user_blocked: {
         Args: { blocked_uuid: string; blocker_uuid: string }
         Returns: boolean
+      }
+      use_streak_freeze: {
+        Args: {
+          p_protected_date?: string
+          p_streak_type?: string
+          p_user_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {
