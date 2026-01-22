@@ -1,15 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Flame, Zap, Target, Trophy, Clock, CheckCircle2, 
-  AlertCircle, Sparkles, ArrowRight
+  AlertCircle, Sparkles, ArrowRight, Snowflake, Crown, Shield
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
+import { PricingPlans } from "@/components/PricingPlans";
+import { toast } from "sonner";
 
 interface HabitLoopCardProps {
   onNavigateToCheckIn?: () => void;
@@ -19,35 +23,34 @@ interface StreakInfo {
   current: number;
   longest: number;
   lastActivity: string | null;
-  freezesAvailable: number;
+  freezeUsedThisWeek: boolean;
 }
 
 export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
   const { user } = useAuth();
-  const { missedActions, streakAtRisk, checkMissedActions } = useSmartNotifications();
+  const { isPremium } = usePremiumStatus();
+  const { missedActions, streakAtRisk } = useSmartNotifications();
   const [streak, setStreak] = useState<StreakInfo>({
     current: 0,
     longest: 0,
     lastActivity: null,
-    freezesAvailable: 0,
+    freezeUsedThisWeek: false,
   });
+  const [canUseFreeze, setCanUseFreeze] = useState(false);
   const [todayComplete, setTodayComplete] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFreezeDialog, setShowFreezeDialog] = useState(false);
+  const [showPricingDialog, setShowPricingDialog] = useState(false);
+  const [freezeLoading, setFreezeLoading] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    fetchStreakData();
-  }, [user]);
-
-  const fetchStreakData = async () => {
+  const fetchStreakData = useCallback(async () => {
     if (!user) return;
     const today = new Date().toISOString().split("T")[0];
 
     const [streakData, goalsData] = await Promise.all([
       supabase
         .from("user_streaks")
-        .select("current_streak, longest_streak, last_activity_date")
+        .select("current_streak, longest_streak, last_activity_date, freeze_used_this_week")
         .eq("user_id", user.id)
         .eq("streak_type", "check_in")
         .maybeSingle(),
@@ -64,7 +67,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
         current: streakData.data.current_streak || 0,
         longest: streakData.data.longest_streak || 0,
         lastActivity: streakData.data.last_activity_date,
-        freezesAvailable: 1, // Could be stored in DB for premium users
+        freezeUsedThisWeek: streakData.data.freeze_used_this_week || false,
       });
     }
 
@@ -76,7 +79,56 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       setTodayComplete(allComplete || false);
     }
 
+    // Check if user can use freeze
+    if (isPremium && streakData.data?.current_streak > 0) {
+      const { data: freezeCheck } = await supabase.rpc('can_use_streak_freeze', {
+        check_user_id: user.id,
+        check_streak_type: 'check_in'
+      });
+      setCanUseFreeze(freezeCheck || false);
+    }
+
     setLoading(false);
+  }, [user, isPremium]);
+
+  useEffect(() => {
+    if (user) {
+      fetchStreakData();
+    }
+  }, [user, fetchStreakData]);
+
+  const handleUseFreeze = async () => {
+    if (!user || !canUseFreeze) return;
+    
+    setFreezeLoading(true);
+    
+    try {
+      const { data, error } = await supabase.rpc('use_streak_freeze', {
+        p_user_id: user.id,
+        p_streak_type: 'check_in'
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message?: string; error?: string };
+      
+      if (result.success) {
+        toast.success("🧊 Streak Frozen!", {
+          description: "Your streak is protected for today. Use wisely - you get one per week!",
+        });
+        setShowFreezeDialog(false);
+        setCanUseFreeze(false);
+        setStreak(prev => ({ ...prev, freezeUsedThisWeek: true }));
+        await fetchStreakData();
+      } else {
+        toast.error(result.error || "Could not use freeze");
+      }
+    } catch (error) {
+      console.error("Error using freeze:", error);
+      toast.error("Failed to use streak freeze");
+    } finally {
+      setFreezeLoading(false);
+    }
   };
 
   const getStreakStatus = () => {
@@ -90,10 +142,10 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       };
     }
     
-    if (streakAtRisk) {
+    if (streakAtRisk && streak.current > 0) {
       return {
         status: 'at-risk',
-        message: `${streak.current} day streak at risk! Check in now`,
+        message: `${streak.current} day streak at risk!`,
         color: 'text-amber-500',
         bgColor: 'bg-amber-500/10',
         icon: AlertCircle,
@@ -102,7 +154,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
 
     if (missedActions.length > 0) {
       const hours = new Date().getHours();
-      if (hours >= 20) {
+      if (hours >= 20 && streak.current > 0) {
         return {
           status: 'urgent',
           message: "Only a few hours left to keep your streak!",
@@ -138,6 +190,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
   const StatusIcon = streakStatus.icon;
   const nextMilestone = getNextMilestone(streak.current);
   const progressToMilestone = (streak.current / nextMilestone) * 100;
+  const showFreezeOption = streakAtRisk && streak.current > 0 && !todayComplete;
 
   if (loading) {
     return (
@@ -152,111 +205,184 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
   }
 
   return (
-    <Card className={`gradient-card border-border/50 overflow-hidden ${
-      streakStatus.status === 'complete' ? 'border-green-500/30' :
-      streakStatus.status === 'at-risk' ? 'border-amber-500/30' :
-      streakStatus.status === 'urgent' ? 'border-red-500/30' : ''
-    }`}>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <div className={`p-2 rounded-xl ${streak.current > 0 ? 'bg-gradient-to-br from-orange-500 to-amber-500' : 'bg-muted'}`}>
-              <Flame className={`w-5 h-5 ${streak.current > 0 ? 'text-white' : 'text-muted-foreground'}`} />
+    <>
+      <Card className={`gradient-card border-border/50 overflow-hidden ${
+        streakStatus.status === 'complete' ? 'border-green-500/30' :
+        streakStatus.status === 'at-risk' ? 'border-amber-500/30' :
+        streakStatus.status === 'urgent' ? 'border-red-500/30' : ''
+      }`}>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className={`p-2 rounded-xl ${streak.current > 0 ? 'bg-gradient-to-br from-orange-500 to-amber-500' : 'bg-muted'}`}>
+                <Flame className={`w-5 h-5 ${streak.current > 0 ? 'text-white' : 'text-muted-foreground'}`} />
+              </div>
+              <div>
+                <span className="text-2xl font-bold">{streak.current}</span>
+                <span className="text-sm text-muted-foreground ml-1">day streak</span>
+              </div>
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              {/* Freeze indicator */}
+              {isPremium && (
+                <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+                  canUseFreeze 
+                    ? 'bg-cyan-500/10 text-cyan-500' 
+                    : 'bg-muted text-muted-foreground'
+                }`}>
+                  <Snowflake className="w-3 h-3" />
+                  <span>{canUseFreeze ? '1' : '0'}</span>
+                </div>
+              )}
+              {streak.longest > 0 && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Trophy className="w-3 h-3 text-amber-500" />
+                  Best: {streak.longest}
+                </div>
+              )}
             </div>
-            <div>
-              <span className="text-2xl font-bold">{streak.current}</span>
-              <span className="text-sm text-muted-foreground ml-1">day streak</span>
-            </div>
-          </CardTitle>
-          {streak.longest > 0 && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Trophy className="w-3 h-3 text-amber-500" />
-              Best: {streak.longest}
-            </div>
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Status Message */}
-        <motion.div
-          key={streakStatus.status}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-2 p-3 rounded-xl ${streakStatus.bgColor}`}
-        >
-          <StatusIcon className={`w-5 h-5 ${streakStatus.color}`} />
-          <span className={`text-sm font-medium ${streakStatus.color}`}>
-            {streakStatus.message}
-          </span>
-        </motion.div>
-
-        {/* Progress to Next Milestone */}
-        <div>
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-muted-foreground">Next milestone</span>
-            <span className="font-medium">{streak.current}/{nextMilestone} days</span>
           </div>
-          <Progress value={progressToMilestone} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-1">
-            {nextMilestone - streak.current} days to earn the {nextMilestone}-day badge 🏆
-          </p>
-        </div>
+        </CardHeader>
 
-        {/* Action Button */}
-        {!todayComplete && (
-          <Button
-            onClick={onNavigateToCheckIn}
-            className={`w-full ${
-              streakStatus.status === 'urgent' 
-                ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600' 
-                : streakStatus.status === 'at-risk'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
-                : 'gradient-primary'
-            } text-white`}
-          >
-            <Zap className="w-4 h-4 mr-2" />
-            {streakStatus.status === 'urgent' ? 'Quick Check-In Now!' : 'Start Daily Check-In'}
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        )}
-
-        {/* Streak Perks */}
-        {streak.current >= 7 && (
+        <CardContent className="space-y-4">
+          {/* Status Message */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center justify-center gap-3 pt-2 border-t border-border/50"
+            key={streakStatus.status}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex items-center gap-2 p-3 rounded-xl ${streakStatus.bgColor}`}
           >
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Sparkles className="w-3 h-3 text-purple-500" />
-              <span>7+ day bonus active</span>
+            <StatusIcon className={`w-5 h-5 ${streakStatus.color}`} />
+            <span className={`text-sm font-medium ${streakStatus.color} flex-1`}>
+              {streakStatus.message}
+            </span>
+            {/* Show freeze button when streak at risk */}
+            {showFreezeOption && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => isPremium ? setShowFreezeDialog(true) : setShowPricingDialog(true)}
+                className={`h-7 px-2 ${
+                  canUseFreeze 
+                    ? 'text-cyan-500 hover:text-cyan-600 hover:bg-cyan-500/10' 
+                    : 'text-muted-foreground'
+                }`}
+              >
+                <Snowflake className="w-4 h-4 mr-1" />
+                {isPremium ? (canUseFreeze ? 'Freeze' : 'Used') : (
+                  <Crown className="w-3 h-3 ml-1" />
+                )}
+              </Button>
+            )}
+          </motion.div>
+
+          {/* Progress to Next Milestone */}
+          <div>
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">Next milestone</span>
+              <span className="font-medium">{streak.current}/{nextMilestone} days</span>
             </div>
-          </motion.div>
-        )}
-      </CardContent>
+            <Progress value={progressToMilestone} className="h-2" />
+            <p className="text-xs text-muted-foreground mt-1">
+              {nextMilestone - streak.current} days to earn the {nextMilestone}-day badge 🏆
+            </p>
+          </div>
 
-      {/* Celebration Animation */}
-      <AnimatePresence>
-        {showCelebration && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 pointer-events-none flex items-center justify-center bg-background/80"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              className="text-center"
+          {/* Action Button */}
+          {!todayComplete && (
+            <Button
+              onClick={onNavigateToCheckIn}
+              className={`w-full ${
+                streakStatus.status === 'urgent' 
+                  ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600' 
+                  : streakStatus.status === 'at-risk'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
+                  : 'gradient-primary'
+              } text-primary-foreground`}
             >
-              <Flame className="w-16 h-16 text-orange-500 mx-auto mb-2" />
-              <p className="text-xl font-bold">Streak Extended!</p>
+              <Zap className="w-4 h-4 mr-2" />
+              {streakStatus.status === 'urgent' ? 'Quick Check-In Now!' : 'Start Daily Check-In'}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
+
+          {/* Streak Perks */}
+          {streak.current >= 7 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-center gap-3 pt-2 border-t border-border/50"
+            >
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Sparkles className="w-3 h-3 text-purple-500" />
+                <span>7+ day bonus active</span>
+              </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Freeze Confirmation Dialog */}
+      <Dialog open={showFreezeDialog} onOpenChange={setShowFreezeDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="p-2 rounded-full bg-cyan-500/10">
+                <Snowflake className="w-5 h-5 text-cyan-500" />
+              </div>
+              Use Streak Freeze?
+            </DialogTitle>
+            <DialogDescription>
+              This will protect your {streak.current}-day streak for today. You can only use one freeze per week.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-2">
+            <div className="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
+              <div className="flex items-center gap-3">
+                <Shield className="w-8 h-8 text-cyan-500" />
+                <div>
+                  <p className="font-medium">Your streak will be protected</p>
+                  <p className="text-sm text-muted-foreground">
+                    Missing today won't break your streak
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowFreezeDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUseFreeze}
+                disabled={freezeLoading || !canUseFreeze}
+                className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
+              >
+                {freezeLoading ? (
+                  <span className="animate-pulse">Freezing...</span>
+                ) : (
+                  <>
+                    <Snowflake className="w-4 h-4 mr-2" />
+                    Use Freeze
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Premium Upsell Dialog */}
+      <Dialog open={showPricingDialog} onOpenChange={setShowPricingDialog}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden">
+          <PricingPlans onClose={() => setShowPricingDialog(false)} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
