@@ -1012,15 +1012,89 @@ export type Database = {
         }
         Relationships: []
       }
+      user_xp: {
+        Row: {
+          created_at: string
+          current_level: number
+          daily_login_streak: number
+          id: string
+          last_login_date: string | null
+          last_login_reward_date: string | null
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          daily_login_streak?: number
+          id?: string
+          last_login_date?: string | null
+          last_login_reward_date?: string | null
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          daily_login_streak?: number
+          id?: string
+          last_login_date?: string | null
+          last_login_reward_date?: string | null
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      xp_history: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          source: string
+          user_id: string
+          xp_amount: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          source: string
+          user_id: string
+          xp_amount: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          source?: string
+          user_id?: string
+          xp_amount?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      add_user_xp: {
+        Args: {
+          p_description?: string
+          p_source: string
+          p_user_id: string
+          p_xp_amount: number
+        }
+        Returns: Json
+      }
+      calculate_level_from_xp: { Args: { xp_amount: number }; Returns: number }
       can_use_streak_freeze: {
         Args: { check_streak_type?: string; check_user_id: string }
         Returns: boolean
       }
+      claim_daily_login_reward: { Args: { p_user_id: string }; Returns: Json }
       is_premium_user: { Args: { check_user_id: string }; Returns: boolean }
       is_user_blocked: {
         Args: { blocked_uuid: string; blocker_uuid: string }

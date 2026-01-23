@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Zap, MessageCircle, Check } from "lucide-react";
+import { Heart, Zap, MessageCircle, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 
 const moodEmojis = ["😔", "😕", "😐", "🙂", "😊", "😄", "🤗", "😁", "🥳", "🌟"];
 const cravingLevels = ["None", "Low", "Medium", "High", "Intense"];
 
 export const MoodCheckIn = () => {
   const { user } = useAuth();
+  const { addXP } = useGamification();
   const [completed, setCompleted] = useState(false);
+  const [wasAlreadyCompleted, setWasAlreadyCompleted] = useState(false);
   const [mood, setMood] = useState(5);
   const [craving, setCraving] = useState(0);
   const [note, setNote] = useState("");
@@ -40,6 +43,7 @@ export const MoodCheckIn = () => {
       setCraving(data.craving_level);
       setNote(data.note || "");
       setCompleted(true);
+      setWasAlreadyCompleted(true);
     }
   };
 
@@ -78,10 +82,20 @@ export const MoodCheckIn = () => {
         onConflict: "user_id,date"
       });
 
+    // Award XP for first check-in of the day
+    if (!wasAlreadyCompleted) {
+      await addXP(XP_REWARDS.mood_log, "mood_log", "Daily mood check-in");
+    }
+
     setCompleted(true);
+    setWasAlreadyCompleted(true);
     setIsExpanded(false);
     setLoading(false);
-    toast.success("Check-in saved! Keep going strong 💪");
+    toast.success(
+      wasAlreadyCompleted 
+        ? "Check-in updated!" 
+        : `Check-in saved! +${XP_REWARDS.mood_log} XP 💪`
+    );
   };
 
   if (completed && !isExpanded) {
@@ -98,7 +112,12 @@ export const MoodCheckIn = () => {
               <Check className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="font-medium text-foreground">Today's Check-In Complete</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-foreground">Today's Check-In Complete</p>
+                <span className="text-xs text-amber-500 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />+{XP_REWARDS.mood_log} XP
+                </span>
+              </div>
               <p className="text-sm text-muted-foreground">
                 Mood: {moodEmojis[mood - 1]} • Craving: {cravingLevels[craving]}
               </p>

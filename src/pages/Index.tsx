@@ -35,6 +35,8 @@ import { PersonalizedRecommendations } from "@/components/PersonalizedRecommenda
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
 import { HabitLoopCard } from "@/components/HabitLoopCard";
+import { GamificationCard } from "@/components/GamificationCard";
+import { XPNotificationProvider } from "@/components/XPNotification";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
@@ -120,6 +122,7 @@ const Index = () => {
                 {profile?.display_name ? `Keep going, ${profile.display_name}!` : "You're doing amazing!"} 🌟
               </h1>
             </motion.div>
+            <GamificationCard />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
@@ -187,44 +190,46 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/30"
-      >
-        <div className="container max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl gradient-primary">
-              <Leaf className="w-5 h-5 text-primary-foreground" />
+    <XPNotificationProvider>
+      <div className="min-h-screen bg-background">
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/30"
+        >
+          <div className="container max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-xl gradient-primary">
+                <Leaf className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-lg font-semibold text-foreground">Clean & Sober</span>
             </div>
-            <span className="text-lg font-semibold text-foreground">Clean & Sober</span>
+            <div className="flex items-center gap-1">
+              <NotificationsBell />
+              <UserProfile />
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <NotificationsBell />
-            <UserProfile />
-          </div>
-        </div>
-      </motion.header>
+        </motion.header>
 
-      <main className="container max-w-2xl mx-auto px-4 py-6 pb-28">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {renderTabContent()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+        <main className="container max-w-2xl mx-auto px-4 py-6 pb-28">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderTabContent()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
-      <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      <EmergencyButton />
-      <AIRecoveryCoach />
-    </div>
+        <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <EmergencyButton />
+        <AIRecoveryCoach />
+      </div>
+    </XPNotificationProvider>
   );
 };
 
