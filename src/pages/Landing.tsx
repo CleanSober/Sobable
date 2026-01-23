@@ -9,9 +9,11 @@ import {
   Brain, 
   Phone, 
   Sparkles,
-  CheckCircle2,
   ArrowRight,
-  Star
+  Star,
+  Download,
+  Users,
+  Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppStoreBadges from "@/components/AppStoreBadges";
@@ -86,6 +88,7 @@ const Landing = () => {
       navigate("/app");
     }
   }, [user, loading, navigate]);
+
   return (
     <main className="min-h-screen bg-background overflow-x-hidden" role="main">
       {/* Hero Section */}
@@ -138,55 +141,63 @@ const Landing = () => {
               The #1 free sobriety counter app. Track your recovery, count days sober, calculate money saved, and prevent relapse—one day at a time.
             </motion.p>
 
+            {/* Primary CTA - App Store Downloads */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+              className="mb-8"
             >
-              <Button asChild size="lg" className="gradient-primary text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
-                <Link to="/auth">
-                  Start Tracking Free
-                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="px-8 py-6 text-lg border-border/50 hover:bg-secondary/50"
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Learn More
-              </Button>
+              <p className="text-sm text-muted-foreground mb-4 flex items-center justify-center lg:justify-start gap-2">
+                <Download className="w-4 h-4" />
+                Download Free on iOS & Android
+              </p>
+              <AppStoreBadges size="lg" className="justify-center lg:justify-start" />
             </motion.div>
 
-            {/* App Store Badges */}
+            {/* Secondary CTA */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-8"
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10"
             >
-              <p className="text-sm text-muted-foreground mb-4">Download on iOS &amp; Android</p>
-              <AppStoreBadges size="md" className="justify-center lg:justify-start" />
+              <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg border-border/50 hover:bg-secondary/50">
+                <Link to="/auth">
+                  Try Web Version
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                </Link>
+              </Button>
             </motion.div>
 
+            {/* Social Proof Stats */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-12 grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0"
+              className="grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 p-4 rounded-2xl bg-card/50 border border-border/30"
             >
-              {[
-                { value: "100%", label: "Free Forever" },
-                { value: "24/7", label: "Access" },
-                { value: "100%", label: "Private" },
-              ].map((stat, index) => (
-                <div key={index} className="text-center lg:text-left">
-                  <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 text-2xl md:text-3xl font-bold text-foreground">
+                  <Users className="w-5 h-5 text-primary" />
+                  50K+
                 </div>
-              ))}
+                <div className="text-xs text-muted-foreground">Active Users</div>
+              </div>
+              <div className="text-center border-x border-border/30">
+                <div className="flex items-center justify-center gap-1 text-2xl md:text-3xl font-bold text-foreground">
+                  <Star className="w-5 h-5 text-accent fill-accent" />
+                  4.9
+                </div>
+                <div className="text-xs text-muted-foreground">App Rating</div>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 text-2xl md:text-3xl font-bold text-foreground">
+                  <Clock className="w-5 h-5 text-primary" />
+                  24/7
+                </div>
+                <div className="text-xs text-muted-foreground">Support</div>
+              </div>
             </motion.div>
           </div>
 
@@ -312,6 +323,17 @@ const Landing = () => {
               ))}
             </div>
           </div>
+
+          {/* Mid-section Download CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-16 text-center"
+          >
+            <p className="text-muted-foreground mb-4">Get all features free</p>
+            <AppStoreBadges size="md" />
+          </motion.div>
         </div>
       </section>
 
@@ -332,9 +354,9 @@ const Landing = () => {
 
           <div className="space-y-8">
             {[
-              { step: "1", title: "Enter Your Sobriety Date", description: "Set when you quit drinking or using. Your sobriety counter starts tracking immediately—no sign-up required." },
-              { step: "2", title: "Track Daily Progress", description: "Log mood, cravings, and triggers. Watch your sober day count and money saved grow every day." },
-              { step: "3", title: "Stay Sober & Celebrate", description: "Get daily motivation, earn sobriety milestones (24 hours, 1 week, 30 days, 1 year), and access emergency support." }
+              { step: "1", title: "Download the App", description: "Get the free app on iOS or Android. Takes less than 30 seconds to set up." },
+              { step: "2", title: "Set Your Sobriety Date", description: "Enter when you quit drinking. Your sobriety counter starts tracking immediately." },
+              { step: "3", title: "Track & Celebrate", description: "Log mood, cravings, and triggers. Earn sobriety milestones and watch your money saved grow." }
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -354,6 +376,16 @@ const Landing = () => {
               </motion.div>
             ))}
           </div>
+
+          {/* CTA after steps */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center"
+          >
+            <AppStoreBadges size="lg" />
+          </motion.div>
         </div>
       </section>
 
@@ -416,11 +448,10 @@ const Landing = () => {
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Your recovery data stays on your device. No account required. No data collection. No ads. The most private sober app available.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
               {["No Account Needed", "Offline Access", "Zero Data Collection", "Anonymous Forever"].map((item, index) => (
-                <div key={index} className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50">
-                  <CheckCircle2 className="w-4 h-4 text-success" aria-hidden="true" />
-                  <span className="text-sm font-medium">{item}</span>
+                <div key={index} className="px-4 py-2 rounded-full bg-secondary/50 border border-border/50">
+                  <span className="text-sm font-medium text-foreground">{item}</span>
                 </div>
               ))}
             </div>
@@ -439,20 +470,26 @@ const Landing = () => {
           <div className="absolute inset-0 bg-primary/5" />
           <div className="relative z-10">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Ready to Start Your Journey?
+              Start Your Recovery Today
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              Every journey begins with a single step. Take yours today.
+              Every journey begins with a single step. Download the app and take yours today.
             </p>
-            <Button asChild size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-lg font-semibold shadow-glow hover:shadow-lg transition-all duration-300">
-              <Link to="/app">
-                Get Started Free
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
-            </Button>
-            <div className="mt-8">
-              <p className="text-sm text-muted-foreground mb-4">Or download the app</p>
-              <AppStoreBadges size="sm" />
+            
+            {/* Primary: App Store badges */}
+            <div className="mb-6">
+              <AppStoreBadges size="lg" />
+            </div>
+
+            {/* Secondary: Web version */}
+            <div className="pt-6 border-t border-border/30">
+              <p className="text-sm text-muted-foreground mb-4">Or continue in browser</p>
+              <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg">
+                <Link to="/auth">
+                  Use Web Version
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
             </div>
           </div>
         </motion.div>

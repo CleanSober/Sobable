@@ -124,6 +124,7 @@ const Index = () => {
             </motion.div>
             <GamificationCard />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            <ProgressSharing />
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
@@ -177,7 +178,6 @@ const Index = () => {
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
             <PremiumAnalytics />
             <DataInsights />
-            <ProgressSharing />
           </div>
         );
 
