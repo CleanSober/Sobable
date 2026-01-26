@@ -36,6 +36,8 @@ import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
 import { HabitLoopCard } from "@/components/HabitLoopCard";
 import { GamificationCard } from "@/components/GamificationCard";
+import { XPLeaderboard } from "@/components/XPLeaderboard";
+import { FriendInvite } from "@/components/FriendInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
@@ -123,6 +125,8 @@ const Index = () => {
               </h1>
             </motion.div>
             <GamificationCard />
+            <XPLeaderboard />
+            <FriendInvite />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <ProgressSharing />
             <MotivationalBanner />

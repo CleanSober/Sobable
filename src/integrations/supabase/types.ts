@@ -401,6 +401,36 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          invite_code: string
+          invitee_email: string
+          inviter_id: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invite_code?: string
+          invitee_email: string
+          inviter_id: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invite_code?: string
+          invitee_email?: string
+          inviter_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           ai_prompt: string | null
@@ -1020,6 +1050,7 @@ export type Database = {
           id: string
           last_login_date: string | null
           last_login_reward_date: string | null
+          show_on_leaderboard: boolean
           total_xp: number
           updated_at: string
           user_id: string
@@ -1031,6 +1062,7 @@ export type Database = {
           id?: string
           last_login_date?: string | null
           last_login_reward_date?: string | null
+          show_on_leaderboard?: boolean
           total_xp?: number
           updated_at?: string
           user_id: string
@@ -1042,6 +1074,7 @@ export type Database = {
           id?: string
           last_login_date?: string | null
           last_login_reward_date?: string | null
+          show_on_leaderboard?: boolean
           total_xp?: number
           updated_at?: string
           user_id?: string

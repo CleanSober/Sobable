@@ -48,6 +48,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useGamification, XP_REWARDS } from '@/hooks/useGamification';
 import { useJournal, JournalEntry } from '@/hooks/useJournal';
 import { format } from 'date-fns';
 
@@ -112,6 +113,8 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
     setLoadingAnalysis(false);
   };
 
+  const { addXP } = useGamification();
+
   const handleSaveEntry = async () => {
     if (!newEntry.content.trim()) return;
 
@@ -123,6 +126,9 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
       mood_analysis: moodAnalysis ? JSON.stringify(moodAnalysis) : null,
       tags: newEntry.tags,
     });
+
+    // Award XP for journaling
+    await addXP(XP_REWARDS.journal, 'journal', 'Wrote a journal entry');
 
     // Reset form
     setNewEntry({ title: '', content: '', tags: [] });

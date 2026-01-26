@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCopingStrategies } from "@/lib/storage";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 
 interface TriggerEntry {
@@ -94,6 +95,8 @@ export const TriggerLogger = () => {
     setIsLogging(false);
   };
 
+  const { addXP } = useGamification();
+
   const handleSubmit = async () => {
     if (!user) return;
     if (!trigger || !situation || !emotion) {
@@ -136,6 +139,9 @@ export const TriggerLogger = () => {
       }, {
         onConflict: "user_id,date"
       });
+
+    // Award XP for trigger logging
+    await addXP(XP_REWARDS.trigger_log, 'trigger_log', 'Logged a trigger for self-awareness');
 
     await fetchEntries();
     resetForm();

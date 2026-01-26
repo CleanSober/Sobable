@@ -4,6 +4,7 @@ import { Send, MessageCircle, ChevronDown, ChevronUp, MoreHorizontal, Pencil, Tr
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { 
   useUserProfiles, 
@@ -99,6 +100,8 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
     }
   }, [expanded, fetchReplies]);
 
+  const { addXP } = useGamification();
+
   const submitReply = async () => {
     const trimmedReply = newReply.trim();
     
@@ -140,6 +143,9 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
         data.id,
         getAllProfiles()
       );
+
+      // Award XP for forum reply
+      await addXP(XP_REWARDS.community_reply, 'community_reply', 'Replied to a forum post');
 
       toast.success("Reply posted!");
       setNewReply("");

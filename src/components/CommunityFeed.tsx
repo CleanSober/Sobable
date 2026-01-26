@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 
 interface Post {
@@ -50,6 +51,8 @@ export const CommunityFeed = () => {
     };
   }, []);
 
+  const { addXP } = useGamification();
+
   const addPost = async () => {
     if (!newPost.trim() || !user) return;
 
@@ -63,6 +66,8 @@ export const CommunityFeed = () => {
     if (error) {
       toast.error("Failed to post. Please try again.");
     } else {
+      // Award XP for community post
+      await addXP(XP_REWARDS.community_post, 'community_post', 'Shared a post with the community');
       setNewPost("");
       toast.success("Posted!");
     }
