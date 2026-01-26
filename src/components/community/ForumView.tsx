@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent, createMentionNotifications } from "@/hooks/useCommunity";
 import { PostCard } from "./PostCard";
@@ -68,6 +69,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     }
   }, [forum.id, fetchProfiles]);
 
+  const { addXP } = useGamification();
+
   const createPost = async () => {
     const trimmedTitle = newTitle.trim();
     const trimmedContent = newContent.trim();
@@ -95,6 +98,9 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       });
 
       if (error) throw error;
+      
+      // Award XP for forum post
+      await addXP(XP_REWARDS.community_post, 'community_post', 'Started a new forum discussion');
       
       toast.success("Post created!");
       setNewTitle("");

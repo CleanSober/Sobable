@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 
 interface Meditation {
@@ -88,6 +89,8 @@ export const GuidedMeditations = () => {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isPlaying, timeRemaining, activeMeditation, stopMusic]);
 
+  const { addXP } = useGamification();
+
   const completeMeditation = async () => {
     if (!user) return;
     const today = new Date().toISOString().split("T")[0];
@@ -101,6 +104,9 @@ export const GuidedMeditations = () => {
       }, {
         onConflict: "user_id,date"
       });
+
+    // Award XP for meditation
+    await addXP(XP_REWARDS.meditation, 'meditation', 'Completed guided meditation');
     
     toast.success("Meditation complete! Great job taking care of yourself 🧘");
   };
