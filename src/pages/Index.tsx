@@ -116,12 +116,20 @@ const Index = () => {
       case "home":
         return (
           <div className="space-y-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-              <p className="text-muted-foreground mb-1">
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="glass-card rounded-2xl p-5 text-center"
+            >
+              <p className="text-muted-foreground text-sm mb-1 font-medium">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
               <h1 className="text-2xl font-bold text-foreground">
-                {profile?.display_name ? `Keep going, ${profile.display_name}!` : "You're doing amazing!"} 🌟
+                {profile?.display_name ? (
+                  <>Keep going, <span className="text-gradient">{profile.display_name}</span>!</>
+                ) : (
+                  "You're doing amazing!"
+                )} 🌟
               </h1>
             </motion.div>
             <GamificationCard />
@@ -195,18 +203,28 @@ const Index = () => {
 
   return (
     <XPNotificationProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background noise-overlay">
+        {/* Ambient background effects */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 blur-[120px] rounded-full" />
+          <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-accent/5 blur-[100px] rounded-full" />
+        </div>
+        
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/30"
+          className="sticky top-0 z-40"
         >
-          <div className="container max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl gradient-primary">
+          {/* Glass header background */}
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl border-b border-border/30" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          
+          <div className="container max-w-2xl mx-auto px-4 py-4 flex items-center justify-between relative">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl gradient-primary shadow-lg shadow-primary/20 icon-glow">
                 <Leaf className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold text-foreground">Clean & Sober</span>
+              <span className="text-lg font-bold text-foreground tracking-tight">Clean & Sober</span>
             </div>
             <div className="flex items-center gap-1">
               <NotificationsBell />
@@ -215,14 +233,14 @@ const Index = () => {
           </div>
         </motion.header>
 
-        <main className="container max-w-2xl mx-auto px-4 py-6 pb-28">
+        <main className="container max-w-2xl mx-auto px-4 py-6 pb-28 relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
             >
               {renderTabContent()}
             </motion.div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ChevronRight, Heart } from "lucide-react";
+import { Sparkles, ChevronRight, Heart, Quote } from "lucide-react";
 
 const motivationalMessages = [
   { text: "Every day sober is a victory worth celebrating", emoji: "🏆" },
@@ -20,7 +20,6 @@ export const MotivationalBanner = () => {
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
-    // Pick a random message on mount based on the day
     const today = new Date().toDateString();
     const hash = today.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
     setCurrentIndex(hash % motivationalMessages.length);
@@ -37,25 +36,28 @@ export const MotivationalBanner = () => {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20 border border-primary/20 p-4"
+      className="glass-card rounded-2xl p-4 relative overflow-hidden"
     >
-      {/* Sparkle decorations */}
-      <div className="absolute top-2 right-2">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+      
+      {/* Decorative elements */}
+      <div className="absolute top-3 right-3">
         <Sparkles className="w-4 h-4 text-primary/40" />
       </div>
-      <div className="absolute bottom-2 left-2">
-        <Sparkles className="w-3 h-3 text-accent/40" />
+      <div className="absolute bottom-3 left-3">
+        <Quote className="w-3 h-3 text-accent/30" />
       </div>
 
-      <div className="flex items-center gap-3">
-        <motion.span
+      <div className="flex items-center gap-4 relative">
+        <motion.div
           key={currentIndex}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="text-2xl"
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: 0 }}
+          className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl border border-primary/20"
         >
           {message.emoji}
-        </motion.span>
+        </motion.div>
         
         <AnimatePresence mode="wait">
           <motion.p
@@ -63,9 +65,9 @@ export const MotivationalBanner = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="flex-1 text-sm font-medium text-foreground"
+            className="flex-1 text-sm font-medium text-foreground leading-relaxed"
           >
-            {message.text}
+            "{message.text}"
           </motion.p>
         </AnimatePresence>
 
@@ -73,16 +75,20 @@ export const MotivationalBanner = () => {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setLiked(!liked)}
-            className="p-1.5 rounded-lg hover:bg-background/50 transition-colors"
+            className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
           >
             <Heart 
-              className={`w-4 h-4 transition-colors ${liked ? "fill-rose-500 text-rose-500" : "text-muted-foreground"}`} 
+              className={`w-4 h-4 transition-all duration-300 ${
+                liked 
+                  ? "fill-destructive text-destructive scale-110" 
+                  : "text-muted-foreground"
+              }`} 
             />
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={nextMessage}
-            className="p-1.5 rounded-lg hover:bg-background/50 transition-colors"
+            className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
           >
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </motion.button>

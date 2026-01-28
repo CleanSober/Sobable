@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { UserPlus, Copy, Check, Send, Gift, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserPlus, Copy, Check, Send, Gift, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +47,6 @@ export const FriendInvite = () => {
   const sendInvite = async () => {
     if (!user || !email.trim()) return;
 
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
@@ -98,66 +96,75 @@ export const FriendInvite = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "accepted":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
+        return "bg-success/15 text-success border-success/25";
       case "pending":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+        return "bg-warning/15 text-warning border-warning/25";
       case "expired":
-        return "bg-muted text-muted-foreground";
+        return "bg-muted text-muted-foreground border-muted";
       default:
-        return "bg-muted";
+        return "bg-muted text-muted-foreground";
     }
   };
 
   const acceptedCount = invitations.filter(i => i.status === "accepted").length;
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <UserPlus className="h-5 w-5 text-primary" />
-          Invite Friends
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Earn <span className="text-primary font-semibold">+50 XP</span> for each friend who joins!
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="card-enhanced overflow-hidden">
+      {/* Header */}
+      <div className="p-5 pb-3">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 icon-glow">
+            <UserPlus className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Invite Friends</h3>
+            <p className="text-xs text-muted-foreground">
+              Earn <span className="text-accent font-bold">+50 XP</span> for each friend who joins!
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="px-5 pb-5 space-y-4">
         {/* Stats */}
         {invitations.length > 0 && (
           <div className="flex gap-3">
-            <div className="flex-1 p-3 rounded-lg bg-muted/50 text-center">
-              <Users className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-              <p className="text-lg font-bold">{invitations.length}</p>
+            <div className="flex-1 stat-box text-center group">
+              <Users className="h-4 w-4 mx-auto mb-1.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <p className="text-xl font-bold text-foreground">{invitations.length}</p>
               <p className="text-xs text-muted-foreground">Sent</p>
             </div>
-            <div className="flex-1 p-3 rounded-lg bg-green-500/10 text-center">
-              <Gift className="h-4 w-4 mx-auto mb-1 text-green-500" />
-              <p className="text-lg font-bold text-green-500">{acceptedCount}</p>
+            <div className="flex-1 p-4 rounded-xl bg-success/10 border border-success/20 text-center">
+              <Gift className="h-4 w-4 mx-auto mb-1.5 text-success" />
+              <p className="text-xl font-bold text-success">{acceptedCount}</p>
               <p className="text-xs text-muted-foreground">Joined</p>
             </div>
           </div>
         )}
 
         {/* Share Link */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Share your invite link</label>
+        <div className="glass-card rounded-xl p-4 space-y-3">
+          <label className="text-sm font-medium text-foreground flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
+            Share your invite link
+          </label>
           <div className="flex gap-2">
             <Input
               value={inviteLink}
               readOnly
-              className="text-xs bg-muted/50"
+              className="text-xs bg-secondary/30 border-border/50 font-mono"
             />
             <Button
               variant="outline"
               size="icon"
               onClick={copyLink}
-              className="shrink-0"
+              className={`shrink-0 transition-all duration-300 ${copied ? 'border-success/50 bg-success/10' : 'hover:bg-secondary/50'}`}
             >
               {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-4 w-4 text-success" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -166,21 +173,21 @@ export const FriendInvite = () => {
         </div>
 
         {/* Email Invite */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Or send an email invite</label>
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-foreground">Or send an email invite</label>
           <div className="flex gap-2">
             <Input
               type="email"
               placeholder="friend@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-muted/50"
+              className="bg-secondary/30 border-border/50"
               onKeyDown={(e) => e.key === "Enter" && sendInvite()}
             />
             <Button
               onClick={sendInvite}
               disabled={loading || !email.trim()}
-              className="shrink-0"
+              className="shrink-0 gradient-primary text-primary-foreground"
             >
               {loading ? (
                 <motion.div
@@ -199,26 +206,29 @@ export const FriendInvite = () => {
         {/* Recent Invitations */}
         {invitations.length > 0 && (
           <div className="space-y-2">
-            <label className="text-sm font-medium">Recent invitations</label>
-            <div className="space-y-1.5 max-h-32 overflow-y-auto">
-              {invitations.slice(0, 5).map((inv) => (
-                <div
+            <label className="text-sm font-medium text-foreground">Recent invitations</label>
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {invitations.slice(0, 5).map((inv, index) => (
+                <motion.div
                   key={inv.id}
-                  className="flex items-center justify-between p-2 rounded-lg bg-muted/30 text-sm"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 border border-border/30 text-sm"
                 >
-                  <span className="truncate flex-1">{inv.invitee_email}</span>
+                  <span className="truncate flex-1 text-foreground">{inv.invitee_email}</span>
                   <Badge
                     variant="outline"
-                    className={`text-xs capitalize ${getStatusColor(inv.status)}`}
+                    className={`text-xs capitalize font-medium ${getStatusBadge(inv.status)}`}
                   >
                     {inv.status}
                   </Badge>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

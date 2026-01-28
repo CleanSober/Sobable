@@ -4,7 +4,6 @@ import {
   Flame, Zap, Target, Trophy, Clock, CheckCircle2, 
   AlertCircle, Sparkles, ArrowRight, Snowflake, Crown, Shield
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -79,7 +78,6 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       setTodayComplete(allComplete || false);
     }
 
-    // Check if user can use freeze
     if (isPremium && streakData.data?.current_streak > 0) {
       const { data: freezeCheck } = await supabase.rpc('can_use_streak_freeze', {
         check_user_id: user.id,
@@ -136,8 +134,8 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       return {
         status: 'complete',
         message: "You're on fire! See you tomorrow 🔥",
-        color: 'text-green-500',
-        bgColor: 'bg-green-500/10',
+        bgClass: 'bg-success/10 border-success/30',
+        textClass: 'text-success',
         icon: CheckCircle2,
       };
     }
@@ -146,8 +144,8 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       return {
         status: 'at-risk',
         message: `${streak.current} day streak at risk!`,
-        color: 'text-amber-500',
-        bgColor: 'bg-amber-500/10',
+        bgClass: 'bg-warning/10 border-warning/30',
+        textClass: 'text-warning',
         icon: AlertCircle,
       };
     }
@@ -158,16 +156,16 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
         return {
           status: 'urgent',
           message: "Only a few hours left to keep your streak!",
-          color: 'text-red-500',
-          bgColor: 'bg-red-500/10',
+          bgClass: 'bg-destructive/10 border-destructive/30',
+          textClass: 'text-destructive',
           icon: Clock,
         };
       }
       return {
         status: 'pending',
         message: "Complete your daily check-in to grow your streak",
-        color: 'text-primary',
-        bgColor: 'bg-primary/10',
+        bgClass: 'bg-primary/10 border-primary/30',
+        textClass: 'text-primary',
         icon: Target,
       };
     }
@@ -175,8 +173,8 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
     return {
       status: 'pending',
       message: "Start your day with a quick check-in",
-      color: 'text-primary',
-      bgColor: 'bg-primary/10',
+      bgClass: 'bg-primary/10 border-primary/30',
+      textClass: 'text-primary',
       icon: Sparkles,
     };
   };
@@ -194,81 +192,87 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
 
   if (loading) {
     return (
-      <Card className="gradient-card border-border/50">
-        <CardContent className="p-4">
-          <div className="h-24 flex items-center justify-center">
-            <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="card-enhanced p-6">
+        <div className="h-24 flex items-center justify-center">
+          <Flame className="w-8 h-8 text-orange-500 animate-pulse" />
+        </div>
+      </div>
     );
   }
 
   return (
     <>
-      <Card className={`gradient-card border-border/50 overflow-hidden ${
-        streakStatus.status === 'complete' ? 'border-green-500/30' :
-        streakStatus.status === 'at-risk' ? 'border-amber-500/30' :
-        streakStatus.status === 'urgent' ? 'border-red-500/30' : ''
+      <div className={`card-enhanced overflow-hidden ${
+        streakStatus.status === 'complete' ? 'border-success/40' :
+        streakStatus.status === 'at-risk' ? 'border-warning/40' :
+        streakStatus.status === 'urgent' ? 'border-destructive/40' : ''
       }`}>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <div className={`p-2 rounded-xl ${streak.current > 0 ? 'bg-gradient-to-br from-orange-500 to-amber-500' : 'bg-muted'}`}>
+        {/* Ambient glow based on status */}
+        {streak.current > 0 && (
+          <div className="absolute top-0 left-1/3 w-48 h-48 bg-orange-500/10 blur-[80px] rounded-full pointer-events-none" />
+        )}
+        
+        <div className="relative p-5">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl shadow-lg ${
+                streak.current > 0 
+                  ? 'bg-gradient-to-br from-orange-500 to-amber-500 shadow-orange-500/30' 
+                  : 'bg-muted'
+              }`}>
                 <Flame className={`w-5 h-5 ${streak.current > 0 ? 'text-white' : 'text-muted-foreground'}`} />
               </div>
               <div>
-                <span className="text-2xl font-bold">{streak.current}</span>
-                <span className="text-sm text-muted-foreground ml-1">day streak</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-foreground">{streak.current}</span>
+                  <span className="text-sm text-muted-foreground font-medium">day streak</span>
+                </div>
               </div>
-            </CardTitle>
+            </div>
             <div className="flex items-center gap-2">
-              {/* Freeze indicator */}
               {isPremium && (
-                <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+                <div className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg ${
                   canUseFreeze 
-                    ? 'bg-cyan-500/10 text-cyan-500' 
-                    : 'bg-muted text-muted-foreground'
+                    ? 'bg-cyan-500/15 text-cyan-500 border border-cyan-500/25' 
+                    : 'bg-muted/50 text-muted-foreground'
                 }`}>
-                  <Snowflake className="w-3 h-3" />
-                  <span>{canUseFreeze ? '1' : '0'}</span>
+                  <Snowflake className="w-3.5 h-3.5" />
+                  <span className="font-semibold">{canUseFreeze ? '1' : '0'}</span>
                 </div>
               )}
               {streak.longest > 0 && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Trophy className="w-3 h-3 text-amber-500" />
-                  Best: {streak.longest}
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2.5 py-1.5 rounded-lg">
+                  <Trophy className="w-3.5 h-3.5 text-accent" />
+                  <span className="font-medium">Best: {streak.longest}</span>
                 </div>
               )}
             </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="space-y-4">
           {/* Status Message */}
           <motion.div
             key={streakStatus.status}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`flex items-center gap-2 p-3 rounded-xl ${streakStatus.bgColor}`}
+            className={`flex items-center gap-3 p-3.5 rounded-xl border ${streakStatus.bgClass} mb-4`}
           >
-            <StatusIcon className={`w-5 h-5 ${streakStatus.color}`} />
-            <span className={`text-sm font-medium ${streakStatus.color} flex-1`}>
+            <StatusIcon className={`w-5 h-5 ${streakStatus.textClass}`} />
+            <span className={`text-sm font-medium ${streakStatus.textClass} flex-1`}>
               {streakStatus.message}
             </span>
-            {/* Show freeze button when streak at risk */}
             {showFreezeOption && (
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => isPremium ? setShowFreezeDialog(true) : setShowPricingDialog(true)}
-                className={`h-7 px-2 ${
+                className={`h-8 px-3 ${
                   canUseFreeze 
-                    ? 'text-cyan-500 hover:text-cyan-600 hover:bg-cyan-500/10' 
+                    ? 'text-cyan-500 hover:text-cyan-400 hover:bg-cyan-500/10' 
                     : 'text-muted-foreground'
                 }`}
               >
-                <Snowflake className="w-4 h-4 mr-1" />
+                <Snowflake className="w-4 h-4 mr-1.5" />
                 {isPremium ? (canUseFreeze ? 'Freeze' : 'Used') : (
                   <Crown className="w-3 h-3 ml-1" />
                 )}
@@ -277,13 +281,13 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
           </motion.div>
 
           {/* Progress to Next Milestone */}
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-muted-foreground">Next milestone</span>
-              <span className="font-medium">{streak.current}/{nextMilestone} days</span>
+          <div className="glass-card rounded-xl p-4 mb-4">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="text-muted-foreground font-medium">Next milestone</span>
+              <span className="font-semibold text-foreground">{streak.current}/{nextMilestone} days</span>
             </div>
-            <Progress value={progressToMilestone} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-1">
+            <Progress value={progressToMilestone} className="h-2.5 mb-2" />
+            <p className="text-xs text-muted-foreground">
               {nextMilestone - streak.current} days to earn the {nextMilestone}-day badge 🏆
             </p>
           </div>
@@ -292,13 +296,13 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
           {!todayComplete && (
             <Button
               onClick={onNavigateToCheckIn}
-              className={`w-full ${
+              className={`w-full h-12 font-semibold text-sm ${
                 streakStatus.status === 'urgent' 
-                  ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600' 
+                  ? 'bg-gradient-to-r from-destructive to-orange-500 hover:from-destructive/90 hover:to-orange-600' 
                   : streakStatus.status === 'at-risk'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
+                  ? 'bg-gradient-to-r from-warning to-orange-500 hover:from-warning/90 hover:to-orange-600'
                   : 'gradient-primary'
-              } text-primary-foreground`}
+              } text-primary-foreground btn-glow`}
             >
               <Zap className="w-4 h-4 mr-2" />
               {streakStatus.status === 'urgent' ? 'Quick Check-In Now!' : 'Start Daily Check-In'}
@@ -311,23 +315,23 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center justify-center gap-3 pt-2 border-t border-border/50"
+              className="flex items-center justify-center gap-2 pt-4 mt-4 border-t border-border/30"
             >
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20">
                 <Sparkles className="w-3 h-3 text-purple-500" />
-                <span>7+ day bonus active</span>
+                <span className="text-purple-500 font-medium">7+ day bonus active</span>
               </div>
             </motion.div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Freeze Confirmation Dialog */}
       <Dialog open={showFreezeDialog} onOpenChange={setShowFreezeDialog}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm card-enhanced border-cyan-500/20">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="p-2 rounded-full bg-cyan-500/10">
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/25">
                 <Snowflake className="w-5 h-5 text-cyan-500" />
               </div>
               Use Streak Freeze?
@@ -338,11 +342,11 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
           </DialogHeader>
           
           <div className="space-y-4 pt-2">
-            <div className="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
+            <div className="p-4 rounded-xl glass-card border border-cyan-500/20">
               <div className="flex items-center gap-3">
                 <Shield className="w-8 h-8 text-cyan-500" />
                 <div>
-                  <p className="font-medium">Your streak will be protected</p>
+                  <p className="font-semibold text-foreground">Your streak will be protected</p>
                   <p className="text-sm text-muted-foreground">
                     Missing today won't break your streak
                   </p>
@@ -350,18 +354,18 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 variant="outline"
                 onClick={() => setShowFreezeDialog(false)}
-                className="flex-1"
+                className="flex-1 h-11"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleUseFreeze}
                 disabled={freezeLoading || !canUseFreeze}
-                className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
+                className="flex-1 h-11 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
               >
                 {freezeLoading ? (
                   <span className="animate-pulse">Freezing...</span>
