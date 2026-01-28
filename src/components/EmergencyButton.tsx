@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { Phone, Heart, MessageCircle, X, Shield, GripVertical } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Phone, Heart, MessageCircle, X, Shield, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUserData } from "@/lib/storage";
 
@@ -11,9 +11,7 @@ export const EmergencyButton = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const userData = getUserData();
-  const dragControls = useDragControls();
 
-  // Load saved position on mount
   useEffect(() => {
     const savedPosition = localStorage.getItem(POSITION_STORAGE_KEY);
     if (savedPosition) {
@@ -25,14 +23,12 @@ export const EmergencyButton = () => {
     }
   }, []);
 
-  // Trigger haptic feedback
   const triggerHaptic = (pattern: number | number[] = 50) => {
     if ('vibrate' in navigator) {
       navigator.vibrate(pattern);
     }
   };
 
-  // Save position when it changes
   const handleDragEnd = (_: any, info: { offset: { x: number; y: number } }) => {
     const newPosition = {
       x: position.x + info.offset.x,
@@ -40,19 +36,18 @@ export const EmergencyButton = () => {
     };
     setPosition(newPosition);
     localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(newPosition));
-    // Small delay to prevent click from firing
     setTimeout(() => setIsDragging(false), 100);
   };
 
   const handleButtonClick = () => {
     if (!isDragging) {
-      triggerHaptic([50, 30, 50]); // Double pulse pattern
+      triggerHaptic([50, 30, 50]);
       setIsOpen(true);
     }
   };
 
   const handleDragStart = () => {
-    triggerHaptic(30); // Light feedback when starting drag
+    triggerHaptic(30);
     setIsDragging(true);
   };
 
@@ -62,16 +57,12 @@ export const EmergencyButton = () => {
       description: "Free, confidential, 24/7 support",
       phone: "1-800-662-4357",
       icon: Phone,
-      color: "text-destructive",
-      bgColor: "bg-destructive/10",
     },
     {
       name: "Crisis Text Line",
       description: "Text HOME to 741741",
       phone: "741741",
       icon: MessageCircle,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
     },
   ];
 
@@ -94,11 +85,23 @@ export const EmergencyButton = () => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleButtonClick}
-        className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:shadow-xl transition-shadow cursor-grab active:cursor-grabbing touch-none"
+        className="fixed bottom-24 right-6 z-50 p-4 rounded-full shadow-lg cursor-grab active:cursor-grabbing touch-none transition-all duration-300"
+        style={{
+          background: "linear-gradient(135deg, hsl(0 75% 55%), hsl(350 80% 50%))",
+          boxShadow: "0 8px 32px hsl(0 75% 55% / 0.4), 0 0 0 1px hsl(0 75% 60% / 0.3)"
+        }}
         aria-label="Emergency Support - Drag to reposition"
         whileDrag={{ scale: 1.1 }}
+        whileHover={{ scale: 1.05 }}
       >
-        <Shield className="w-6 h-6" />
+        <Shield className="w-6 h-6 text-white" />
+        
+        {/* Pulse ring */}
+        <motion.div
+          animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute inset-0 rounded-full border-2 border-white/30"
+        />
       </motion.button>
 
       {/* Emergency Modal */}
@@ -111,7 +114,7 @@ export const EmergencyButton = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xl"
             />
 
             {/* Modal */}
@@ -121,20 +124,23 @@ export const EmergencyButton = () => {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed inset-x-4 bottom-4 z-50 md:inset-x-auto md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md"
             >
-              <div className="rounded-2xl gradient-card shadow-soft border border-border p-6">
+              <div className="card-enhanced p-6 relative overflow-hidden">
+                {/* Background glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-destructive/20 blur-[80px] rounded-full pointer-events-none" />
+                
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 relative">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-destructive/10">
-                      <Shield className="w-5 h-5 text-destructive" />
+                    <div className="p-2.5 rounded-xl bg-destructive/15 border border-destructive/25">
+                      <AlertTriangle className="w-5 h-5 text-destructive" />
                     </div>
-                    <h2 className="text-lg font-semibold text-foreground">
+                    <h2 className="text-lg font-bold text-foreground">
                       Emergency Support
                     </h2>
                   </div>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                    className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
                   >
                     <X className="w-5 h-5 text-muted-foreground" />
                   </button>
@@ -142,32 +148,35 @@ export const EmergencyButton = () => {
 
                 {/* Personal Reminder */}
                 {userData?.personalReminder && (
-                  <div className="mb-6 p-4 rounded-xl bg-accent/10 border border-accent/20">
+                  <div className="mb-6 p-4 rounded-xl glass-card">
                     <div className="flex items-center gap-2 mb-2">
                       <Heart className="w-4 h-4 text-accent" />
-                      <span className="text-sm font-medium text-accent">Your Reason</span>
+                      <span className="text-sm font-semibold text-accent">Your Reason</span>
                     </div>
-                    <p className="text-foreground">{userData.personalReminder}</p>
+                    <p className="text-foreground font-medium">{userData.personalReminder}</p>
                   </div>
                 )}
 
                 {/* Resources */}
                 <div className="space-y-3 mb-6">
-                  {resources.map((resource) => (
-                    <a
+                  {resources.map((resource, index) => (
+                    <motion.a
                       key={resource.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
                       href={`tel:${resource.phone}`}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-secondary/50 border border-border/50 hover:bg-secondary transition-colors"
+                      className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 hover:border-primary/30 transition-all duration-300 group"
                     >
-                      <div className={`p-2 rounded-lg ${resource.bgColor}`}>
-                        <resource.icon className={`w-5 h-5 ${resource.color}`} />
+                      <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 group-hover:bg-primary/20 transition-colors">
+                        <resource.icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-foreground">{resource.name}</p>
+                        <p className="font-semibold text-foreground">{resource.name}</p>
                         <p className="text-sm text-muted-foreground">{resource.description}</p>
                       </div>
-                      <span className="text-sm font-medium text-primary">{resource.phone}</span>
-                    </a>
+                      <span className="text-sm font-bold text-primary">{resource.phone}</span>
+                    </motion.a>
                   ))}
                 </div>
 
@@ -176,7 +185,7 @@ export const EmergencyButton = () => {
                   {userData?.sponsorPhone && (
                     <Button
                       variant="outline"
-                      className="border-primary/30 text-primary hover:bg-primary/10"
+                      className="border-primary/30 text-primary hover:bg-primary/10 h-12"
                       asChild
                     >
                       <a href={`tel:${userData.sponsorPhone}`}>
@@ -188,12 +197,12 @@ export const EmergencyButton = () => {
                   {userData?.emergencyContact && (
                     <Button
                       variant="outline"
-                      className="border-accent/30 text-accent hover:bg-accent/10"
+                      className="border-accent/30 text-accent hover:bg-accent/10 h-12"
                       asChild
                     >
                       <a href={`tel:${userData.emergencyContact}`}>
                         <Phone className="w-4 h-4 mr-2" />
-                        Emergency Contact
+                        Emergency
                       </a>
                     </Button>
                   )}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Medal, Crown, Eye, EyeOff, Sparkles } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trophy, Medal, Crown, Eye, EyeOff, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +31,6 @@ export const XPLeaderboard = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      // Get top users who opted into leaderboard
       const { data: xpData, error: xpError } = await supabase
         .from("user_xp")
         .select("user_id, total_xp, current_level, show_on_leaderboard")
@@ -42,7 +40,6 @@ export const XPLeaderboard = () => {
 
       if (xpError) throw xpError;
 
-      // Get display names for these users
       const userIds = xpData?.map(e => e.user_id) || [];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -58,7 +55,6 @@ export const XPLeaderboard = () => {
 
       setEntries(enrichedEntries);
 
-      // Find user's rank
       if (user) {
         const { data: allXP } = await supabase
           .from("user_xp")
@@ -109,18 +105,34 @@ export const XPLeaderboard = () => {
     fetchLeaderboard();
   };
 
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Crown className="h-5 w-5 text-yellow-500" />;
-    if (rank === 2) return <Medal className="h-5 w-5 text-muted-foreground" />;
-    if (rank === 3) return <Medal className="h-5 w-5 text-amber-600" />;
-    return <span className="w-5 text-center text-sm font-medium text-muted-foreground">{rank}</span>;
+  const getRankBadge = (rank: number) => {
+    if (rank === 1) return (
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+        <Crown className="h-4 w-4 text-white" />
+      </div>
+    );
+    if (rank === 2) return (
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
+        <Medal className="h-4 w-4 text-white" />
+      </div>
+    );
+    if (rank === 3) return (
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg">
+        <Medal className="h-4 w-4 text-white" />
+      </div>
+    );
+    return (
+      <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+        <span className="text-sm font-bold text-muted-foreground">{rank}</span>
+      </div>
+    );
   };
 
   const getLevelColor = (level: number) => {
-    if (level >= 10) return "bg-gradient-to-r from-yellow-400 to-amber-500 text-primary-foreground";
-    if (level >= 7) return "bg-gradient-to-r from-purple-500 to-pink-500 text-primary-foreground";
-    if (level >= 4) return "bg-gradient-to-r from-blue-500 to-cyan-500 text-primary-foreground";
-    return "bg-muted";
+    if (level >= 10) return "bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0";
+    if (level >= 7) return "bg-gradient-to-r from-violet-500 to-purple-500 text-white border-0";
+    if (level >= 4) return "bg-gradient-to-r from-primary to-emerald-500 text-white border-0";
+    return "bg-secondary/50 text-foreground";
   };
 
   const getAnonymousName = (index: number) => {
@@ -131,59 +143,65 @@ export const XPLeaderboard = () => {
 
   if (loading) {
     return (
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            >
-              <Trophy className="h-6 w-6 text-primary" />
-            </motion.div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="card-enhanced p-6">
+        <div className="flex items-center justify-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Trophy className="h-6 w-6 text-accent" />
+          </motion.div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-      <CardHeader className="pb-3">
+    <div className="card-enhanced overflow-hidden">
+      {/* Header */}
+      <div className="p-5 pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Trophy className="h-5 w-5 text-yellow-500" />
-            XP Leaderboard
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-accent/15 border border-accent/25 icon-glow">
+              <Trophy className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">XP Leaderboard</h3>
+              {userRank && (
+                <p className="text-xs text-muted-foreground">
+                  Your rank: <span className="font-bold text-primary">#{userRank}</span>
+                </p>
+              )}
+            </div>
+          </div>
           {user && (
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleLeaderboardVisibility}
-              className="text-xs"
+              className="text-xs h-8 px-3 hover:bg-secondary/50"
             >
               {showOnLeaderboard ? (
                 <>
-                  <Eye className="mr-1 h-3 w-3" /> Visible
+                  <Eye className="mr-1.5 h-3.5 w-3.5 text-primary" /> Visible
                 </>
               ) : (
                 <>
-                  <EyeOff className="mr-1 h-3 w-3" /> Hidden
+                  <EyeOff className="mr-1.5 h-3.5 w-3.5" /> Hidden
                 </>
               )}
             </Button>
           )}
         </div>
-        {userRank && (
-          <p className="text-sm text-muted-foreground">
-            Your rank: <span className="font-semibold text-primary">#{userRank}</span>
-          </p>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-2">
+      </div>
+      
+      {/* Leaderboard entries */}
+      <div className="px-5 pb-5 space-y-2">
         {entries.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground py-4">
-            Be the first on the leaderboard!
-          </p>
+          <div className="text-center py-8 glass-card rounded-xl">
+            <Star className="h-8 w-8 text-accent/40 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Be the first on the leaderboard!</p>
+          </div>
         ) : (
           entries.slice(0, 10).map((entry, index) => {
             const isCurrentUser = user?.id === entry.user_id;
@@ -195,36 +213,33 @@ export const XPLeaderboard = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className={`flex items-center gap-3 p-2 rounded-lg ${
-                  isCurrentUser ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/50"
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+                  isCurrentUser 
+                    ? "bg-primary/10 border border-primary/30" 
+                    : "bg-secondary/20 hover:bg-secondary/40 border border-transparent"
                 }`}
               >
-                <div className="w-6 flex justify-center">
-                  {getRankIcon(index + 1)}
-                </div>
+                {getRankBadge(index + 1)}
 
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-xs">
+                <Avatar className="h-10 w-10 border-2 border-border/30">
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-sm font-semibold">
                     {displayName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">
+                  <p className="font-semibold text-sm truncate text-foreground">
                     {displayName}
-                    {isCurrentUser && <span className="text-primary ml-1">(You)</span>}
+                    {isCurrentUser && <span className="text-primary ml-1.5 text-xs">(You)</span>}
                   </p>
-                  <Badge
-                    variant="secondary"
-                    className={`text-xs ${getLevelColor(entry.current_level)}`}
-                  >
+                  <Badge className={`text-xs px-2 py-0.5 ${getLevelColor(entry.current_level)}`}>
                     Lv.{entry.current_level} {getLevelTitle(entry.current_level)}
                   </Badge>
                 </div>
 
                 <div className="text-right">
-                  <p className="font-semibold text-sm flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-yellow-500" />
+                  <p className="font-bold text-sm flex items-center gap-1 justify-end text-accent">
+                    <Sparkles className="h-3.5 w-3.5" />
                     {entry.total_xp.toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground">XP</p>
@@ -233,7 +248,7 @@ export const XPLeaderboard = () => {
             );
           })
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

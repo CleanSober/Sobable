@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, CheckCircle2, Circle, Flame, Trophy, Sparkles } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Target, CheckCircle2, Circle, Flame, Trophy, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -11,14 +10,14 @@ interface DailyGoal {
   label: string;
   icon: React.ElementType;
   field: "mood_logged" | "trigger_logged" | "meditation_done" | "journal_written";
-  color: string;
+  gradient: string;
 }
 
 const goals: DailyGoal[] = [
-  { id: "mood", label: "Log your mood", icon: Sparkles, field: "mood_logged", color: "text-amber-500" },
-  { id: "trigger", label: "Track a trigger", icon: Target, field: "trigger_logged", color: "text-rose-500" },
-  { id: "meditation", label: "Complete meditation", icon: Flame, field: "meditation_done", color: "text-purple-500" },
-  { id: "journal", label: "Write in journal", icon: Trophy, field: "journal_written", color: "text-emerald-500" },
+  { id: "mood", label: "Log your mood", icon: Sparkles, field: "mood_logged", gradient: "from-amber-400 to-orange-500" },
+  { id: "trigger", label: "Track a trigger", icon: Target, field: "trigger_logged", gradient: "from-rose-400 to-pink-500" },
+  { id: "meditation", label: "Complete meditation", icon: Zap, field: "meditation_done", gradient: "from-violet-400 to-purple-500" },
+  { id: "journal", label: "Write in journal", icon: Trophy, field: "journal_written", gradient: "from-emerald-400 to-teal-500" },
 ];
 
 export const DailyGoals = () => {
@@ -100,7 +99,6 @@ export const DailyGoals = () => {
     if (newValue) {
       toast.success(`${goal.label} completed! 🎉`);
       
-      // Check if all goals completed
       const allCompleted = goals.every(g => 
         g.field === goal.field ? newValue : completedGoals[g.field]
       );
@@ -135,7 +133,7 @@ export const DailyGoals = () => {
       if (lastDate === yesterdayStr) {
         newStreak = existing.current_streak + 1;
       } else if (lastDate === today) {
-        return; // Already updated today
+        return;
       }
 
       const newLongest = Math.max(newStreak, existing.longest_streak);
@@ -168,7 +166,7 @@ export const DailyGoals = () => {
   const progress = (completedCount / goals.length) * 100;
 
   return (
-    <Card className="gradient-card border-border/50 overflow-hidden relative">
+    <div className="card-enhanced overflow-hidden relative">
       {/* Confetti animation */}
       <AnimatePresence>
         {showConfetti && (
@@ -181,12 +179,7 @@ export const DailyGoals = () => {
             {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{ 
-                  x: "50%", 
-                  y: "50%", 
-                  scale: 0,
-                  rotate: 0 
-                }}
+                initial={{ x: "50%", y: "50%", scale: 0, rotate: 0 }}
                 animate={{ 
                   x: `${Math.random() * 100}%`,
                   y: `${Math.random() * 100}%`,
@@ -196,7 +189,7 @@ export const DailyGoals = () => {
                 transition={{ duration: 1.5, delay: i * 0.05 }}
                 className="absolute w-3 h-3 rounded-full"
                 style={{
-                  background: ["#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"][i % 5]
+                  background: ["hsl(168 84% 45%)", "hsl(42 100% 55%)", "hsl(270 76% 55%)", "hsl(340 82% 52%)", "hsl(190 90% 50%)"][i % 5]
                 }}
               />
             ))}
@@ -204,39 +197,43 @@ export const DailyGoals = () => {
         )}
       </AnimatePresence>
 
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Target className="w-5 h-5 text-primary" />
-            Daily Goals
-          </CardTitle>
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 icon-glow">
+              <Target className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Daily Goals</h3>
+              <p className="text-xs text-muted-foreground">{completedCount}/{goals.length} completed</p>
+            </div>
+          </div>
           {streak > 0 && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 border border-orange-500/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/15 to-amber-500/15 border border-orange-500/25"
             >
               <Flame className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-semibold text-orange-500">{streak} day streak</span>
+              <span className="text-sm font-bold text-orange-500">{streak}</span>
             </motion.div>
           )}
         </div>
-        <div className="mt-2">
-          <div className="flex items-center justify-between text-sm mb-1">
-            <span className="text-muted-foreground">{completedCount}/{goals.length} completed</span>
-            <span className="text-primary font-medium">{Math.round(progress)}%</span>
-          </div>
-          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+        
+        {/* Progress bar */}
+        <div className="mb-5">
+          <div className="relative h-2.5 bg-muted/50 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="h-full gradient-primary rounded-full"
+              className="absolute inset-y-0 left-0 gradient-primary rounded-full"
             />
+            <div className="absolute inset-0 animate-shimmer rounded-full" />
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+
+        {/* Goals list */}
         <div className="space-y-2">
           {goals.map((goal, index) => {
             const Icon = goal.icon;
@@ -248,34 +245,46 @@ export const DailyGoals = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => toggleGoal(goal)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-300 ${
                   isCompleted 
                     ? "bg-primary/10 border border-primary/30" 
-                    : "bg-secondary/50 border border-transparent hover:border-border"
+                    : "bg-secondary/30 border border-border/30 hover:bg-secondary/50 hover:border-border/50"
                 }`}
               >
                 <motion.div
                   whileTap={{ scale: 0.9 }}
-                  className={`p-2 rounded-lg ${isCompleted ? "bg-primary/20" : "bg-muted"}`}
+                  className={`p-2 rounded-lg transition-all duration-300 ${
+                    isCompleted 
+                      ? "bg-gradient-to-br " + goal.gradient + " shadow-lg" 
+                      : "bg-muted/50"
+                  }`}
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <CheckCircle2 className="w-5 h-5 text-white" />
                   ) : (
                     <Circle className="w-5 h-5 text-muted-foreground" />
                   )}
                 </motion.div>
                 <div className="flex-1 text-left">
-                  <span className={`font-medium ${isCompleted ? "text-primary line-through" : "text-foreground"}`}>
+                  <span className={`font-medium transition-all ${
+                    isCompleted 
+                      ? "text-primary" 
+                      : "text-foreground"
+                  }`}>
                     {goal.label}
                   </span>
                 </div>
-                <Icon className={`w-5 h-5 ${isCompleted ? "text-primary" : goal.color}`} />
+                <div className={`p-1.5 rounded-lg transition-all ${isCompleted ? "bg-primary/20" : "bg-transparent"}`}>
+                  <Icon className={`w-4 h-4 transition-colors ${isCompleted ? "text-primary" : "text-muted-foreground"}`} />
+                </div>
               </motion.button>
             );
           })}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
