@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Medal, Crown, Eye, EyeOff, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,7 @@ interface LeaderboardEntry {
   total_xp: number;
   current_level: number;
   display_name: string | null;
+  avatar_url: string | null;
   show_on_leaderboard: boolean;
 }
 
@@ -43,14 +44,15 @@ export const XPLeaderboard = () => {
       const userIds = xpData?.map(e => e.user_id) || [];
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name")
+        .select("user_id, display_name, avatar_url")
         .in("user_id", userIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) || []);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, { display_name: p.display_name, avatar_url: p.avatar_url }]) || []);
 
       const enrichedEntries = xpData?.map(entry => ({
         ...entry,
-        display_name: profileMap.get(entry.user_id) || null,
+        display_name: profileMap.get(entry.user_id)?.display_name || null,
+        avatar_url: profileMap.get(entry.user_id)?.avatar_url || null,
       })) || [];
 
       setEntries(enrichedEntries);
@@ -222,6 +224,7 @@ export const XPLeaderboard = () => {
                 {getRankBadge(index + 1)}
 
                 <Avatar className="h-10 w-10 border-2 border-border/30">
+                  <AvatarImage src={entry.avatar_url || undefined} alt={displayName} />
                   <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-sm font-semibold">
                     {displayName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>

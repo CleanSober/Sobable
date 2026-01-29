@@ -14,6 +14,7 @@ export interface UserProfile {
   emergency_contact: string | null;
   personal_reminder: string | null;
   onboarding_complete: boolean;
+  avatar_url: string | null;
 }
 
 export const useUserData = () => {
