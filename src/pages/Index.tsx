@@ -28,7 +28,6 @@ import { BreathingExercise } from "@/components/BreathingExercise";
 import { GuidedMeditations } from "@/components/GuidedMeditations";
 import { CrisisResources } from "@/components/CrisisResources";
 import { DataInsights } from "@/components/DataInsights";
-import { ProgressSharing } from "@/components/ProgressSharing";
 import { PremiumAnalytics } from "@/components/PremiumAnalytics";
 import { WeeklyProgressSummary } from "@/components/WeeklyProgressSummary";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
@@ -37,7 +36,7 @@ import { Journal } from "@/components/Journal";
 import { HabitLoopCard } from "@/components/HabitLoopCard";
 import { GamificationCard } from "@/components/GamificationCard";
 import { XPLeaderboard } from "@/components/XPLeaderboard";
-import { FriendInvite } from "@/components/FriendInvite";
+import { ShareAndInvite } from "@/components/ShareAndInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
@@ -134,9 +133,7 @@ const Index = () => {
             </motion.div>
             <GamificationCard />
             <XPLeaderboard />
-            <FriendInvite />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
-            <ProgressSharing />
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
@@ -144,6 +141,7 @@ const Index = () => {
             <QuickActions />
             <SmartInsights />
             <AchievementBadges daysSober={daysSober} />
+            <ShareAndInvite />
           </div>
         );
 
