@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Shield, TrendingUp, TrendingDown, Brain, Lightbulb, ChevronRight } from "lucide-react";
+import { AlertTriangle, Shield, TrendingUp, TrendingDown, Brain, Lightbulb, ChevronRight, Lock, Crown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { PremiumGate } from "./community/PremiumGate";
 import { subDays, parseISO, format, isToday, getDay } from "date-fns";
 
 interface RiskFactor {
@@ -25,6 +27,7 @@ interface PredictionData {
 
 export const RiskPrediction = () => {
   const { user } = useAuth();
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const [loading, setLoading] = useState(true);
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -229,7 +232,58 @@ export const RiskPrediction = () => {
     setLoading(false);
   };
 
-  if (loading) {
+  // Premium gate for Risk Prediction
+  if (!premiumLoading && !isPremium) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="border border-border/50 overflow-hidden">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Brain className="w-5 h-5 text-primary" />
+                Risk Insights
+              </CardTitle>
+              <span className="flex items-center gap-1 text-xs font-medium text-amber-500">
+                <Crown className="w-4 h-4" />
+                Sober Club
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              {/* Blurred preview */}
+              <div className="blur-sm pointer-events-none opacity-50 space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <TrendingUp className="w-4 h-4 text-green-500" />
+                  <span className="text-green-500">Trending positive</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/30">
+                    ✓ Mood stable (7.2/10)
+                  </Badge>
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/30">
+                    ✓ Good sleep quality
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl py-6">
+                <Lock className="w-8 h-8 text-amber-500 mb-3" />
+                <h3 className="font-semibold text-foreground mb-1">Unlock Risk Insights</h3>
+                <p className="text-sm text-muted-foreground text-center mb-4 px-4">
+                  AI-powered predictions to help you stay on track
+                </p>
+                <PremiumGate />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  if (loading || premiumLoading) {
     return null; // Don't show loading state for this widget
   }
 

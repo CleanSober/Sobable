@@ -18,14 +18,17 @@ import {
   Table,
   Lightbulb,
   Brain,
-  Smile
+  Smile,
+  Crown,
+  Lock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { 
+import { usePremiumStatus } from '@/hooks/usePremiumStatus';
+import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
@@ -67,6 +70,7 @@ interface JournalProps {
 }
 
 export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
+  const { isPremium } = usePremiumStatus();
   const {
     entries,
     loading,
@@ -306,40 +310,59 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* AI Prompt Section */}
+            {/* AI Prompt Section - Premium Feature */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Need inspiration? Get an AI-powered prompt:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {promptCategories.map(cat => (
-                  <Button
-                    key={cat.id}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleGetPrompt(cat.id)}
-                    disabled={loadingPrompt}
-                    className="gap-2"
-                  >
-                    <cat.icon className={`h-4 w-4 ${cat.color}`} />
-                    {cat.label}
-                  </Button>
-                ))}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Need inspiration? Get an AI-powered prompt:
+                </p>
+                {!isPremium && (
+                  <Badge variant="outline" className="text-amber-500 border-amber-500/30 text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Sober Club
+                  </Badge>
+                )}
               </div>
-              {loadingPrompt && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating prompt...
+              {isPremium ? (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {promptCategories.map(cat => (
+                      <Button
+                        key={cat.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleGetPrompt(cat.id)}
+                        disabled={loadingPrompt}
+                        className="gap-2"
+                      >
+                        <cat.icon className={`h-4 w-4 ${cat.color}`} />
+                        {cat.label}
+                      </Button>
+                    ))}
+                  </div>
+                  {loadingPrompt && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating prompt...
+                    </div>
+                  )}
+                  {aiPrompt && !loadingPrompt && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-primary/10 rounded-lg border border-primary/20"
+                    >
+                      <p className="text-sm italic">"{aiPrompt}"</p>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/50 text-center">
+                  <Lock className="w-4 h-4 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    Upgrade to Sober Club to unlock AI prompts
+                  </p>
                 </div>
-              )}
-              {aiPrompt && !loadingPrompt && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-3 bg-primary/10 rounded-lg border border-primary/20"
-                >
-                  <p className="text-sm italic">"{aiPrompt}"</p>
-                </motion.div>
               )}
             </div>
 
@@ -399,26 +422,40 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
               />
             </div>
 
-            {/* Mood Analysis */}
+            {/* Mood Analysis - Premium Feature */}
             {newEntry.content.length > 50 && (
-              <Button
-                variant="outline"
-                onClick={handleAnalyzeMood}
-                disabled={loadingAnalysis}
-                className="w-full gap-2"
-              >
-                {loadingAnalysis ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4" />
-                    Analyze Mood & Get Insights
-                  </>
-                )}
-              </Button>
+              isPremium ? (
+                <Button
+                  variant="outline"
+                  onClick={handleAnalyzeMood}
+                  disabled={loadingAnalysis}
+                  className="w-full gap-2"
+                >
+                  {loadingAnalysis ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4" />
+                      Analyze Mood & Get Insights
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
+                  <Lock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">AI Mood Analysis</p>
+                    <p className="text-xs text-muted-foreground">Upgrade to analyze your mood automatically</p>
+                  </div>
+                  <Badge variant="outline" className="text-amber-500 border-amber-500/30 text-xs flex-shrink-0">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Sober Club
+                  </Badge>
+                </div>
+              )
             )}
 
             {moodAnalysis && (
