@@ -35,7 +35,9 @@ import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
 import { HabitLoopCard } from "@/components/HabitLoopCard";
 import { GamificationCard } from "@/components/GamificationCard";
-
+import { DailyChallenges } from "@/components/DailyChallenges";
+import { RiskPrediction } from "@/components/RiskPrediction";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { ShareAndInvite } from "@/components/ShareAndInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { useAuth } from "@/contexts/AuthContext";
@@ -132,7 +134,7 @@ const Index = () => {
               </h1>
             </motion.div>
             <GamificationCard />
-            
+            <DailyChallenges />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
@@ -168,6 +170,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold text-foreground mb-1">Triggers & Coping</h1>
               <p className="text-muted-foreground">Know yourself to protect yourself</p>
             </motion.div>
+            <RiskPrediction />
             <CravingTimer />
             <TriggerLogger />
             <PatternAnalysis />
@@ -225,6 +228,7 @@ const Index = () => {
               <span className="text-lg font-bold text-foreground tracking-tight">Clean & Sober</span>
             </div>
             <div className="flex items-center gap-1">
+              <NotificationCenter />
               <NotificationsBell />
               <UserProfile />
             </div>
