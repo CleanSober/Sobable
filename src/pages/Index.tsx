@@ -42,6 +42,7 @@ import { ShareAndInvite } from "@/components/ShareAndInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
+import { useCapacitor } from "@/hooks/useCapacitor";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 
 const Index = () => {
@@ -49,6 +50,9 @@ const Index = () => {
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const navigate = useNavigate();
+  
+  // Initialize Capacitor for native mobile features
+  useCapacitor();
 
   useEffect(() => {
     if (!authLoading && !user) {

@@ -1,5 +1,6 @@
 import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export type TabId = "home" | "checkin" | "community" | "triggers" | "progress";
 
@@ -24,6 +25,13 @@ interface BottomTabsProps {
 }
 
 export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
+  const { impact } = useHaptics();
+  
+  const handleTabChange = (tabId: TabId) => {
+    impact('light');
+    onTabChange(tabId);
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 safe-area-bottom">
       {/* Glass background */}
@@ -42,7 +50,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
             return (
               <button
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className="relative flex flex-col items-center justify-center px-4 py-2 min-w-[64px] transition-all duration-300"
               >
                 {/* Active indicator background */}
