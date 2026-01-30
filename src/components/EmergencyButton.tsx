@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Heart, MessageCircle, X, Shield, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUserData } from "@/lib/storage";
+import { makePhoneCall, sendSMS, hapticWarning, hapticImpact } from "@/lib/nativeActions";
 
 const POSITION_STORAGE_KEY = 'emergency-button-position';
 
@@ -22,13 +23,6 @@ export const EmergencyButton = () => {
       }
     }
   }, []);
-
-  const triggerHaptic = (pattern: number | number[] = 50) => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(pattern);
-    }
-  };
-
   const handleDragEnd = (_: any, info: { offset: { x: number; y: number } }) => {
     const newPosition = {
       x: position.x + info.offset.x,
@@ -39,16 +33,27 @@ export const EmergencyButton = () => {
     setTimeout(() => setIsDragging(false), 100);
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     if (!isDragging) {
-      triggerHaptic([50, 30, 50]);
+      await hapticWarning();
       setIsOpen(true);
     }
   };
 
-  const handleDragStart = () => {
-    triggerHaptic(30);
+  const handleDragStart = async () => {
+    await hapticImpact();
     setIsDragging(true);
+  };
+
+  const handleResourceCall = async (phone: string) => {
+    await makePhoneCall(phone);
+  };
+
+  const handleResourceText = async (text: string) => {
+    // Extract the number from "HOME to 741741" format
+    const number = text.includes("to") ? text.split(" to ")[1] : text;
+    const body = text.includes("to") ? text.split(" to ")[0] : undefined;
+    await sendSMS(number, body);
   };
 
   const resources = [
@@ -160,13 +165,13 @@ export const EmergencyButton = () => {
                 {/* Resources */}
                 <div className="space-y-3 mb-6">
                   {resources.map((resource, index) => (
-                    <motion.a
+                    <motion.button
                       key={resource.name}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      href={`tel:${resource.phone}`}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 hover:border-primary/30 transition-all duration-300 group"
+                      onClick={() => handleResourceCall(resource.phone)}
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 hover:border-primary/30 transition-all duration-300 group text-left"
                     >
                       <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 group-hover:bg-primary/20 transition-colors">
                         <resource.icon className="w-5 h-5 text-primary" />
@@ -176,7 +181,7 @@ export const EmergencyButton = () => {
                         <p className="text-sm text-muted-foreground">{resource.description}</p>
                       </div>
                       <span className="text-sm font-bold text-primary">{resource.phone}</span>
-                    </motion.a>
+                    </motion.button>
                   ))}
                 </div>
 
@@ -186,24 +191,20 @@ export const EmergencyButton = () => {
                     <Button
                       variant="outline"
                       className="border-primary/30 text-primary hover:bg-primary/10 h-12"
-                      asChild
+                      onClick={() => handleResourceCall(userData.sponsorPhone)}
                     >
-                      <a href={`tel:${userData.sponsorPhone}`}>
-                        <Phone className="w-4 h-4 mr-2" />
-                        Call Sponsor
-                      </a>
+                      <Phone className="w-4 h-4 mr-2" />
+                      Call Sponsor
                     </Button>
                   )}
                   {userData?.emergencyContact && (
                     <Button
                       variant="outline"
                       className="border-accent/30 text-accent hover:bg-accent/10 h-12"
-                      asChild
+                      onClick={() => handleResourceCall(userData.emergencyContact)}
                     >
-                      <a href={`tel:${userData.emergencyContact}`}>
-                        <Phone className="w-4 h-4 mr-2" />
-                        Emergency
-                      </a>
+                      <Phone className="w-4 h-4 mr-2" />
+                      Emergency
                     </Button>
                   )}
                 </div>

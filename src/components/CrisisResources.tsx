@@ -4,6 +4,7 @@ import { Heart, Phone, MessageCircle, Globe, ChevronDown, ChevronUp, ExternalLin
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { makePhoneCall, sendSMS, hapticTap } from "@/lib/nativeActions";
 
 interface Resource {
   name: string;
@@ -97,7 +98,18 @@ const selfHelpResources = [
 
 export const CrisisResources = () => {
   const [expandedResource, setExpandedResource] = useState<string | null>(null);
-  const [showSelfHelp, setShowSelfHelp] = useState(false);
+
+  const handleCall = async (phone: string) => {
+    await hapticTap();
+    await makePhoneCall(phone);
+  };
+
+  const handleText = async (text: string) => {
+    await hapticTap();
+    const number = text.includes("to") ? text.split(" to ")[1] : text;
+    const body = text.includes("to") ? text.split(" to ")[0] : undefined;
+    await sendSMS(number, body);
+  };
 
   return (
     <div className="space-y-4">
@@ -151,19 +163,15 @@ export const CrisisResources = () => {
                   <p className="text-sm text-muted-foreground mb-4">{resource.description}</p>
                   <div className="flex flex-wrap gap-2">
                     {resource.phone && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={`tel:${resource.phone}`}>
-                          <Phone className="w-4 h-4 mr-2" />
-                          Call {resource.phone}
-                        </a>
+                      <Button size="sm" variant="outline" onClick={() => handleCall(resource.phone!)}>
+                        <Phone className="w-4 h-4 mr-2" />
+                        Call {resource.phone}
                       </Button>
                     )}
                     {resource.text && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={`sms:${resource.text.includes("to") ? resource.text.split(" to ")[1] : resource.text}`}>
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          Text {resource.text}
-                        </a>
+                      <Button size="sm" variant="outline" onClick={() => handleText(resource.text!)}>
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Text {resource.text}
                       </Button>
                     )}
                     {resource.website && (
