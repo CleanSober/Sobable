@@ -34,78 +34,131 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden"
         >
-          {/* Background gradient orbs */}
+          {/* Background gradient mesh */}
           <div className="absolute inset-0 overflow-hidden">
+            {/* Teal primary orb */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.3, scale: 1 }}
+              animate={{ opacity: 0.35, scale: 1 }}
               transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-[120px]"
-              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" }}
+              className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-[150px]"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--success)))" }}
             />
+            {/* Amber accent orb */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.2, scale: 1 }}
-              transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
-              className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-[100px]"
-              style={{ background: "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--secondary)))" }}
+              animate={{ opacity: 0.25, scale: 1 }}
+              transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+              className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px]"
+              style={{ background: "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--warning)))" }}
+            />
+            {/* Subtle center glow */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              transition={{ duration: 2, delay: 0.5 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[200px]"
+              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 70%)" }}
             />
           </div>
 
           {/* Logo container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            initial={{ opacity: 0, scale: 0.5, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ 
               duration: 0.8, 
               delay: 0.2,
               type: "spring",
-              stiffness: 200,
-              damping: 20
+              stiffness: 180,
+              damping: 18
             }}
             className="relative z-10 flex flex-col items-center"
           >
-            {/* Icon with glow effect */}
+            {/* Icon with premium glow effect */}
             <motion.div
               initial={{ rotate: -10 }}
               animate={{ rotate: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="relative mb-6"
+              className="relative mb-8"
             >
-              {/* Glow ring */}
+              {/* Outer glow ring */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="absolute inset-0 rounded-3xl blur-xl"
+                transition={{ duration: 1.2, delay: 0.4 }}
+                className="absolute inset-0 rounded-3xl"
                 style={{ 
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.5))",
-                  transform: "scale(1.3)"
+                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--accent) / 0.4))",
+                  transform: "scale(1.4)",
+                  filter: "blur(30px)"
                 }}
               />
               
-              {/* Main icon container */}
-              <div className="relative w-28 h-28 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={sobableLogo} alt="Sobable" className="w-full h-full object-cover" />
+              {/* Inner glow ring */}
+              <motion.div
+                animate={{ 
+                  opacity: [0.5, 0.8, 0.5],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="absolute inset-0 rounded-3xl"
+                style={{ 
+                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3))",
+                  transform: "scale(1.2)",
+                  filter: "blur(15px)"
+                }}
+              />
+              
+              {/* Main icon container with tech border */}
+              <div className="relative w-32 h-32 rounded-3xl overflow-hidden shadow-elevated tech-border">
+                <img 
+                  src={sobableLogo} 
+                  alt="Sobable" 
+                  className="w-full h-full object-cover"
+                />
+                {/* Shimmer overlay */}
+                <motion.div
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "200%" }}
+                  transition={{ 
+                    duration: 1.5, 
+                    delay: 0.8,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                />
               </div>
 
               {/* Sparkle decorations */}
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.8 }}
+                transition={{ duration: 0.4, delay: 0.9 }}
                 className="absolute -top-2 -right-2"
               >
-                <Sparkles className="w-6 h-6 text-accent" />
+                <Sparkles className="w-6 h-6 text-accent drop-shadow-lg" />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 1.1 }}
+                className="absolute -bottom-1 -left-1"
+              >
+                <Sparkles className="w-4 h-4 text-primary drop-shadow-lg" />
               </motion.div>
             </motion.div>
 
-            {/* App name */}
+            {/* App name with gradient */}
             <motion.h1
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="text-3xl font-bold text-foreground tracking-tight mb-2"
+              transition={{ duration: 0.5, delay: 0.7 }}
+              className="text-4xl font-bold tracking-tight mb-3 text-gradient"
             >
               Sobable
             </motion.h1>
@@ -114,8 +167,8 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="text-muted-foreground text-sm font-medium"
+              transition={{ duration: 0.5, delay: 0.9 }}
+              className="text-muted-foreground text-base font-medium"
             >
               Your journey to recovery
             </motion.p>
@@ -125,22 +178,28 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1 }}
-            className="absolute bottom-20 flex flex-col items-center gap-3"
+            transition={{ duration: 0.5, delay: 1.2 }}
+            className="absolute bottom-24 flex flex-col items-center gap-4"
           >
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-2 h-2 rounded-full bg-primary"
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ 
+                    background: i === 1 
+                      ? "hsl(var(--accent))" 
+                      : "hsl(var(--primary))" 
+                  }}
                   animate={{
-                    scale: [1, 1.3, 1],
+                    scale: [1, 1.4, 1],
                     opacity: [0.5, 1, 0.5],
                   }}
                   transition={{
-                    duration: 1,
+                    duration: 1.2,
                     repeat: Infinity,
                     delay: i * 0.2,
+                    ease: "easeInOut"
                   }}
                 />
               ))}
