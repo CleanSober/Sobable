@@ -1131,6 +1131,20 @@ export type Database = {
         Returns: boolean
       }
       claim_daily_login_reward: { Args: { p_user_id: string }; Returns: Json }
+      count_recent_actions: {
+        Args: { p_action_type: string; p_minutes?: number; p_user_id: string }
+        Returns: number
+      }
+      get_public_profile: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          sobriety_start_date: string
+          user_id: string
+        }[]
+      }
+      is_admin: { Args: { check_user_id: string }; Returns: boolean }
       is_premium_user: { Args: { check_user_id: string }; Returns: boolean }
       is_user_blocked: {
         Args: { blocked_uuid: string; blocker_uuid: string }
