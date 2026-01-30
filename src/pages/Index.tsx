@@ -41,6 +41,7 @@ import { RiskPrediction } from "@/components/RiskPrediction";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { ShareAndInvite } from "@/components/ShareAndInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
+import { AdBanner } from "@/components/AdBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -254,6 +255,7 @@ const Index = () => {
         <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
         <EmergencyButton />
         <AIRecoveryCoach />
+        <AdBanner position="bottom" />
       </div>
     </XPNotificationProvider>
   );
