@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Brain, TrendingUp, TrendingDown, AlertCircle, Sparkles, Moon, Activity } from "lucide-react";
+import { Brain, TrendingUp, TrendingDown, AlertCircle, Sparkles, Moon, Activity, Lock, Crown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { PremiumGate } from "./community/PremiumGate";
 
 interface Insight {
   id: string;
@@ -15,6 +17,7 @@ interface Insight {
 
 export const SmartInsights = () => {
   const { user } = useAuth();
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -185,7 +188,64 @@ export const SmartInsights = () => {
     }
   };
 
-  if (loading) {
+  // Premium gate for Smart Insights
+  if (!premiumLoading && !isPremium) {
+    return (
+      <Card className="gradient-card border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Brain className="w-5 h-5 text-primary" />
+            Smart Insights
+            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-amber-500">
+              <Crown className="w-4 h-4" />
+              Sober Club
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            {/* Blurred preview */}
+            <div className="blur-sm pointer-events-none opacity-50 space-y-3">
+              <div className="p-4 rounded-xl border bg-emerald-500/10 border-emerald-500/30">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-background/50">
+                    <TrendingUp className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Mood is improving!</h4>
+                    <p className="text-sm text-muted-foreground mt-1">Your mood trends upward this week.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl border bg-blue-500/10 border-blue-500/30">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-background/50">
+                    <Moon className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Sleep is on track!</h4>
+                    <p className="text-sm text-muted-foreground mt-1">Great sleep patterns support recovery.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
+              <Lock className="w-8 h-8 text-amber-500 mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Unlock Smart Insights</h3>
+              <p className="text-sm text-muted-foreground text-center mb-4 px-4">
+                AI-powered analysis of your mood, sleep, and recovery patterns
+              </p>
+              <PremiumGate />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loading || premiumLoading) {
     return (
       <Card className="gradient-card border-border/50">
         <CardHeader className="pb-3">

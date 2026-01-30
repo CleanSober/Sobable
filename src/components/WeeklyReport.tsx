@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FileText, TrendingUp, TrendingDown, Minus, Calendar, DollarSign, Brain, Heart } from "lucide-react";
+import { FileText, TrendingUp, TrendingDown, Minus, Calendar, DollarSign, Brain, Heart, Lock, Crown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { PremiumGate } from "./community/PremiumGate";
 import { calculateDaysSober, type UserData } from "@/lib/storage";
 
 interface WeeklyReportProps {
@@ -24,6 +26,7 @@ interface TriggerEntry {
 
 export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
   const { user } = useAuth();
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const [report, setReport] = useState({
     avgMoodThisWeek: 0,
     avgMoodLastWeek: 0,
@@ -194,7 +197,56 @@ export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
     },
   ];
 
-  if (loading) {
+  // Premium gate for Weekly Report
+  if (!premiumLoading && !isPremium) {
+    return (
+      <Card className="gradient-card border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="w-5 h-5 text-primary" />
+            Weekly Report
+            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-amber-500">
+              <Crown className="w-4 h-4" />
+              Sober Club
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            {/* Blurred preview */}
+            <div className="blur-sm pointer-events-none opacity-50 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-4 rounded-xl bg-pink-500/10">
+                  <p className="text-2xl font-bold">7.5</p>
+                  <p className="text-xs text-muted-foreground">Avg Mood</p>
+                </div>
+                <div className="p-4 rounded-xl bg-green-500/10">
+                  <p className="text-2xl font-bold">92%</p>
+                  <p className="text-xs text-muted-foreground">Success Rate</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/20">
+                <p className="text-2xl font-bold text-green-500">$55</p>
+                <p className="text-xs">Saved This Week</p>
+              </div>
+            </div>
+            
+            {/* Overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
+              <Lock className="w-8 h-8 text-amber-500 mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Unlock Weekly Reports</h3>
+              <p className="text-sm text-muted-foreground text-center mb-4 px-4">
+                Detailed analysis of your weekly progress
+              </p>
+              <PremiumGate />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loading || premiumLoading) {
     return (
       <Card className="gradient-card border-border/50">
         <CardHeader className="pb-3">
