@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Phone, BookHeart, Timer, MessageCircle, Sparkles } from "lucide-react";
 import { useUserData } from "@/hooks/useUserData";
 import { toast } from "sonner";
+import { makePhoneCall, hapticSuccess } from "@/lib/nativeActions";
 
 interface QuickAction {
   id: string;
@@ -22,9 +23,9 @@ export const QuickActions = () => {
       icon: Phone,
       gradient: "from-emerald-400 to-teal-500",
       glowColor: "168 84% 45%",
-      action: () => {
+      action: async () => {
         if (profile?.sponsor_phone) {
-          window.location.href = `tel:${profile.sponsor_phone}`;
+          await makePhoneCall(profile.sponsor_phone);
         } else {
           toast.info("Add your sponsor's number in settings");
         }
@@ -36,8 +37,9 @@ export const QuickActions = () => {
       icon: BookHeart,
       gradient: "from-pink-400 to-rose-500",
       glowColor: "340 82% 52%",
-      action: () => {
+      action: async () => {
         if (profile?.personal_reminder) {
+          await hapticSuccess();
           toast.success(profile.personal_reminder, {
             duration: 5000,
             icon: "💪"
@@ -66,8 +68,8 @@ export const QuickActions = () => {
       icon: MessageCircle,
       gradient: "from-violet-400 to-purple-500",
       glowColor: "270 76% 55%",
-      action: () => {
-        window.location.href = "tel:988";
+      action: async () => {
+        await makePhoneCall("988");
       }
     }
   ];
