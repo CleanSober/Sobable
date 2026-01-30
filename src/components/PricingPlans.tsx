@@ -99,7 +99,7 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
         >
           Yearly
           <Badge variant="secondary" className="bg-green-500/20 text-green-600 text-xs">
-            Save 17%
+            Save 16%
           </Badge>
         </button>
       </div>
@@ -115,14 +115,14 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
           </div>
           <CardDescription>
             {selectedPlan === "yearly" && (
-              <span className="text-green-600 font-medium">Save $19.89/year!</span>
+              <span className="text-green-600 font-medium">Save $15.89/year!</span>
             )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center">
             <span className="text-4xl font-bold text-foreground">
-              ${selectedPlan === "monthly" ? "9.99" : "99.99"}
+              ${selectedPlan === "monthly" ? "7.99" : "79.99"}
             </span>
             <span className="text-muted-foreground">
               /{selectedPlan === "monthly" ? "month" : "year"}

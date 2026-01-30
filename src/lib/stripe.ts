@@ -1,18 +1,18 @@
 // Stripe product and price configuration
 export const STRIPE_PLANS = {
   premium_monthly: {
-    product_id: "prod_To7fenzY4C1UPy",
-    price_id: "price_1SqVQ0PDEHcoOCnUFFi4lwpA",
+    product_id: "prod_Tt6Apu0s30j7yZ",
+    price_id: "price_1SvJyIPDEHcoOCnUCygf0YgT",
     name: "Premium Monthly",
-    price: 9.99,
+    price: 7.99,
     interval: "month" as const,
     description: "Full access to all premium features",
   },
   premium_yearly: {
-    product_id: "prod_To7fwgydzzWQmS",
-    price_id: "price_1SqVQUPDEHcoOCnU1dF31J2N",
+    product_id: "prod_Tt6AA9aEV4J4sE",
+    price_id: "price_1SvJyKPDEHcoOCnUgFroTceF",
     name: "Premium Yearly",
-    price: 99.99,
+    price: 79.99,
     interval: "year" as const,
     description: "Full access + Save 2 months!",
   },
