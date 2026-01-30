@@ -69,9 +69,12 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
       className="max-w-lg mx-auto p-4 space-y-6"
     >
       <div className="text-center space-y-2">
+        <Badge className="bg-green-500/20 text-green-600 border-green-500/30 mb-2">
+          7-Day Free Trial
+        </Badge>
         <h2 className="text-2xl font-bold text-foreground">Join Sober Club</h2>
         <p className="text-muted-foreground">
-          Unlock all features and accelerate your recovery journey
+          Try all premium features free for 7 days
         </p>
       </div>
 
@@ -154,14 +157,17 @@ export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
             ) : (
               <>
                 <Crown className="w-4 h-4 mr-2" />
-                Join Sober Club
+                Start 7-Day Free Trial
               </>
             )}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Cancel anytime. Secure payment via Stripe.
-          </p>
+          <div className="text-xs text-center text-muted-foreground space-y-1">
+            <p className="font-medium text-foreground/80">No charge for 7 days</p>
+            <p>
+              Then ${selectedPlan === "monthly" ? "7.99/month" : "79.99/year"}. Cancel anytime.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
