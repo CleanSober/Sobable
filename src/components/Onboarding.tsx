@@ -108,7 +108,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  Welcome to Clean & Sober
+                  Welcome to Sobable
                 </h1>
                 <p className="text-muted-foreground">
                   What should we call you?

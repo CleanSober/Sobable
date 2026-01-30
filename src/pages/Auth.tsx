@@ -80,7 +80,7 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center p-4 rounded-2xl gradient-primary mb-4">
             <Leaf className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Clean & Sober</h1>
+          <h1 className="text-3xl font-bold mb-2">Sobable</h1>
           <p className="text-muted-foreground">
             {isLogin ? "Welcome back to your journey" : "Start your recovery journey today"}
           </p>

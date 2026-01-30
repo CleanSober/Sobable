@@ -164,7 +164,7 @@ function generateEmailHtml(
     
     <!-- Header -->
     <div style="padding: 20px 30px; text-align: center;">
-      <p style="font-size: 24px; font-weight: bold; color: #16a34a; margin: 0;">🌿 Clean & Sober</p>
+      <p style="font-size: 24px; font-weight: bold; color: #16a34a; margin: 0;">🌿 Sobable</p>
     </div>
     
     <!-- Greeting -->
@@ -245,7 +245,7 @@ function generateEmailHtml(
         Keep going strong! Every day is a victory. 💪
       </p>
       <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0 0 8px;">
-        Clean & Sober App • You're receiving this because you opted in to weekly digests.
+        Sobable App • You're receiving this because you opted in to weekly digests.
       </p>
     </div>
   </div>
@@ -272,7 +272,7 @@ async function sendDigestToUser(
     );
 
     const { error } = await resend.emails.send({
-      from: "Clean & Sober <onboarding@resend.dev>",
+      from: "Sobable <onboarding@resend.dev>",
       to: [user.email],
       subject: `Your Weekly Recovery Progress - ${daysSober} Days Strong! 🌟`,
       html,
