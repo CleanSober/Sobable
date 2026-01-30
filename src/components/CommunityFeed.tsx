@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { useCommunityBot } from "@/hooks/useCommunityBot";
 import { toast } from "sonner";
 
 interface Post {
@@ -50,24 +51,34 @@ export const CommunityFeed = () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
   const { addXP } = useGamification();
+  const { triggerBotReply } = useCommunityBot();
 
   const addPost = async () => {
     if (!newPost.trim() || !user) return;
 
     setLoading(true);
-    const { error } = await supabase.from("community_posts").insert({
+    const { data, error } = await supabase.from("community_posts").insert({
       content: newPost.trim(),
       post_type: postType,
       user_id: user.id,
-    });
+    }).select().single();
 
     if (error) {
       toast.error("Failed to post. Please try again.");
     } else {
       // Award XP for community post
       await addXP(XP_REWARDS.community_post, 'community_post', 'Shared a post with the community');
+      
+      // Trigger bot auto-reply after random delay (1-5 min)
+      if (data) {
+        triggerBotReply({
+          content: newPost.trim(),
+          targetId: data.id,
+          targetType: "community_post",
+        });
+      }
+      
       setNewPost("");
       toast.success("Posted!");
     }

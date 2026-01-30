@@ -14,6 +14,7 @@ import {
   validateMessageLength,
   createMentionNotifications
 } from "@/hooks/useCommunity";
+import { useCommunityBot } from "@/hooks/useCommunityBot";
 
 interface ChatRoom {
   id: string;
@@ -31,6 +32,7 @@ const MAX_MESSAGE_LENGTH = 2000;
 export const LiveChat = () => {
   const { user } = useAuth();
   const { fetchProfiles, getDisplayNameForUser, getAllProfiles } = useUserProfiles();
+  const { triggerBotReply } = useCommunityBot();
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -170,6 +172,13 @@ export const LiveChat = () => {
         data.id,
         getAllProfiles()
       );
+      
+      // Trigger bot auto-reply after random delay (1-5 min)
+      triggerBotReply({
+        content: trimmedMessage,
+        targetId: data.id,
+        targetType: "chat_message",
+      });
       
       setNewMessage("");
     } catch {
