@@ -1,10 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Award, Lock, Star, Trophy, Medal, Crown, Gem, Heart, Zap, Shield, Flame, Diamond, Sparkles, Sun, Moon, Target, Rocket, Mountain, TreePine, Infinity, Share2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useInterstitialAd } from "./InterstitialAd";
 
 interface Badge {
   id: string;
@@ -131,11 +132,31 @@ interface AchievementBadgesProps {
 
 export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const { showAd } = useInterstitialAd();
+  const previousUnlockedCount = useRef<number | null>(null);
 
   const unlockedBadges = badges.filter((b) => daysSober >= b.daysRequired);
   const lockedBadges = badges.filter((b) => daysSober < b.daysRequired);
   const nextBadge = lockedBadges[0];
   const daysToNext = nextBadge ? nextBadge.daysRequired - daysSober : 0;
+
+  // Show interstitial ad when a new badge is unlocked
+  useEffect(() => {
+    const currentUnlockedCount = unlockedBadges.length;
+    
+    // Only trigger if we have a previous count and it increased
+    if (previousUnlockedCount.current !== null && currentUnlockedCount > previousUnlockedCount.current) {
+      const newBadge = unlockedBadges[currentUnlockedCount - 1];
+      toast.success(`🎉 New badge unlocked: ${newBadge.name}!`);
+      
+      // Show interstitial ad after unlocking a new achievement (natural break point)
+      setTimeout(() => {
+        showAd();
+      }, 2000);
+    }
+    
+    previousUnlockedCount.current = currentUnlockedCount;
+  }, [unlockedBadges.length, showAd]);
 
   return (
     <Card className="gradient-card border-border/50">
