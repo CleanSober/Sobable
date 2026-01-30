@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Check, Trash2, MessageSquare, Heart, UserPlus, AtSign, X } from "lucide-react";
+import { Bell, Check, Trash2, MessageSquare, Heart, UserPlus, AtSign, X, MessageCircle, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow, parseISO } from "date-fns";
@@ -29,9 +27,12 @@ interface Notification {
 
 const NOTIFICATION_ICONS: Record<string, typeof Bell> = {
   mention: AtSign,
-  reply: MessageSquare,
+  reply: MessageCircle,
   like: Heart,
+  reaction: Heart,
   follow: UserPlus,
+  chat_message: MessageSquare,
+  forum_post: MessageSquare,
   default: Bell,
 };
 
@@ -39,7 +40,10 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   mention: "text-blue-500 bg-blue-500/10",
   reply: "text-green-500 bg-green-500/10",
   like: "text-pink-500 bg-pink-500/10",
+  reaction: "text-pink-500 bg-pink-500/10",
   follow: "text-purple-500 bg-purple-500/10",
+  chat_message: "text-teal-500 bg-teal-500/10",
+  forum_post: "text-amber-500 bg-amber-500/10",
   default: "text-primary bg-primary/10",
 };
 
@@ -146,7 +150,10 @@ export const NotificationCenter = () => {
       case "mention": return "You were mentioned";
       case "reply": return "New reply";
       case "like": return "Someone liked your post";
+      case "reaction": return "New reaction";
       case "follow": return "New follower";
+      case "chat_message": return "New chat message";
+      case "forum_post": return "New forum activity";
       default: return "Notification";
     }
   };
@@ -160,69 +167,78 @@ export const NotificationCenter = () => {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
           <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-medium"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </motion.span>
-          )}
-        </Button>
-      </SheetTrigger>
-
-      <SheetContent side="right" className="w-full sm:max-w-md">
-        <SheetHeader className="pb-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notifications
-              {unreadCount > 0 && (
-                <Badge variant="secondary">{unreadCount} new</Badge>
-              )}
-            </SheetTitle>
-          </div>
-          
-          {notifications.length > 0 && (
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={markAllAsRead}
-                disabled={unreadCount === 0}
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-xs font-medium flex items-center justify-center"
               >
-                <Check className="w-4 h-4 mr-1" />
-                Mark all read
-              </Button>
-              <Button variant="outline" size="sm" onClick={clearAll}>
-                <Trash2 className="w-4 h-4 mr-1" />
-                Clear all
-              </Button>
-            </div>
-          )}
-        </SheetHeader>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Button>
+      </PopoverTrigger>
 
-        <ScrollArea className="h-[calc(100vh-150px)] mt-4">
+      <PopoverContent 
+        className="w-96 p-0 bg-background border border-border shadow-xl z-50" 
+        align="end"
+        sideOffset={8}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+          <div className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Notifications</h3>
+            {unreadCount > 0 && (
+              <Badge variant="secondary" className="text-xs">{unreadCount} new</Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        {notifications.length > 0 && (
+          <div className="flex gap-2 p-2 border-b border-border bg-muted/30">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+              className="text-xs h-7 flex-1"
+            >
+              <Check className="w-3.5 h-3.5 mr-1" />
+              Mark all read
+            </Button>
+            <Button variant="ghost" size="sm" onClick={clearAll} className="text-xs h-7 flex-1">
+              <Trash2 className="w-3.5 h-3.5 mr-1" />
+              Clear all
+            </Button>
+          </div>
+        )}
+
+        {/* Notifications list */}
+        <ScrollArea className="max-h-80">
           {loading ? (
             <div className="flex justify-center py-8">
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No notifications yet</p>
-              <p className="text-sm text-muted-foreground/70">
-                We'll notify you when something happens
+            <div className="text-center py-10">
+              <Bell className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+              <p className="text-muted-foreground font-medium">No notifications yet</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                You'll see mentions, replies & more here
               </p>
             </div>
           ) : (
-            <AnimatePresence mode="popLayout">
-              <div className="space-y-2">
+            <div className="p-2 space-y-1">
+              <AnimatePresence mode="popLayout">
                 {notifications.map((notification, index) => {
                   const Icon = getNotificationIcon(notification.notification_type);
                   const colorClass = getNotificationColor(notification.notification_type);
@@ -230,60 +246,68 @@ export const NotificationCenter = () => {
                   return (
                     <motion.div
                       key={notification.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ delay: index * 0.03 }}
-                      className={`relative p-3 rounded-lg border transition-colors ${
+                      transition={{ delay: index * 0.02 }}
+                      className={`group relative flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all ${
                         notification.is_read
-                          ? "bg-background border-border/50"
-                          : "bg-primary/5 border-primary/20"
+                          ? "bg-transparent hover:bg-muted/50 opacity-70"
+                          : "bg-primary/5 hover:bg-primary/10"
                       }`}
                       onClick={() => !notification.is_read && markAsRead(notification.id)}
                     >
-                      <div className="flex gap-3">
-                        <div className={`p-2 rounded-lg ${colorClass}`}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">
-                            {getNotificationTitle(notification.notification_type)}
-                          </p>
-                          {notification.content_preview && (
-                            <p className="text-sm text-muted-foreground truncate">
-                              {notification.content_preview}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatDistanceToNow(parseISO(notification.created_at), { addSuffix: true })}
-                          </p>
-                        </div>
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteNotification(notification.id);
-                          }}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
+                      <div className={`flex-shrink-0 p-2 rounded-lg ${colorClass}`}>
+                        <Icon className="w-4 h-4" />
                       </div>
 
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">
+                          {getNotificationTitle(notification.notification_type)}
+                        </p>
+                        {notification.content_preview && (
+                          <p className="text-sm text-muted-foreground truncate mt-0.5">
+                            "{notification.content_preview}"
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formatDistanceToNow(parseISO(notification.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteNotification(notification.id);
+                        }}
+                        aria-label="Delete notification"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+
                       {!notification.is_read && (
-                        <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full" />
+                        <div className="absolute top-3 right-10 w-2 h-2 bg-primary rounded-full" />
                       )}
                     </motion.div>
                   );
                 })}
-              </div>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
           )}
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+
+        {/* Footer */}
+        {notifications.length > 0 && (
+          <div className="p-2 border-t border-border bg-muted/20">
+            <p className="text-xs text-center text-muted-foreground">
+              Showing last {Math.min(notifications.length, 50)} notifications
+            </p>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 };
