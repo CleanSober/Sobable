@@ -4,6 +4,7 @@ import { Target, CheckCircle2, Circle, Flame, Trophy, Sparkles, Zap } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useInterstitialAd } from "./InterstitialAd";
 
 interface DailyGoal {
   id: string;
@@ -22,6 +23,7 @@ const goals: DailyGoal[] = [
 
 export const DailyGoals = () => {
   const { user } = useAuth();
+  const { showAd } = useInterstitialAd();
   const [completedGoals, setCompletedGoals] = useState<Record<string, boolean>>({
     mood_logged: false,
     trigger_logged: false,
@@ -108,6 +110,11 @@ export const DailyGoals = () => {
         updateStreak();
         setTimeout(() => setShowConfetti(false), 3000);
         toast.success("All daily goals completed! Amazing work! 🏆");
+        
+        // Show interstitial ad after completing all goals (natural break point)
+        setTimeout(() => {
+          showAd();
+        }, 1500);
       }
     }
   };
