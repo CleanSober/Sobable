@@ -35,7 +35,7 @@ import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
 import { HabitLoopCard } from "@/components/HabitLoopCard";
 import { GamificationCard } from "@/components/GamificationCard";
-import { XPLeaderboard } from "@/components/XPLeaderboard";
+
 import { ShareAndInvite } from "@/components/ShareAndInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { useAuth } from "@/contexts/AuthContext";
@@ -132,7 +132,7 @@ const Index = () => {
               </h1>
             </motion.div>
             <GamificationCard />
-            <XPLeaderboard />
+            
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
