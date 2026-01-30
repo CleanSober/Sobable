@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, MessageSquare, Crown } from "lucide-react";
+import { Users, MessageSquare, Crown, Trophy, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./PremiumGate";
 import { ForumList } from "./ForumList";
 import { ForumView } from "./ForumView";
 import { LiveChat } from "./LiveChat";
-import { toast } from "sonner";
+import { Leaderboard } from "./Leaderboard";
+import { CreateForumModal } from "./CreateForumModal";
 
 interface Forum {
   id: string;
@@ -21,8 +22,12 @@ export const CommunityHub = () => {
   const { isPremium, loading } = usePremiumStatus();
   const [selectedForum, setSelectedForum] = useState<Forum | null>(null);
   const [activeTab, setActiveTab] = useState("chat");
+  const [showCreateForumModal, setShowCreateForumModal] = useState(false);
+  const [forumRefreshKey, setForumRefreshKey] = useState(0);
 
-  // Let PremiumGate handle the upgrade flow directly
+  const handleForumCreated = useCallback(() => {
+    setForumRefreshKey((prev) => prev + 1);
+  }, []);
 
   if (loading) {
     return (
@@ -65,13 +70,13 @@ export const CommunityHub = () => {
 
       {/* Tabs navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-12">
+        <TabsList className="grid w-full grid-cols-3 h-12">
           <TabsTrigger 
             value="chat" 
             className="flex items-center gap-2 data-[state=active]:bg-primary/10"
           >
             <MessageSquare className="w-4 h-4" aria-hidden="true" />
-            <span>Live Chat</span>
+            <span>Chat</span>
           </TabsTrigger>
           <TabsTrigger 
             value="forums" 
@@ -79,6 +84,13 @@ export const CommunityHub = () => {
           >
             <Users className="w-4 h-4" aria-hidden="true" />
             <span>Forums</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="leaderboard" 
+            className="flex items-center gap-2 data-[state=active]:bg-primary/10"
+          >
+            <Trophy className="w-4 h-4" aria-hidden="true" />
+            <span>Leaders</span>
           </TabsTrigger>
         </TabsList>
 
@@ -88,11 +100,23 @@ export const CommunityHub = () => {
 
         <TabsContent value="forums" className="mt-4 focus-visible:outline-none">
           <ForumList
+            key={forumRefreshKey}
             onSelectForum={setSelectedForum}
-            onCreateForum={() => toast.info("Forum creation coming soon!")}
+            onCreateForum={() => setShowCreateForumModal(true)}
           />
         </TabsContent>
+
+        <TabsContent value="leaderboard" className="mt-4 focus-visible:outline-none">
+          <Leaderboard />
+        </TabsContent>
       </Tabs>
+
+      {/* Create Forum Modal */}
+      <CreateForumModal
+        open={showCreateForumModal}
+        onOpenChange={setShowCreateForumModal}
+        onForumCreated={handleForumCreated}
+      />
     </motion.div>
   );
 };
