@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Leaf, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import sobableLogo from "@/assets/sobable-logo.png";
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -77,8 +78,8 @@ const Auth = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-4 rounded-2xl gradient-primary mb-4">
-            <Leaf className="w-10 h-10 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center rounded-2xl overflow-hidden mb-4 shadow-lg shadow-primary/20">
+            <img src={sobableLogo} alt="Sobable" className="w-20 h-20" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Sobable</h1>
           <p className="text-muted-foreground">
