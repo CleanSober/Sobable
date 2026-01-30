@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Heart } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import sobableLogo from "@/assets/sobable-logo.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -84,10 +85,8 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               />
               
               {/* Main icon container */}
-              <div className="relative w-28 h-28 rounded-3xl bg-gradient-to-br from-primary via-primary to-accent p-0.5 shadow-2xl">
-                <div className="w-full h-full rounded-3xl bg-background/90 backdrop-blur-sm flex items-center justify-center">
-                  <Heart className="w-14 h-14 text-primary" fill="currentColor" />
-                </div>
+              <div className="relative w-28 h-28 rounded-3xl overflow-hidden shadow-2xl">
+                <img src={sobableLogo} alt="Sobable" className="w-full h-full object-cover" />
               </div>
 
               {/* Sparkle decorations */}

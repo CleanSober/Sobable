@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import sobableLogo from "@/assets/sobable-logo.png";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
@@ -226,9 +227,7 @@ const Index = () => {
           
           <div className="container max-w-2xl mx-auto px-4 py-4 flex items-center justify-between relative">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl gradient-primary shadow-lg shadow-primary/20 icon-glow">
-                <Leaf className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img src={sobableLogo} alt="Sobable" className="w-10 h-10 rounded-xl shadow-lg shadow-primary/20" />
               <span className="text-lg font-bold text-foreground tracking-tight">Sobable</span>
             </div>
             <div className="flex items-center gap-1">
