@@ -108,7 +108,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               transition={{ duration: 0.5, delay: 0.6 }}
               className="text-3xl font-bold text-foreground tracking-tight mb-2"
             >
-              Clean & Sober
+              Sobable
             </motion.h1>
 
             {/* Tagline */}

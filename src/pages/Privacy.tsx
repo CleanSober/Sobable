@@ -128,7 +128,7 @@ const Privacy = () => {
         >
           <h3 className="text-lg font-semibold text-foreground mb-3">Introduction</h3>
           <p className="text-muted-foreground leading-relaxed">
-            Clean & Sober ("we", "our", or "us") operates the Clean & Sober mobile application. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. Your recovery journey is personal, and we treat your data with the utmost respect and confidentiality.
+            Sobable ("we", "our", or "us") operates the Sobable mobile application. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. Your recovery journey is personal, and we treat your data with the utmost respect and confidentiality.
           </p>
         </motion.div>
 

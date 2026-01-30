@@ -19,7 +19,7 @@ const TermsAndConditions = () => {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-3">
           <p>
-            <strong className="text-foreground">This app is not a substitute for professional medical advice, diagnosis, or treatment.</strong> Clean & Sober is designed as a supportive tool for individuals on their recovery journey but should not replace professional healthcare services.
+            <strong className="text-foreground">This app is not a substitute for professional medical advice, diagnosis, or treatment.</strong> Sobable is designed as a supportive tool for individuals on their recovery journey but should not replace professional healthcare services.
           </p>
           <p>
             If you are experiencing a medical emergency, thoughts of self-harm, or need immediate assistance, please contact emergency services (911) or a crisis hotline immediately:
@@ -64,14 +64,14 @@ const TermsAndConditions = () => {
                   <section>
                     <h3 className="font-semibold text-foreground mb-2">1. Acceptance of Terms</h3>
                     <p>
-                      By accessing and using the Clean & Sober application ("App"), you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use the App.
+                      By accessing and using the Sobable application ("App"), you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use the App.
                     </p>
                   </section>
 
                   <section>
                     <h3 className="font-semibold text-foreground mb-2">2. Description of Service</h3>
                     <p>
-                      Clean & Sober is a personal recovery support application that provides tools for tracking sobriety, mood logging, trigger identification, community support features, and motivational content. The App is designed to supplement, not replace, professional addiction treatment and mental health services.
+                      Sobable is a personal recovery support application that provides tools for tracking sobriety, mood logging, trigger identification, community support features, and motivational content. The App is designed to supplement, not replace, professional addiction treatment and mental health services.
                     </p>
                   </section>
 
@@ -117,7 +117,7 @@ const TermsAndConditions = () => {
                   <section>
                     <h3 className="font-semibold text-foreground mb-2">7. Intellectual Property</h3>
                     <p>
-                      All content, features, and functionality of the App, including but not limited to text, graphics, logos, icons, and software, are the exclusive property of Clean & Sober and are protected by copyright, trademark, and other intellectual property laws.
+                      All content, features, and functionality of the App, including but not limited to text, graphics, logos, icons, and software, are the exclusive property of Sobable and are protected by copyright, trademark, and other intellectual property laws.
                     </p>
                   </section>
 

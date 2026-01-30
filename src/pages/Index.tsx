@@ -137,12 +137,12 @@ const Index = () => {
                 )} 🌟
               </h1>
             </motion.div>
+            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
+            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
             <GamificationCard />
             <DailyChallenges />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
-            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
-            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
             <DailyGoals />
             <QuickActions />
             <SmartInsights />
@@ -229,7 +229,7 @@ const Index = () => {
               <div className="p-2.5 rounded-xl gradient-primary shadow-lg shadow-primary/20 icon-glow">
                 <Leaf className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold text-foreground tracking-tight">Clean & Sober</span>
+              <span className="text-lg font-bold text-foreground tracking-tight">Sobable</span>
             </div>
             <div className="flex items-center gap-1">
               <NotificationCenter />
