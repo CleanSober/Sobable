@@ -13,19 +13,20 @@ import {
   Star,
   Download,
   Users,
-  Clock
+  Clock,
+  Flame
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import { useAuth } from "@/contexts/AuthContext";
-import appIcon from "@/assets/app-icon.png";
-import appIconWebp from "@/assets/app-icon.webp";
+import sobableLogo from "@/assets/sobable-logo.png";
 import phoneMockup1 from "@/assets/phone-mockup-1.png";
 import phoneMockup1Webp from "@/assets/phone-mockup-1.webp";
 import phoneMockup2 from "@/assets/phone-mockup-2.png";
 import phoneMockup2Webp from "@/assets/phone-mockup-2.webp";
 import phoneMockupSquare from "@/assets/phone-mockup-square.png";
 import phoneMockupSquareWebp from "@/assets/phone-mockup-square.webp";
+import socialHeroBanner from "@/assets/brand/social-hero-banner.png";
 
 const features = [
   {
@@ -93,10 +94,16 @@ const Landing = () => {
     <main className="min-h-screen bg-background overflow-x-hidden" role="main">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20">
-        {/* Background effects */}
+        {/* Background with hero banner */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-soft" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
+          <img 
+            src={socialHeroBanner} 
+            alt="" 
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse-soft" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
@@ -107,18 +114,15 @@ const Landing = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-                <picture>
-                  <source srcSet={appIconWebp} type="image/webp" />
-                  <img 
-                    src={appIcon} 
-                    alt="Sober Days App Icon - Free Sobriety Tracker" 
-                    width={24} 
-                    height={24} 
-                    className="w-6 h-6 rounded-lg" 
-                  />
-                </picture>
-                <span className="text-sm text-primary font-medium">Free Sobriety Tracker App</span>
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/20 to-teal-500/20 border border-amber-500/30 mb-8">
+                <img 
+                  src={sobableLogo} 
+                  alt="Sobable - Rise. Recover. Renew." 
+                  width={28} 
+                  height={28} 
+                  className="w-7 h-7" 
+                />
+                <span className="text-sm font-medium bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">Rise. Recover. Renew.</span>
               </div>
             </motion.div>
 
@@ -128,8 +132,8 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
             >
-              Track Your Sober Days.{" "}
-              <span className="text-gradient">Stay Alcohol-Free.</span>
+              Your Recovery{" "}
+              <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-teal-400 bg-clip-text text-transparent">Starts Today.</span>
             </motion.h1>
 
             <motion.p
@@ -138,7 +142,7 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl lg:max-w-none"
             >
-              The #1 free sobriety counter app. Track your recovery, count days sober, calculate money saved, and prevent relapse—one day at a time.
+              Track your sobriety journey with Sobable. Count days sober, calculate money saved, and build lasting recovery—one day at a time.
             </motion.p>
 
             {/* Primary CTA - App Store Downloads */}
@@ -149,7 +153,7 @@ const Landing = () => {
               className="mb-8"
             >
               <p className="text-sm text-muted-foreground mb-4 flex items-center justify-center lg:justify-start gap-2">
-                <Download className="w-4 h-4" />
+                <Flame className="w-4 h-4 text-amber-400" />
                 Download Free on iOS & Android
               </p>
               <AppStoreBadges size="lg" className="justify-center lg:justify-start" />
@@ -175,25 +179,25 @@ const Landing = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 p-4 rounded-2xl bg-card/50 border border-border/30"
+              className="grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 p-4 rounded-2xl bg-gradient-to-r from-amber-500/5 to-teal-500/5 border border-amber-500/20"
             >
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 text-2xl md:text-3xl font-bold text-foreground">
-                  <Users className="w-5 h-5 text-primary" />
+                  <Users className="w-5 h-5 text-amber-400" />
                   50K+
                 </div>
                 <div className="text-xs text-muted-foreground">Active Users</div>
               </div>
-              <div className="text-center border-x border-border/30">
+              <div className="text-center border-x border-amber-500/20">
                 <div className="flex items-center justify-center gap-1 text-2xl md:text-3xl font-bold text-foreground">
-                  <Star className="w-5 h-5 text-accent fill-accent" />
+                  <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
                   4.9
                 </div>
                 <div className="text-xs text-muted-foreground">App Rating</div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 text-2xl md:text-3xl font-bold text-foreground">
-                  <Clock className="w-5 h-5 text-primary" />
+                  <Flame className="w-5 h-5 text-amber-400" />
                   24/7
                 </div>
                 <div className="text-xs text-muted-foreground">Support</div>
@@ -255,7 +259,7 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6 bg-card/30" aria-labelledby="features-heading">
+      <section id="features" className="py-24 px-6 bg-gradient-to-b from-background to-card/30" aria-labelledby="features-heading">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -263,12 +267,16 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+              <Flame className="w-4 h-4 text-amber-400" />
+              <span className="text-sm font-medium text-amber-400">Powerful Features</span>
+            </div>
             <h2 id="features-heading" className="text-3xl md:text-5xl font-bold mb-4">
-              Best Sobriety Tracker{" "}
-              <span className="text-gradient">Features</span>
+              Everything You Need to{" "}
+              <span className="bg-gradient-to-r from-amber-400 to-teal-400 bg-clip-text text-transparent">Recover</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to quit drinking and stay sober. Free tools for addiction recovery and relapse prevention.
+              Free tools for addiction recovery and relapse prevention. Track, reflect, and grow stronger every day.
             </p>
           </motion.div>
 
@@ -312,10 +320,10 @@ const Landing = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="gradient-card p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 group"
+                  className="p-6 rounded-2xl bg-gradient-to-br from-card to-card/50 border border-amber-500/10 hover:border-amber-500/30 transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-shadow duration-300">
-                    <feature.icon className="w-6 h-6 text-primary-foreground" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-teal-600 flex items-center justify-center mb-4 group-hover:shadow-lg group-hover:shadow-amber-500/20 transition-shadow duration-300">
+                    <feature.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
@@ -347,16 +355,16 @@ const Landing = () => {
             className="text-center mb-16"
           >
             <h2 id="how-it-works-heading" className="text-3xl md:text-5xl font-bold mb-4">
-              Start Counting{" "}
-              <span className="text-gradient">Sober Days</span>
+              Start Your{" "}
+              <span className="bg-gradient-to-r from-amber-400 to-teal-400 bg-clip-text text-transparent">Journey</span>
             </h2>
           </motion.div>
 
           <div className="space-y-8">
             {[
-              { step: "1", title: "Download the App", description: "Get the free app on iOS or Android. Takes less than 30 seconds to set up." },
-              { step: "2", title: "Set Your Sobriety Date", description: "Enter when you quit drinking. Your sobriety counter starts tracking immediately." },
-              { step: "3", title: "Track & Celebrate", description: "Log mood, cravings, and triggers. Earn sobriety milestones and watch your money saved grow." }
+              { step: "1", title: "Download Sobable", description: "Get the free app on iOS or Android. Takes less than 30 seconds to set up." },
+              { step: "2", title: "Set Your Sobriety Date", description: "Enter when you started your recovery. Your journey counter starts tracking immediately." },
+              { step: "3", title: "Rise & Renew", description: "Log mood, cravings, and triggers. Earn milestones and watch your transformation unfold." }
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -366,7 +374,7 @@ const Landing = () => {
                 transition={{ delay: index * 0.2 }}
                 className="flex gap-6 items-start"
               >
-                <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center flex-shrink-0 text-primary-foreground font-bold text-xl">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-teal-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xl shadow-lg shadow-amber-500/20">
                   {item.step}
                 </div>
                 <div>
@@ -390,7 +398,7 @@ const Landing = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 px-6 bg-card/30" aria-labelledby="testimonials-heading">
+      <section className="py-24 px-6 bg-gradient-to-b from-card/30 to-background" aria-labelledby="testimonials-heading">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -398,12 +406,16 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+              <span className="text-sm font-medium text-amber-400">Success Stories</span>
+            </div>
             <h2 id="testimonials-heading" className="text-3xl md:text-5xl font-bold mb-4">
-              Real Recovery{" "}
-              <span className="text-gradient">Success Stories</span>
+              Real People,{" "}
+              <span className="bg-gradient-to-r from-amber-400 to-teal-400 bg-clip-text text-transparent">Real Recovery</span>
             </h2>
             <p className="text-lg text-muted-foreground">
-              Join thousands who have tracked their sobriety and transformed their lives.
+              Join thousands who have transformed their lives with Sobable.
             </p>
           </motion.div>
 
@@ -415,17 +427,17 @@ const Landing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="gradient-card p-6 rounded-2xl border border-border/50"
+                className="p-6 rounded-2xl bg-gradient-to-br from-card to-card/50 border border-amber-500/10"
               >
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
                 <p className="text-foreground/90 mb-4 italic">"{testimonial.quote}"</p>
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{testimonial.name}</span>
-                  <span className="text-sm text-primary font-semibold">{testimonial.days} days sober</span>
+                  <span className="text-sm text-amber-400 font-semibold">{testimonial.days} days sober</span>
                 </div>
               </motion.div>
             ))}
@@ -441,16 +453,18 @@ const Landing = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Shield className="w-16 h-16 text-primary mx-auto mb-6" aria-hidden="true" />
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-teal-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/20">
+              <Shield className="w-10 h-10 text-white" aria-hidden="true" />
+            </div>
             <h2 id="privacy-heading" className="text-3xl md:text-4xl font-bold mb-4">
-              100% Private Sobriety Tracking
+              Your Privacy, Protected
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Your recovery data stays on your device. No account required. No data collection. No ads. The most private sober app available.
+              Your recovery journey is personal. Your data stays on your device. No account required. No data collection. No ads.
             </p>
             <div className="flex flex-wrap justify-center gap-4 mb-8">
               {["No Account Needed", "Offline Access", "Zero Data Collection", "Anonymous Forever"].map((item, index) => (
-                <div key={index} className="px-4 py-2 rounded-full bg-secondary/50 border border-border/50">
+                <div key={index} className="px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-teal-500/10 border border-amber-500/20">
                   <span className="text-sm font-medium text-foreground">{item}</span>
                 </div>
               ))}
@@ -465,15 +479,21 @@ const Landing = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center gradient-card p-12 rounded-3xl border border-primary/20 relative overflow-hidden"
+          className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-gradient-to-br from-amber-500/10 via-teal-500/5 to-amber-500/10 border border-amber-500/20 relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-primary/5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-teal-500/5" />
           <div className="relative z-10">
+            <img 
+              src={sobableLogo} 
+              alt="Sobable" 
+              className="w-16 h-16 mx-auto mb-6"
+            />
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Start Your Recovery Today
+              Rise. Recover.{" "}
+              <span className="bg-gradient-to-r from-amber-400 to-teal-400 bg-clip-text text-transparent">Renew.</span>
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              Every journey begins with a single step. Download the app and take yours today.
+              Your transformation starts with a single step. Download Sobable and begin your journey today.
             </p>
             
             {/* Primary: App Store badges */}
@@ -482,9 +502,9 @@ const Landing = () => {
             </div>
 
             {/* Secondary: Web version */}
-            <div className="pt-6 border-t border-border/30">
+            <div className="pt-6 border-t border-amber-500/20">
               <p className="text-sm text-muted-foreground mb-4">Or continue in browser</p>
-              <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg">
+              <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg border-amber-500/30 hover:bg-amber-500/10">
                 <Link to="/auth">
                   Use Web Version
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -496,10 +516,14 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-border/50">
-        <div className="max-w-6xl mx-auto text-center">
+      <footer className="py-8 px-6 border-t border-amber-500/10">
+        <div className="max-w-6xl mx-auto text-center flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2">
+            <img src={sobableLogo} alt="Sobable" className="w-6 h-6" />
+            <span className="font-semibold bg-gradient-to-r from-amber-400 to-teal-400 bg-clip-text text-transparent">Sobable</span>
+          </div>
           <p className="text-muted-foreground text-sm">
-            Made with care for those on the path to recovery. You are not alone.
+            Rise. Recover. Renew. You are not alone on this journey.
           </p>
         </div>
       </footer>
