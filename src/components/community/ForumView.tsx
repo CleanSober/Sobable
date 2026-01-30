@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent, createMentionNotifications } from "@/hooks/useCommunity";
+import { useCommunityBot } from "@/hooks/useCommunityBot";
 import { PostCard } from "./PostCard";
 
 interface Forum {
@@ -30,6 +31,7 @@ const MAX_CONTENT_LENGTH = 10000;
 export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const { user } = useAuth();
   const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
+  const { triggerBotReply } = useCommunityBot();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,14 +92,23 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     setSubmitting(true);
     
     try {
-      const { error } = await supabase.from("forum_posts").insert({
+      const { data, error } = await supabase.from("forum_posts").insert({
         forum_id: forum.id,
         user_id: user.id,
         title: trimmedTitle,
         content: trimmedContent,
-      });
+      }).select().single();
 
       if (error) throw error;
+      
+      // Trigger bot auto-reply after random delay (1-5 min)
+      if (data) {
+        triggerBotReply({
+          content: `${trimmedTitle}\n\n${trimmedContent}`,
+          targetId: data.id,
+          targetType: "forum_post",
+        });
+      }
       
       // Award XP for forum post
       await addXP(XP_REWARDS.community_post, 'community_post', 'Started a new forum discussion');
