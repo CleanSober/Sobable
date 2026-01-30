@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, MessageCircle, Users, AlertCircle } from "lucide-react";
+import { Send, MessageCircle, Users, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,13 +11,20 @@ import {
   useUserProfiles, 
   useTypingIndicator,
   ChatMessage, 
-  ChatRoom, 
   validateMessageLength,
   createMentionNotifications
 } from "@/hooks/useCommunity";
+
+interface ChatRoom {
+  id: string;
+  name: string;
+  description: string | null;
+}
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { MentionInput } from "./MentionInput";
+import { ChatRoomSelector } from "./ChatRoomSelector";
+import { OnlineUsers } from "./OnlineUsers";
 
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -87,6 +94,7 @@ export const LiveChat = () => {
         .from("chat_rooms")
         .select("id, name, description")
         .eq("is_active", true)
+        .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
 
@@ -121,6 +129,12 @@ export const LiveChat = () => {
       setError("Failed to load messages");
     }
   }, [room?.id, fetchProfiles]);
+
+  const handleRoomChange = useCallback((newRoom: ChatRoom) => {
+    setRoom(newRoom);
+    setMessages([]);
+    setError(null);
+  }, []);
 
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
@@ -187,7 +201,7 @@ export const LiveChat = () => {
 
   if (loading) {
     return (
-      <Card className="gradient-card border-border/50 h-[500px]">
+      <Card className="gradient-card border-border/50 h-[550px]">
         <CardContent className="flex items-center justify-center h-full">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -198,14 +212,15 @@ export const LiveChat = () => {
     );
   }
 
-  if (error) {
+  if (error && !room) {
     return (
-      <Card className="gradient-card border-destructive/50 h-[500px]">
+      <Card className="gradient-card border-destructive/50 h-[550px]">
         <CardContent className="flex items-center justify-center h-full">
           <div className="flex flex-col items-center gap-3 text-center">
             <AlertCircle className="w-10 h-10 text-destructive" />
             <p className="text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={fetchRoom}>
+              <RefreshCw className="w-4 h-4 mr-2" />
               Try again
             </Button>
           </div>
@@ -216,18 +231,24 @@ export const LiveChat = () => {
 
   return (
     <Card className="gradient-card border-border/50 overflow-hidden">
-      <CardHeader className="pb-3 border-b border-border/30">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <MessageCircle className="w-5 h-5 text-primary" aria-hidden="true" />
-          {room?.name || "Live Chat"}
-        </CardTitle>
-        {room?.description && (
-          <p className="text-sm text-muted-foreground">{room.description}</p>
-        )}
+      <CardHeader className="pb-3 border-b border-border/30 space-y-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MessageCircle className="w-5 h-5 text-primary" aria-hidden="true" />
+            Live Chat
+          </CardTitle>
+          <OnlineUsers roomId={room?.id} />
+        </div>
+        
+        {/* Room selector */}
+        <ChatRoomSelector
+          currentRoom={room}
+          onSelectRoom={handleRoomChange}
+        />
       </CardHeader>
       
       <CardContent className="p-0">
-        <ScrollArea className="h-[350px]" ref={scrollRef}>
+        <ScrollArea className="h-[320px]" ref={scrollRef}>
           <div className="space-y-3 p-4">
             {messages.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
@@ -288,6 +309,7 @@ export const LiveChat = () => {
               onClick={sendMessage} 
               disabled={!newMessage.trim() || sending} 
               size="icon"
+              className="gradient-primary text-primary-foreground"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" aria-hidden="true" />
