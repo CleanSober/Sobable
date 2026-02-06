@@ -35,7 +35,7 @@ import { PersonalizedRecommendations } from "@/components/PersonalizedRecommenda
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
 import { HabitLoopCard } from "@/components/HabitLoopCard";
-import { GamificationCard } from "@/components/GamificationCard";
+// GamificationCard is now integrated into SobrietyCounter
 import { DailyChallenges } from "@/components/DailyChallenges";
 import { RiskPrediction } from "@/components/RiskPrediction";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -141,7 +141,7 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
-            <GamificationCard />
+            {/* XP is now integrated into the SobrietyCounter above */}
             <DailyChallenges />
             <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
