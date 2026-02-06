@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
 
-export type TabId = "home" | "checkin" | "community" | "triggers" | "progress";
-export const TAB_ORDER: TabId[] = ["home", "checkin", "community", "triggers", "progress"];
+export type TabId = "home" | "checkin" | "triggers" | "progress" | "community";
+export const TAB_ORDER: TabId[] = ["home", "checkin", "triggers", "progress", "community"];
 
 interface Tab {
   id: TabId;
@@ -17,9 +17,9 @@ interface Tab {
 const tabs: Tab[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "checkin", label: "Check-In", icon: Heart },
-  { id: "community", label: "Community", icon: Users, isPremium: true },
   { id: "triggers", label: "Triggers", icon: Brain },
   { id: "progress", label: "Progress", icon: TrendingUp },
+  { id: "community", label: "Community", icon: Users, isPremium: true },
 ];
 
 interface BottomTabsProps {

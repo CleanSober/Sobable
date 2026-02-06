@@ -162,8 +162,8 @@ const Index = () => {
               <p className="text-sm text-muted-foreground">How are you feeling today?</p>
             </motion.div>
             <MoodCheckIn />
-            <Journal daysSober={daysSober} />
             <SleepTracker />
+            <Journal daysSober={daysSober} />
             <BreathingExercise />
             <GuidedMeditations />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
@@ -177,8 +177,8 @@ const Index = () => {
               <h1 className="text-xl font-bold text-foreground mb-0.5">Triggers & Coping</h1>
               <p className="text-sm text-muted-foreground">Know yourself to protect yourself</p>
             </motion.div>
-            <RiskPrediction />
             <CravingTimer />
+            <RiskPrediction />
             <TriggerLogger />
             <PatternAnalysis />
             <RelapsePreventionPlan />
@@ -193,8 +193,8 @@ const Index = () => {
               <h1 className="text-xl font-bold text-foreground mb-0.5">Your Journey</h1>
               <p className="text-sm text-muted-foreground">Every step counts</p>
             </motion.div>
-            <PersonalizedRecommendations />
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+            <PersonalizedRecommendations />
             <PremiumAnalytics />
           </div>
         );
