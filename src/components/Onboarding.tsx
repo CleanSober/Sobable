@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Check, Shield, Sparkles } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, Shield, Sparkles, PartyPopper, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 
 const substances = [
   { id: "alcohol", label: "Alcohol", emoji: "🍺" },
@@ -31,9 +32,11 @@ interface OnboardingProps {
 }
 
 const TOTAL_STEPS = 4;
+const CELEBRATION_DURATION = 3500;
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [step, setStep] = useState(1);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [name, setName] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
@@ -49,7 +52,9 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     );
   };
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
+    setShowCelebration(true);
+
     const data: OnboardingData = {
       name: isAnonymous ? "" : name.trim().slice(0, 50),
       substances: selectedSubstances,
@@ -59,8 +64,11 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
       emergencyContact: emergencyContact.trim().slice(0, 20) || undefined,
     };
-    onComplete(data);
-  };
+
+    setTimeout(() => {
+      onComplete(data);
+    }, CELEBRATION_DURATION);
+  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact, onComplete]);
 
   const canProceed = () => {
     switch (step) {
@@ -80,6 +88,64 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   ];
 
   const currentTitle = stepTitles[step - 1];
+
+  if (showCelebration) {
+    return (
+      <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col items-center justify-center p-5 relative overflow-hidden">
+        <ConfettiCelebration duration={CELEBRATION_DURATION} />
+
+        {/* Background glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full" />
+          <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-accent/10 blur-[100px] rounded-full" />
+        </div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+          className="relative z-10 flex flex-col items-center text-center max-w-sm"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 12, delay: 0.3 }}
+            className="w-20 h-20 rounded-3xl gradient-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/30"
+          >
+            <PartyPopper className="w-10 h-10 text-primary-foreground" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-3xl font-bold text-foreground mb-2"
+          >
+            You're all set! 🎉
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="text-muted-foreground text-base mb-6"
+          >
+            Your recovery journey starts now.{"\n"}We're proud of you.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.0 }}
+            className="flex items-center gap-2 text-sm text-primary font-medium"
+          >
+            <Rocket className="w-4 h-4" />
+            <span>Loading your dashboard...</span>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col p-5 relative overflow-hidden">
