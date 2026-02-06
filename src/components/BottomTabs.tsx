@@ -5,6 +5,7 @@ import { useHaptics } from "@/hooks/useHaptics";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
 
 export type TabId = "home" | "checkin" | "community" | "triggers" | "progress";
+export const TAB_ORDER: TabId[] = ["home", "checkin", "community", "triggers", "progress"];
 
 interface Tab {
   id: TabId;
