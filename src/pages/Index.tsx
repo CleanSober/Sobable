@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Loader2 } from "lucide-react";
 import sobableLogo from "@/assets/sobable-logo.png";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
@@ -8,7 +9,7 @@ import { MoneySaved } from "@/components/MoneySaved";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
 import { EmergencyButton } from "@/components/EmergencyButton";
 import { Onboarding } from "@/components/Onboarding";
-import { BottomTabs, type TabId } from "@/components/BottomTabs";
+import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { ProgressView } from "@/components/ProgressView";
 import { TriggerLogger } from "@/components/TriggerLogger";
 import { PatternAnalysis } from "@/components/PatternAnalysis";
@@ -43,8 +44,21 @@ const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const navigate = useNavigate();
-  
+
+  const handleTabChange = (tab: TabId) => {
+    const oldIndex = TAB_ORDER.indexOf(activeTab);
+    const newIndex = TAB_ORDER.indexOf(tab);
+    setSwipeDirection(newIndex > oldIndex ? 1 : -1);
+    setActiveTab(tab);
+  };
+
+  const { onTouchStart, onTouchEnd } = useSwipeNavigation(
+    TAB_ORDER,
+    activeTab,
+    handleTabChange
+  );
   // Initialize Capacitor for native mobile features
   useCapacitor();
 
@@ -223,21 +237,26 @@ const Index = () => {
           </div>
         </motion.header>
 
-        <main className="container max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-24 relative">
-          <AnimatePresence mode="wait">
+        <main
+          className="container max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-24 relative overflow-x-hidden"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <AnimatePresence mode="wait" custom={swipeDirection}>
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              custom={swipeDirection}
+              initial={{ opacity: 0, x: swipeDirection * 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: swipeDirection * -60 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
             >
               {renderTabContent()}
             </motion.div>
           </AnimatePresence>
         </main>
 
-        <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomTabs activeTab={activeTab} onTabChange={handleTabChange} />
         <EmergencyButton />
         <AIRecoveryCoach />
         <AdBanner position="bottom" />
