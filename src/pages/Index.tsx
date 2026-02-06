@@ -18,13 +18,11 @@ import { CravingTimer } from "@/components/CravingTimer";
 import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 import { RelapsePreventionPlan } from "@/components/RelapsePreventionPlan";
 import { SleepTracker } from "@/components/SleepTracker";
-import { DailyGoals } from "@/components/DailyGoals";
 import { QuickActions } from "@/components/QuickActions";
+import { DailyRitual } from "@/components/DailyRitual";
 import { MotivationalBanner } from "@/components/MotivationalBanner";
 import { CommunityHub } from "@/components/community/CommunityHub";
 import { NotificationsBell } from "@/components/community/NotificationsBell";
-import { StreakTracker } from "@/components/StreakTracker";
-import { SmartInsights } from "@/components/SmartInsights";
 import { BreathingExercise } from "@/components/BreathingExercise";
 import { GuidedMeditations } from "@/components/GuidedMeditations";
 import { CrisisResources } from "@/components/CrisisResources";
@@ -32,12 +30,8 @@ import { PremiumAnalytics } from "@/components/PremiumAnalytics";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
-import { HabitLoopCard } from "@/components/HabitLoopCard";
-// GamificationCard is now integrated into SobrietyCounter
-import { DailyChallenges } from "@/components/DailyChallenges";
 import { RiskPrediction } from "@/components/RiskPrediction";
 import { NotificationCenter } from "@/components/NotificationCenter";
-import { ShareAndInvite } from "@/components/ShareAndInvite";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -139,15 +133,10 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
-            {/* XP is now integrated into the SobrietyCounter above */}
-            <DailyChallenges />
-            <HabitLoopCard onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
-            <DailyGoals />
             <QuickActions />
-            <SmartInsights />
             <AchievementBadges daysSober={daysSober} />
-            <ShareAndInvite />
           </div>
         );
 

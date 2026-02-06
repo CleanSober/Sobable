@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Award, Calendar, TrendingUp, Sparkles, Gift, Zap, ChevronDown, ChevronUp, Star, Flame } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMilestones } from "@/lib/storage";
-import { useGamification, getLevelTitle, XP_REWARDS } from "@/hooks/useGamification";
-import { cn } from "@/lib/utils";
+import { useGamification, getLevelTitle } from "@/hooks/useGamification";
 
 interface SobrietyCounterProps {
   daysSober: number;
@@ -26,21 +22,10 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
 
   const {
     userXP,
-    xpHistory,
     xpProgress,
     loading: xpLoading,
-    claiming,
-    claimDailyReward,
-    canClaimDailyReward,
   } = useGamification();
-  const [showHistory, setShowHistory] = useState(false);
   const [rewardAnimation, setRewardAnimation] = useState(false);
-
-  const handleClaimReward = async () => {
-    setRewardAnimation(true);
-    await claimDailyReward();
-    setTimeout(() => setRewardAnimation(false), 1000);
-  };
 
   const levelTitle = userXP ? getLevelTitle(userXP.current_level) : "";
 
@@ -200,70 +185,7 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
           </div>
         )}
 
-        {/* Daily Reward */}
-        {!xpLoading && userXP && (
-          <div className="glass-card rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "p-2 rounded-xl transition-all duration-300",
-                  canClaimDailyReward
-                    ? "bg-success/20 animate-glow-pulse"
-                    : "bg-muted/50"
-                )}>
-                  <Gift className={cn(
-                    "w-4 h-4",
-                    canClaimDailyReward ? "text-success" : "text-muted-foreground"
-                  )} />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm text-foreground">Daily Reward</p>
-                  <div className="flex items-center gap-2">
-                    {userXP.daily_login_streak > 0 && (
-                      <span className="flex items-center gap-1 text-[10px] text-accent">
-                        <Flame className="w-3 h-3" />
-                        {userXP.daily_login_streak} day streak
-                      </span>
-                    )}
-                    {userXP.daily_login_streak >= 7 && (
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-accent/15 text-accent border-accent/30">
-                        Week bonus!
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                onClick={handleClaimReward}
-                disabled={!canClaimDailyReward || claiming}
-                className={cn(
-                  "gap-1.5 font-semibold text-xs transition-all duration-300",
-                  canClaimDailyReward && "bg-gradient-to-r from-success to-primary hover:shadow-lg hover:shadow-success/25 btn-glow"
-                )}
-              >
-                {claiming ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Zap className="w-3.5 h-3.5" />
-                    </motion.div>
-                    Claiming...
-                  </>
-                ) : canClaimDailyReward ? (
-                  <>
-                    <Gift className="w-3.5 h-3.5" />
-                    +{XP_REWARDS.daily_login + Math.min(userXP.daily_login_streak * 5, 50)} XP
-                  </>
-                ) : (
-                  "Claimed ✓"
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
+
 
         {/* Milestones Achieved */}
         {reached.length > 0 && (
@@ -288,53 +210,8 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
           </div>
         )}
 
-        {/* XP History Collapsible */}
-        {!xpLoading && userXP && (
-          <Collapsible open={showHistory} onOpenChange={setShowHistory}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full mt-4 gap-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/30"
-              >
-                <TrendingUp className="w-3.5 h-3.5" />
-                Recent XP Gains
-                {showHistory ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-                {xpHistory.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No XP earned yet. Start your journey!
-                  </p>
-                ) : (
-                  xpHistory.map((entry, index) => (
-                    <motion.div
-                      key={entry.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-secondary/30 border border-border/30"
-                    >
-                      <div>
-                        <p className="text-xs font-medium text-foreground capitalize">
-                          {entry.source.replace(/_/g, " ")}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {entry.description || new Date(entry.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Badge className="bg-accent/15 text-accent border-accent/30 font-semibold text-[10px]">
-                        +{entry.xp_amount} XP
-                      </Badge>
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+
+
 
         {/* Loading state for XP */}
         {xpLoading && (
