@@ -135,7 +135,7 @@ const Index = () => {
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
-            <QuickActions />
+            <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <AchievementBadges daysSober={daysSober} />
           </div>
         );

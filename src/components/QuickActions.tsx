@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
-import { Phone, BookHeart, Timer, MessageCircle, Sparkles } from "lucide-react";
+import { Phone, BookHeart, Wind, MessageCircle, Sparkles } from "lucide-react";
 import { useUserData } from "@/hooks/useUserData";
 import { toast } from "sonner";
 import { makePhoneCall, hapticSuccess } from "@/lib/nativeActions";
+
+interface QuickActionsProps {
+  onNavigateToCheckIn?: () => void;
+}
 
 interface QuickAction {
   id: string;
@@ -13,7 +17,7 @@ interface QuickAction {
   action: () => void;
 }
 
-export const QuickActions = () => {
+export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const { profile } = useUserData();
 
   const actions: QuickAction[] = [
@@ -52,14 +56,14 @@ export const QuickActions = () => {
     {
       id: "breathe",
       label: "Breathe",
-      icon: Timer,
+      icon: Wind,
       gradient: "from-blue-400 to-cyan-500",
       glowColor: "190 90% 50%",
       action: () => {
-        toast.info("Starting breathing exercise...", {
-          duration: 2000,
-          icon: "🧘"
-        });
+        if (onNavigateToCheckIn) {
+          onNavigateToCheckIn();
+          toast.info("Scroll down to Breathing Exercises 🧘", { duration: 3000 });
+        }
       }
     },
     {
@@ -68,8 +72,16 @@ export const QuickActions = () => {
       icon: MessageCircle,
       gradient: "from-violet-400 to-purple-500",
       glowColor: "270 76% 55%",
-      action: async () => {
-        await makePhoneCall("988");
+      action: () => {
+        toast("988 Suicide & Crisis Lifeline", {
+          description: "Call or text 988 for 24/7 free support",
+          duration: 8000,
+          icon: "🆘",
+          action: {
+            label: "Call 988",
+            onClick: () => makePhoneCall("988"),
+          },
+        });
       }
     }
   ];

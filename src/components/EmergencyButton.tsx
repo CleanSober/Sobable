@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Heart, MessageCircle, X, Shield, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getUserData } from "@/lib/storage";
+import { useUserData } from "@/hooks/useUserData";
 import { makePhoneCall, sendSMS, hapticWarning, hapticImpact } from "@/lib/nativeActions";
 
 const POSITION_STORAGE_KEY = 'emergency-button-position';
@@ -11,7 +11,7 @@ export const EmergencyButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const userData = getUserData();
+  const { profile } = useUserData();
 
   useEffect(() => {
     const savedPosition = localStorage.getItem(POSITION_STORAGE_KEY);
@@ -23,6 +23,7 @@ export const EmergencyButton = () => {
       }
     }
   }, []);
+
   const handleDragEnd = (_: any, info: { offset: { x: number; y: number } }) => {
     const newPosition = {
       x: position.x + info.offset.x,
@@ -50,7 +51,6 @@ export const EmergencyButton = () => {
   };
 
   const handleResourceText = async (text: string) => {
-    // Extract the number from "HOME to 741741" format
     const number = text.includes("to") ? text.split(" to ")[1] : text;
     const body = text.includes("to") ? text.split(" to ")[0] : undefined;
     await sendSMS(number, body);
@@ -152,13 +152,13 @@ export const EmergencyButton = () => {
                 </div>
 
                 {/* Personal Reminder */}
-                {userData?.personalReminder && (
+                {profile?.personal_reminder && (
                   <div className="mb-6 p-4 rounded-xl glass-card">
                     <div className="flex items-center gap-2 mb-2">
                       <Heart className="w-4 h-4 text-accent" />
                       <span className="text-sm font-semibold text-accent">Your Reason</span>
                     </div>
-                    <p className="text-foreground font-medium">{userData.personalReminder}</p>
+                    <p className="text-foreground font-medium">{profile.personal_reminder}</p>
                   </div>
                 )}
 
@@ -187,21 +187,21 @@ export const EmergencyButton = () => {
 
                 {/* Contact buttons */}
                 <div className="grid grid-cols-2 gap-3">
-                  {userData?.sponsorPhone && (
+                  {profile?.sponsor_phone && (
                     <Button
                       variant="outline"
                       className="border-primary/30 text-primary hover:bg-primary/10 h-12"
-                      onClick={() => handleResourceCall(userData.sponsorPhone)}
+                      onClick={() => handleResourceCall(profile.sponsor_phone!)}
                     >
                       <Phone className="w-4 h-4 mr-2" />
                       Call Sponsor
                     </Button>
                   )}
-                  {userData?.emergencyContact && (
+                  {profile?.emergency_contact && (
                     <Button
                       variant="outline"
                       className="border-accent/30 text-accent hover:bg-accent/10 h-12"
-                      onClick={() => handleResourceCall(userData.emergencyContact)}
+                      onClick={() => handleResourceCall(profile.emergency_contact!)}
                     >
                       <Phone className="w-4 h-4 mr-2" />
                       Emergency
