@@ -1,6 +1,7 @@
 import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
+import { useOnlineCount } from "@/hooks/useOnlineCount";
 
 export type TabId = "home" | "checkin" | "community" | "triggers" | "progress";
 
@@ -26,7 +27,7 @@ interface BottomTabsProps {
 
 export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
   const { impact } = useHaptics();
-  
+  const onlineCount = useOnlineCount();
   const handleTabChange = (tabId: TabId) => {
     impact('light');
     onTabChange(tabId);
@@ -86,8 +87,21 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     />
                   </motion.div>
                   
+                  {/* Online users count badge for community tab */}
+                  {tab.id === "community" && onlineCount > 0 && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30"
+                    >
+                      <span className="text-[10px] font-bold text-white leading-none">
+                        {onlineCount > 99 ? "99+" : onlineCount}
+                      </span>
+                    </motion.div>
+                  )}
+
                   {/* Premium crown badge */}
-                  {isPremium && (
+                  {isPremium && tab.id !== "community" && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
