@@ -140,16 +140,66 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
     font-family: "Outfit", system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     background-image: var(--gradient-mesh);
     background-attachment: fixed;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent pull-to-refresh on mobile */
+  body.no-pull-refresh {
+    overscroll-behavior-y: none;
+  }
+
+  /* Better touch targets on mobile - only for standalone interactive elements */
+  @media (max-width: 639px) {
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Compact interactive elements that intentionally skip 44px rule */
+  [data-radix-collection-item],
+  [role="menuitem"],
+  [role="option"],
+  .inline-action {
+    min-height: unset;
+    min-width: unset;
+  }
+
+  /* Prevent text selection on interactive elements */
+  button, [role="button"], nav {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smooth scrolling on mobile */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Input zoom prevention on iOS (font-size >= 16px) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: inherit !important;
+    }
   }
 }
 
@@ -388,5 +438,21 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     opacity: 0.02;
     pointer-events: none;
+  }
+
+  /* Mobile momentum scroll */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Touch feedback */
+  .touch-active {
+    @apply active:scale-[0.97] active:opacity-80 transition-all duration-150;
+  }
+
+  /* Prevent content shift on scrollbar */
+  .scrollbar-stable {
+    scrollbar-gutter: stable;
   }
 }

@@ -187,7 +187,7 @@ export const NotificationCenter = () => {
       </PopoverTrigger>
 
       <PopoverContent 
-        className="w-96 p-0 bg-background border border-border shadow-xl z-50" 
+        className="w-[calc(100vw-1rem)] sm:w-96 p-0 bg-background border border-border shadow-xl z-50 max-h-[80dvh]" 
         align="end"
         sideOffset={8}
       >

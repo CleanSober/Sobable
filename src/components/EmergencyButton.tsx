@@ -90,7 +90,7 @@ export const EmergencyButton = () => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleButtonClick}
-        className="fixed bottom-24 right-6 z-50 p-4 rounded-full shadow-lg cursor-grab active:cursor-grabbing touch-none transition-all duration-300"
+        className="fixed bottom-20 right-4 z-50 p-3.5 rounded-full shadow-lg cursor-grab active:cursor-grabbing touch-none transition-all duration-300"
         style={{
           background: "linear-gradient(135deg, hsl(0 75% 55%), hsl(350 80% 50%))",
           boxShadow: "0 8px 32px hsl(0 75% 55% / 0.4), 0 0 0 1px hsl(0 75% 60% / 0.3)"
@@ -99,7 +99,7 @@ export const EmergencyButton = () => {
         whileDrag={{ scale: 1.1 }}
         whileHover={{ scale: 1.05 }}
       >
-        <Shield className="w-6 h-6 text-white" />
+        <Shield className="w-5 h-5 text-white" />
         
         {/* Pulse ring */}
         <motion.div

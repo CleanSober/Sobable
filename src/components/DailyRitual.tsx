@@ -263,7 +263,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
           )}
         </AnimatePresence>
 
-        <div className="relative p-5 space-y-4">
+        <div className="relative p-4 sm:p-5 space-y-3 sm:space-y-4">
           {/* Row 1: Streak + Daily Reward */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -48,8 +48,8 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
       {/* Glow effect at top */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       
-      <div className="container max-w-2xl mx-auto px-2 relative">
-        <div className="flex items-center justify-around py-2">
+      <div className="container max-w-2xl mx-auto px-1 relative">
+        <div className="flex items-center justify-around py-1.5">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
@@ -59,7 +59,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className="relative flex flex-col items-center justify-center px-4 py-2 min-w-[64px] transition-all duration-300"
+                className="relative flex flex-col items-center justify-center px-3 py-2 min-w-[56px] transition-all duration-300 active:scale-95"
               >
                 {/* Tooltip for community tab */}
                 <AnimatePresence>
@@ -101,7 +101,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <Icon
-                      className={`w-6 h-6 relative z-10 transition-all duration-300 ${
+                      className={`w-5 h-5 relative z-10 transition-all duration-300 ${
                         isPremium 
                           ? isActive 
                             ? "text-accent drop-shadow-[0_0_8px_hsl(42_100%_55%/0.5)]" 
@@ -149,7 +149,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                 
                 {/* Label */}
                 <span
-                  className={`text-xs mt-1.5 font-medium relative z-10 transition-all duration-300 ${
+                  className={`text-[10px] mt-1 font-medium relative z-10 transition-all duration-300 leading-tight ${
                     isPremium
                       ? isActive ? "text-accent" : "text-accent/60"
                       : isActive ? "text-primary" : "text-muted-foreground"

@@ -348,7 +348,7 @@ export const MoodCheckIn = () => {
         return (
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground text-center">Select all that apply</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {emotionTags.map((tag) => {
                 const isSelected = selectedEmotions.includes(tag.label);
                 return (
