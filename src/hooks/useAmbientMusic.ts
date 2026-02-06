@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useAmbientMusic = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,14 +11,20 @@ export const useAmbientMusic = () => {
   const generateAndPlay = useCallback(async (type: string, duration: number = 30) => {
     setIsLoading(true);
     try {
+      // Get the user's session token for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        toast.error("Please sign in to use ambient music");
+        return null;
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ambient-music`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ type, duration }),
         }
@@ -39,7 +46,6 @@ export const useAmbientMusic = () => {
         URL.revokeObjectURL(audioUrlRef.current);
       }
 
-      // Use data URI for base64 audio
       const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
       audioUrlRef.current = audioUrl;
       

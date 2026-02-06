@@ -35,15 +35,55 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate the caller
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: authError } = await supabaseAuth.auth.getClaims(token);
+    if (authError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+    console.log("Community bot triggered by authenticated user:", userId);
+
     const { type, content, targetId, targetType } = await req.json();
-    
-    console.log(`Community bot triggered: type=${type}, targetType=${targetType}, targetId=${targetId}`);
+
+    // Validate input
+    if (!content || typeof content !== "string" || content.length > 5000) {
+      return new Response(JSON.stringify({ error: "Invalid content" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!targetId || !targetType) {
+      return new Response(JSON.stringify({ error: "Missing targetId or targetType" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Use service role for writing bot replies
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -60,7 +100,7 @@ serve(async (req) => {
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: SUPPORTIVE_SYSTEM_PROMPT },
-          { role: "user", content: `Please provide a brief supportive response to this community post:\n\n"${content}"` },
+          { role: "user", content: `Please provide a brief supportive response to this community post:\n\n"${content.substring(0, 2000)}"` },
         ],
       }),
     });
@@ -85,7 +125,6 @@ serve(async (req) => {
 
     // Insert the reply based on target type
     if (targetType === "chat_message") {
-      // Reply to chat room
       const { data: originalMsg } = await supabaseClient
         .from("chat_messages")
         .select("room_id")
@@ -107,7 +146,6 @@ serve(async (req) => {
         }
       }
     } else if (targetType === "forum_post") {
-      // Reply to forum post
       const { error: insertError } = await supabaseClient
         .from("forum_replies")
         .insert({
@@ -121,7 +159,6 @@ serve(async (req) => {
         throw insertError;
       }
 
-      // Increment reply count manually
       const { data: post } = await supabaseClient
         .from("forum_posts")
         .select("reply_count")
@@ -135,7 +172,6 @@ serve(async (req) => {
           .eq("id", targetId);
       }
     } else if (targetType === "community_post") {
-      // For community_posts, we could add a reply system or just log
       console.log("Community post bot response (no reply table):", botReply);
     }
 

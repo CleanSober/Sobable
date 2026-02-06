@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,14 +13,48 @@ serve(async (req) => {
   }
 
   try {
-    const { type, duration } = await req.json();
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+    // Authenticate the user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: authError } = await supabaseClient.auth.getClaims(token);
+    if (authError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+    console.log("Generating ambient music for user:", userId);
+
+    const { type, duration } = await req.json();
+
+    // Validate input
+    if (type && typeof type !== "string") {
+      return new Response(JSON.stringify({ error: "Invalid type parameter" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     if (!ELEVENLABS_API_KEY) {
       throw new Error("ELEVENLABS_API_KEY is not configured");
     }
 
-    // Define prompts for different meditation/exercise types
     const musicPrompts: Record<string, string> = {
       breathing: "Gentle ambient meditation music with soft piano and flowing synth pads, calming and serene, perfect for breathing exercises, slow tempo, peaceful atmosphere",
       "478": "Deeply relaxing ambient soundscape with soft wind chimes and gentle ocean waves, perfect for 4-7-8 breathing technique, calming and anxiety-reducing",
@@ -33,7 +68,7 @@ serve(async (req) => {
     };
 
     const prompt = musicPrompts[type] || musicPrompts.default;
-    const musicDuration = Math.min(duration || 30, 120); // Cap at 120 seconds for ElevenLabs
+    const musicDuration = Math.min(duration || 30, 120);
 
     console.log(`Generating ${type} ambient music for ${musicDuration} seconds`);
 

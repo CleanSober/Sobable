@@ -24,12 +24,25 @@ const Auth = () => {
   }, [user, navigate]);
 
   const validateForm = () => {
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    const trimmedEmail = email.trim();
+    if (trimmedEmail.length > 255) {
+      toast.error("Email is too long");
+      return false;
+    }
+    if (!trimmedEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       toast.error("Please enter a valid email address");
       return false;
     }
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return false;
+    }
+    if (password.length > 128) {
+      toast.error("Password is too long");
+      return false;
+    }
+    if (!isLogin && !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      toast.error("Password must include uppercase, lowercase, and a number");
       return false;
     }
     return true;
