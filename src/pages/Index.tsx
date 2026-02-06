@@ -28,9 +28,7 @@ import { SmartInsights } from "@/components/SmartInsights";
 import { BreathingExercise } from "@/components/BreathingExercise";
 import { GuidedMeditations } from "@/components/GuidedMeditations";
 import { CrisisResources } from "@/components/CrisisResources";
-import { DataInsights } from "@/components/DataInsights";
 import { PremiumAnalytics } from "@/components/PremiumAnalytics";
-import { WeeklyProgressSummary } from "@/components/WeeklyProgressSummary";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { Journal } from "@/components/Journal";
@@ -193,10 +191,8 @@ const Index = () => {
               <p className="text-muted-foreground">Every step counts</p>
             </motion.div>
             <PersonalizedRecommendations />
-            <WeeklyProgressSummary userData={userData} />
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
             <PremiumAnalytics />
-            <DataInsights />
           </div>
         );
 
