@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   DollarSign, Calendar, Award, Target, 
   BarChart3, Activity, Flame, Brain, Moon, Heart, Minus,
-  ChevronLeft, ChevronRight, Shield, Droplets,
-  Wind, Eye, Smile, Sparkles, Check, ArrowUpRight, ArrowDownRight
+  ChevronLeft, ChevronRight, Sparkles,
+  Check, ArrowUpRight, ArrowDownRight
 } from "lucide-react";
 import { getMilestones } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HealthBenefitsTimeline } from "@/components/HealthBenefitsTimeline";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,18 +42,7 @@ interface DayActivity {
   activities: string[];
 }
 
-const HEALTH_BENEFITS = [
-  { days: 1, icon: Heart, title: "Heart Rate Normalizing", desc: "Blood pressure begins to drop" },
-  { days: 2, icon: Droplets, title: "Toxin Clearance Begins", desc: "Body starts eliminating toxins" },
-  { days: 3, icon: Brain, title: "Brain Chemistry Shifting", desc: "Dopamine receptors start recovering" },
-  { days: 7, icon: Moon, title: "Sleep Improving", desc: "Sleep patterns begin to normalize" },
-  { days: 14, icon: Shield, title: "Immune System Boost", desc: "Immune function strengthening" },
-  { days: 30, icon: Eye, title: "Clarity & Focus", desc: "Cognitive function notably improved" },
-  { days: 60, icon: Wind, title: "Energy Restored", desc: "Physical energy and stamina increase" },
-  { days: 90, icon: Sparkles, title: "Neuroplasticity", desc: "Brain creating new neural pathways" },
-  { days: 180, icon: Smile, title: "Emotional Regulation", desc: "Mood stability significantly improved" },
-  { days: 365, icon: Award, title: "Full Year Renewal", desc: "Major organ repair and mental resilience" },
-];
+// Health benefits moved to HealthBenefitsTimeline component
 
 const emptyStats: PeriodStats = {
   moodAvg: 0, moodEntries: 0, journalCount: 0, triggerCount: 0,
@@ -250,9 +240,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
     return new Date(dateStr + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" }).charAt(0);
   };
 
-  // Health benefits reached & next
-  const benefitsReached = HEALTH_BENEFITS.filter(b => daysSober >= b.days);
-  const nextBenefit = HEALTH_BENEFITS.find(b => daysSober < b.days);
+  // Health benefits handled by HealthBenefitsTimeline component
 
   // Circumference for the score ring
   const RING_R = 52;
@@ -493,58 +481,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
 
 
       {/* Health Benefits Timeline */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="card-enhanced p-6">
-        <div className="flex items-center gap-2 mb-5">
-          <div className="p-2 rounded-lg bg-emerald-500/10"><Heart className="w-5 h-5 text-emerald-500" /></div>
-          <span className="text-lg font-semibold text-foreground">Health Benefits</span>
-          <span className="ml-auto text-xs text-muted-foreground">{benefitsReached.length}/{HEALTH_BENEFITS.length} unlocked</span>
-        </div>
-
-        {nextBenefit && (
-          <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <nextBenefit.icon className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Next: {nextBenefit.title}</span>
-              </div>
-              <span className="text-xs text-muted-foreground">{nextBenefit.days - daysSober}d to go</span>
-            </div>
-            <Progress value={(daysSober / nextBenefit.days) * 100} className="h-2" />
-          </div>
-        )}
-
-        <div className="space-y-1">
-          {HEALTH_BENEFITS.map((benefit, i) => {
-            const unlocked = daysSober >= benefit.days;
-            const Icon = benefit.icon;
-            return (
-              <motion.div
-                key={benefit.days}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.03 }}
-                className="flex items-center gap-3 py-2"
-              >
-                <div className="flex flex-col items-center w-6">
-                  <div className={`w-3 h-3 rounded-full ${unlocked ? "bg-primary shadow-glow" : "bg-secondary border border-border"}`} />
-                  {i < HEALTH_BENEFITS.length - 1 && (
-                    <div className={`w-0.5 h-5 ${unlocked && daysSober >= (HEALTH_BENEFITS[i + 1]?.days || Infinity) ? "bg-primary/50" : "bg-border"}`} />
-                  )}
-                </div>
-                <div className={`flex-1 flex items-center gap-2 ${!unlocked ? "opacity-40" : ""}`}>
-                  <Icon className={`w-4 h-4 shrink-0 ${unlocked ? "text-primary" : "text-muted-foreground"}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{benefit.title}</p>
-                    <p className="text-[10px] text-muted-foreground">{benefit.desc}</p>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">Day {benefit.days}</span>
-                </div>
-                {unlocked && <Check className="w-4 h-4 text-primary shrink-0" />}
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
+      <HealthBenefitsTimeline daysSober={daysSober} />
 
       {/* Financial Impact */}
       {dailySpending > 0 && (
