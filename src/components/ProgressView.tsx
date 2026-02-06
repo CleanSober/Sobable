@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  TrendingUp, TrendingDown, DollarSign, Calendar, Award, Target, 
+  DollarSign, Calendar, Award, Target, 
   BarChart3, Activity, Flame, Brain, Moon, Heart, Minus,
-  ChevronLeft, ChevronRight, Zap, Shield, Clock, Droplets,
+  ChevronLeft, ChevronRight, Shield, Droplets,
   Wind, Eye, Smile, Sparkles, Check, ArrowUpRight, ArrowDownRight
 } from "lucide-react";
 import { getMilestones } from "@/lib/storage";
@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useGamification, getLevelTitle } from "@/hooks/useGamification";
 
 interface ProgressViewProps {
   daysSober: number;
@@ -63,7 +62,7 @@ const emptyStats: PeriodStats = {
 
 export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressViewProps) => {
   const { user } = useAuth();
-  const { userXP, xpProgress } = useGamification();
+  
   const { reached, next } = getMilestones(daysSober);
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [weekOffset, setWeekOffset] = useState(0);
@@ -73,9 +72,6 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
   const [weekActivity, setWeekActivity] = useState<DayActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const weeks = Math.floor(daysSober / 7);
-  const months = Math.floor(daysSober / 30);
-  const years = Math.floor(daysSober / 365);
   const yearlyProjection = dailySpending * 365;
   const fiveYearProjection = dailySpending * 365 * 5;
 
@@ -493,55 +489,8 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
         </motion.div>
       )}
 
-      {/* Level & XP */}
-      {userXP && xpProgress && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="card-enhanced p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary via-accent to-primary flex items-center justify-center text-lg font-bold text-white shadow-glow">
-                {userXP.current_level}
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground">{getLevelTitle(userXP.current_level)}</h3>
-                <p className="text-xs text-muted-foreground">{userXP.total_xp.toLocaleString()} XP</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Zap className="w-3 h-3 text-primary" />
-              {xpProgress.progressInLevel}/{xpProgress.xpNeededForLevel}
-            </div>
-          </div>
-          <Progress value={xpProgress.percentage} className="h-2" />
-        </motion.div>
-      )}
 
-      {/* Your Journey */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }} className="card-enhanced p-6">
-        <div className="flex items-center gap-2 mb-5">
-          <div className="p-2 rounded-lg bg-primary/10"><TrendingUp className="w-5 h-5 text-primary" /></div>
-          <span className="text-lg font-semibold text-foreground">Your Journey</span>
-        </div>
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { label: "Days", value: daysSober, gradient: "from-primary to-primary/50" },
-            { label: "Weeks", value: weeks, gradient: "from-blue-500 to-blue-500/50" },
-            { label: "Months", value: months, gradient: "from-accent to-accent/50" },
-            { label: "Years", value: years, gradient: "from-amber-500 to-amber-500/50" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              className="p-3 rounded-xl bg-secondary/50 border border-border/30 text-center relative overflow-hidden"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-5`} />
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+
 
       {/* Health Benefits Timeline */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="card-enhanced p-6">
