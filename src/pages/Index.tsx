@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, Flame } from "lucide-react";
 import sobableLogo from "@/assets/sobable-logo.png";
+import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
@@ -69,6 +70,41 @@ const Index = () => {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
+
+  // Welcome back toast with streak info
+  const welcomeShownRef = useRef(false);
+  useEffect(() => {
+    if (welcomeShownRef.current || authLoading || profileLoading || !user || !profile?.onboarding_complete) return;
+    if (!userXP) return;
+
+    welcomeShownRef.current = true;
+
+    const streak = userXP.daily_login_streak ?? 0;
+    const name = profile?.display_name;
+    const greeting = name ? `Welcome back, ${name}!` : "Welcome back!";
+
+    // Small delay so the page renders first
+    const timer = setTimeout(() => {
+      if (streak > 1) {
+        toast(greeting, {
+          description: `🔥 ${streak}-day streak! Keep it going!`,
+          duration: 4000,
+        });
+      } else if (streak === 1) {
+        toast(greeting, {
+          description: "🌱 Day 1 of your streak — let's build momentum!",
+          duration: 4000,
+        });
+      } else {
+        toast(greeting, {
+          description: "✨ Great to see you again!",
+          duration: 3000,
+        });
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [authLoading, profileLoading, user, userXP, profile]);
 
   if (authLoading || profileLoading) {
     return (
