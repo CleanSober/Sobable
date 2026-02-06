@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
+import { useHaptics } from "@/hooks/useHaptics";
 
 const substances = [
   { id: "alcohol", label: "Alcohol", emoji: "🍺" },
@@ -52,8 +53,16 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     );
   };
 
+  const { notification, impact } = useHaptics();
+
   const handleComplete = useCallback(() => {
     setShowCelebration(true);
+
+    // Haptic celebration burst: success notification + heavy impact combo
+    notification('success');
+    setTimeout(() => impact('heavy'), 200);
+    setTimeout(() => impact('medium'), 400);
+    setTimeout(() => impact('light'), 550);
 
     const data: OnboardingData = {
       name: isAnonymous ? "" : name.trim().slice(0, 50),
@@ -68,7 +77,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     setTimeout(() => {
       onComplete(data);
     }, CELEBRATION_DURATION);
-  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact, onComplete]);
+  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact, onComplete, notification, impact]);
 
   const canProceed = () => {
     switch (step) {
