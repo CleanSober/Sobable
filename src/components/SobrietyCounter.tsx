@@ -42,9 +42,9 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
         <div className="absolute bottom-0 right-0 w-40 h-40 bg-accent/10 blur-[60px] rounded-full" />
       </div>
 
-      <div className="relative z-10 p-6">
+      <div className="relative z-10 p-4 sm:p-6">
         {/* Top row: Clean date + XP badge */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20 icon-glow">
               <Calendar className="w-5 h-5 text-primary" />
@@ -89,26 +89,26 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
         </div>
 
         {/* Main Counter */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4 sm:mb-6">
           <motion.div
             key={daysSober}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="relative inline-block mb-2"
+            className="relative inline-block mb-1"
           >
-            <span className="text-8xl md:text-9xl font-bold text-gradient tracking-tight">
+            <span className="text-6xl sm:text-8xl md:text-9xl font-bold text-gradient tracking-tight">
               {daysSober}
             </span>
-            <Sparkles className="absolute -top-2 -right-4 w-6 h-6 text-accent animate-pulse" />
+            <Sparkles className="absolute -top-1 -right-3 w-5 h-5 text-accent animate-pulse" />
           </motion.div>
-          <p className="text-xl text-foreground/80 font-medium tracking-wide">
+          <p className="text-lg sm:text-xl text-foreground/80 font-medium tracking-wide">
             {daysSober === 1 ? "Day" : "Days"} Clean & Sober
           </p>
         </div>
 
         {/* Time breakdown */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
           {[
             { label: "Weeks", value: weeks, icon: "📅" },
             { label: "Months", value: months, icon: "🌙" },

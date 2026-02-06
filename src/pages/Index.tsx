@@ -114,16 +114,16 @@ const Index = () => {
     switch (activeTab) {
       case "home":
         return (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <motion.div 
               initial={{ opacity: 0, y: -10 }} 
               animate={{ opacity: 1, y: 0 }} 
-              className="glass-card rounded-2xl p-5 text-center"
+              className="glass-card rounded-2xl p-4 text-center"
             >
-              <p className="text-muted-foreground text-sm mb-1 font-medium">
+              <p className="text-muted-foreground text-xs mb-0.5 font-medium">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-xl font-bold text-foreground">
                 {profile?.display_name ? (
                   <>Keep going, <span className="text-gradient">{profile.display_name}</span>!</>
                 ) : (
@@ -142,10 +142,10 @@ const Index = () => {
 
       case "checkin":
         return (
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-              <h1 className="text-2xl font-bold text-foreground mb-1">Daily Check-In</h1>
-              <p className="text-muted-foreground">How are you feeling today?</p>
+          <div className="space-y-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
+              <h1 className="text-xl font-bold text-foreground mb-0.5">Daily Check-In</h1>
+              <p className="text-sm text-muted-foreground">How are you feeling today?</p>
             </motion.div>
             <MoodCheckIn />
             <Journal daysSober={daysSober} />
@@ -158,10 +158,10 @@ const Index = () => {
 
       case "triggers":
         return (
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-              <h1 className="text-2xl font-bold text-foreground mb-1">Triggers & Coping</h1>
-              <p className="text-muted-foreground">Know yourself to protect yourself</p>
+          <div className="space-y-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
+              <h1 className="text-xl font-bold text-foreground mb-0.5">Triggers & Coping</h1>
+              <p className="text-sm text-muted-foreground">Know yourself to protect yourself</p>
             </motion.div>
             <RiskPrediction />
             <CravingTimer />
@@ -174,10 +174,10 @@ const Index = () => {
 
       case "progress":
         return (
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-              <h1 className="text-2xl font-bold text-foreground mb-1">Your Journey</h1>
-              <p className="text-muted-foreground">Every step counts</p>
+          <div className="space-y-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
+              <h1 className="text-xl font-bold text-foreground mb-0.5">Your Journey</h1>
+              <p className="text-sm text-muted-foreground">Every step counts</p>
             </motion.div>
             <PersonalizedRecommendations />
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
@@ -195,7 +195,7 @@ const Index = () => {
 
   return (
     <XPNotificationProvider>
-      <div className="min-h-screen bg-background noise-overlay">
+      <div className="min-h-screen min-h-[100dvh] bg-background noise-overlay">
         {/* Ambient background effects */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 blur-[120px] rounded-full" />
@@ -205,32 +205,32 @@ const Index = () => {
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-40"
+          className="sticky top-0 z-40 safe-area-top"
         >
           {/* Glass header background */}
           <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl border-b border-border/30" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           
-          <div className="container max-w-2xl mx-auto px-4 py-4 flex items-center justify-between relative">
-            <div className="flex items-center gap-3">
-              <img src={sobableLogo} alt="Sobable" className="w-10 h-10 rounded-xl shadow-lg shadow-primary/20" />
+          <div className="container max-w-2xl mx-auto px-4 py-3 flex items-center justify-between relative">
+            <div className="flex items-center gap-2.5">
+              <img src={sobableLogo} alt="Sobable" className="w-9 h-9 rounded-xl shadow-lg shadow-primary/20" />
               <span className="text-lg font-bold text-foreground tracking-tight">Sobable</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <NotificationCenter />
               <UserProfile />
             </div>
           </div>
         </motion.header>
 
-        <main className="container max-w-2xl mx-auto px-4 py-6 pb-28 relative">
+        <main className="container max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-24 relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.2 }}
             >
               {renderTabContent()}
             </motion.div>

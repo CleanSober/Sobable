@@ -183,9 +183,9 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
       <div className="absolute top-0 right-1/4 w-48 h-48 bg-accent/10 blur-[80px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-32 h-32 bg-primary/8 blur-[60px] rounded-full pointer-events-none" />
 
-      <div className="relative p-6">
+      <div className="relative p-4 sm:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-accent/15 border border-accent/25 icon-glow">
               <PiggyBank className="w-5 h-5 text-accent" />
@@ -204,15 +204,15 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
         </div>
 
         {/* Main Amount - Animated */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4 sm:mb-6">
           <motion.div
             key={totalSaved}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex items-center justify-center gap-1 mb-2"
+            className="flex items-center justify-center gap-1 mb-1.5"
           >
-            <DollarSign className="w-8 h-8 text-accent" />
-            <span className="text-5xl md:text-6xl font-bold text-gradient-gold tabular-nums">
+            <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-accent" />
+            <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-gradient-gold tabular-nums">
               {animatedTotal.toLocaleString()}
             </span>
           </motion.div>
