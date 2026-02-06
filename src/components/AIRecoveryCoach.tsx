@@ -1,6 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, X, Sparkles, Loader2, RefreshCw, Crown } from "lucide-react";
+import {
+  Bot, Send, X, Sparkles, Loader2, RefreshCw, Crown,
+  Brain, Heart, Shield, TrendingUp, Moon, Flame
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,6 +15,7 @@ import { calculateDaysSober } from "@/lib/storage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PremiumGate } from "@/components/community/PremiumGate";
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -18,11 +23,50 @@ interface Message {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recovery-coach`;
 
-const quickPrompts = [
-  "I'm feeling a craving right now",
-  "Help me stay motivated today",
-  "I need a coping strategy",
-  "Celebrate my progress with me",
+interface QuickPrompt {
+  icon: React.ElementType;
+  label: string;
+  prompt: string;
+  color: string;
+}
+
+const quickPrompts: QuickPrompt[] = [
+  {
+    icon: Flame,
+    label: "Craving help",
+    prompt: "I'm feeling a craving right now. Can you look at my recent triggers and help me with a coping strategy that's worked for me before?",
+    color: "text-red-400",
+  },
+  {
+    icon: TrendingUp,
+    label: "Analyze my week",
+    prompt: "Can you analyze my mood, sleep, and trigger data from this past week and give me insights on how I'm doing?",
+    color: "text-primary",
+  },
+  {
+    icon: Shield,
+    label: "Prevention check",
+    prompt: "Review my relapse prevention plan and suggest improvements based on my recent patterns and triggers.",
+    color: "text-blue-400",
+  },
+  {
+    icon: Heart,
+    label: "Celebrate wins",
+    prompt: "What are my recent wins and achievements? Help me celebrate my progress!",
+    color: "text-pink-400",
+  },
+  {
+    icon: Moon,
+    label: "Sleep & recovery",
+    prompt: "How is my sleep affecting my recovery? Analyze my sleep data and give me tips to improve.",
+    color: "text-indigo-400",
+  },
+  {
+    icon: Brain,
+    label: "Pattern insights",
+    prompt: "What patterns do you see in my triggers and emotions? Help me understand my biggest risk factors.",
+    color: "text-amber-400",
+  },
 ];
 
 export const AIRecoveryCoach = () => {
@@ -45,11 +89,25 @@ export const AIRecoveryCoach = () => {
     }
   };
 
-  // Let PremiumGate handle the upgrade flow directly
-
   const daysSober = profile?.sobriety_start_date
     ? calculateDaysSober(profile.sobriety_start_date)
     : 0;
+
+  const welcomeMessage = useMemo(() => {
+    const greeting = daysSober > 0
+      ? `**${daysSober} days strong!** 🎉 I have access to all your recovery data — mood, triggers, sleep, journal, and more.`
+      : "I have access to all your recovery data to give you personalized support.";
+
+    return `Hey${profile?.display_name ? ` ${profile.display_name}` : ""}! 🌟 ${greeting}
+
+I can:
+- **Analyze patterns** in your mood, triggers & sleep
+- **Help with cravings** using strategies that worked for you before
+- **Review your prevention plan** and suggest improvements
+- **Celebrate your wins** and track your progress
+
+How can I support you today?`;
+  }, [daysSober, profile?.display_name]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -59,15 +117,9 @@ export const AIRecoveryCoach = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Welcome message
-      setMessages([{
-        role: "assistant",
-        content: `Hey there! 🌟 I'm your AI Recovery Coach. I'm here to support you on your journey${daysSober > 0 ? ` — congratulations on ${daysSober} days sober!` : ''}. 
-
-Whether you need help managing a craving, want to talk through a tough moment, or just need some encouragement, I'm here for you. How can I support you today?`
-      }]);
+      setMessages([{ role: "assistant", content: welcomeMessage }]);
     }
-  }, [isOpen, daysSober]);
+  }, [isOpen, welcomeMessage]);
 
   const streamChat = async (userMessage: string) => {
     const newMessages: Message[] = [...messages, { role: "user", content: userMessage }];
@@ -78,12 +130,10 @@ Whether you need help managing a craving, want to talk through a tough moment, o
     let assistantContent = "";
 
     try {
-      // Get the current user's session token for authentication
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session?.access_token) {
         toast.error("Please sign in to use the Recovery Coach");
-        setMessages(prev => prev.slice(0, -1));
+        setMessages((prev) => prev.slice(0, -1));
         setIsLoading(false);
         return;
       }
@@ -94,21 +144,26 @@ Whether you need help managing a craving, want to talk through a tough moment, o
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          messages: newMessages,
-          context: {
-            daysSober,
-            substances: profile?.substances,
-            personalReminder: profile?.personal_reminder,
-          },
-        }),
+        body: JSON.stringify({ messages: newMessages }),
       });
+
+      if (response.status === 429) {
+        toast.error("Too many requests — please wait a moment and try again.");
+        setMessages((prev) => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
+      }
+      if (response.status === 402) {
+        toast.error("AI credits depleted. Please add credits in workspace settings.");
+        setMessages((prev) => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to connect to coach");
       }
-
       if (!response.body) throw new Error("No response stream");
 
       const reader = response.body.getReader();
@@ -117,10 +172,10 @@ Whether you need help managing a craving, want to talk through a tough moment, o
 
       const updateAssistant = (content: string) => {
         assistantContent = content;
-        setMessages(prev => {
+        setMessages((prev) => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && prev.length > newMessages.length) {
-            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content } : m);
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content } : m));
           }
           return [...prev, { role: "assistant", content }];
         });
@@ -129,21 +184,17 @@ Whether you need help managing a craving, want to talk through a tough moment, o
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         buffer += decoder.decode(value, { stream: true });
 
         let newlineIndex: number;
         while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
           let line = buffer.slice(0, newlineIndex);
           buffer = buffer.slice(newlineIndex + 1);
-
           if (line.endsWith("\r")) line = line.slice(0, -1);
           if (line.startsWith(":") || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
-
           const jsonStr = line.slice(6).trim();
           if (jsonStr === "[DONE]") break;
-
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content;
@@ -157,12 +208,31 @@ Whether you need help managing a craving, want to talk through a tough moment, o
           }
         }
       }
+
+      // Flush remaining buffer
+      if (buffer.trim()) {
+        for (let raw of buffer.split("\n")) {
+          if (!raw) continue;
+          if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+          if (raw.startsWith(":") || raw.trim() === "") continue;
+          if (!raw.startsWith("data: ")) continue;
+          const jsonStr = raw.slice(6).trim();
+          if (jsonStr === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
+              updateAssistant(assistantContent);
+            }
+          } catch { /* ignore */ }
+        }
+      }
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to get response");
-      // Remove the failed message attempt
       if (assistantContent === "") {
-        setMessages(prev => prev.slice(0, -1));
+        setMessages((prev) => prev.slice(0, -1));
       }
     } finally {
       setIsLoading(false);
@@ -180,15 +250,12 @@ Whether you need help managing a craving, want to talk through a tough moment, o
   };
 
   const resetChat = () => {
-    setMessages([{
-      role: "assistant",
-      content: `Fresh start! 🌱 I'm ready to support you. What's on your mind?`
-    }]);
+    setMessages([{ role: "assistant", content: welcomeMessage }]);
   };
 
   return (
     <>
-      {/* Floating Chat Button - Premium Gold */}
+      {/* Floating Chat Button */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -220,12 +287,7 @@ Whether you need help managing a craving, want to talk through a tough moment, o
               className="fixed inset-4 z-50 flex items-center justify-center"
             >
               <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowUpgrade(false)}
-                  className="absolute top-2 right-2 z-10"
-                >
+                <Button variant="ghost" size="icon" onClick={() => setShowUpgrade(false)} className="absolute top-2 right-2 z-10">
                   <X className="w-5 h-5" />
                 </Button>
                 <PremiumGate />
@@ -250,25 +312,27 @@ Whether you need help managing a craving, want to talk through a tough moment, o
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              className="fixed inset-4 z-50 md:inset-auto md:bottom-8 md:right-8 md:w-[420px] md:h-[600px] flex flex-col"
+              className="fixed inset-2 z-50 md:inset-auto md:bottom-8 md:right-8 md:w-[460px] md:h-[650px] flex flex-col"
             >
               <div className="flex-1 flex flex-col rounded-2xl gradient-card shadow-soft border border-border overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border/50">
+                <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-amber-500/10 to-primary/10">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl gradient-primary">
-                      <Sparkles className="w-5 h-5 text-primary-foreground" />
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/20">
+                      <Brain className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Recovery Coach</h3>
-                      <p className="text-xs text-muted-foreground">AI-powered support</p>
+                      <p className="text-xs text-muted-foreground">
+                        AI-powered • Data-driven insights
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={resetChat} title="New conversation">
+                    <Button variant="ghost" size="icon" onClick={resetChat} title="New conversation" className="h-8 w-8">
                       <RefreshCw className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
                       <X className="w-5 h-5" />
                     </Button>
                   </div>
@@ -280,18 +344,25 @@ Whether you need help managing a craving, want to talk through a tough moment, o
                     {messages.map((msg, i) => (
                       <motion.div
                         key={i}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
                         className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                       >
                         <div
-                          className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                          className={`max-w-[88%] rounded-2xl px-4 py-3 ${
                             msg.role === "user"
                               ? "bg-primary text-primary-foreground rounded-br-md"
                               : "bg-secondary/70 text-foreground rounded-bl-md"
                           }`}
                         >
-                          <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          {msg.role === "assistant" ? (
+                            <div className="text-sm prose prose-sm prose-invert max-w-none [&>p]:my-1.5 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>blockquote]:my-1.5 [&>blockquote]:border-primary/50 [&>blockquote]:text-muted-foreground [&_strong]:text-foreground [&_li]:my-0.5">
+                              <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            </div>
+                          ) : (
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          )}
                         </div>
                       </motion.div>
                     ))}
@@ -301,8 +372,9 @@ Whether you need help managing a craving, want to talk through a tough moment, o
                         animate={{ opacity: 1 }}
                         className="flex justify-start"
                       >
-                        <div className="bg-secondary/70 rounded-2xl rounded-bl-md px-4 py-3">
-                          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <div className="bg-secondary/70 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                          <span className="text-xs text-muted-foreground">Analyzing your data...</span>
                         </div>
                       </motion.div>
                     )}
@@ -311,24 +383,29 @@ Whether you need help managing a craving, want to talk through a tough moment, o
 
                 {/* Quick Prompts */}
                 {messages.length <= 1 && (
-                  <div className="px-4 pb-2">
-                    <div className="flex flex-wrap gap-2">
-                      {quickPrompts.map((prompt) => (
-                        <button
-                          key={prompt}
-                          onClick={() => handleQuickPrompt(prompt)}
-                          disabled={isLoading}
-                          className="text-xs px-3 py-1.5 rounded-full bg-secondary/70 text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
-                        >
-                          {prompt}
-                        </button>
-                      ))}
+                  <div className="px-4 pb-3">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-2">Quick actions</p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {quickPrompts.map((qp) => {
+                        const Icon = qp.icon;
+                        return (
+                          <button
+                            key={qp.label}
+                            onClick={() => handleQuickPrompt(qp.prompt)}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-secondary/50 text-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50 text-left active:scale-[0.97]"
+                          >
+                            <Icon className={`w-3.5 h-3.5 shrink-0 ${qp.color}`} />
+                            <span className="truncate">{qp.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
 
                 {/* Input */}
-                <form onSubmit={handleSubmit} className="p-4 border-t border-border/50">
+                <form onSubmit={handleSubmit} className="p-3 border-t border-border/50">
                   <div className="flex gap-2">
                     <Textarea
                       ref={textareaRef}
@@ -340,8 +417,8 @@ Whether you need help managing a craving, want to talk through a tough moment, o
                           handleSubmit();
                         }
                       }}
-                      placeholder="Type your message..."
-                      className="min-h-[44px] max-h-32 resize-none bg-secondary/50"
+                      placeholder="Ask about your recovery data..."
+                      className="min-h-[44px] max-h-32 resize-none bg-secondary/50 text-sm"
                       disabled={isLoading}
                     />
                     <Button
