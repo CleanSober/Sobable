@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
-import { Loader2 } from "lucide-react";
+import { useGamification } from "@/hooks/useGamification";
+import { Loader2, Flame } from "lucide-react";
 import sobableLogo from "@/assets/sobable-logo.png";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
@@ -43,6 +44,7 @@ import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useUserData();
+  const { userXP } = useGamification();
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const navigate = useNavigate();
@@ -229,6 +231,17 @@ const Index = () => {
             <div className="flex items-center gap-2.5">
               <img src={sobableLogo} alt="Sobable" className="w-9 h-9 rounded-xl shadow-lg shadow-primary/20" />
               <span className="text-lg font-bold text-foreground tracking-tight">Sobable</span>
+              {(userXP?.daily_login_streak ?? 0) > 0 && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/15 border border-accent/30"
+                >
+                  <Flame className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-xs font-bold text-accent">{userXP?.daily_login_streak}</span>
+                </motion.div>
+              )}
             </div>
             <div className="flex items-center gap-0.5">
               <NotificationCenter />
