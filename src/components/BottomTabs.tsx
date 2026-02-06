@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
@@ -28,8 +29,14 @@ interface BottomTabsProps {
 export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
   const { impact } = useHaptics();
   const onlineCount = useOnlineCount();
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const handleTabChange = (tabId: TabId) => {
     impact('light');
+    if (tabId === "community" && onlineCount > 0) {
+      setShowTooltip(true);
+      setTimeout(() => setShowTooltip(false), 2000);
+    }
     onTabChange(tabId);
   };
 
@@ -54,6 +61,25 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                 onClick={() => handleTabChange(tab.id)}
                 className="relative flex flex-col items-center justify-center px-4 py-2 min-w-[64px] transition-all duration-300"
               >
+                {/* Tooltip for community tab */}
+                <AnimatePresence>
+                  {tab.id === "community" && showTooltip && onlineCount > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 4, scale: 0.9 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute -top-10 left-1/2 -translate-x-1/2 z-50 whitespace-nowrap"
+                    >
+                      <div className="bg-popover text-popover-foreground text-xs font-medium px-2.5 py-1.5 rounded-lg shadow-lg border border-border/50 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        {onlineCount} {onlineCount === 1 ? "user" : "users"} online
+                      </div>
+                      <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 rotate-45 bg-popover border-r border-b border-border/50" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* Active indicator background */}
                 {isActive && (
                   <motion.div
