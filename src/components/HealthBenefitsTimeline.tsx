@@ -77,6 +77,7 @@ interface HealthBenefitsTimelineProps {
 export const HealthBenefitsTimeline = ({ daysSober }: HealthBenefitsTimelineProps) => {
   const [expandedBenefit, setExpandedBenefit] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const benefitsReached = HEALTH_BENEFITS.filter((b) => daysSober >= b.days);
   const nextBenefit = HEALTH_BENEFITS.find((b) => daysSober < b.days);
@@ -98,8 +99,11 @@ export const HealthBenefitsTimeline = ({ daysSober }: HealthBenefitsTimelineProp
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="card-enhanced p-5">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
+      {/* Header - always visible, acts as toggle */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-2 text-left"
+      >
         <div className="p-2 rounded-lg bg-emerald-500/10">
           <Heart className="w-5 h-5 text-emerald-400" />
         </div>
@@ -109,7 +113,21 @@ export const HealthBenefitsTimeline = ({ daysSober }: HealthBenefitsTimelineProp
             {benefitsReached.length}/{totalBenefits} unlocked • Your body is healing
           </p>
         </div>
-      </div>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+        </motion.div>
+      </button>
+
+      <AnimatePresence>
+      {isOpen && (
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        className="overflow-hidden"
+      >
+      <div className="mt-4">
 
       {/* Category Progress Rings */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
@@ -300,6 +318,10 @@ export const HealthBenefitsTimeline = ({ daysSober }: HealthBenefitsTimelineProp
         </div>
         <Progress value={(benefitsReached.length / totalBenefits) * 100} className="h-2.5" />
       </div>
+      </div>
+      </motion.div>
+      )}
+      </AnimatePresence>
     </motion.div>
   );
 };
