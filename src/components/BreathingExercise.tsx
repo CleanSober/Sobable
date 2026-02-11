@@ -181,14 +181,14 @@ export const BreathingExercise = () => {
 
   return (
     <Card className="gradient-card border-border/50 overflow-hidden">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Wind className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Wind className="w-4 h-4 text-primary" />
           Breathing Exercises
         </CardTitle>
-        <p className="text-sm text-muted-foreground">Calm your mind and body</p>
+        <p className="text-[10px] text-muted-foreground">Calm your mind and body</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 pb-3">
         <AnimatePresence mode="wait">
           {!selectedTechnique || completed ? (
             <motion.div
@@ -196,19 +196,18 @@ export const BreathingExercise = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-2 gap-3"
+              className="grid grid-cols-2 gap-2"
             >
               {techniques.map((tech) => (
                 <motion.button
                   key={tech.id}
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => startExercise(tech)}
-                  className={`p-4 rounded-xl bg-gradient-to-br ${tech.color} text-white text-left transition-shadow hover:shadow-lg`}
+                  className={`p-3 rounded-xl bg-gradient-to-br ${tech.color} text-white text-left transition-shadow active:shadow-lg`}
                 >
-                  <Wind className="w-5 h-5 mb-2" />
-                  <h4 className="font-semibold text-sm">{tech.name}</h4>
-                  <p className="text-xs opacity-80 mt-1">{tech.description}</p>
+                  <Wind className="w-4 h-4 mb-1.5" />
+                  <h4 className="font-semibold text-xs">{tech.name}</h4>
+                  <p className="text-[10px] opacity-80 mt-0.5">{tech.description}</p>
                 </motion.button>
               ))}
             </motion.div>

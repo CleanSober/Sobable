@@ -155,57 +155,55 @@ export const GuidedMeditations = () => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Headphones className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Headphones className="w-4 h-4 text-primary" />
           Guided Meditations
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 pb-3">
         {activeMeditation && isPlaying ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <div className={`p-6 rounded-2xl bg-gradient-to-br ${activeMeditation.color} text-white text-center`}>
-              <activeMeditation.icon className="w-12 h-12 mx-auto mb-3" />
-              <h3 className="text-xl font-bold mb-1">{activeMeditation.name}</h3>
-              <p className="text-3xl font-mono">{formatTime(timeRemaining)}</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+            <div className={`p-4 rounded-xl bg-gradient-to-br ${activeMeditation.color} text-white text-center`}>
+              <activeMeditation.icon className="w-8 h-8 mx-auto mb-2" />
+              <h3 className="text-base font-bold mb-0.5">{activeMeditation.name}</h3>
+              <p className="text-2xl font-mono">{formatTime(timeRemaining)}</p>
             </div>
-            <Progress value={progress} className="h-2" />
-            <motion.div key={currentStep} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl bg-muted/30 text-center">
-              <p className="font-medium">{activeMeditation.instructions[currentStep]}</p>
+            <Progress value={progress} className="h-1.5" />
+            <motion.div key={currentStep} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-xl bg-muted/30 text-center">
+              <p className="font-medium text-xs">{activeMeditation.instructions[currentStep]}</p>
             </motion.div>
-            <div className="flex gap-3 justify-center">
-              <Button onClick={handlePauseResume} variant="outline">
-                {isPlaying ? <><Pause className="w-4 h-4 mr-2" />Pause</> : <><Play className="w-4 h-4 mr-2" />Resume</>}
+            <div className="flex gap-2 justify-center">
+              <Button onClick={handlePauseResume} variant="outline" size="sm" className="text-xs h-8">
+                {isPlaying ? <><Pause className="w-3.5 h-3.5 mr-1" />Pause</> : <><Play className="w-3.5 h-3.5 mr-1" />Resume</>}
               </Button>
-              
-              {/* Music toggle */}
               <Button 
                 onClick={() => musicPlaying ? pauseMusic() : playMusic()} 
                 variant={musicPlaying ? "secondary" : "ghost"}
                 disabled={musicLoading}
+                size="sm"
+                className="text-xs h-8"
               >
                 {musicLoading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : musicPlaying ? (
-                  <Volume2 className="w-4 h-4 mr-2" />
+                  <Volume2 className="w-3.5 h-3.5" />
                 ) : (
-                  <VolumeX className="w-4 h-4 mr-2" />
+                  <VolumeX className="w-3.5 h-3.5" />
                 )}
-                {musicLoading ? "Loading..." : musicPlaying ? "Music On" : "Music Off"}
               </Button>
-              
-              <Button onClick={handleEnd} variant="ghost">
-                <RotateCcw className="w-4 h-4 mr-2" />End
+              <Button onClick={handleEnd} variant="ghost" size="sm" className="text-xs h-8">
+                <RotateCcw className="w-3.5 h-3.5 mr-1" />End
               </Button>
             </div>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {meditations.map((med) => (
-              <motion.button key={med.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => startMeditation(med)} className={`p-4 rounded-xl bg-gradient-to-br ${med.color} text-white text-left`}>
-                <med.icon className="w-6 h-6 mb-2" />
-                <h4 className="font-semibold text-sm">{med.name}</h4>
-                <p className="text-xs opacity-80">{Math.floor(med.duration / 60)} min</p>
+              <motion.button key={med.id} whileTap={{ scale: 0.98 }} onClick={() => startMeditation(med)} className={`p-3 rounded-xl bg-gradient-to-br ${med.color} text-white text-left`}>
+                <med.icon className="w-4 h-4 mb-1.5" />
+                <h4 className="font-semibold text-xs">{med.name}</h4>
+                <p className="text-[10px] opacity-80">{Math.floor(med.duration / 60)} min</p>
               </motion.button>
             ))}
           </div>

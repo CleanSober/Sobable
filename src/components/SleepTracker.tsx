@@ -163,58 +163,58 @@ export const SleepTracker = () => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Moon className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Moon className="w-4 h-4 text-primary" />
           Sleep Tracker
-          {saving && <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground ml-auto" />}
-          {!saving && user && <Cloud className="w-4 h-4 text-green-500 ml-auto" aria-label="Synced across devices" />}
+          {saving && <RefreshCw className="w-3.5 h-3.5 animate-spin text-muted-foreground ml-auto" />}
+          {!saving && user && <Cloud className="w-3.5 h-3.5 text-green-500 ml-auto" aria-label="Synced across devices" />}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           Quality sleep supports your recovery
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3 px-3 pb-3">
         {/* Time Inputs */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <Moon className="w-4 h-4 text-indigo-400" />
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <label className="flex items-center gap-1.5 text-xs font-medium">
+              <Moon className="w-3.5 h-3.5 text-indigo-400" />
               Bedtime
             </label>
             <input
               type="time"
               value={bedtime}
               onChange={(e) => setBedtime(e.target.value)}
-              className="w-full p-3 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none"
+              className="w-full p-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none text-sm"
             />
           </div>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <Sun className="w-4 h-4 text-amber-400" />
+          <div className="space-y-1">
+            <label className="flex items-center gap-1.5 text-xs font-medium">
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
               Wake Time
             </label>
             <input
               type="time"
               value={wakeTime}
               onChange={(e) => setWakeTime(e.target.value)}
-              className="w-full p-3 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none"
+              className="w-full p-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none text-sm"
             />
           </div>
         </div>
 
         {/* Hours Slept Display */}
         <motion.div
-          className="p-4 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-center"
+          className="p-3 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-center"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Bed className="w-5 h-5 text-indigo-400" />
-            <span className="text-sm text-muted-foreground">Hours Slept</span>
+          <div className="flex items-center justify-center gap-1.5 mb-0.5">
+            <Bed className="w-4 h-4 text-indigo-400" />
+            <span className="text-[10px] text-muted-foreground">Hours Slept</span>
           </div>
-          <p className="text-3xl font-bold">{hoursSlept.toFixed(1)} hrs</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-2xl font-bold">{hoursSlept.toFixed(1)} hrs</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">
             {hoursSlept >= 7 && hoursSlept <= 9
               ? "✅ Optimal range (7-9 hours)"
               : hoursSlept < 7
@@ -224,10 +224,10 @@ export const SleepTracker = () => {
         </motion.div>
 
         {/* Quality Slider */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Sleep Quality</label>
-            <span className={`text-sm font-medium ${getQualityColor(quality[0])}`}>
+            <label className="text-xs font-medium">Sleep Quality</label>
+            <span className={`text-xs font-medium ${getQualityColor(quality[0])}`}>
               {getQualityLabel(quality[0])}
             </span>
           </div>
@@ -239,7 +239,7 @@ export const SleepTracker = () => {
             step={1}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-[10px] text-muted-foreground">
             <span>Poor</span>
             <span>Excellent</span>
           </div>
@@ -248,43 +248,43 @@ export const SleepTracker = () => {
         {/* Save Button */}
         <Button
           onClick={handleSave}
-          className="w-full gradient-primary"
+          className="w-full gradient-primary h-9 text-xs"
           disabled={saving || !user}
         >
           {saving ? (
             <>
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
               Saving...
             </>
           ) : (
             <>
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-3.5 h-3.5 mr-1.5" />
               Log Sleep
             </>
           )}
         </Button>
 
         {!user && (
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-[10px] text-center text-muted-foreground">
             Sign in to sync your sleep data across devices
           </p>
         )}
 
         {/* Weekly Stats */}
         {weekEntries.length > 0 && (
-          <div className="p-4 rounded-xl bg-muted/30">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">This Week</span>
+          <div className="p-2.5 rounded-xl bg-muted/30">
+            <div className="flex items-center gap-1.5 mb-2">
+              <TrendingUp className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium">This Week</span>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-2 text-center">
               <div>
-                <p className="text-2xl font-bold">{avgHours.toFixed(1)}h</p>
-                <p className="text-xs text-muted-foreground">Avg Hours</p>
+                <p className="text-lg font-bold">{avgHours.toFixed(1)}h</p>
+                <p className="text-[10px] text-muted-foreground">Avg Hours</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">{avgQuality.toFixed(1)}/10</p>
-                <p className="text-xs text-muted-foreground">Avg Quality</p>
+                <p className="text-lg font-bold">{avgQuality.toFixed(1)}/10</p>
+                <p className="text-[10px] text-muted-foreground">Avg Quality</p>
               </div>
             </div>
           </div>
