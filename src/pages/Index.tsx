@@ -42,6 +42,7 @@ import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
 import { GuidedPathways } from "@/components/premium/GuidedPathways";
 import { AccountabilityPartner } from "@/components/premium/AccountabilityPartner";
 import { PredictiveInsights } from "@/components/premium/PredictiveInsights";
+import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -54,6 +55,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
+  const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
   const navigate = useNavigate();
 
   const handleTabChange = (tab: TabId) => {
@@ -111,6 +113,19 @@ const Index = () => {
 
     return () => clearTimeout(timer);
   }, [authLoading, profileLoading, user, userXP, profile]);
+
+  // Show premium features onboarding once after first login
+  useEffect(() => {
+    if (!user || !profile?.onboarding_complete) return;
+    const key = `premium_onboarding_shown_${user.id}`;
+    if (!localStorage.getItem(key)) {
+      const timer = setTimeout(() => {
+        setShowPremiumOnboarding(true);
+        localStorage.setItem(key, "true");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, profile?.onboarding_complete]);
 
   if (authLoading || profileLoading) {
     return (
@@ -337,6 +352,7 @@ const Index = () => {
 
         <BottomTabs activeTab={activeTab} onTabChange={handleTabChange} />
         <AIRecoveryCoach isOpen={coachOpen} onOpenChange={setCoachOpen} />
+        <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />
         <AdBanner position="bottom" />
       </div>
     </XPNotificationProvider>
