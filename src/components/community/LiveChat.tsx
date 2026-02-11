@@ -210,7 +210,7 @@ export const LiveChat = () => {
 
   if (loading) {
     return (
-      <Card className="gradient-card border-border/50 h-[550px]">
+      <Card className="gradient-card border-border/50 h-[60dvh]">
         <CardContent className="flex items-center justify-center h-full">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -223,7 +223,7 @@ export const LiveChat = () => {
 
   if (error && !room) {
     return (
-      <Card className="gradient-card border-destructive/50 h-[550px]">
+      <Card className="gradient-card border-destructive/50 h-[60dvh]">
         <CardContent className="flex items-center justify-center h-full">
           <div className="flex flex-col items-center gap-3 text-center">
             <AlertCircle className="w-10 h-10 text-destructive" />
@@ -239,31 +239,30 @@ export const LiveChat = () => {
   }
 
   return (
-    <Card className="gradient-card border-border/50 overflow-hidden">
-      <CardHeader className="pb-3 border-b border-border/30 space-y-3">
+    <Card className="gradient-card border-border/50 overflow-hidden flex flex-col" style={{ height: 'calc(100dvh - 10rem)' }}>
+      <CardHeader className="pb-2 pt-3 px-3 border-b border-border/30 space-y-2 shrink-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <MessageCircle className="w-5 h-5 text-primary" aria-hidden="true" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <MessageCircle className="w-4 h-4 text-primary" aria-hidden="true" />
             Live Chat
           </CardTitle>
           <OnlineUsers roomId={room?.id} />
         </div>
         
-        {/* Room selector */}
         <ChatRoomSelector
           currentRoom={room}
           onSelectRoom={handleRoomChange}
         />
       </CardHeader>
       
-      <CardContent className="p-0">
-        <ScrollArea className="h-[320px]" ref={scrollRef}>
-          <div className="space-y-3 p-4">
+      <CardContent className="p-0 flex flex-col flex-1 min-h-0">
+        <ScrollArea className="flex-1" ref={scrollRef}>
+          <div className="space-y-2 p-3">
             {messages.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="w-12 h-12 mx-auto mb-3 opacity-40" aria-hidden="true" />
-                <p className="font-medium">No messages yet</p>
-                <p className="text-sm mt-1">Start the conversation!</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="w-10 h-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
+                <p className="font-medium text-sm">No messages yet</p>
+                <p className="text-xs mt-1">Start the conversation!</p>
               </div>
             ) : (
               <AnimatePresence mode="popLayout">
@@ -290,19 +289,19 @@ export const LiveChat = () => {
           )}
         </AnimatePresence>
 
-        <div className="p-4 border-t border-border/50 bg-card/50">
+        <div className="p-3 border-t border-border/50 bg-card/50 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <MentionInput
                 value={newMessage}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder="Type a message... Use @ to mention"
+                placeholder="Type a message..."
                 disabled={sending}
                 maxLength={MAX_MESSAGE_LENGTH}
                 profiles={getAllProfiles()}
                 aria-label="Message input"
-                className={isNearLimit ? "pr-16" : ""}
+                className={isNearLimit ? "pr-14" : ""}
               />
               {isNearLimit && (
                 <span 
@@ -318,7 +317,7 @@ export const LiveChat = () => {
               onClick={sendMessage} 
               disabled={!newMessage.trim() || sending} 
               size="icon"
-              className="gradient-primary text-primary-foreground"
+              className="gradient-primary text-primary-foreground h-10 w-10"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" aria-hidden="true" />
