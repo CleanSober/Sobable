@@ -160,20 +160,20 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Award className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Award className="w-4 h-4 text-primary" />
           Achievement Badges
         </CardTitle>
         {nextBadge && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[10px] text-muted-foreground">
             {daysToNext} days until <span className="text-primary font-medium">{nextBadge.name}</span>
           </p>
         )}
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[320px] pr-2">
-          <div className="grid grid-cols-3 gap-3">
+      <CardContent className="px-3 pb-3">
+        <ScrollArea className="h-[260px] pr-1">
+          <div className="grid grid-cols-4 gap-1.5">
           {badges.map((badge, index) => {
             const isUnlocked = daysSober >= badge.daysRequired;
             const Icon = badge.icon;
@@ -183,29 +183,29 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
                 key={badge.id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.02 }}
                 onClick={() => setSelectedBadge(badge)}
-                className={`relative flex flex-col items-center p-3 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center p-2 rounded-lg transition-all ${
                   isUnlocked
-                    ? "bg-gradient-to-br " + badge.color + " shadow-lg hover:scale-105"
+                    ? "bg-gradient-to-br " + badge.color + " shadow-md active:scale-95"
                     : "bg-muted/50 opacity-50"
                 }`}
               >
                 {isUnlocked ? (
-                  <Icon className="w-8 h-8 text-white mb-1" />
+                  <Icon className="w-5 h-5 text-white mb-0.5" />
                 ) : (
-                  <Lock className="w-8 h-8 text-muted-foreground mb-1" />
+                  <Lock className="w-5 h-5 text-muted-foreground mb-0.5" />
                 )}
-                <span className={`text-xs text-center font-medium ${isUnlocked ? "text-white" : "text-muted-foreground"}`}>
+                <span className={`text-[8px] text-center font-medium leading-tight ${isUnlocked ? "text-white" : "text-muted-foreground"}`}>
                   {badge.name}
                 </span>
                 {isUnlocked && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
+                    className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center"
                   >
-                    <Star className="w-3 h-3 text-white" />
+                    <Star className="w-2 h-2 text-white" />
                   </motion.div>
                 )}
               </motion.button>
