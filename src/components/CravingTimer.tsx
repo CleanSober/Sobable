@@ -117,38 +117,38 @@ export const CravingTimer = () => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Timer className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Timer className="w-4 h-4 text-primary" />
           Craving Timer
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           Cravings typically pass within 15-20 minutes
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 px-3 pb-3">
         <AnimatePresence mode="wait">
           {cravingSurvived ? (
             <motion.div
               key="success"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-8"
+              className="text-center py-6"
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", delay: 0.2 }}
-                className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center"
+                className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center"
               >
-                <Check className="w-10 h-10 text-white" />
+                <Check className="w-8 h-8 text-white" />
               </motion.div>
-              <h3 className="text-2xl font-bold text-green-500 mb-2">You Did It! 🎉</h3>
-              <p className="text-muted-foreground mb-6">
-                You successfully rode out this craving. You're stronger than you know!
+              <h3 className="text-xl font-bold text-green-500 mb-1">You Did It! 🎉</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                You successfully rode out this craving!
               </p>
-              <Button onClick={resetTimer} variant="outline">
-                <RotateCcw className="w-4 h-4 mr-2" />
+              <Button onClick={resetTimer} variant="outline" size="sm" className="text-xs h-8">
+                <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                 Reset Timer
               </Button>
             </motion.div>
@@ -157,64 +157,59 @@ export const CravingTimer = () => {
               key="active"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="space-y-6"
+              className="space-y-4"
             >
-              {/* Timer Display */}
               <div className="text-center">
                 <motion.div
-                  className="text-5xl font-bold font-mono"
+                  className="text-4xl font-bold font-mono"
                   key={timeRemaining}
                   initial={{ scale: 1.1 }}
                   animate={{ scale: 1 }}
                 >
                   {formatTime(timeRemaining)}
                 </motion.div>
-                <p className="text-muted-foreground mt-2">until craving subsides</p>
+                <p className="text-[10px] text-muted-foreground mt-1">until craving subsides</p>
               </div>
 
-              {/* Progress */}
-              <div className="space-y-2">
-                <Progress value={progress} className="h-3" />
-                <p className="text-xs text-center text-muted-foreground">
+              <div className="space-y-1">
+                <Progress value={progress} className="h-2" />
+                <p className="text-[10px] text-center text-muted-foreground">
                   {Math.round(progress)}% complete
                 </p>
               </div>
 
-              {/* Breathing Exercise */}
               <motion.div
-                className={`p-6 rounded-2xl bg-gradient-to-br ${getBreathColor()} text-white text-center`}
+                className={`p-4 rounded-xl bg-gradient-to-br ${getBreathColor()} text-white text-center`}
                 animate={{ scale: breathPhase === "inhale" ? 1.02 : breathPhase === "exhale" ? 0.98 : 1 }}
                 transition={{ duration: 4, ease: "easeInOut" }}
               >
-                <Wind className="w-8 h-8 mx-auto mb-2" />
-                <p className="text-xl font-semibold">{getBreathInstruction()}</p>
-                <p className="text-sm opacity-80 mt-1">
+                <Wind className="w-6 h-6 mx-auto mb-1" />
+                <p className="text-base font-semibold">{getBreathInstruction()}</p>
+                <p className="text-[10px] opacity-80 mt-0.5">
                   {breathingExercises[currentExercise].name}
                 </p>
               </motion.div>
 
-              {/* Motivational Message */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={messageIndex}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-center p-4 rounded-xl bg-primary/10"
+                  className="text-center p-3 rounded-xl bg-primary/10"
                 >
-                  <Heart className="w-5 h-5 mx-auto mb-2 text-primary" />
-                  <p className="text-sm font-medium">{motivationalMessages[messageIndex]}</p>
+                  <Heart className="w-4 h-4 mx-auto mb-1 text-primary" />
+                  <p className="text-xs font-medium">{motivationalMessages[messageIndex]}</p>
                 </motion.div>
               </AnimatePresence>
 
-              {/* Controls */}
-              <div className="flex gap-3 justify-center">
-                <Button onClick={pauseTimer} variant="outline" size="lg">
-                  <Pause className="w-5 h-5 mr-2" />
+              <div className="flex gap-2 justify-center">
+                <Button onClick={pauseTimer} variant="outline" size="sm" className="text-xs h-8">
+                  <Pause className="w-3.5 h-3.5 mr-1" />
                   Pause
                 </Button>
-                <Button onClick={resetTimer} variant="ghost" size="lg">
-                  <RotateCcw className="w-5 h-5 mr-2" />
+                <Button onClick={resetTimer} variant="ghost" size="sm" className="text-xs h-8">
+                  <RotateCcw className="w-3.5 h-3.5 mr-1" />
                   Reset
                 </Button>
               </div>
@@ -224,20 +219,19 @@ export const CravingTimer = () => {
               key="idle"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-6"
+              className="text-center py-4"
             >
-              <p className="text-muted-foreground mb-6">
-                Feeling a craving? Start the timer and follow the breathing exercises. 
-                Most cravings pass within 20 minutes.
+              <p className="text-xs text-muted-foreground mb-4">
+                Feeling a craving? Start the timer and follow the breathing exercises.
               </p>
-              <Button onClick={startTimer} size="lg" className="gradient-primary">
-                <Play className="w-5 h-5 mr-2" />
+              <Button onClick={startTimer} size="sm" className="gradient-primary h-9 text-xs">
+                <Play className="w-4 h-4 mr-1.5" />
                 Start Urge Surfing
               </Button>
 
               {timeRemaining < CRAVING_DURATION && (
-                <Button onClick={resetTimer} variant="ghost" className="mt-3 w-full">
-                  <RotateCcw className="w-4 h-4 mr-2" />
+                <Button onClick={resetTimer} variant="ghost" size="sm" className="mt-2 w-full text-xs h-8">
+                  <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                   Reset Timer
                 </Button>
               )}
