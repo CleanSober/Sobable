@@ -57,7 +57,14 @@ export const MotivationalBanner = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="flex-1 text-sm font-medium text-foreground leading-relaxed"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.3}
+            onDragEnd={(_e, info) => {
+              if (info.offset.x < -50) nextMessage();
+              else if (info.offset.x > 50) setCurrentIndex((prev) => (prev - 1 + motivationalMessages.length) % motivationalMessages.length);
+            }}
+            className="flex-1 text-sm font-medium text-foreground leading-relaxed cursor-grab active:cursor-grabbing select-none"
           >
             "{message.text}"
           </motion.p>
