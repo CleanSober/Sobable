@@ -95,12 +95,12 @@ const ForumCard = memo(({
         onKeyDown={(e) => e.key === "Enter" && onSelect()}
         aria-label={`${forum.title} forum with ${forum.post_count} posts`}
       >
-        <CardContent className="p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <span className="text-xl flex-shrink-0" aria-hidden="true">{icon}</span>
+        <CardContent className="p-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="text-base flex-shrink-0" aria-hidden="true">{icon}</span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <h3 className="font-medium text-sm text-foreground truncate">{forum.title}</h3>
+                <h3 className="font-medium text-xs text-foreground truncate">{forum.title}</h3>
                 {isPopular && (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary shrink-0">
                     <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
@@ -109,7 +109,7 @@ const ForumCard = memo(({
                 )}
               </div>
               {forum.description && (
-                <p className="text-xs text-muted-foreground truncate">{forum.description}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{forum.description}</p>
               )}
             </div>
           </div>
@@ -203,73 +203,73 @@ export const ForumList = ({ onSelectForum, onCreateForum }: ForumListProps) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {/* Header with search and create */}
-      <header className="space-y-3">
+      <header className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" aria-hidden="true" />
+          <h2 className="text-sm font-semibold flex items-center gap-1.5">
+            <Users className="w-4 h-4 text-primary" aria-hidden="true" />
             Forums
-            <Badge variant="outline" className="ml-1">{forums.length}</Badge>
+            <Badge variant="outline" className="ml-1 text-[10px] px-1.5">{forums.length}</Badge>
           </h2>
           <Button 
             size="sm" 
             onClick={onCreateForum}
-            className="gradient-primary text-primary-foreground"
+            className="gradient-primary text-primary-foreground h-7 text-[10px] px-2.5"
             aria-label="Create a new forum"
           >
-            <Plus className="w-4 h-4 mr-1" aria-hidden="true" />
-            New Topic
+            <Plus className="w-3.5 h-3.5 mr-0.5" aria-hidden="true" />
+            New
           </Button>
         </div>
 
         {/* Search bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search forums..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-8 h-8 text-xs"
           />
         </div>
 
         {/* Sort buttons */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
           <Button
             size="sm"
             variant={sortBy === "popular" ? "default" : "outline"}
             onClick={() => setSortBy("popular")}
-            className="shrink-0"
+            className="shrink-0 h-7 text-[10px] px-2"
           >
-            <TrendingUp className="w-3.5 h-3.5 mr-1" />
+            <TrendingUp className="w-3 h-3 mr-0.5" />
             Popular
           </Button>
           <Button
             size="sm"
             variant={sortBy === "recent" ? "default" : "outline"}
             onClick={() => setSortBy("recent")}
-            className="shrink-0"
+            className="shrink-0 h-7 text-[10px] px-2"
           >
-            <Clock className="w-3.5 h-3.5 mr-1" />
+            <Clock className="w-3 h-3 mr-0.5" />
             Recent
           </Button>
           <Button
             size="sm"
             variant={sortBy === "alphabetical" ? "default" : "outline"}
             onClick={() => setSortBy("alphabetical")}
-            className="shrink-0"
+            className="shrink-0 h-7 text-[10px] px-2"
           >
             A-Z
           </Button>
         </div>
 
         {/* Category filters */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1">
           <Badge
             variant={selectedCategory === null ? "default" : "outline"}
-            className="cursor-pointer hover:bg-primary/20 transition-colors"
+            className="cursor-pointer hover:bg-primary/20 transition-colors text-[10px] px-1.5 py-0"
             onClick={() => setSelectedCategory(null)}
           >
             All
@@ -278,7 +278,7 @@ export const ForumList = ({ onSelectForum, onCreateForum }: ForumListProps) => {
             <Badge
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
-              className="cursor-pointer hover:bg-primary/20 transition-colors"
+              className="cursor-pointer hover:bg-primary/20 transition-colors text-[10px] px-1.5 py-0"
               onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
             >
               {category}

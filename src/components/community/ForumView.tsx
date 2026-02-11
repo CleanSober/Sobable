@@ -130,21 +130,22 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const contentRemaining = MAX_CONTENT_LENGTH - newContent.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {/* Header */}
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-2">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={onBack}
+          className="h-8 w-8"
           aria-label="Go back to forum list"
         >
-          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
         </Button>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold truncate">{forum.title}</h2>
+          <h2 className="text-sm font-semibold truncate">{forum.title}</h2>
           {forum.description && (
-            <p className="text-sm text-muted-foreground truncate">{forum.description}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{forum.description}</p>
           )}
         </div>
       </header>
@@ -153,15 +154,15 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       {!showNewPost ? (
         <Button 
           onClick={() => setShowNewPost(true)} 
-          className="w-full"
+          className="w-full h-8 text-xs"
           aria-label="Create a new post"
         >
-          <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+          <Plus className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
           Create Post
         </Button>
       ) : (
         <Card className="gradient-card border-border/50">
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-3 space-y-2">
             <div>
               <Input
                 placeholder="Post title..."

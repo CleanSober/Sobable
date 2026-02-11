@@ -239,11 +239,11 @@ export const LiveChat = () => {
   }
 
   return (
-    <Card className="gradient-card border-border/50 overflow-hidden flex flex-col" style={{ height: 'calc(100dvh - 10rem)' }}>
-      <CardHeader className="pb-2 pt-3 px-3 border-b border-border/30 space-y-2 shrink-0">
+    <Card className="gradient-card border-border/50 overflow-hidden flex flex-col" style={{ height: 'calc(100dvh - 11rem)' }}>
+      <CardHeader className="pb-1.5 pt-2 px-2.5 border-b border-border/30 space-y-1.5 shrink-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <MessageCircle className="w-4 h-4 text-primary" aria-hidden="true" />
+          <CardTitle className="flex items-center gap-1.5 text-sm">
+            <MessageCircle className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
             Live Chat
           </CardTitle>
           <OnlineUsers roomId={room?.id} />
@@ -257,7 +257,7 @@ export const LiveChat = () => {
       
       <CardContent className="p-0 flex flex-col flex-1 min-h-0">
         <ScrollArea className="flex-1" ref={scrollRef}>
-          <div className="space-y-2 p-3">
+          <div className="space-y-1.5 p-2">
             {messages.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="w-10 h-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
@@ -289,8 +289,8 @@ export const LiveChat = () => {
           )}
         </AnimatePresence>
 
-        <div className="p-3 border-t border-border/50 bg-card/50 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <div className="flex gap-2">
+        <div className="p-2 border-t border-border/50 bg-card/50 shrink-0 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          <div className="flex gap-1.5">
             <div className="relative flex-1">
               <MentionInput
                 value={newMessage}
@@ -301,11 +301,11 @@ export const LiveChat = () => {
                 maxLength={MAX_MESSAGE_LENGTH}
                 profiles={getAllProfiles()}
                 aria-label="Message input"
-                className={isNearLimit ? "pr-14" : ""}
+                className={isNearLimit ? "pr-12" : ""}
               />
               {isNearLimit && (
                 <span 
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] ${
                     remainingChars < 20 ? "text-destructive" : "text-muted-foreground"
                   }`}
                 >
@@ -317,10 +317,10 @@ export const LiveChat = () => {
               onClick={sendMessage} 
               disabled={!newMessage.trim() || sending} 
               size="icon"
-              className="gradient-primary text-primary-foreground h-10 w-10"
+              className="gradient-primary text-primary-foreground h-9 w-9"
               aria-label="Send message"
             >
-              <Send className="w-4 h-4" aria-hidden="true" />
+              <Send className="w-3.5 h-3.5" aria-hidden="true" />
             </Button>
           </div>
         </div>

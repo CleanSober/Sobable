@@ -149,20 +149,20 @@ export const PostCard = memo(({
         transition={{ delay: index * 0.05 }}
       >
         <Card className="gradient-card border-border/50 hover:border-border/70 transition-colors">
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             {/* Author header */}
-            <header className="flex items-center gap-3 mb-3">
+            <header className="flex items-center gap-2 mb-2">
               <div 
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-medium shadow-sm ${getAvatarColor(userId)}`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-medium shadow-sm ${getAvatarColor(userId)}`}
                 aria-hidden="true"
               >
                 {getInitials(displayName)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-xs font-medium text-foreground truncate">
                   {isOwn ? "You" : displayName}
                 </p>
-                <time className="text-xs text-muted-foreground" dateTime={createdAt}>
+                <time className="text-[10px] text-muted-foreground" dateTime={createdAt}>
                   {formatTimeAgo(createdAt)}
                 </time>
               </div>
@@ -248,10 +248,10 @@ export const PostCard = memo(({
               </div>
             ) : (
               <>
-                <h3 className="font-semibold text-foreground mb-1.5 leading-snug">{title}</h3>
+                <h3 className="text-xs font-semibold text-foreground mb-1 leading-snug">{title}</h3>
                 <MentionText 
                   text={content} 
-                  className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed block" 
+                  className="text-[10px] text-muted-foreground mb-3 line-clamp-3 leading-relaxed block" 
                 />
               </>
             )}
