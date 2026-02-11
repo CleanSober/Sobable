@@ -247,30 +247,30 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
   const RING_C = 2 * Math.PI * RING_R;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* View Mode Toggle */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
-        <div className="flex items-center gap-2 p-1 rounded-xl bg-secondary/50 border border-border/50">
-          <Button variant={viewMode === "weekly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("weekly"); setWeekOffset(0); }} className="rounded-lg">
-            <Calendar className="w-4 h-4 mr-1" /> Weekly
+        <div className="flex items-center gap-1.5 p-0.5 rounded-xl bg-secondary/50 border border-border/50">
+          <Button variant={viewMode === "weekly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("weekly"); setWeekOffset(0); }} className="rounded-lg h-7 text-[10px] px-2">
+            <Calendar className="w-3.5 h-3.5 mr-1" /> Weekly
           </Button>
-          <Button variant={viewMode === "monthly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("monthly"); setMonthOffset(0); }} className="rounded-lg">
-            <BarChart3 className="w-4 h-4 mr-1" /> Monthly
+          <Button variant={viewMode === "monthly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("monthly"); setMonthOffset(0); }} className="rounded-lg h-7 text-[10px] px-2">
+            <BarChart3 className="w-3.5 h-3.5 mr-1" /> Monthly
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handlePrev} className="h-8 w-8"><ChevronLeft className="w-4 h-4" /></Button>
-          <span className="text-sm font-medium min-w-[140px] text-center">{dateRangeLabel}</span>
-          <Button variant="ghost" size="icon" onClick={handleNext} disabled={!canGoForward} className="h-8 w-8"><ChevronRight className="w-4 h-4" /></Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={handlePrev} className="h-7 w-7"><ChevronLeft className="w-3.5 h-3.5" /></Button>
+          <span className="text-[10px] font-medium min-w-[100px] text-center">{dateRangeLabel}</span>
+          <Button variant="ghost" size="icon" onClick={handleNext} disabled={!canGoForward} className="h-7 w-7"><ChevronRight className="w-3.5 h-3.5" /></Button>
         </div>
       </motion.div>
 
       {/* Wellness Score Hero */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card-enhanced p-6">
-        <div className="flex items-center gap-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-4">
           {/* Score Ring */}
-          <div className="relative w-28 h-28 shrink-0">
-            <svg className="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120">
+          <div className="relative w-20 h-20 shrink-0">
+            <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r={RING_R} stroke="hsl(var(--secondary))" strokeWidth="10" fill="none" />
               <motion.circle
                 cx="60" cy="60" r={RING_R}
@@ -284,19 +284,19 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-foreground">{wellnessScore}</span>
-              <span className="text-[10px] text-muted-foreground font-medium">WELLNESS</span>
+              <span className="text-2xl font-bold text-foreground">{wellnessScore}</span>
+              <span className="text-[8px] text-muted-foreground font-medium">WELLNESS</span>
             </div>
           </div>
 
           {/* Score Breakdown */}
-          <div className="flex-1 space-y-2.5">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-lg font-bold text-foreground">Recovery Score</h3>
+          <div className="flex-1 space-y-1.5">
+            <div className="flex items-center justify-between mb-0.5">
+              <h3 className="text-sm font-bold text-foreground">Recovery Score</h3>
               {scoreChange !== 0 && (
-                <span className={`text-sm font-semibold flex items-center gap-1 ${scoreChange > 0 ? "text-emerald-500" : "text-red-400"}`}>
-                  {scoreChange > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                  {scoreChange > 0 ? "+" : ""}{scoreChange} pts
+                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${scoreChange > 0 ? "text-emerald-500" : "text-red-400"}`}>
+                  {scoreChange > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {scoreChange > 0 ? "+" : ""}{scoreChange}
                 </span>
               )}
             </div>
@@ -306,9 +306,9 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
               { label: "Cravings", value: currentStats.cravingAvg > 0 ? Math.round((1 - currentStats.cravingAvg / 10) * 100) : 100, color: "bg-amber-500" },
               { label: "Triggers", value: currentStats.triggerCount > 0 ? Math.round((currentStats.triggersResisted / currentStats.triggerCount) * 100) : 100, color: "bg-emerald-500" },
             ].map(item => (
-              <div key={item.label} className="flex items-center gap-2">
-                <span className="text-[11px] text-muted-foreground w-16">{item.label}</span>
-                <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
+              <div key={item.label} className="flex items-center gap-1.5">
+                <span className="text-[9px] text-muted-foreground w-12">{item.label}</span>
+                <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${item.value}%` }}
@@ -316,7 +316,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
                     className={`h-full ${item.color} rounded-full`}
                   />
                 </div>
-                <span className="text-[11px] font-medium w-7 text-right text-muted-foreground">{item.value}</span>
+                <span className="text-[9px] font-medium w-6 text-right text-muted-foreground">{item.value}</span>
               </div>
             ))}
           </div>
@@ -324,26 +324,26 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
       </motion.div>
 
       {/* 7-Day Activity Rings */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card-enhanced p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Activity className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">7-Day Activity</span>
-          <span className="ml-auto text-xs text-muted-foreground">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Activity className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-semibold text-foreground">7-Day Activity</span>
+          <span className="ml-auto text-[10px] text-muted-foreground">
             {weekActivity.filter(d => d.score > 0).length}/7 active
           </span>
         </div>
-        <div className="flex justify-between gap-1">
+        <div className="flex justify-between gap-0.5">
           {weekActivity.map((day, i) => {
             const isToday = i === 6;
-            const ringR = 16;
+            const ringR = 14;
             const ringC = 2 * Math.PI * ringR;
             return (
-              <div key={day.date} className="flex flex-col items-center gap-1.5">
-                <div className="relative w-10 h-10">
-                  <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r={ringR} stroke="hsl(var(--secondary))" strokeWidth="3" fill="none" />
+              <div key={day.date} className="flex flex-col items-center gap-1">
+                <div className="relative w-8 h-8">
+                  <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r={ringR} stroke="hsl(var(--secondary))" strokeWidth="3" fill="none" />
                     <motion.circle
-                      cx="20" cy="20" r={ringR}
+                      cx="18" cy="18" r={ringR}
                       stroke={day.score >= 75 ? "hsl(var(--primary))" : day.score >= 50 ? "hsl(38 92% 60%)" : day.score > 0 ? "hsl(var(--muted-foreground))" : "transparent"}
                       strokeWidth="3" fill="none" strokeLinecap="round"
                       initial={{ strokeDasharray: `0 ${ringC}` }}
@@ -353,16 +353,16 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
                   </svg>
                   {day.score >= 100 && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Check className="w-4 h-4 text-primary" />
+                      <Check className="w-3 h-3 text-primary" />
                     </div>
                   )}
                   {day.score > 0 && day.score < 100 && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[9px] font-bold text-muted-foreground">{day.activities.length}</span>
+                      <span className="text-[8px] font-bold text-muted-foreground">{day.activities.length}</span>
                     </div>
                   )}
                 </div>
-                <span className={`text-[10px] font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                <span className={`text-[9px] font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>
                   {isToday ? "Today" : getDayName(day.date)}
                 </span>
               </div>
@@ -379,7 +379,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
-          className="grid grid-cols-2 gap-3"
+          className="grid grid-cols-2 gap-2"
         >
           {(() => {
             const moodTrend = getTrend(currentStats.moodAvg, prevStats.moodAvg);
@@ -433,22 +433,22 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
                   transition={{ delay: index * 0.04 }}
                 >
                   <Card className="card-enhanced">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${card.gradient} flex items-center justify-center`}>
-                          <card.icon className={`w-4 h-4 ${card.iconColor}`} />
+                    <CardContent className="p-3">
+                      <div className="flex items-start justify-between mb-1">
+                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${card.gradient} flex items-center justify-center`}>
+                          <card.icon className={`w-3.5 h-3.5 ${card.iconColor}`} />
                         </div>
-                        <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${card.trend.color}`}>
-                          <TrendIcon className="w-3 h-3" />
+                        <span className={`text-[9px] font-semibold flex items-center gap-0.5 ${card.trend.color}`}>
+                          <TrendIcon className="w-2.5 h-2.5" />
                           {card.trend.label}
                         </span>
                       </div>
-                      <p className="text-xl font-bold text-foreground">
+                      <p className="text-lg font-bold text-foreground">
                         {card.value}
-                        {card.suffix && <span className="text-sm ml-0.5">{card.suffix}</span>}
+                        {card.suffix && <span className="text-xs ml-0.5">{card.suffix}</span>}
                       </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{card.label}</p>
-                      <p className="text-[9px] text-muted-foreground/70">{card.sub}</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">{card.label}</p>
+                      <p className="text-[8px] text-muted-foreground/70">{card.sub}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -460,18 +460,18 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
 
       {/* Goal Completion Rate */}
       {currentStats.totalGoals > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-enhanced p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-foreground">Goal Completion</span>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-enhanced p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-semibold text-foreground">Goal Completion</span>
             </div>
-            <span className="text-lg font-bold text-primary">
+            <span className="text-sm font-bold text-primary">
               {Math.round((currentStats.goalsCompleted / currentStats.totalGoals) * 100)}%
             </span>
           </div>
-          <Progress value={(currentStats.goalsCompleted / currentStats.totalGoals) * 100} className="h-3 mb-2" />
-          <p className="text-xs text-muted-foreground">
+          <Progress value={(currentStats.goalsCompleted / currentStats.totalGoals) * 100} className="h-2 mb-1.5" />
+          <p className="text-[10px] text-muted-foreground">
             {currentStats.goalsCompleted} of {currentStats.totalGoals} days with all goals met
           </p>
         </motion.div>
@@ -485,29 +485,29 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
 
       {/* Financial Impact */}
       {dailySpending > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="card-enhanced p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="p-2 rounded-lg bg-accent/10"><DollarSign className="w-5 h-5 text-accent" /></div>
-            <span className="text-lg font-semibold text-foreground">Financial Impact</span>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="card-enhanced p-3">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-lg bg-accent/10"><DollarSign className="w-4 h-4 text-accent" /></div>
+            <span className="text-sm font-semibold text-foreground">Financial Impact</span>
           </div>
 
-          <div className="text-center mb-5 p-5 rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20">
-            <p className="text-xs text-muted-foreground mb-1">Total Saved</p>
-            <p className="text-4xl font-bold bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">
+          <div className="text-center mb-3 p-3 rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20">
+            <p className="text-[10px] text-muted-foreground mb-0.5">Total Saved</p>
+            <p className="text-3xl font-bold bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">
               ${totalSaved.toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">${dailySpending}/day × {daysSober} days</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">${dailySpending}/day × {daysSober} days</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {[
               { label: "This Month", value: dailySpending * 30 },
               { label: "Per Year", value: yearlyProjection },
               { label: "In 5 Years", value: fiveYearProjection },
             ].map(item => (
-              <div key={item.label} className="p-3 rounded-xl bg-secondary/50 border border-border/30 text-center">
-                <p className="text-base font-semibold text-foreground">${item.value.toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{item.label}</p>
+              <div key={item.label} className="p-2 rounded-xl bg-secondary/50 border border-border/30 text-center">
+                <p className="text-sm font-semibold text-foreground">${item.value.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground mt-0.5">{item.label}</p>
               </div>
             ))}
           </div>
@@ -515,30 +515,30 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
       )}
 
       {/* Milestones */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card-enhanced p-6">
-        <div className="flex items-center gap-2 mb-5">
-          <div className="p-2 rounded-lg bg-primary/10"><Award className="w-5 h-5 text-primary" /></div>
-          <span className="text-lg font-semibold text-foreground">Milestones</span>
-          <span className="ml-auto text-xs text-muted-foreground">{reached.length} earned</span>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-lg bg-primary/10"><Award className="w-4 h-4 text-primary" /></div>
+          <span className="text-sm font-semibold text-foreground">Milestones</span>
+          <span className="ml-auto text-[10px] text-muted-foreground">{reached.length} earned</span>
         </div>
 
         {next && (
-          <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-primary">Next: {next.name}</span>
-              <span className="text-sm text-muted-foreground">{next.days - daysSober} days to go</span>
+          <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-medium text-primary">Next: {next.name}</span>
+              <span className="text-[10px] text-muted-foreground">{next.days - daysSober} days to go</span>
             </div>
-            <Progress value={(daysSober / next.days) * 100} className="h-3" />
+            <Progress value={(daysSober / next.days) * 100} className="h-2" />
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {reached.map((milestone) => (
             <motion.span
               key={milestone}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="px-3 py-1.5 text-sm font-medium rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-accent border border-accent/20"
+              className="px-2 py-1 text-[10px] font-medium rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-accent border border-accent/20"
             >
               ✓ {milestone}
             </motion.span>
@@ -546,7 +546,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
         </div>
 
         {reached.length === 0 && (
-          <p className="text-center text-muted-foreground py-4">Your first milestone is coming up! Keep going! 💪</p>
+          <p className="text-center text-xs text-muted-foreground py-3">Your first milestone is coming up! 💪</p>
         )}
       </motion.div>
     </div>
