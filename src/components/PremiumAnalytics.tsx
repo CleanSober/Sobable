@@ -463,39 +463,36 @@ export const PremiumAnalytics = () => {
   if (!isPremium) {
     return (
       <Card className="gradient-card border-border/50 overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <BarChart3 className="w-5 h-5 text-primary" />
+        <CardHeader className="pb-2 pt-3 px-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <BarChart3 className="w-4 h-4 text-primary" />
             Advanced Analytics
-            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-amber-500">
-              <Crown className="w-4 h-4" />
+            <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-amber-500">
+              <Crown className="w-3.5 h-3.5" />
               Sober Club
             </span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 pb-3">
           <div className="relative">
-            {/* Blurred preview */}
             <div className="blur-sm pointer-events-none opacity-50">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="p-4 rounded-xl bg-primary/10 text-center">
-                  <div className="text-3xl font-bold text-primary">87</div>
-                  <div className="text-xs text-muted-foreground">Recovery Score</div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="p-3 rounded-xl bg-primary/10 text-center">
+                  <div className="text-lg font-bold text-primary">87</div>
+                  <div className="text-[10px] text-muted-foreground">Recovery Score</div>
                 </div>
-                <div className="p-4 rounded-xl bg-emerald-500/10 text-center">
-                  <div className="text-3xl font-bold text-emerald-500">+12%</div>
-                  <div className="text-xs text-muted-foreground">This Week</div>
+                <div className="p-3 rounded-xl bg-emerald-500/10 text-center">
+                  <div className="text-lg font-bold text-emerald-500">+12%</div>
+                  <div className="text-[10px] text-muted-foreground">This Week</div>
                 </div>
               </div>
-              <div className="h-32 bg-secondary/30 rounded-xl" />
+              <div className="h-24 bg-secondary/30 rounded-xl" />
             </div>
-            
-            {/* Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
-              <Lock className="w-8 h-8 text-amber-500 mb-3" />
-              <h3 className="font-semibold text-foreground mb-1">Unlock Advanced Analytics</h3>
-              <p className="text-sm text-muted-foreground text-center mb-4 px-4">
-                Get AI-powered insights, predictive alerts, and personalized recovery scoring
+              <Lock className="w-6 h-6 text-amber-500 mb-2" />
+              <h3 className="font-semibold text-sm text-foreground mb-0.5">Unlock Analytics</h3>
+              <p className="text-xs text-muted-foreground text-center mb-3 px-4">
+                AI insights, alerts & recovery scoring
               </p>
               <PremiumGate />
             </div>
@@ -533,7 +530,7 @@ export const PremiumAnalytics = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
 
       {/* Predictive Alert */}
       {predictiveAlert && (
@@ -543,36 +540,36 @@ export const PremiumAnalytics = () => {
           transition={{ delay: 0.1 }}
         >
           <Card className={`${getRiskStyles(predictiveAlert.riskLevel).bg} ${getRiskStyles(predictiveAlert.riskLevel).border} border`}>
-            <CardContent className="pt-4">
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${getRiskStyles(predictiveAlert.riskLevel).bg}`}>
+            <CardContent className="pt-3 px-3 pb-3">
+              <div className="flex items-start gap-2">
+                <div className={`p-1.5 rounded-lg ${getRiskStyles(predictiveAlert.riskLevel).bg}`}>
                   {predictiveAlert.riskLevel === "low" ? (
-                    <Shield className={`w-5 h-5 ${getRiskStyles(predictiveAlert.riskLevel).text}`} />
+                    <Shield className={`w-4 h-4 ${getRiskStyles(predictiveAlert.riskLevel).text}`} />
                   ) : predictiveAlert.riskLevel === "high" ? (
-                    <AlertTriangle className={`w-5 h-5 ${getRiskStyles(predictiveAlert.riskLevel).text}`} />
+                    <AlertTriangle className={`w-4 h-4 ${getRiskStyles(predictiveAlert.riskLevel).text}`} />
                   ) : (
-                    <Zap className={`w-5 h-5 ${getRiskStyles(predictiveAlert.riskLevel).text}`} />
+                    <Zap className={`w-4 h-4 ${getRiskStyles(predictiveAlert.riskLevel).text}`} />
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-sm font-semibold ${getRiskStyles(predictiveAlert.riskLevel).text} capitalize`}>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className={`text-xs font-semibold ${getRiskStyles(predictiveAlert.riskLevel).text} capitalize`}>
                       {predictiveAlert.riskLevel} Risk
                     </span>
-                    <span className="text-xs text-muted-foreground">
-                      {predictiveAlert.confidence}% confidence
+                    <span className="text-[10px] text-muted-foreground">
+                      {predictiveAlert.confidence}%
                     </span>
                   </div>
                   {predictiveAlert.riskFactors.length > 0 && (
-                    <ul className="text-xs text-muted-foreground mb-2 space-y-1">
+                    <ul className="text-[10px] text-muted-foreground mb-1.5 space-y-0.5">
                       {predictiveAlert.riskFactors.map((factor, i) => (
                         <li key={i}>• {factor}</li>
                       ))}
                     </ul>
                   )}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {predictiveAlert.recommendations.map((rec, i) => (
-                      <span key={i} className="text-xs bg-background/50 px-2 py-1 rounded-full">
+                      <span key={i} className="text-[10px] bg-background/50 px-1.5 py-0.5 rounded-full">
                         💡 {rec}
                       </span>
                     ))}
@@ -592,13 +589,13 @@ export const PremiumAnalytics = () => {
           transition={{ delay: 0.2 }}
         >
           <Card className="gradient-card border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Brain className="w-5 h-5 text-primary" />
-                AI-Powered Insights
+            <CardHeader className="pb-2 pt-3 px-3">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Brain className="w-4 h-4 text-primary" />
+                AI Insights
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2 px-3 pb-3">
               {insights.map((insight, index) => {
                 const Icon = insight.icon;
                 return (
@@ -607,23 +604,23 @@ export const PremiumAnalytics = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`p-4 rounded-xl border ${getInsightStyles(insight.type)}`}
+                    className={`p-3 rounded-xl border ${getInsightStyles(insight.type)}`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-background/50">
-                        <Icon className="w-4 h-4" />
+                    <div className="flex items-start gap-2">
+                      <div className="p-1.5 rounded-lg bg-background/50">
+                        <Icon className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-foreground">{insight.title}</h4>
-                          <span className="text-xs text-muted-foreground">
-                            {insight.confidence}% confidence
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <h4 className="text-xs font-semibold text-foreground">{insight.title}</h4>
+                          <span className="text-[9px] text-muted-foreground">
+                            {insight.confidence}%
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">{insight.description}</p>
+                        <p className="text-[10px] text-muted-foreground">{insight.description}</p>
                         {insight.action && (
-                          <Button variant="ghost" size="sm" className="mt-2 h-7 text-xs">
-                            <Target className="w-3 h-3 mr-1" />
+                          <Button variant="ghost" size="sm" className="mt-1 h-6 text-[10px] px-2">
+                            <Target className="w-3 h-3 mr-0.5" />
                             {insight.action}
                           </Button>
                         )}
@@ -638,11 +635,11 @@ export const PremiumAnalytics = () => {
       )}
 
       {/* Charts */}
-      <Tabs defaultValue="trends" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-          <TabsTrigger value="triggers">Triggers</TabsTrigger>
-          <TabsTrigger value="balance">Balance</TabsTrigger>
+      <Tabs defaultValue="trends" className="space-y-3">
+        <TabsList className="grid w-full grid-cols-3 h-8">
+          <TabsTrigger value="trends" className="text-[10px]">Trends</TabsTrigger>
+          <TabsTrigger value="triggers" className="text-[10px]">Triggers</TabsTrigger>
+          <TabsTrigger value="balance" className="text-[10px]">Balance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trends">
@@ -652,7 +649,7 @@ export const PremiumAnalytics = () => {
             </CardHeader>
             <CardContent>
               {trendData.length > 0 ? (
-                <div className="h-64">
+                <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={trendData}>
                       <defs>
@@ -737,7 +734,7 @@ export const PremiumAnalytics = () => {
               <CardTitle className="text-base">Recovery Balance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64">
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="hsl(217 25% 20%)" />

@@ -117,20 +117,20 @@ export const PersonalizedRecommendations = () => {
     return (
       <Card className="gradient-card border-border/50 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5" />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            AI Recovery Recommendations
-            <Badge variant="secondary" className="ml-2 bg-amber-500/20 text-amber-600">
-              <Crown className="w-3 h-3 mr-1" />
+        <CardHeader className="pb-2 pt-3 px-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            AI Recommendations
+            <Badge variant="secondary" className="ml-auto bg-amber-500/20 text-amber-600 text-[10px]">
+              <Crown className="w-3 h-3 mr-0.5" />
               Premium
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-4">
-            <p className="text-muted-foreground mb-4">
-              Get personalized AI-powered recommendations based on your recovery journey.
+        <CardContent className="px-3 pb-3">
+          <div className="text-center py-3">
+            <p className="text-xs text-muted-foreground mb-3">
+              Get AI-powered recommendations for your recovery.
             </p>
             <PremiumGate />
           </div>
@@ -141,21 +141,22 @@ export const PersonalizedRecommendations = () => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-500" />
-          Your Personalized Plan
+      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          Your Plan
         </CardTitle>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
+          className="h-7 w-7"
           onClick={fetchRecommendations}
           disabled={loading}
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
         </Button>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3 px-3 pb-3">
         {loading && !recommendations ? (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -178,75 +179,75 @@ export const PersonalizedRecommendations = () => {
               className="space-y-6"
             >
               {/* Strength Score */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-emerald-500" />
-                    <span className="font-semibold">Recovery Strength</span>
+              <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Award className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-semibold">Recovery Strength</span>
                   </div>
-                  <span className="text-2xl font-bold text-emerald-500">
+                  <span className="text-lg font-bold text-emerald-500">
                     {recommendations.strengthScore}%
                   </span>
                 </div>
                 <Progress 
                   value={recommendations.strengthScore} 
-                  className="h-3 bg-emerald-500/20" 
+                  className="h-2 bg-emerald-500/20" 
                 />
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-lg bg-secondary/50 text-center">
-                  <Calendar className="w-4 h-4 mx-auto mb-1 text-primary" />
-                  <div className="text-lg font-bold">{recommendations.stats.daysSober}</div>
-                  <div className="text-xs text-muted-foreground">Days Sober</div>
+              <div className="grid grid-cols-4 gap-1.5">
+                <div className="p-2 rounded-lg bg-secondary/50 text-center">
+                  <Calendar className="w-3.5 h-3.5 mx-auto mb-0.5 text-primary" />
+                  <div className="text-sm font-bold">{recommendations.stats.daysSober}</div>
+                  <div className="text-[9px] text-muted-foreground">Days</div>
                 </div>
-                <div className="p-3 rounded-lg bg-secondary/50 text-center">
-                  <Heart className="w-4 h-4 mx-auto mb-1 text-pink-500" />
-                  <div className="text-lg font-bold">{recommendations.stats.avgMood}/5</div>
-                  <div className="text-xs text-muted-foreground">Avg Mood</div>
+                <div className="p-2 rounded-lg bg-secondary/50 text-center">
+                  <Heart className="w-3.5 h-3.5 mx-auto mb-0.5 text-pink-500" />
+                  <div className="text-sm font-bold">{recommendations.stats.avgMood}/5</div>
+                  <div className="text-[9px] text-muted-foreground">Mood</div>
                 </div>
-                <div className="p-3 rounded-lg bg-secondary/50 text-center">
-                  <Moon className="w-4 h-4 mx-auto mb-1 text-indigo-500" />
-                  <div className="text-lg font-bold">{recommendations.stats.avgSleep}h</div>
-                  <div className="text-xs text-muted-foreground">Avg Sleep</div>
+                <div className="p-2 rounded-lg bg-secondary/50 text-center">
+                  <Moon className="w-3.5 h-3.5 mx-auto mb-0.5 text-indigo-500" />
+                  <div className="text-sm font-bold">{recommendations.stats.avgSleep}h</div>
+                  <div className="text-[9px] text-muted-foreground">Sleep</div>
                 </div>
-                <div className="p-3 rounded-lg bg-secondary/50 text-center">
-                  <TrendingUp className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
-                  <div className="text-lg font-bold">{recommendations.stats.triggerSuccessRate}%</div>
-                  <div className="text-xs text-muted-foreground">Resisted</div>
+                <div className="p-2 rounded-lg bg-secondary/50 text-center">
+                  <TrendingUp className="w-3.5 h-3.5 mx-auto mb-0.5 text-emerald-500" />
+                  <div className="text-sm font-bold">{recommendations.stats.triggerSuccessRate}%</div>
+                  <div className="text-[9px] text-muted-foreground">Resisted</div>
                 </div>
               </div>
 
               {/* Daily Focus */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-amber-500" />
-                  <span className="font-semibold">Today's Focus</span>
+              <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Target className="w-4 h-4 text-amber-500" />
+                  <span className="text-xs font-semibold">Today's Focus</span>
                 </div>
-                <p className="text-foreground">{recommendations.dailyFocus}</p>
+                <p className="text-xs text-foreground">{recommendations.dailyFocus}</p>
               </div>
 
               {/* Weekly Goal */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-5 h-5 text-blue-500" />
-                  <span className="font-semibold">This Week's Goal</span>
+              <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <span className="text-xs font-semibold">This Week's Goal</span>
                 </div>
-                <p className="text-foreground">{recommendations.weeklyGoal}</p>
+                <p className="text-xs text-foreground">{recommendations.weeklyGoal}</p>
               </div>
 
               {/* Strengths */}
               {recommendations.strengths.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                     Your Strengths
                   </h4>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {recommendations.strengths.map((strength, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                        <div className="w-1 h-1 rounded-full bg-emerald-500" />
                         <span>{strength}</span>
                       </div>
                     ))}
@@ -257,14 +258,14 @@ export const PersonalizedRecommendations = () => {
               {/* Risk Factors */}
               {recommendations.riskFactors.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
                     Areas to Watch
                   </h4>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {recommendations.riskFactors.map((risk, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                        <div className="w-1 h-1 rounded-full bg-amber-500" />
                         <span>{risk}</span>
                       </div>
                     ))}
@@ -274,37 +275,37 @@ export const PersonalizedRecommendations = () => {
 
               {/* Action Plan */}
               <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-primary" />
+                <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-primary" />
                   Your Action Plan
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {recommendations.actionPlan.map((action, i) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
-                      className="p-3 rounded-lg bg-secondary/50 border border-border/50"
+                      className="p-2.5 rounded-lg bg-secondary/50 border border-border/50"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                      <div className="flex items-start gap-2">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                           action.priority === "high" 
                             ? "bg-red-500/20 text-red-500" 
                             : action.priority === "medium"
                               ? "bg-amber-500/20 text-amber-500"
                               : "bg-blue-500/20 text-blue-500"
                         }`}>
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className="w-3 h-3" />
                         </div>
                         <div>
-                          <div className="font-medium flex items-center gap-2">
+                          <div className="text-xs font-medium flex items-center gap-1.5">
                             {action.title}
-                            <Badge variant="outline" className="text-xs capitalize">
+                            <Badge variant="outline" className="text-[9px] capitalize px-1 py-0">
                               {action.priority}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
                             {action.description}
                           </p>
                         </div>
@@ -315,9 +316,9 @@ export const PersonalizedRecommendations = () => {
               </div>
 
               {/* Motivational Message */}
-              <div className="p-4 rounded-xl gradient-primary text-primary-foreground text-center">
-                <Sparkles className="w-6 h-6 mx-auto mb-2 opacity-80" />
-                <p className="font-medium">{recommendations.motivationalMessage}</p>
+              <div className="p-3 rounded-xl gradient-primary text-primary-foreground text-center">
+                <Sparkles className="w-5 h-5 mx-auto mb-1 opacity-80" />
+                <p className="text-xs font-medium">{recommendations.motivationalMessage}</p>
               </div>
             </motion.div>
           </AnimatePresence>
