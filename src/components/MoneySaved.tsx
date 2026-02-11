@@ -183,41 +183,41 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
       <div className="absolute top-0 right-1/4 w-48 h-48 bg-accent/10 blur-[80px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-32 h-32 bg-primary/8 blur-[60px] rounded-full pointer-events-none" />
 
-      <div className="relative p-4 sm:p-6">
+      <div className="relative p-3">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-accent/15 border border-accent/25 icon-glow">
-              <PiggyBank className="w-5 h-5 text-accent" />
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-accent/15 border border-accent/25 icon-glow">
+              <PiggyBank className="w-4 h-4 text-accent" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Money Saved</h3>
-              <p className="text-xs text-muted-foreground">Your financial progress</p>
+              <h3 className="font-semibold text-sm text-foreground">Money Saved</h3>
+              <p className="text-[10px] text-muted-foreground">Your financial progress</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
             <ArrowUpRight className="w-3 h-3 text-primary" />
-            <span className="text-xs font-medium text-primary">
+            <span className="text-[10px] font-medium text-primary">
               ${dailySpending}/day
             </span>
           </div>
         </div>
 
         {/* Main Amount - Animated */}
-        <div className="text-center mb-4 sm:mb-6">
+        <div className="text-center mb-3">
           <motion.div
             key={totalSaved}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex items-center justify-center gap-1 mb-1.5"
+            className="flex items-center justify-center gap-1 mb-1"
           >
-            <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-accent" />
-            <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-gradient-gold tabular-nums">
+            <DollarSign className="w-5 h-5 text-accent" />
+            <span className="text-4xl font-bold text-gradient-gold tabular-nums">
               {animatedTotal.toLocaleString()}
             </span>
           </motion.div>
-          <p className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
-            <Sparkles className="w-4 h-4 text-accent" />
+          <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
             saved in {daysSober} {daysSober === 1 ? "day" : "days"}
           </p>
           {investmentGain > 0 && (
@@ -225,7 +225,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-xs text-primary mt-1 flex items-center justify-center gap-1"
+              className="text-[10px] text-primary mt-0.5 flex items-center justify-center gap-1"
             >
               <Landmark className="w-3 h-3" />
               +${investmentGain.toLocaleString()} if invested at 8% return
@@ -235,10 +235,10 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
 
         {/* Tabs for different views */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4 bg-muted/30">
-            <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
-            <TabsTrigger value="growth" className="text-xs">Growth</TabsTrigger>
-            <TabsTrigger value="goals" className="text-xs">Goals</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-3 bg-muted/30 h-8">
+            <TabsTrigger value="overview" className="text-[10px]">Overview</TabsTrigger>
+            <TabsTrigger value="growth" className="text-[10px]">Growth</TabsTrigger>
+            <TabsTrigger value="goals" className="text-[10px]">Goals</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}

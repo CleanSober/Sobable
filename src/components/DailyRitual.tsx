@@ -263,25 +263,25 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
           )}
         </AnimatePresence>
 
-        <div className="relative p-4 sm:p-5 space-y-3 sm:space-y-4">
+        <div className="relative p-3 space-y-2.5">
           {/* Row 1: Streak + Daily Reward */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <div
-                className={`p-2.5 rounded-xl shadow-lg ${
+                className={`p-2 rounded-xl shadow-lg ${
                   streak.current > 0 ? "bg-gradient-to-br from-orange-500 to-amber-500 shadow-orange-500/25" : "bg-muted"
                 }`}
               >
-                <Flame className={`w-5 h-5 ${streak.current > 0 ? "text-white" : "text-muted-foreground"}`} />
+                <Flame className={`w-4 h-4 ${streak.current > 0 ? "text-white" : "text-muted-foreground"}`} />
               </div>
               <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-bold text-foreground">{streak.current}</span>
-                  <span className="text-sm text-muted-foreground font-medium">day streak</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-foreground">{streak.current}</span>
+                  <span className="text-xs text-muted-foreground font-medium">day streak</span>
                 </div>
                 {streak.longest > 0 && streak.longest > streak.current && (
-                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <Trophy className="w-3 h-3 text-accent" /> Best: {streak.longest}
+                  <p className="text-[9px] text-muted-foreground flex items-center gap-1">
+                    <Trophy className="w-2.5 h-2.5 text-accent" /> Best: {streak.longest}
                   </p>
                 )}
               </div>
@@ -293,22 +293,22 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
                 size="sm"
                 onClick={handleClaimReward}
                 disabled={!canClaimDailyReward || claiming}
-                className={`gap-1.5 font-semibold text-xs h-9 ${
+                className={`gap-1 font-semibold text-[10px] h-8 px-3 ${
                   canClaimDailyReward
                     ? "bg-gradient-to-r from-success to-primary hover:shadow-lg text-primary-foreground btn-glow"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
                 {claiming ? (
-                  <Zap className="w-3.5 h-3.5 animate-spin" />
+                  <Zap className="w-3 h-3 animate-spin" />
                 ) : canClaimDailyReward ? (
                   <>
-                    <Gift className="w-3.5 h-3.5" />
+                    <Gift className="w-3 h-3" />
                     Claim XP
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <CheckCircle2 className="w-3 h-3" />
                     Claimed
                   </>
                 )}
@@ -355,25 +355,25 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
           {/* Progress Ring + Goals */}
           <div className="space-y-1">
             {/* Circular progress header */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">Today's Ritual</span>
-                <span className="text-xs text-muted-foreground">{completedCount}/{GOALS.length}</span>
+                <span className="text-xs font-semibold text-foreground">Today's Ritual</span>
+                <span className="text-[10px] text-muted-foreground">{completedCount}/{GOALS.length}</span>
               </div>
               {allDone && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="text-xs font-semibold text-success flex items-center gap-1"
+                  className="text-[10px] font-semibold text-success flex items-center gap-1"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3 h-3" />
                   Complete!
                 </motion.span>
               )}
             </div>
 
             {/* Progress bar */}
-            <div className="relative h-2 bg-muted/40 rounded-full overflow-hidden mb-4">
+            <div className="relative h-1.5 bg-muted/40 rounded-full overflow-hidden mb-2.5">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
@@ -383,7 +383,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
             </div>
 
             {/* Goal items - compact grid */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {GOALS.map((goal) => {
                 const Icon = goal.icon;
                 const done = goals[goal.field];
@@ -391,22 +391,22 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
                   <button
                     key={goal.id}
                     onClick={() => toggleGoal(goal)}
-                    className={`flex items-center gap-2.5 p-3 rounded-xl transition-all duration-200 text-left ${
+                    className={`flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 text-left ${
                       done
                         ? "bg-success/10 border border-success/30"
                         : "bg-secondary/30 border border-border/30 hover:bg-secondary/50 active:scale-[0.98]"
                     }`}
                   >
                     {done ? (
-                      <CheckCircle2 className="w-4.5 h-4.5 text-success flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                     ) : (
-                      <Circle className="w-4.5 h-4.5 text-muted-foreground flex-shrink-0" />
+                      <Circle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className={`text-sm font-medium truncate ${done ? "text-success" : "text-foreground"}`}>
+                      <p className={`text-xs font-medium truncate ${done ? "text-success" : "text-foreground"}`}>
                         {goal.label}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">{goal.xpLabel}</p>
+                      <p className="text-[9px] text-muted-foreground">{goal.xpLabel}</p>
                     </div>
                   </button>
                 );
@@ -418,7 +418,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
           {!allDone ? (
             <Button
               onClick={onNavigateToCheckIn}
-              className={`w-full h-11 font-semibold text-sm text-primary-foreground ${
+              className={`w-full h-10 font-semibold text-xs text-primary-foreground ${
                 isUrgent
                   ? "bg-gradient-to-r from-destructive to-orange-500"
                   : isStreakAtRisk
@@ -426,15 +426,15 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
                   : "gradient-primary"
               } btn-glow`}
             >
-              <Zap className="w-4 h-4 mr-2" />
+              <Zap className="w-3.5 h-3.5 mr-1.5" />
               {isUrgent ? "Quick Check-In Now!" : "Start Daily Check-In"}
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Button>
           ) : (
-            <div className="text-center py-2">
-              <p className="text-sm text-success font-medium">🔥 All done! See you tomorrow.</p>
+            <div className="text-center py-1">
+              <p className="text-xs text-success font-medium">🔥 All done! See you tomorrow.</p>
               {streak.current > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[10px] text-muted-foreground mt-0.5">
                   {nextMilestone - streak.current} days to your {nextMilestone}-day badge
                 </p>
               )}

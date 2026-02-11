@@ -36,25 +36,17 @@ export const MotivationalBanner = () => {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-2xl p-3 sm:p-4 relative overflow-hidden"
+      className="glass-card rounded-2xl p-2.5 relative overflow-hidden"
     >
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 pointer-events-none" />
-      
-      {/* Decorative elements */}
-      <div className="absolute top-3 right-3">
-        <Sparkles className="w-4 h-4 text-primary/40" />
-      </div>
-      <div className="absolute bottom-3 left-3">
-        <Quote className="w-3 h-3 text-accent/30" />
-      </div>
 
-      <div className="flex items-center gap-3 relative">
+      <div className="flex items-center gap-2.5 relative">
         <motion.div
           key={currentIndex}
           initial={{ scale: 0, rotate: -20 }}
           animate={{ scale: 1, rotate: 0 }}
-          className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl sm:text-2xl border border-primary/20"
+          className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-lg border border-primary/20"
         >
           {message.emoji}
         </motion.div>
