@@ -26,12 +26,9 @@ import { Button } from "@/components/ui/button";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import { useAuth } from "@/contexts/AuthContext";
 import sobableLogo from "@/assets/sobable-logo.png";
-import phoneMockup1 from "@/assets/phone-mockup-1.png";
-import phoneMockup1Webp from "@/assets/phone-mockup-1.webp";
-import phoneMockup2 from "@/assets/phone-mockup-2.png";
-import phoneMockup2Webp from "@/assets/phone-mockup-2.webp";
-import phoneMockupSquare from "@/assets/phone-mockup-square.png";
-import phoneMockupSquareWebp from "@/assets/phone-mockup-square.webp";
+import screenshotDashboard from "@/assets/screenshots/01-dashboard-main.png";
+import screenshotMoodCheckin from "@/assets/screenshots/05-mood-checkin.png";
+import screenshotMoneySaved from "@/assets/screenshots/15-money-saved.png";
 
 const painPoints = [
   { icon: AlertTriangle, text: "Losing track of your sober days and starting over" },
@@ -257,35 +254,33 @@ const Landing = () => {
             className="relative flex justify-center"
           >
             <div className="relative">
-              <motion.picture
+              <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="relative z-10"
               >
-                <source srcSet={`${phoneMockup1Webp} 1x`} type="image/webp" />
                 <img
-                  src={phoneMockup1}
-                  alt="Sobable sobriety tracker app"
+                  src={screenshotDashboard}
+                  alt="Sobable app dashboard showing sobriety counter and daily stats"
                   width={288}
                   height={512}
-                  className="w-64 sm:w-72 h-auto rounded-3xl shadow-2xl"
+                  className="w-64 sm:w-72 h-auto rounded-3xl shadow-2xl border border-border/20"
                   fetchPriority="high"
                 />
-              </motion.picture>
-              <motion.picture
+              </motion.div>
+              <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
                 className="absolute -right-16 top-16 hidden sm:block"
               >
-                <source srcSet={`${phoneMockup2Webp} 1x`} type="image/webp" />
                 <img
-                  src={phoneMockup2}
-                  alt="Sobable daily motivation"
+                  src={screenshotMoodCheckin}
+                  alt="Sobable mood check-in screen"
                   width={200}
                   height={356}
-                  className="w-48 h-auto rounded-3xl shadow-xl opacity-80"
+                  className="w-48 h-auto rounded-3xl shadow-xl opacity-80 border border-border/20"
                 />
-              </motion.picture>
+              </motion.div>
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-amber-500/20 blur-[80px] -z-10 scale-125" />
             </div>
           </motion.div>
