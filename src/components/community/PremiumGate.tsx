@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, Shield, MessageSquare, Users, Heart, Bot } from "lucide-react";
+import { Crown, Shield, MessageSquare, Users, Heart, Bot, Brain, Star, Compass, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -11,10 +11,12 @@ interface PremiumGateProps {
 }
 
 const features = [
-  { icon: Bot, text: "AI Recovery Coach" },
-  { icon: MessageSquare, text: "Unlimited forum access" },
-  { icon: Users, text: "Real-time chat rooms" },
-  { icon: Heart, text: "Connect with peers" },
+  { icon: Bot, text: "AI Recovery Coach — 24/7 support" },
+  { icon: Brain, text: "Predictive Insights & Risk Score" },
+  { icon: Users, text: "Accountability Partner matching" },
+  { icon: Compass, text: "Guided Recovery Pathways" },
+  { icon: MessageSquare, text: "Forums & real-time chat rooms" },
+  { icon: Zap, text: "Ad-free experience" },
 ] as const;
 
 export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
@@ -47,12 +49,19 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
               <Crown className="w-7 h-7 text-white" aria-hidden="true" />
             </motion.div>
             
-            {/* Title and description */}
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-foreground">Join Sober Club</h2>
+              <h2 className="text-lg font-bold text-foreground">Join 2,400+ in Sober Club</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Connect with our supportive community, forums, and live chat.
+                Unlock the full recovery toolkit — try free for 7 days
               </p>
+            </div>
+
+            {/* Stars */}
+            <div className="flex items-center justify-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              ))}
+              <span className="text-[10px] text-muted-foreground ml-1">4.9/5</span>
             </div>
 
             {/* Features list */}
@@ -62,7 +71,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
                   key={text}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
+                  transition={{ delay: 0.3 + index * 0.08 }}
                   className="flex items-center gap-2"
                 >
                   <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -76,22 +85,20 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
             {/* CTA button */}
             <Button 
               onClick={handleUpgradeClick}
-              className="w-full h-9 text-sm bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
+              className="w-full h-10 text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
             >
               <Crown className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
-              Join Sober Club
+              Start Free Trial
             </Button>
 
-            {/* Security note */}
             <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
               <Shield className="w-3 h-3" aria-hidden="true" />
-              Secure payment
+              No charge for 7 days · Cancel anytime
             </p>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Pricing Modal */}
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
         <DialogContent className="max-w-lg p-0 overflow-hidden">
           <PricingPlans onClose={() => setShowPricing(false)} />

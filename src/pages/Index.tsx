@@ -37,6 +37,7 @@ import { RiskPrediction } from "@/components/RiskPrediction";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
+import { PremiumUpsellBanner } from "@/components/PremiumUpsellBanner";
 import { SmartRiskScore } from "@/components/premium/SmartRiskScore";
 import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
 import { GuidedPathways } from "@/components/premium/GuidedPathways";
@@ -209,6 +210,7 @@ const Index = () => {
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            <PremiumUpsellBanner message="Get AI-powered risk alerts & recovery coaching" />
             <SmartRiskScore />
             {/* AI Recovery Coach Card */}
             <motion.button
@@ -248,6 +250,7 @@ const Index = () => {
             <BreathingExercise />
             <GuidedMeditations />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+            <PremiumUpsellBanner message="Unlock AI journal insights & guided meditations" />
           </div>
         );
 
@@ -264,6 +267,7 @@ const Index = () => {
             <PatternAnalysis />
             <RelapsePreventionPlan />
             <CrisisResources />
+            <PremiumUpsellBanner message="Get daily risk scores & predictive pattern analysis" />
           </div>
         );
 
