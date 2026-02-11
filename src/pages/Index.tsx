@@ -265,7 +265,6 @@ const Index = () => {
           
           <div className="container max-w-2xl mx-auto px-3 py-2 flex items-center justify-between relative">
             <div className="flex items-center gap-2">
-              <img src={sobableLogo} alt="Sobable" className="w-8 h-8 rounded-xl shadow-lg shadow-primary/20" />
               <span className="text-base font-bold text-foreground tracking-tight">Sobable</span>
               {(userXP?.daily_login_streak ?? 0) > 0 && (
                 <motion.div
