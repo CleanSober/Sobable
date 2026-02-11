@@ -93,7 +93,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
         <h3 className="text-sm font-semibold text-foreground">Quick Actions</h3>
       </div>
       
-      <div className="grid grid-cols-4 gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory">
         {actions.map((action, index) => {
           const Icon = action.icon;
           return (
@@ -104,7 +104,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
               transition={{ delay: index * 0.05 }}
               whileTap={{ scale: 0.92 }}
               onClick={action.action}
-              className="group flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl bg-secondary/40 active:bg-secondary/70 border border-transparent active:border-border/50 transition-all duration-200"
+              className="group flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl bg-secondary/40 active:bg-secondary/70 border border-transparent active:border-border/50 transition-all duration-200 min-w-[72px] snap-start flex-shrink-0"
             >
               <div 
                 className={`relative p-2 sm:p-2.5 rounded-xl bg-gradient-to-br ${action.gradient} shadow-lg transition-all duration-300`}
