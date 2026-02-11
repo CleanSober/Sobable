@@ -166,16 +166,16 @@ const Index = () => {
     switch (activeTab) {
       case "home":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <motion.div 
               initial={{ opacity: 0, y: -10 }} 
               animate={{ opacity: 1, y: 0 }} 
-              className="glass-card rounded-2xl p-4 text-center"
+              className="glass-card rounded-2xl p-3 text-center"
             >
-              <p className="text-muted-foreground text-xs mb-0.5 font-medium">
+              <p className="text-muted-foreground text-[10px] mb-0.5 font-medium">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
-              <h1 className="text-xl font-bold text-foreground">
+              <h1 className="text-lg font-bold text-foreground">
                 {profile?.display_name ? (
                   <>Keep going, <span className="text-gradient">{profile.display_name}</span>!</>
                 ) : (
@@ -194,10 +194,10 @@ const Index = () => {
 
       case "checkin":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-xl font-bold text-foreground mb-0.5">Daily Check-In</h1>
-              <p className="text-sm text-muted-foreground">How are you feeling today?</p>
+              <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
+              <p className="text-xs text-muted-foreground">How are you feeling today?</p>
             </motion.div>
             <MoodCheckIn />
             <SleepTracker />
@@ -210,10 +210,10 @@ const Index = () => {
 
       case "triggers":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-xl font-bold text-foreground mb-0.5">Triggers & Coping</h1>
-              <p className="text-sm text-muted-foreground">Know yourself to protect yourself</p>
+              <h1 className="text-lg font-bold text-foreground mb-0.5">Triggers & Coping</h1>
+              <p className="text-xs text-muted-foreground">Know yourself to protect yourself</p>
             </motion.div>
             <CravingTimer />
             <RiskPrediction />
@@ -226,10 +226,10 @@ const Index = () => {
 
       case "progress":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-xl font-bold text-foreground mb-0.5">Your Journey</h1>
-              <p className="text-sm text-muted-foreground">Every step counts</p>
+              <h1 className="text-lg font-bold text-foreground mb-0.5">Your Journey</h1>
+              <p className="text-xs text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
             <PersonalizedRecommendations />
@@ -263,19 +263,19 @@ const Index = () => {
           <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl border-b border-border/30" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           
-          <div className="container max-w-2xl mx-auto px-4 py-3 flex items-center justify-between relative">
-            <div className="flex items-center gap-2.5">
-              <img src={sobableLogo} alt="Sobable" className="w-9 h-9 rounded-xl shadow-lg shadow-primary/20" />
-              <span className="text-lg font-bold text-foreground tracking-tight">Sobable</span>
+          <div className="container max-w-2xl mx-auto px-3 py-2 flex items-center justify-between relative">
+            <div className="flex items-center gap-2">
+              <img src={sobableLogo} alt="Sobable" className="w-8 h-8 rounded-xl shadow-lg shadow-primary/20" />
+              <span className="text-base font-bold text-foreground tracking-tight">Sobable</span>
               {(userXP?.daily_login_streak ?? 0) > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/15 border border-accent/30"
+                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-accent/15 border border-accent/30"
                 >
-                  <Flame className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-xs font-bold text-accent">{userXP?.daily_login_streak}</span>
+                  <Flame className="w-3 h-3 text-accent" />
+                  <span className="text-[10px] font-bold text-accent">{userXP?.daily_login_streak}</span>
                 </motion.div>
               )}
             </div>
@@ -287,7 +287,7 @@ const Index = () => {
         </motion.header>
 
         <main
-          className="container max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-24 relative overflow-x-hidden"
+          className="container max-w-2xl mx-auto px-3 py-3 pb-20 relative overflow-x-hidden"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >

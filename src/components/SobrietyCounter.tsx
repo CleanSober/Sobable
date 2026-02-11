@@ -42,19 +42,19 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
         <div className="absolute bottom-0 right-0 w-40 h-40 bg-accent/10 blur-[60px] rounded-full" />
       </div>
 
-      <div className="relative z-10 p-4 sm:p-6">
+      <div className="relative z-10 p-4">
         {/* Top row: Clean date + XP badge */}
-        <div className="flex items-start justify-between mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20 icon-glow">
-              <Calendar className="w-5 h-5 text-primary" />
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-primary/15 border border-primary/20 icon-glow">
+              <Calendar className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <span className="text-muted-foreground text-sm font-medium">
+              <span className="text-muted-foreground text-xs font-medium">
                 Clean Since
               </span>
-              <p className="text-foreground font-semibold">
-                {new Date(startDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+              <p className="text-foreground font-semibold text-sm">
+                {new Date(startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
           </div>
@@ -64,23 +64,23 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1.5"
             >
               <div className="text-right">
-                <div className="flex items-center gap-1.5 justify-end text-accent">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span className="font-bold text-sm">{userXP.total_xp.toLocaleString()} XP</span>
+                <div className="flex items-center gap-1 justify-end text-accent">
+                  <Sparkles className="w-3 h-3" />
+                  <span className="font-bold text-xs">{userXP.total_xp.toLocaleString()} XP</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground">Lvl {userXP.current_level} • {levelTitle}</p>
+                <p className="text-[9px] text-muted-foreground">Lvl {userXP.current_level} • {levelTitle}</p>
               </div>
               <motion.div
                 className="relative"
                 animate={rewardAnimation ? { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] } : {}}
               >
-                <div className="p-2 rounded-xl gradient-premium shadow-lg shadow-accent/20">
-                  <Star className="w-4 h-4 text-primary-foreground" />
+                <div className="p-1.5 rounded-lg gradient-premium shadow-lg shadow-accent/20">
+                  <Star className="w-3.5 h-3.5 text-primary-foreground" />
                 </div>
-                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-card">
+                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-lg border border-card">
                   {userXP.current_level}
                 </div>
               </motion.div>
@@ -89,26 +89,25 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
         </div>
 
         {/* Main Counter */}
-        <div className="text-center mb-4 sm:mb-6">
+        <div className="text-center mb-3">
           <motion.div
             key={daysSober}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="relative inline-block mb-1"
+            className="relative inline-block mb-0.5"
           >
-            <span className="text-6xl sm:text-8xl md:text-9xl font-bold text-gradient tracking-tight">
+            <span className="text-5xl font-bold text-gradient tracking-tight">
               {daysSober}
             </span>
-            <Sparkles className="absolute -top-1 -right-3 w-5 h-5 text-accent animate-pulse" />
+            <Sparkles className="absolute -top-1 -right-3 w-4 h-4 text-accent animate-pulse" />
           </motion.div>
-          <p className="text-lg sm:text-xl text-foreground/80 font-medium tracking-wide">
+          <p className="text-base text-foreground/80 font-medium tracking-wide">
             {daysSober === 1 ? "Day" : "Days"} Clean & Sober
           </p>
         </div>
 
-        {/* Time breakdown */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="grid grid-cols-3 gap-2 mb-3">
           {[
             { label: "Weeks", value: weeks, icon: "📅" },
             { label: "Months", value: months, icon: "🌙" },
@@ -119,23 +118,23 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="stat-box text-center group"
+              className="stat-box text-center group !p-3"
             >
-              <span className="text-lg opacity-60 group-hover:opacity-100 transition-opacity">{item.icon}</span>
-              <p className="text-2xl font-bold text-foreground mt-1">{item.value}</p>
-              <p className="text-xs text-muted-foreground font-medium">{item.label}</p>
+              <span className="text-base opacity-60 group-hover:opacity-100 transition-opacity">{item.icon}</span>
+              <p className="text-xl font-bold text-foreground mt-0.5">{item.value}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">{item.label}</p>
             </motion.div>
           ))}
         </div>
 
         {/* XP Progress Bar */}
         {!xpLoading && userXP && xpProgress && (
-          <div className="mb-6 space-y-2">
-            <div className="flex justify-between text-xs">
+          <div className="mb-4 space-y-1.5">
+            <div className="flex justify-between text-[10px]">
               <span className="text-muted-foreground">Level {userXP.current_level} → {userXP.current_level + 1}</span>
               <span className="text-foreground font-medium">{xpProgress.progressInLevel} / {xpProgress.xpNeededForLevel} XP</span>
             </div>
-            <div className="relative h-2.5 bg-muted/50 rounded-full overflow-hidden">
+            <div className="relative h-2 bg-muted/50 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${xpProgress.percentage}%` }}

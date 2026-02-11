@@ -233,10 +233,13 @@
     transition: all 0.3s ease;
   }
 
-  .card-enhanced:hover {
-    border-color: hsl(var(--primary) / 0.3);
-    box-shadow: var(--shadow-elevated), 0 0 30px hsl(var(--primary) / 0.1);
-    transform: translateY(-2px);
+  /* Only hover effects on non-touch devices */
+  @media (hover: hover) {
+    .card-enhanced:hover {
+      border-color: hsl(var(--primary) / 0.3);
+      box-shadow: var(--shadow-elevated), 0 0 30px hsl(var(--primary) / 0.1);
+      transform: translateY(-2px);
+    }
   }
 
   /* Tech border animation */
