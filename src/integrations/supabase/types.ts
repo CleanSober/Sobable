@@ -539,6 +539,115 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_matches: {
+        Row: {
+          created_at: string
+          id: string
+          match_score: number | null
+          partner_id: string
+          shared_goals: string[] | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          partner_id: string
+          shared_goals?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          partner_id?: string
+          shared_goals?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      partner_messages: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          message: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "partner_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pathway_progress: {
+        Row: {
+          completed_at: string | null
+          completed_tasks: string[] | null
+          current_week: number
+          id: string
+          is_active: boolean | null
+          pathway_id: string
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_tasks?: string[] | null
+          current_week?: number
+          id?: string
+          is_active?: boolean | null
+          pathway_id: string
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_tasks?: string[] | null
+          current_week?: number
+          id?: string
+          is_active?: boolean | null
+          pathway_id?: string
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pathway_progress_pathway_id_fkey"
+            columns: ["pathway_id"]
+            isOneToOne: false
+            referencedRelation: "recovery_pathways"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_votes: {
         Row: {
           created_at: string
@@ -637,6 +746,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      predictive_insights: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          description: string
+          id: string
+          insight_type: string
+          pattern_data: Json | null
+          strategies: string[] | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          insight_type: string
+          pattern_data?: Json | null
+          strategies?: string[] | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          insight_type?: string
+          pattern_data?: Json | null
+          strategies?: string[] | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       prevention_plans: {
         Row: {
@@ -745,6 +890,75 @@ export type Database = {
           id?: string
           target_id?: string
           target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recovery_pathways: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          duration_weeks: number
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          tasks: Json
+          title: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          duration_weeks?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          tasks?: Json
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          duration_weeks?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          tasks?: Json
+          title?: string
+        }
+        Relationships: []
+      }
+      risk_scores: {
+        Row: {
+          created_at: string
+          factors: Json | null
+          id: string
+          recommendations: string[] | null
+          risk_level: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          factors?: Json | null
+          id?: string
+          recommendations?: string[] | null
+          risk_level?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          factors?: Json | null
+          id?: string
+          recommendations?: string[] | null
+          risk_level?: string
+          score?: number
           user_id?: string
         }
         Relationships: []

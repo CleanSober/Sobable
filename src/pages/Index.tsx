@@ -37,6 +37,11 @@ import { RiskPrediction } from "@/components/RiskPrediction";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
+import { SmartRiskScore } from "@/components/premium/SmartRiskScore";
+import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
+import { GuidedPathways } from "@/components/premium/GuidedPathways";
+import { AccountabilityPartner } from "@/components/premium/AccountabilityPartner";
+import { PredictiveInsights } from "@/components/premium/PredictiveInsights";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -189,6 +194,7 @@ const Index = () => {
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            <SmartRiskScore />
             {/* AI Recovery Coach Card */}
             <motion.button
               initial={{ opacity: 0, y: 10 }}
@@ -209,6 +215,7 @@ const Index = () => {
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             </motion.button>
+            <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
             <AchievementBadges daysSober={daysSober} />
           </div>
         );
@@ -253,6 +260,9 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+            <GuidedPathways />
+            <PredictiveInsights />
+            <AccountabilityPartner />
             <PersonalizedRecommendations />
             <PremiumAnalytics />
           </div>
