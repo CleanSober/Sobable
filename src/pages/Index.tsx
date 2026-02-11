@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useGamification } from "@/hooks/useGamification";
-import { Loader2, Flame } from "lucide-react";
+import { Loader2, Flame, Bot, Crown, ChevronRight } from "lucide-react";
 import sobableLogo from "@/assets/sobable-logo.png";
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
 import { MoodCheckIn } from "@/components/MoodCheckIn";
-import { EmergencyButton } from "@/components/EmergencyButton";
+
 import { Onboarding } from "@/components/Onboarding";
 import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { ProgressView } from "@/components/ProgressView";
@@ -48,6 +48,7 @@ const Index = () => {
   const { userXP } = useGamification();
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
+  const [coachOpen, setCoachOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleTabChange = (tab: TabId) => {
@@ -188,6 +189,26 @@ const Index = () => {
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            {/* AI Recovery Coach Card */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setCoachOpen(true)}
+              className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
+            >
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 border border-accent/30">
+                <Bot className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
+                  <Crown className="w-3 h-3 text-accent" />
+                </div>
+                <p className="text-[10px] text-muted-foreground">Personalized insights from your recovery data</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </motion.button>
             <AchievementBadges daysSober={daysSober} />
           </div>
         );
@@ -305,8 +326,7 @@ const Index = () => {
         </main>
 
         <BottomTabs activeTab={activeTab} onTabChange={handleTabChange} />
-        <EmergencyButton />
-        <AIRecoveryCoach />
+        <AIRecoveryCoach isOpen={coachOpen} onOpenChange={setCoachOpen} />
         <AdBanner position="bottom" />
       </div>
     </XPNotificationProvider>
