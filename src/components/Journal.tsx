@@ -168,53 +168,53 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 pt-3 px-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <BookOpen className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <BookOpen className="h-4 w-4 text-primary" />
               Recovery Journal
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2">
+                    <Download className="h-3 w-3 mr-1" />
                     Export
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => exportEntries('json')}>
-                    <FileJson className="h-4 w-4 mr-2" />
+                    <FileJson className="h-3.5 w-3.5 mr-2" />
                     JSON
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => exportEntries('txt')}>
-                    <FileText className="h-4 w-4 mr-2" />
+                    <FileText className="h-3.5 w-3.5 mr-2" />
                     Text
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => exportEntries('csv')}>
-                    <Table className="h-4 w-4 mr-2" />
+                    <Table className="h-3.5 w-3.5 mr-2" />
                     CSV
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={() => setIsWriting(true)} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                New Entry
+              <Button onClick={() => setIsWriting(true)} size="sm" className="h-7 text-[10px] px-2">
+                <Plus className="h-3 w-3 mr-1" />
+                New
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 pb-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Search your journal..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="pl-8 h-8 text-xs"
             />
           </div>
         </CardContent>
@@ -222,25 +222,25 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
 
       {/* Entry List */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : entries.length === 0 ? (
         <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardContent className="py-12 text-center">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-            <h3 className="text-lg font-medium mb-2">Start Your Journal</h3>
-            <p className="text-muted-foreground mb-4">
-              Journaling is a powerful tool for recovery. Write your first entry today.
+          <CardContent className="py-8 text-center">
+            <BookOpen className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+            <h3 className="text-sm font-medium mb-1">Start Your Journal</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Journaling is a powerful tool for recovery.
             </p>
-            <Button onClick={() => setIsWriting(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => setIsWriting(true)} size="sm" className="text-xs h-8">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
               Write First Entry
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <AnimatePresence>
             {entries.map((entry) => (
               <motion.div
@@ -250,46 +250,46 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
                 exit={{ opacity: 0, x: -100 }}
               >
                 <Card 
-                  className="bg-card/50 backdrop-blur-sm border-border/50 cursor-pointer hover:bg-card/70 transition-colors"
+                  className="bg-card/50 backdrop-blur-sm border-border/50 cursor-pointer active:bg-card/70 transition-colors"
                   onClick={() => setSelectedEntry(entry)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
+                  <CardContent className="p-3">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium truncate">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <h3 className="font-medium text-xs truncate">
                             {entry.title || 'Untitled Entry'}
                           </h3>
                           {entry.is_favorite && (
-                            <Heart className="h-4 w-4 fill-pink-400 text-pink-400 flex-shrink-0" />
+                            <Heart className="h-3 w-3 fill-pink-400 text-pink-400 flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        <p className="text-[10px] text-muted-foreground line-clamp-2 mb-1.5">
                           {entry.content}
                         </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(entry.created_at), 'MMM d, yyyy')}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                            <Calendar className="h-2.5 w-2.5" />
+                            {format(new Date(entry.created_at), 'MMM d')}
                           </span>
                           {entry.mood_score && (
-                            <Badge variant="outline" className={getMoodColor(entry.mood_score)}>
+                            <Badge variant="outline" className={`${getMoodColor(entry.mood_score)} text-[9px] px-1 py-0 h-4`}>
                               {moodEmojis[entry.mood_score - 1]} {entry.mood_score}/10
                             </Badge>
                           )}
-                          {entry.tags.slice(0, 3).map(tag => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
+                          {entry.tags.slice(0, 2).map(tag => (
+                            <Badge key={tag} variant="secondary" className="text-[9px] px-1 py-0 h-4">
                               {tag}
                             </Badge>
                           ))}
-                          {entry.tags.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{entry.tags.length - 3}
+                          {entry.tags.length > 2 && (
+                            <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4">
+                              +{entry.tags.length - 2}
                             </Badge>
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
                     </div>
                   </CardContent>
                 </Card>

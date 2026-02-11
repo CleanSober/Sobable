@@ -240,17 +240,17 @@ export const MoodCheckIn = () => {
         className="card-enhanced relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-success/8 blur-[60px] rounded-full pointer-events-none" />
-        <div className="relative p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-success/15 border border-success/25 icon-glow">
-                <Check className="w-5 h-5 text-success" />
+        <div className="relative p-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-success/15 border border-success/25 icon-glow">
+                <Check className="w-4 h-4 text-success" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-foreground">Today's Check-In Complete</p>
-                  <span className="text-[10px] text-accent flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10">
-                    <Sparkles className="w-3 h-3" />+{XP_REWARDS.mood_log} XP
+                <div className="flex items-center gap-1.5">
+                  <p className="font-semibold text-sm text-foreground">Check-In Complete</p>
+                  <span className="text-[9px] text-accent flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-accent/10">
+                    <Sparkles className="w-2.5 h-2.5" />+{XP_REWARDS.mood_log} XP
                   </span>
                 </div>
               </div>
@@ -262,34 +262,34 @@ export const MoodCheckIn = () => {
                 setIsExpanded(true);
                 setCurrentStep(0);
               }}
-              className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 text-xs"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 text-[10px] h-7 px-2"
             >
               Update
             </Button>
           </div>
 
           {/* Summary stats */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-1.5">
             {[
               { label: "Mood", value: summaryData.moodLabel, sub: `${mood}/10` },
               { label: "Craving", value: cravingLevels[craving] === "None" ? "✅" : "⚠️", sub: summaryData.cravingLabel },
               { label: "Energy", value: energyLevels.find((e) => e.value === energy)?.emoji || "⚡", sub: summaryData.energyLabel },
               { label: "Social", value: social >= 4 ? "💚" : social >= 3 ? "💛" : "🔴", sub: summaryData.socialLabel },
             ].map((item) => (
-              <div key={item.label} className="text-center p-2 rounded-lg bg-secondary/30">
-                <span className="text-lg">{item.value}</span>
-                <p className="text-[9px] text-muted-foreground mt-0.5">{item.sub}</p>
+              <div key={item.label} className="text-center p-1.5 rounded-lg bg-secondary/30">
+                <span className="text-base">{item.value}</span>
+                <p className="text-[8px] text-muted-foreground mt-0.5">{item.sub}</p>
               </div>
             ))}
           </div>
 
           {/* Emotion tags */}
           {selectedEmotions.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
+            <div className="flex flex-wrap gap-1 mt-2">
               {selectedEmotions.map((e) => {
                 const tag = emotionTags.find((t) => t.label === e);
                 return (
-                  <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  <span key={e} className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                     {tag?.emoji} {e}
                   </span>
                 );
@@ -312,21 +312,21 @@ export const MoodCheckIn = () => {
     switch (step) {
       case "mood":
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div className="text-center">
               <motion.span
                 key={mood}
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-7xl inline-block mb-3"
+                className="text-5xl inline-block mb-2"
               >
                 {moodEmojis[mood - 1]}
               </motion.span>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {mood <= 3 ? "Hang in there, it gets better" : mood <= 6 ? "You're doing okay" : "That's wonderful!"}
               </p>
             </div>
-            <div className="px-2">
+            <div className="px-1">
               <input
                 type="range"
                 min="1"
@@ -335,7 +335,7 @@ export const MoodCheckIn = () => {
                 onChange={(e) => setMood(Number(e.target.value))}
                 className="w-full h-2 bg-secondary rounded-full appearance-none cursor-pointer accent-primary"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5 px-0.5">
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1 px-0.5">
                 <span>Struggling</span>
                 <span className="font-semibold text-foreground text-xs">{mood}/10</span>
                 <span>Thriving</span>
@@ -346,9 +346,9 @@ export const MoodCheckIn = () => {
 
       case "emotions":
         return (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground text-center">Select all that apply</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          <div className="space-y-2">
+            <p className="text-[10px] text-muted-foreground text-center">Select all that apply</p>
+            <div className="grid grid-cols-4 gap-1.5">
               {emotionTags.map((tag) => {
                 const isSelected = selectedEmotions.includes(tag.label);
                 return (
@@ -357,14 +357,14 @@ export const MoodCheckIn = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleEmotion(tag.label)}
                     className={cn(
-                      "flex flex-col items-center gap-1 p-2.5 rounded-xl text-center transition-all duration-200 border",
+                      "flex flex-col items-center gap-0.5 p-2 rounded-xl text-center transition-all duration-200 border",
                       isSelected
                         ? "bg-primary/15 border-primary/30 shadow-sm"
-                        : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                        : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                     )}
                   >
-                    <span className="text-xl">{tag.emoji}</span>
-                    <span className={cn("text-[10px] font-medium", isSelected ? "text-primary" : "text-muted-foreground")}>
+                    <span className="text-lg">{tag.emoji}</span>
+                    <span className={cn("text-[9px] font-medium leading-tight", isSelected ? "text-primary" : "text-muted-foreground")}>
                       {tag.label}
                     </span>
                   </motion.button>
@@ -376,18 +376,18 @@ export const MoodCheckIn = () => {
 
       case "craving":
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div className="text-center">
               <motion.div
                 key={craving}
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
-                className="text-6xl mb-3 inline-block"
+                className="text-5xl mb-2 inline-block"
               >
                 {craving === 0 ? "😌" : craving === 1 ? "😐" : craving === 2 ? "😬" : craving === 3 ? "😰" : "🔥"}
               </motion.div>
-              <p className="text-sm font-medium text-foreground">{cravingLevels[craving]}</p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs font-medium text-foreground">{cravingLevels[craving]}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
                 {craving === 0
                   ? "No cravings — amazing!"
                   : craving <= 2
@@ -395,19 +395,19 @@ export const MoodCheckIn = () => {
                   : "It's okay to use your coping tools"}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               {cravingLevels.map((level, index) => (
                 <motion.button
                   key={level}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCraving(index)}
                   className={cn(
-                    "flex-1 py-3 rounded-xl text-xs font-medium transition-all duration-200 border",
+                    "flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all duration-200 border",
                     craving === index
                       ? index >= 3
                         ? "bg-destructive/15 border-destructive/30 text-destructive"
                         : "bg-primary/15 border-primary/30 text-primary"
-                      : "bg-secondary/30 border-border/30 text-muted-foreground hover:bg-secondary/50"
+                      : "bg-secondary/30 border-border/30 text-muted-foreground active:bg-secondary/50"
                   )}
                 >
                   {level}
@@ -419,32 +419,30 @@ export const MoodCheckIn = () => {
 
       case "energy":
         return (
-          <div className="space-y-4">
-            <div className="text-center mb-2">
-              <motion.span key={energy} initial={{ scale: 0.6 }} animate={{ scale: 1 }} className="text-5xl inline-block mb-2">
+          <div className="space-y-3">
+            <div className="text-center mb-1">
+              <motion.span key={energy} initial={{ scale: 0.6 }} animate={{ scale: 1 }} className="text-4xl inline-block mb-1">
                 {energyLevels.find((e) => e.value === energy)?.emoji}
               </motion.span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {energyLevels.map((level) => (
                 <motion.button
                   key={level.value}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setEnergy(level.value)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 border",
+                    "w-full flex items-center gap-2.5 p-2.5 rounded-xl transition-all duration-200 border",
                     energy === level.value
                       ? "bg-primary/10 border-primary/30"
-                      : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                      : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                   )}
                 >
-                  <span className="text-xl">{level.emoji}</span>
-                  <div className="flex-1 text-left">
-                    <span className={cn("text-sm font-medium", energy === level.value ? "text-primary" : "text-foreground")}>
-                      {level.label}
-                    </span>
-                  </div>
-                  {energy === level.value && <Check className="w-4 h-4 text-primary" />}
+                  <span className="text-lg">{level.emoji}</span>
+                  <span className={cn("text-xs font-medium flex-1 text-left", energy === level.value ? "text-primary" : "text-foreground")}>
+                    {level.label}
+                  </span>
+                  {energy === level.value && <Check className="w-3.5 h-3.5 text-primary" />}
                 </motion.button>
               ))}
             </div>
@@ -453,9 +451,9 @@ export const MoodCheckIn = () => {
 
       case "physical":
         return (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground text-center">Any symptoms you're experiencing?</p>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <p className="text-[10px] text-muted-foreground text-center">Any symptoms you're experiencing?</p>
+            <div className="grid grid-cols-2 gap-1.5">
               {physicalSymptoms.map((symptom) => {
                 const isSelected = selectedSymptoms.includes(symptom.id);
                 return (
@@ -464,17 +462,17 @@ export const MoodCheckIn = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleSymptom(symptom.id)}
                     className={cn(
-                      "flex items-center gap-2 p-3 rounded-xl transition-all duration-200 border text-left",
+                      "flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 border text-left",
                       isSelected
                         ? symptom.id === "none"
                           ? "bg-success/10 border-success/30"
                           : "bg-destructive/10 border-destructive/30"
-                        : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                        : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                     )}
                   >
-                    <span className="text-lg">{symptom.emoji}</span>
+                    <span className="text-base">{symptom.emoji}</span>
                     <span className={cn(
-                      "text-xs font-medium",
+                      "text-[10px] font-medium",
                       isSelected
                         ? symptom.id === "none" ? "text-success" : "text-destructive"
                         : "text-foreground"
@@ -490,8 +488,8 @@ export const MoodCheckIn = () => {
 
       case "social":
         return (
-          <div className="space-y-3">
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <div className="space-y-1.5">
               {socialConnections.map((level) => {
                 const Icon = level.icon;
                 return (
@@ -500,25 +498,25 @@ export const MoodCheckIn = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSocial(level.value)}
                     className={cn(
-                      "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 border",
+                      "w-full flex items-center gap-2.5 p-2.5 rounded-xl transition-all duration-200 border",
                       social === level.value
                         ? "bg-primary/10 border-primary/30"
-                        : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                        : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                     )}
                   >
                     <div className={cn(
-                      "p-2 rounded-lg",
+                      "p-1.5 rounded-lg",
                       social === level.value ? "bg-primary/20" : "bg-muted/50"
                     )}>
-                      <Icon className={cn("w-4 h-4", social === level.value ? "text-primary" : "text-muted-foreground")} />
+                      <Icon className={cn("w-3.5 h-3.5", social === level.value ? "text-primary" : "text-muted-foreground")} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className={cn("text-sm font-medium", social === level.value ? "text-primary" : "text-foreground")}>
+                      <p className={cn("text-xs font-medium", social === level.value ? "text-primary" : "text-foreground")}>
                         {level.label}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">{level.desc}</p>
+                      <p className="text-[9px] text-muted-foreground">{level.desc}</p>
                     </div>
-                    {social === level.value && <Check className="w-4 h-4 text-primary" />}
+                    {social === level.value && <Check className="w-3.5 h-3.5 text-primary" />}
                   </motion.button>
                 );
               })}
@@ -528,10 +526,10 @@ export const MoodCheckIn = () => {
 
       case "gratitude":
         return (
-          <div className="space-y-4">
-            <div className="text-center mb-2">
-              <span className="text-5xl inline-block mb-2">🙏</span>
-              <p className="text-xs text-muted-foreground">
+          <div className="space-y-3">
+            <div className="text-center mb-1">
+              <span className="text-4xl inline-block mb-1">🙏</span>
+              <p className="text-[10px] text-muted-foreground">
                 Gratitude rewires your brain for positivity
               </p>
             </div>
@@ -539,18 +537,18 @@ export const MoodCheckIn = () => {
               value={gratitude}
               onChange={(e) => setGratitude(e.target.value)}
               placeholder="Today I'm grateful for..."
-              className="bg-secondary/30 border-border/50 resize-none focus:border-primary/50 transition-colors min-h-[100px]"
-              rows={4}
+              className="bg-secondary/30 border-border/50 resize-none focus:border-primary/50 transition-colors min-h-[80px] text-sm"
+              rows={3}
             />
           </div>
         );
 
       case "reflection":
         return (
-          <div className="space-y-4">
-            <div className="text-center mb-2">
-              <span className="text-5xl inline-block mb-2">📝</span>
-              <p className="text-xs text-muted-foreground">
+          <div className="space-y-3">
+            <div className="text-center mb-1">
+              <span className="text-4xl inline-block mb-1">📝</span>
+              <p className="text-[10px] text-muted-foreground">
                 Anything else on your mind?
               </p>
             </div>
@@ -558,8 +556,8 @@ export const MoodCheckIn = () => {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="How did today go? Any thoughts, wins, or challenges..."
-              className="bg-secondary/30 border-border/50 resize-none focus:border-primary/50 transition-colors min-h-[100px]"
-              rows={4}
+              className="bg-secondary/30 border-border/50 resize-none focus:border-primary/50 transition-colors min-h-[80px] text-sm"
+              rows={3}
             />
 
             {/* Quick summary preview */}
@@ -603,28 +601,27 @@ export const MoodCheckIn = () => {
       transition={{ duration: 0.6, delay: 0.3 }}
       className="card-enhanced relative overflow-hidden"
     >
-      {/* Ambient glow */}
       <div className="absolute top-0 left-1/3 w-40 h-40 bg-primary/10 blur-[80px] rounded-full pointer-events-none" />
 
-      <div className="relative p-6">
+      <div className="relative p-3">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 icon-glow">
-            <Heart className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="p-2 rounded-xl bg-primary/15 border border-primary/25 icon-glow">
+            <Heart className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-foreground">Daily Check-In</h3>
-            <p className="text-[10px] text-muted-foreground">
+            <h3 className="font-semibold text-sm text-foreground">Daily Check-In</h3>
+            <p className="text-[9px] text-muted-foreground">
               Step {currentStep + 1} of {STEPS.length}
             </p>
           </div>
-          <span className="text-xs text-muted-foreground font-medium">
+          <span className="text-[10px] text-muted-foreground font-medium">
             {Math.round(progress)}%
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="relative h-1.5 bg-muted/50 rounded-full overflow-hidden mb-5">
+        <div className="relative h-1 bg-muted/50 rounded-full overflow-hidden mb-3">
           <motion.div
             className="absolute inset-y-0 left-0 gradient-primary rounded-full"
             animate={{ width: `${progress}%` }}
@@ -637,7 +634,7 @@ export const MoodCheckIn = () => {
           key={step}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-sm font-medium text-foreground mb-4"
+          className="text-xs font-medium text-foreground mb-3"
         >
           {stepLabels[step]}
         </motion.p>
@@ -658,15 +655,15 @@ export const MoodCheckIn = () => {
         </AnimatePresence>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-6 gap-3">
+        <div className="flex items-center justify-between mt-4 gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={goPrev}
             disabled={currentStep === 0}
-            className="gap-1 text-muted-foreground"
+            className="gap-1 text-muted-foreground h-9 text-xs"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
             Back
           </Button>
 
@@ -674,26 +671,26 @@ export const MoodCheckIn = () => {
             <Button
               size="sm"
               onClick={goNext}
-              className="gap-1.5 gradient-primary text-primary-foreground font-medium px-5"
+              className="gap-1 gradient-primary text-primary-foreground font-medium px-4 h-9 text-xs"
             >
               Next
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </Button>
           ) : (
             <Button
               size="sm"
               onClick={handleSubmit}
               disabled={loading}
-              className="gap-1.5 gradient-primary text-primary-foreground font-medium px-5 btn-glow"
+              className="gap-1 gradient-primary text-primary-foreground font-medium px-4 h-9 text-xs btn-glow"
             >
               {loading ? "Saving..." : "Save Check-In"}
-              {!loading && <ArrowRight className="w-4 h-4" />}
+              {!loading && <ArrowRight className="w-3.5 h-3.5" />}
             </Button>
           )}
         </div>
 
         {/* Step dots */}
-        <div className="flex items-center justify-center gap-1.5 mt-4">
+        <div className="flex items-center justify-center gap-1 mt-3">
           {STEPS.map((s, i) => (
             <button
               key={s}
@@ -704,7 +701,7 @@ export const MoodCheckIn = () => {
               className={cn(
                 "w-1.5 h-1.5 rounded-full transition-all duration-200",
                 i === currentStep
-                  ? "w-4 bg-primary"
+                  ? "w-3.5 bg-primary"
                   : i < currentStep
                   ? "bg-primary/40"
                   : "bg-muted-foreground/20"

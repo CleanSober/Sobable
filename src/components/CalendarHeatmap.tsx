@@ -135,45 +135,46 @@ export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Calendar className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Calendar className="w-4 h-4 text-primary" />
           Mood Calendar
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 pb-3">
         {/* Month Navigation */}
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="icon" onClick={previousMonth}>
-            <ChevronLeft className="w-5 h-5" />
+        <div className="flex items-center justify-between mb-2">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={previousMonth}>
+            <ChevronLeft className="w-4 h-4" />
           </Button>
-          <span className="font-semibold">
+          <span className="font-semibold text-xs">
             {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
           </span>
           <Button
             variant="ghost"
             size="icon"
+            className="h-7 w-7"
             onClick={nextMonth}
             disabled={
               currentMonth.getMonth() === new Date().getMonth() &&
               currentMonth.getFullYear() === new Date().getFullYear()
             }
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Week Days Header */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-0.5 mb-1">
           {weekDays.map((day) => (
-            <div key={day} className="text-center text-xs text-muted-foreground font-medium">
-              {day}
+            <div key={day} className="text-center text-[9px] text-muted-foreground font-medium">
+              {day.charAt(0)}
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {days.map((day, index) => {
             if (!day.date) {
               return <div key={index} className="aspect-square" />;
@@ -188,18 +189,18 @@ export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
                 key={index}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.01 }}
-                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative ${
+                transition={{ delay: index * 0.005 }}
+                className={`aspect-square rounded-md flex flex-col items-center justify-center text-[10px] relative ${
                   isFuture || isBeforeSobriety
                     ? "bg-muted/20 text-muted-foreground"
                     : getMoodColor(day.mood?.mood)
-                } ${isToday ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
+                } ${isToday ? "ring-1.5 ring-primary ring-offset-1 ring-offset-background" : ""}`}
               >
-                <span className={day.mood ? "text-white font-medium" : ""}>
+                <span className={day.mood ? "text-white font-medium text-[9px]" : "text-[9px]"}>
                   {day.date.getDate()}
                 </span>
                 {day.mood && (
-                  <span className="text-[10px]">{getMoodEmoji(day.mood.mood)}</span>
+                  <span className="text-[8px] leading-none">{getMoodEmoji(day.mood.mood)}</span>
                 )}
               </motion.div>
             );
@@ -207,32 +208,32 @@ export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-center gap-2 mt-4 text-xs">
+        <div className="flex items-center justify-center gap-1.5 mt-2 text-[9px]">
           <span className="text-muted-foreground">Tough</span>
-          <div className="flex gap-1">
-            <div className="w-4 h-4 rounded bg-red-400" />
-            <div className="w-4 h-4 rounded bg-orange-400" />
-            <div className="w-4 h-4 rounded bg-yellow-400" />
-            <div className="w-4 h-4 rounded bg-emerald-400" />
-            <div className="w-4 h-4 rounded bg-green-500" />
+          <div className="flex gap-0.5">
+            <div className="w-3 h-3 rounded bg-red-400" />
+            <div className="w-3 h-3 rounded bg-orange-400" />
+            <div className="w-3 h-3 rounded bg-yellow-400" />
+            <div className="w-3 h-3 rounded bg-emerald-400" />
+            <div className="w-3 h-3 rounded bg-green-500" />
           </div>
           <span className="text-muted-foreground">Great</span>
         </div>
 
         {/* Stats */}
         {stats && (
-          <div className="mt-4 p-3 rounded-xl bg-muted/30 grid grid-cols-3 gap-2 text-center">
+          <div className="mt-2 p-2 rounded-xl bg-muted/30 grid grid-cols-3 gap-1.5 text-center">
             <div>
-              <p className="text-lg font-bold text-green-500">{stats.goodDays}</p>
-              <p className="text-xs text-muted-foreground">Good Days</p>
+              <p className="text-sm font-bold text-green-500">{stats.goodDays}</p>
+              <p className="text-[9px] text-muted-foreground">Good</p>
             </div>
             <div>
-              <p className="text-lg font-bold">{stats.avgMood.toFixed(1)}</p>
-              <p className="text-xs text-muted-foreground">Avg Mood</p>
+              <p className="text-sm font-bold">{stats.avgMood.toFixed(1)}</p>
+              <p className="text-[9px] text-muted-foreground">Avg</p>
             </div>
             <div>
-              <p className="text-lg font-bold text-orange-500">{stats.toughDays}</p>
-              <p className="text-xs text-muted-foreground">Tough Days</p>
+              <p className="text-sm font-bold text-orange-500">{stats.toughDays}</p>
+              <p className="text-[9px] text-muted-foreground">Tough</p>
             </div>
           </div>
         )}
