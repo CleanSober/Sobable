@@ -195,27 +195,27 @@ export const RelapsePreventionPlan = () => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Shield className="w-5 h-5 text-primary" />
-          Relapse Prevention Plan
-          {syncing && <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground ml-auto" />}
-          {!syncing && user && <Cloud className="w-4 h-4 text-green-500 ml-auto" aria-label="Synced across devices" />}
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Shield className="w-4 h-4 text-primary" />
+          Prevention Plan
+          {syncing && <RefreshCw className="w-3.5 h-3.5 animate-spin text-muted-foreground ml-auto" />}
+          {!syncing && user && <Cloud className="w-3.5 h-3.5 text-green-500 ml-auto" aria-label="Synced" />}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           Your personalized safety toolkit
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-3 pb-3">
         {/* Emergency Contacts */}
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-          <div className="flex items-center gap-2 mb-3">
-            <Phone className="w-5 h-5 text-red-500" />
-            <h4 className="font-semibold text-red-500">Emergency Contacts</h4>
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Phone className="w-4 h-4 text-red-500" />
+            <h4 className="font-semibold text-xs text-red-500">Emergency Contacts</h4>
           </div>
           
           {plan.emergencyContacts.length > 0 ? (
-            <div className="space-y-2 mb-3">
+            <div className="space-y-1.5 mb-2">
               {plan.emergencyContacts.map((contact, index) => (
                 <motion.div
                   key={index}
@@ -224,98 +224,69 @@ export const RelapsePreventionPlan = () => {
                   className="flex items-center justify-between p-2 rounded-lg bg-background/50"
                 >
                   <div>
-                    <p className="font-medium text-sm">{contact.name}</p>
-                    <a href={`tel:${contact.phone}`} className="text-xs text-primary">
+                    <p className="font-medium text-xs">{contact.name}</p>
+                    <a href={`tel:${contact.phone}`} className="text-[10px] text-primary">
                       {contact.phone}
                     </a>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => removeContact(index)}
-                  >
-                    <X className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeContact(index)}>
+                    <X className="w-3.5 h-3.5" />
                   </Button>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground mb-3">
-              Add emergency contacts for quick access during tough moments
+            <p className="text-[10px] text-muted-foreground mb-2">
+              Add emergency contacts for quick access
             </p>
           )}
 
           {editSection === "emergencyContacts" ? (
-            <div className="space-y-2">
-              <Input
-                placeholder="Name"
-                value={newContact.name}
-                onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-              />
-              <Input
-                placeholder="Phone"
-                value={newContact.phone}
-                onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-              />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={addContact} disabled={syncing}>
-                  <Save className="w-4 h-4 mr-1" />
-                  Save
+            <div className="space-y-1.5">
+              <Input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact({ ...newContact, name: e.target.value })} className="h-8 text-xs" />
+              <Input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })} className="h-8 text-xs" />
+              <div className="flex gap-1.5">
+                <Button size="sm" onClick={addContact} disabled={syncing} className="h-7 text-[10px]">
+                  <Save className="w-3 h-3 mr-1" />Save
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setEditSection(null)}>
-                  Cancel
-                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditSection(null)} className="h-7 text-[10px]">Cancel</Button>
               </div>
             </div>
           ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setEditSection("emergencyContacts")}
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Add Contact
+            <Button size="sm" variant="outline" onClick={() => setEditSection("emergencyContacts")} className="h-7 text-[10px]">
+              <Plus className="w-3 h-3 mr-1" />Add Contact
             </Button>
           )}
         </div>
 
         {/* Other Sections */}
         {sections.map((section) => (
-          <div key={section.key} className={`p-4 rounded-xl ${section.bgColor}`}>
-            <div className="flex items-center justify-between mb-3">
+          <div key={section.key} className={`p-3 rounded-xl ${section.bgColor}`}>
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <section.icon className={`w-5 h-5 ${section.color}`} />
+                <section.icon className={`w-4 h-4 ${section.color}`} />
                 <div>
-                  <h4 className={`font-semibold ${section.color}`}>{section.title}</h4>
-                  <p className="text-xs text-muted-foreground">{section.description}</p>
+                  <h4 className={`font-semibold text-xs ${section.color}`}>{section.title}</h4>
+                  <p className="text-[9px] text-muted-foreground">{section.description}</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => setEditSection(editSection === section.key ? null : section.key)}
-              >
-                <Edit2 className="w-4 h-4" />
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditSection(editSection === section.key ? null : section.key)}>
+                <Edit2 className="w-3.5 h-3.5" />
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-1.5 mb-2">
               {(plan[section.key] as string[]).map((item, index) => (
                 <motion.span
                   key={index}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-background/50 text-sm"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-background/50 text-[10px]"
                 >
                   {item}
                   {editSection === section.key && (
-                    <button
-                      onClick={() => removeItem(section.key, index)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="w-3 h-3" />
+                    <button onClick={() => removeItem(section.key, index)} className="ml-0.5 active:text-destructive">
+                      <X className="w-2.5 h-2.5" />
                     </button>
                   )}
                 </motion.span>
@@ -328,16 +299,17 @@ export const RelapsePreventionPlan = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="flex gap-2"
+                  className="flex gap-1.5"
                 >
                   <Input
                     placeholder={`Add ${section.title.toLowerCase()}...`}
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addItem(section.key)}
+                    className="h-8 text-xs"
                   />
-                  <Button size="sm" onClick={() => addItem(section.key)} disabled={syncing}>
-                    <Plus className="w-4 h-4" />
+                  <Button size="sm" onClick={() => addItem(section.key)} disabled={syncing} className="h-8">
+                    <Plus className="w-3.5 h-3.5" />
                   </Button>
                 </motion.div>
               )}

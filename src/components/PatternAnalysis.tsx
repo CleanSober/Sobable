@@ -92,42 +92,39 @@ export const PatternAnalysis = () => {
   if (!premiumLoading && !isPremium) {
     return (
       <Card className="gradient-card border-border/50 overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Brain className="w-5 h-5 text-primary" />
+        <CardHeader className="pb-2 pt-3 px-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Brain className="w-4 h-4 text-primary" />
             Pattern Analysis
-            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-amber-500">
-              <Crown className="w-4 h-4" />
+            <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-amber-500">
+              <Crown className="w-3.5 h-3.5" />
               Sober Club
             </span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 pb-3">
           <div className="relative">
-            {/* Blurred preview */}
             <div className="blur-sm pointer-events-none opacity-50">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="p-4 rounded-xl bg-secondary/50 text-center">
-                  <p className="text-2xl font-bold">12</p>
-                  <p className="text-xs text-muted-foreground">Triggers</p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="p-3 rounded-xl bg-secondary/50 text-center">
+                  <p className="text-lg font-bold">12</p>
+                  <p className="text-[10px] text-muted-foreground">Triggers</p>
                 </div>
-                <div className="p-4 rounded-xl bg-success/10 text-center">
-                  <p className="text-2xl font-bold text-success">85%</p>
-                  <p className="text-xs text-muted-foreground">Resisted</p>
+                <div className="p-3 rounded-xl bg-success/10 text-center">
+                  <p className="text-lg font-bold text-success">85%</p>
+                  <p className="text-[10px] text-muted-foreground">Resisted</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="h-8 bg-secondary/30 rounded-lg" />
-                <div className="h-8 bg-secondary/30 rounded-lg" />
+              <div className="space-y-1.5">
+                <div className="h-6 bg-secondary/30 rounded-lg" />
+                <div className="h-6 bg-secondary/30 rounded-lg" />
               </div>
             </div>
-            
-            {/* Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
-              <Lock className="w-8 h-8 text-amber-500 mb-3" />
-              <h3 className="font-semibold text-foreground mb-1">Unlock Pattern Analysis</h3>
-              <p className="text-sm text-muted-foreground text-center mb-4 px-4">
-                Understand your triggers, emotions, and high-risk situations
+              <Lock className="w-6 h-6 text-amber-500 mb-2" />
+              <h3 className="font-semibold text-sm text-foreground mb-0.5">Unlock Pattern Analysis</h3>
+              <p className="text-xs text-muted-foreground text-center mb-3 px-4">
+                Understand your triggers and high-risk situations
               </p>
               <PremiumGate />
             </div>
@@ -142,14 +139,12 @@ export const PatternAnalysis = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl gradient-card shadow-card border border-border/50 p-6 text-center"
+        className="rounded-2xl gradient-card shadow-card border border-border/50 p-4 text-center"
       >
-        <div className="p-4 rounded-full bg-primary/10 inline-block mb-4">
-          <Brain className="w-8 h-8 text-primary animate-pulse" />
+        <div className="p-3 rounded-full bg-primary/10 inline-block mb-3">
+          <Brain className="w-6 h-6 text-primary animate-pulse" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          Analyzing patterns...
-        </h3>
+        <h3 className="text-sm font-semibold text-foreground">Analyzing patterns...</h3>
       </motion.div>
     );
   }
@@ -159,53 +154,50 @@ export const PatternAnalysis = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl gradient-card shadow-card border border-border/50 p-6 text-center"
+        className="rounded-2xl gradient-card shadow-card border border-border/50 p-4 text-center"
       >
-        <div className="p-4 rounded-full bg-primary/10 inline-block mb-4">
-          <Brain className="w-8 h-8 text-primary" />
+        <div className="p-3 rounded-full bg-primary/10 inline-block mb-3">
+          <Brain className="w-6 h-6 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          Pattern Analysis
-        </h3>
-        <p className="text-muted-foreground">
-          Start logging triggers to see your patterns. The more you log, the better insights you'll get.
+        <h3 className="text-sm font-semibold text-foreground mb-1">Pattern Analysis</h3>
+        <p className="text-xs text-muted-foreground">
+          Start logging triggers to see your patterns.
         </p>
       </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Overview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl gradient-card shadow-card border border-border/50 p-6"
+        className="rounded-2xl gradient-card shadow-card border border-border/50 p-3"
       >
-        <div className="flex items-center gap-2 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Brain className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <Brain className="w-4 h-4 text-primary" />
           </div>
-          <span className="text-lg font-semibold text-foreground">Your Patterns</span>
+          <span className="text-sm font-semibold text-foreground">Your Patterns</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="p-4 rounded-xl bg-secondary/50 border border-border/30 text-center">
-            <p className="text-3xl font-bold text-foreground">{analysis.totalEntries}</p>
-            <p className="text-xs text-muted-foreground">Triggers Logged</p>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="p-3 rounded-xl bg-secondary/50 border border-border/30 text-center">
+            <p className="text-2xl font-bold text-foreground">{analysis.totalEntries}</p>
+            <p className="text-[10px] text-muted-foreground">Triggers Logged</p>
           </div>
-          <div className="p-4 rounded-xl bg-success/10 border border-success/20 text-center">
-            <p className="text-3xl font-bold text-success">{analysis.successRate.toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground">Resisted</p>
+          <div className="p-3 rounded-xl bg-success/10 border border-success/20 text-center">
+            <p className="text-2xl font-bold text-success">{analysis.successRate.toFixed(0)}%</p>
+            <p className="text-[10px] text-muted-foreground">Resisted</p>
           </div>
         </div>
 
-        {/* Success message */}
         {analysis.successRate >= 70 && (
-          <div className="p-4 rounded-xl bg-success/10 border border-success/20 flex items-center gap-3">
-            <Shield className="w-5 h-5 text-success flex-shrink-0" />
-            <p className="text-sm text-foreground">
-              Amazing! You're resisting most of your triggers. Keep it up! 💪
+          <div className="p-2.5 rounded-xl bg-success/10 border border-success/20 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-success flex-shrink-0" />
+            <p className="text-xs text-foreground">
+              Amazing! You're resisting most triggers 💪
             </p>
           </div>
         )}
@@ -217,25 +209,25 @@ export const PatternAnalysis = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl gradient-card shadow-card border border-border/50 p-6"
+          className="rounded-2xl gradient-card shadow-card border border-border/50 p-3"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-destructive/10">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-lg bg-destructive/10">
+              <AlertTriangle className="w-4 h-4 text-destructive" />
             </div>
-            <span className="font-semibold text-foreground">Top Triggers</span>
+            <span className="text-xs font-semibold text-foreground">Top Triggers</span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {analysis.topTriggers.map((item, index) => (
-              <div key={item.name} className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground w-4">{index + 1}</span>
+              <div key={item.name} className="flex items-center gap-2">
+                <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-foreground">{item.name}</span>
-                    <span className="text-xs text-muted-foreground">{item.count}x</span>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-xs font-medium text-foreground">{item.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{item.count}x</span>
                   </div>
-                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div className="h-1 bg-secondary rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(item.count / analysis.topTriggers[0].count) * 100}%` }}
@@ -256,20 +248,20 @@ export const PatternAnalysis = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl gradient-card shadow-card border border-border/50 p-6"
+          className="rounded-2xl gradient-card shadow-card border border-border/50 p-3"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-accent/10">
-              <Heart className="w-5 h-5 text-accent" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-accent/10">
+              <Heart className="w-4 h-4 text-accent" />
             </div>
-            <span className="font-semibold text-foreground">Common Emotions</span>
+            <span className="text-xs font-semibold text-foreground">Common Emotions</span>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {analysis.topEmotions.map((item) => (
               <span
                 key={item.name}
-                className="px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium border border-accent/20"
+                className="px-2 py-1 rounded-full bg-accent/10 text-accent text-[10px] font-medium border border-accent/20"
               >
                 {item.name} ({item.count})
               </span>
@@ -284,23 +276,23 @@ export const PatternAnalysis = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl gradient-card shadow-card border border-border/50 p-6"
+          className="rounded-2xl gradient-card shadow-card border border-border/50 p-3"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-warning/10">
-              <Clock className="w-5 h-5 text-warning" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-warning/10">
+              <Clock className="w-4 h-4 text-warning" />
             </div>
-            <span className="font-semibold text-foreground">High-Risk Times</span>
+            <span className="text-xs font-semibold text-foreground">High-Risk Times</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {analysis.highRiskTimes.map((item) => (
               <div
                 key={item.name}
-                className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border/30"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-secondary/50 border border-border/30"
               >
-                <span className="text-sm text-foreground">{item.name}</span>
-                <span className="text-sm font-medium text-warning">{item.count} triggers</span>
+                <span className="text-xs text-foreground">{item.name}</span>
+                <span className="text-[10px] font-medium text-warning">{item.count} triggers</span>
               </div>
             ))}
           </div>
@@ -313,26 +305,26 @@ export const PatternAnalysis = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="rounded-2xl gradient-card shadow-card border border-border/50 p-6"
+          className="rounded-2xl gradient-card shadow-card border border-border/50 p-3"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <TrendingUp className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-primary/10">
+              <TrendingUp className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-semibold text-foreground">Risk Situations</span>
+            <span className="text-xs font-semibold text-foreground">Risk Situations</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {analysis.topSituations.map((item, index) => (
               <div
                 key={item.name}
-                className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border/30"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-secondary/50 border border-border/30"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">#{index + 1}</span>
-                  <span className="text-sm text-foreground">{item.name}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted-foreground">#{index + 1}</span>
+                  <span className="text-xs text-foreground">{item.name}</span>
                 </div>
-                <span className="text-sm font-medium text-primary">{item.count}x</span>
+                <span className="text-[10px] font-medium text-primary">{item.count}x</span>
               </div>
             ))}
           </div>

@@ -319,21 +319,21 @@ export const TriggerLogger = () => {
     switch (step) {
       case "trigger":
         return (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {triggerOptions.map((opt) => (
               <motion.button
                 key={opt.label}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setTrigger(opt.label)}
                 className={cn(
-                  "flex items-center gap-2.5 p-3 rounded-xl transition-all duration-200 border text-left",
+                  "flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 border text-left",
                   trigger === opt.label
                     ? "bg-destructive/10 border-destructive/30 shadow-sm"
-                    : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                    : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                 )}
               >
-                <span className="text-xl">{opt.emoji}</span>
-                <span className={cn("text-xs font-medium", trigger === opt.label ? "text-destructive" : "text-foreground")}>
+                <span className="text-base">{opt.emoji}</span>
+                <span className={cn("text-[10px] font-medium leading-tight", trigger === opt.label ? "text-destructive" : "text-foreground")}>
                   {opt.label}
                 </span>
               </motion.button>
@@ -343,22 +343,22 @@ export const TriggerLogger = () => {
 
       case "emotion":
         return (
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {emotionOptions.map((opt) => (
                 <motion.button
                   key={opt.label}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setEmotion(opt.label)}
                   className={cn(
-                    "flex flex-col items-center gap-1 p-3 rounded-xl transition-all duration-200 border",
+                    "flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all duration-200 border",
                     emotion === opt.label
                       ? "bg-accent/15 border-accent/30 shadow-sm"
-                      : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                      : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                   )}
                 >
-                  <span className="text-2xl">{opt.emoji}</span>
-                  <span className={cn("text-[10px] font-medium", emotion === opt.label ? "text-accent" : "text-muted-foreground")}>
+                  <span className="text-lg">{opt.emoji}</span>
+                  <span className={cn("text-[9px] font-medium leading-tight", emotion === opt.label ? "text-accent" : "text-muted-foreground")}>
                     {opt.label}
                   </span>
                 </motion.button>
@@ -390,21 +390,21 @@ export const TriggerLogger = () => {
 
       case "situation":
         return (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {situationOptions.map((opt) => (
               <motion.button
                 key={opt.label}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSituation(opt.label)}
                 className={cn(
-                  "flex items-center gap-2.5 p-3 rounded-xl transition-all duration-200 border text-left",
+                  "flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 border text-left",
                   situation === opt.label
                     ? "bg-primary/10 border-primary/30 shadow-sm"
-                    : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                    : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                 )}
               >
-                <span className="text-lg">{opt.emoji}</span>
-                <span className={cn("text-xs font-medium", situation === opt.label ? "text-primary" : "text-foreground")}>
+                <span className="text-base">{opt.emoji}</span>
+                <span className={cn("text-[10px] font-medium", situation === opt.label ? "text-primary" : "text-foreground")}>
                   {opt.label}
                 </span>
               </motion.button>
@@ -414,20 +414,20 @@ export const TriggerLogger = () => {
 
       case "intensity":
         return (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="text-center">
               <motion.span
                 key={intensity}
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-7xl inline-block mb-3"
+                className="text-5xl inline-block mb-2"
               >
                 {getIntensityEmoji(intensity)}
               </motion.span>
-              <p className={cn("text-lg font-semibold", getIntensityColor(intensity))}>
+              <p className={cn("text-sm font-semibold", getIntensityColor(intensity))}>
                 {getIntensityLabel(intensity)}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] text-muted-foreground mt-0.5">
                 {intensity <= 4
                   ? "Manageable — great awareness logging this"
                   : intensity <= 7
@@ -435,16 +435,16 @@ export const TriggerLogger = () => {
                   : "Consider using the craving timer right now"}
               </p>
             </div>
-            <div className="px-2">
+            <div className="px-1">
               <input
                 type="range"
                 min="1"
                 max="10"
                 value={intensity}
                 onChange={(e) => setIntensity(Number(e.target.value))}
-                className="w-full h-2.5 bg-secondary rounded-full appearance-none cursor-pointer accent-destructive"
+                className="w-full h-2 bg-secondary rounded-full appearance-none cursor-pointer accent-destructive"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5 px-0.5">
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1 px-0.5">
                 <span>Mild</span>
                 <span className="font-semibold text-foreground text-xs">{intensity}/10</span>
                 <span>Overwhelming</span>
@@ -480,9 +480,9 @@ export const TriggerLogger = () => {
 
       case "body":
         return (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground text-center">Where do you feel it in your body?</p>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <p className="text-[10px] text-muted-foreground text-center">Where do you feel it in your body?</p>
+            <div className="grid grid-cols-2 gap-1.5">
               {bodySensations.map((s) => {
                 const isSelected = selectedSensations.includes(s.id);
                 return (
@@ -491,17 +491,17 @@ export const TriggerLogger = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleSensation(s.id)}
                     className={cn(
-                      "flex items-center gap-2 p-3 rounded-xl transition-all duration-200 border text-left",
+                      "flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 border text-left",
                       isSelected
                         ? s.id === "none"
                           ? "bg-success/10 border-success/30"
                           : "bg-warning/10 border-warning/30"
-                        : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                        : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                     )}
                   >
-                    <span className="text-lg">{s.emoji}</span>
+                    <span className="text-base">{s.emoji}</span>
                     <span className={cn(
-                      "text-xs font-medium",
+                      "text-[10px] font-medium",
                       isSelected
                         ? s.id === "none" ? "text-success" : "text-warning"
                         : "text-foreground"
@@ -517,9 +517,9 @@ export const TriggerLogger = () => {
 
       case "coping":
         return (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground text-center">Select all that apply</p>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <p className="text-[10px] text-muted-foreground text-center">Select all that apply</p>
+            <div className="grid grid-cols-2 gap-1.5">
               {copingStrategiesUsed.map((c) => {
                 const isSelected = selectedCoping.includes(c.label);
                 return (
@@ -528,14 +528,14 @@ export const TriggerLogger = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleCoping(c.label)}
                     className={cn(
-                      "flex items-center gap-2 p-3 rounded-xl transition-all duration-200 border text-left",
+                      "flex items-center gap-2 p-2.5 rounded-xl transition-all duration-200 border text-left",
                       isSelected
                         ? "bg-primary/10 border-primary/30"
-                        : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                        : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                     )}
                   >
-                    <span className="text-lg">{c.emoji}</span>
-                    <span className={cn("text-xs font-medium", isSelected ? "text-primary" : "text-foreground")}>
+                    <span className="text-base">{c.emoji}</span>
+                    <span className={cn("text-[10px] font-medium", isSelected ? "text-primary" : "text-foreground")}>
                       {c.label}
                     </span>
                   </motion.button>
@@ -547,7 +547,7 @@ export const TriggerLogger = () => {
 
       case "outcome":
         return (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[
               { value: "stayed_sober" as const, label: "Stayed Sober", emoji: "💪", desc: "I resisted the urge", colorClass: "bg-success/10 border-success/30 text-success" },
               { value: "struggled" as const, label: "Struggled", emoji: "😓", desc: "It was really hard but I got through", colorClass: "bg-warning/10 border-warning/30 text-warning" },
@@ -558,16 +558,16 @@ export const TriggerLogger = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setOutcome(opt.value)}
                 className={cn(
-                  "w-full flex items-center gap-3 p-4 rounded-xl transition-all duration-200 border",
-                  outcome === opt.value ? opt.colorClass : "bg-secondary/30 border-border/30 hover:bg-secondary/50"
+                  "w-full flex items-center gap-2.5 p-3 rounded-xl transition-all duration-200 border",
+                  outcome === opt.value ? opt.colorClass : "bg-secondary/30 border-border/30 active:bg-secondary/50"
                 )}
               >
-                <span className="text-3xl">{opt.emoji}</span>
+                <span className="text-2xl">{opt.emoji}</span>
                 <div className="flex-1 text-left">
-                  <p className={cn("text-sm font-semibold", outcome === opt.value ? "" : "text-foreground")}>{opt.label}</p>
-                  <p className="text-[10px] text-muted-foreground">{opt.desc}</p>
+                  <p className={cn("text-xs font-semibold", outcome === opt.value ? "" : "text-foreground")}>{opt.label}</p>
+                  <p className="text-[9px] text-muted-foreground">{opt.desc}</p>
                 </div>
-                {outcome === opt.value && <Check className="w-5 h-5" />}
+                {outcome === opt.value && <Check className="w-4 h-4" />}
               </motion.button>
             ))}
 
@@ -587,13 +587,13 @@ export const TriggerLogger = () => {
 
       case "notes":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="What helped? What made it harder? What would you do differently?"
-              className="bg-secondary/30 border-border/50 resize-none focus:border-primary/50 transition-colors min-h-[100px]"
-              rows={4}
+              className="bg-secondary/30 border-border/50 resize-none focus:border-primary/50 transition-colors min-h-[80px] text-sm"
+              rows={3}
             />
 
             {/* Summary preview */}
@@ -638,16 +638,16 @@ export const TriggerLogger = () => {
 
   // ─── Render ──────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Log New Button */}
       {!isLogging && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Button
             onClick={() => setIsLogging(true)}
-            className="w-full gradient-primary text-primary-foreground font-semibold py-6"
+            className="w-full gradient-primary text-primary-foreground font-semibold py-5 text-sm"
             size="lg"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-4 h-4 mr-1.5" />
             Log a Trigger
           </Button>
         </motion.div>
@@ -664,25 +664,25 @@ export const TriggerLogger = () => {
           >
             <div className="absolute top-0 left-1/3 w-40 h-40 bg-destructive/8 blur-[80px] rounded-full pointer-events-none" />
 
-            <div className="relative p-6">
+            <div className="relative p-3">
               {/* Header */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
                   <div className="p-2 rounded-xl bg-destructive/15 border border-destructive/25">
                     <AlertTriangle className="w-4 h-4 text-destructive" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground text-sm">Log Trigger</h3>
-                    <p className="text-[10px] text-muted-foreground">Step {currentStep + 1} of {STEPS.length}</p>
+                    <p className="text-[9px] text-muted-foreground">Step {currentStep + 1} of {STEPS.length}</p>
                   </div>
                 </div>
-                <button onClick={resetForm} className="p-2 hover:bg-secondary rounded-lg">
+                <button onClick={resetForm} className="p-1.5 active:bg-secondary rounded-lg">
                   <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
 
               {/* Progress bar */}
-              <div className="relative h-1.5 bg-muted/50 rounded-full overflow-hidden mb-5">
+              <div className="relative h-1 bg-muted/50 rounded-full overflow-hidden mb-3">
                 <motion.div
                   className="absolute inset-y-0 left-0 rounded-full"
                   style={{ background: "linear-gradient(135deg, hsl(0 75% 55%), hsl(42 100% 55%))" }}
@@ -692,9 +692,9 @@ export const TriggerLogger = () => {
               </div>
 
               {/* Step label */}
-              <motion.div key={step} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4">
-                <p className="text-sm font-medium text-foreground">{stepLabels[step].title}</p>
-                <p className="text-[10px] text-muted-foreground">{stepLabels[step].subtitle}</p>
+              <motion.div key={step} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-3">
+                <p className="text-xs font-medium text-foreground">{stepLabels[step].title}</p>
+                <p className="text-[9px] text-muted-foreground">{stepLabels[step].subtitle}</p>
               </motion.div>
 
               {/* Step content */}
@@ -713,36 +713,36 @@ export const TriggerLogger = () => {
               </AnimatePresence>
 
               {/* Navigation */}
-              <div className="flex items-center justify-between mt-6 gap-3">
-                <Button variant="ghost" size="sm" onClick={goPrev} disabled={currentStep === 0} className="gap-1 text-muted-foreground">
-                  <ChevronLeft className="w-4 h-4" /> Back
+              <div className="flex items-center justify-between mt-4 gap-3">
+                <Button variant="ghost" size="sm" onClick={goPrev} disabled={currentStep === 0} className="gap-1 text-muted-foreground h-9 text-xs">
+                  <ChevronLeft className="w-3.5 h-3.5" /> Back
                 </Button>
 
                 {currentStep < STEPS.length - 1 ? (
-                  <Button size="sm" onClick={goNext} className="gap-1.5 gradient-primary text-primary-foreground font-medium px-5">
-                    Next <ChevronRight className="w-4 h-4" />
+                  <Button size="sm" onClick={goNext} className="gap-1 gradient-primary text-primary-foreground font-medium px-4 h-9 text-xs">
+                    Next <ChevronRight className="w-3.5 h-3.5" />
                   </Button>
                 ) : (
                   <Button
                     size="sm"
                     onClick={handleSubmit}
                     disabled={loading || !trigger || !emotion || !situation}
-                    className="gap-1.5 gradient-primary text-primary-foreground font-medium px-5 btn-glow"
+                    className="gap-1 gradient-primary text-primary-foreground font-medium px-4 h-9 text-xs btn-glow"
                   >
-                    {loading ? "Saving..." : "Save Entry"} {!loading && <ArrowRight className="w-4 h-4" />}
+                    {loading ? "Saving..." : "Save Entry"} {!loading && <ArrowRight className="w-3.5 h-3.5" />}
                   </Button>
                 )}
               </div>
 
               {/* Step dots */}
-              <div className="flex items-center justify-center gap-1.5 mt-4">
+              <div className="flex items-center justify-center gap-1 mt-3">
                 {STEPS.map((s, i) => (
                   <button
                     key={s}
                     onClick={() => { setDirection(i > currentStep ? 1 : -1); setCurrentStep(i); }}
                     className={cn(
                       "w-1.5 h-1.5 rounded-full transition-all duration-200",
-                      i === currentStep ? "w-4 bg-destructive" : i < currentStep ? "bg-destructive/40" : "bg-muted-foreground/20"
+                      i === currentStep ? "w-3.5 bg-destructive" : i < currentStep ? "bg-destructive/40" : "bg-muted-foreground/20"
                     )}
                   />
                 ))}
@@ -760,13 +760,13 @@ export const TriggerLogger = () => {
           transition={{ delay: 0.1 }}
           className="card-enhanced overflow-hidden"
         >
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-xl bg-destructive/10 border border-destructive/20">
-                <Activity className="w-4 h-4 text-destructive" />
+          <div className="p-3">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded-xl bg-destructive/10 border border-destructive/20">
+                <Activity className="w-3.5 h-3.5 text-destructive" />
               </div>
-              <span className="text-sm font-semibold text-foreground">Recent Triggers</span>
-              <span className="ml-auto text-xs text-muted-foreground">{entries.length} logged</span>
+              <span className="text-xs font-semibold text-foreground">Recent Triggers</span>
+              <span className="ml-auto text-[10px] text-muted-foreground">{entries.length} logged</span>
             </div>
 
             <div className="space-y-2 max-h-96 overflow-y-auto">
