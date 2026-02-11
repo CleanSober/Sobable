@@ -60,45 +60,45 @@ export const CommunityHub = () => {
       className="space-y-3"
     >
       {/* Header */}
-      <header className="text-center py-1">
-        <div className="flex items-center justify-center gap-2 mb-0.5">
-          <Crown className="w-4 h-4 text-amber-500" aria-hidden="true" />
-          <h1 className="text-xl font-bold text-foreground">Community</h1>
+      <header className="text-center py-0.5">
+        <div className="flex items-center justify-center gap-1.5 mb-0">
+          <Crown className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
+          <h1 className="text-base font-bold text-foreground">Community</h1>
         </div>
-        <p className="text-sm text-muted-foreground">Connect with others on the journey</p>
+        <p className="text-xs text-muted-foreground">Connect with others on the journey</p>
       </header>
 
       {/* Tabs navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-10">
+        <TabsList className="grid w-full grid-cols-3 h-8">
           <TabsTrigger 
             value="chat" 
-            className="flex items-center gap-1.5 text-xs data-[state=active]:bg-primary/10"
+            className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
           >
-            <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
+            <MessageSquare className="w-3 h-3" aria-hidden="true" />
             <span>Chat</span>
           </TabsTrigger>
           <TabsTrigger 
             value="forums" 
-            className="flex items-center gap-1.5 text-xs data-[state=active]:bg-primary/10"
+            className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
           >
-            <Users className="w-3.5 h-3.5" aria-hidden="true" />
+            <Users className="w-3 h-3" aria-hidden="true" />
             <span>Forums</span>
           </TabsTrigger>
           <TabsTrigger 
             value="leaderboard" 
-            className="flex items-center gap-1.5 text-xs data-[state=active]:bg-primary/10"
+            className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
           >
-            <Trophy className="w-3.5 h-3.5" aria-hidden="true" />
+            <Trophy className="w-3 h-3" aria-hidden="true" />
             <span>Leaders</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chat" className="mt-3 focus-visible:outline-none">
+        <TabsContent value="chat" className="mt-2 focus-visible:outline-none">
           <LiveChat />
         </TabsContent>
 
-        <TabsContent value="forums" className="mt-3 focus-visible:outline-none">
+        <TabsContent value="forums" className="mt-2 focus-visible:outline-none">
           <ForumList
             key={forumRefreshKey}
             onSelectForum={setSelectedForum}
@@ -106,7 +106,7 @@ export const CommunityHub = () => {
           />
         </TabsContent>
 
-        <TabsContent value="leaderboard" className="mt-3 focus-visible:outline-none">
+        <TabsContent value="leaderboard" className="mt-2 focus-visible:outline-none">
           <Leaderboard />
         </TabsContent>
       </Tabs>
