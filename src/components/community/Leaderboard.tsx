@@ -63,13 +63,13 @@ export const Leaderboard = () => {
 
   return (
     <Card className="gradient-card border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Trophy className="w-4 h-4 text-yellow-500" />
           Top Contributors
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-1.5 px-3 pb-3">
         {leaders.map((leader, index) => {
           const displayName = getDisplayNameForUser(leader.user_id);
           const rank = index + 1;
@@ -80,28 +80,28 @@ export const Leaderboard = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center gap-3 p-2 rounded-lg bg-secondary/20 hover:bg-secondary/40 transition-colors"
+              className="flex items-center gap-2.5 p-2 rounded-lg bg-secondary/20 hover:bg-secondary/40 transition-colors"
             >
-              <div className="w-6 flex justify-center">
+              <div className="w-5 flex justify-center">
                 {getRankIcon(rank)}
               </div>
               
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${getAvatarColor(leader.user_id)}`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-medium ${getAvatarColor(leader.user_id)}`}
               >
                 {getInitials(displayName)}
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{displayName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {leader.posts_count} posts · {leader.replies_count} replies
+                <p className="text-xs font-medium truncate">{displayName}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {leader.posts_count}p · {leader.replies_count}r
                 </p>
               </div>
               
               <div className="text-right">
-                <p className="text-sm font-semibold text-primary">{leader.total_karma}</p>
-                <p className="text-xs text-muted-foreground">karma</p>
+                <p className="text-xs font-semibold text-primary">{leader.total_karma}</p>
+                <p className="text-[9px] text-muted-foreground">karma</p>
               </div>
             </motion.div>
           );
