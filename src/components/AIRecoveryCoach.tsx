@@ -69,17 +69,20 @@ const quickPrompts: QuickPrompt[] = [
   },
 ];
 
-export const AIRecoveryCoach = () => {
+export const AIRecoveryCoach = ({ isOpen: controlledOpen, onOpenChange }: { isOpen?: boolean; onOpenChange?: (open: boolean) => void } = {}) => {
   const { user } = useAuth();
   const { profile } = useUserData();
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const isOpen = controlledOpen ?? internalOpen;
+  const setIsOpen = onOpenChange ?? setInternalOpen;
 
   const handleOpenChat = () => {
     if (!isPremium && !premiumLoading) {
@@ -255,19 +258,6 @@ How can I support you today?`;
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleOpenChat}
-        className="fixed bottom-24 left-6 z-40 p-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/40 transition-shadow"
-        aria-label="Open AI Recovery Coach"
-      >
-        <Bot className="w-6 h-6" />
-        <Crown className="absolute -top-1 -right-1 w-4 h-4 text-amber-300" />
-      </motion.button>
 
       {/* Premium Upgrade Modal */}
       <AnimatePresence>
