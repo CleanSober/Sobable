@@ -139,7 +139,7 @@ export const BrandAssets = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Sobable
+            Clean & Sober
           </h1>
           <p className="text-xl text-muted-foreground">
             Brand Assets & Marketing Package
@@ -356,7 +356,7 @@ export const BrandAssets = () => {
               <Card className="p-6">
                 <div className="flex items-center gap-8">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg">
-                    <img src={appIcon} alt="Sobable Logo" className="w-full h-full object-cover" />
+                    <img src={appIcon} alt="Clean & Sober Logo" className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">The Phoenix Symbol</h4>

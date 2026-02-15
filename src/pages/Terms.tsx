@@ -12,14 +12,14 @@ const Terms = () => {
     {
       icon: CheckCircle,
       title: "1. Acceptance of Terms",
-      content: `By downloading, installing, accessing, or using the Sobable application ("App," "Service," or "Platform"), you ("User," "you," or "your") acknowledge that you have read, understood, and agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and any additional guidelines or policies referenced herein. If you do not agree to these Terms in their entirety, you must immediately cease all use of the App and delete it from your device(s).
+      content: `By downloading, installing, accessing, or using the Clean & Sober application ("App," "Service," or "Platform"), you ("User," "you," or "your") acknowledge that you have read, understood, and agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and any additional guidelines or policies referenced herein. If you do not agree to these Terms in their entirety, you must immediately cease all use of the App and delete it from your device(s).
 
-These Terms constitute a legally binding agreement between you and Sobable ("Company," "we," "us," or "our"). We reserve the right to modify, amend, or update these Terms at any time at our sole discretion. Material changes will be communicated through the App or via the email address associated with your account. Your continued use of the App after any modifications constitutes your binding acceptance of the revised Terms. It is your responsibility to review these Terms periodically.`
+These Terms constitute a legally binding agreement between you and Clean & Sober ("Company," "we," "us," or "our"). We reserve the right to modify, amend, or update these Terms at any time at our sole discretion. Material changes will be communicated through the App or via the email address associated with your account. Your continued use of the App after any modifications constitutes your binding acceptance of the revised Terms. It is your responsibility to review these Terms periodically.`
     },
     {
       icon: FileText,
       title: "2. Description of Service",
-      content: `Sobable is a digital wellness and recovery support application that provides tools including but not limited to: sobriety tracking, mood and trigger logging, guided meditations, breathing exercises, journaling, community forums, gamification features, AI-powered insights, sleep tracking, and motivational content.
+      content: `Clean & Sober is a digital wellness and recovery support application that provides tools including but not limited to: sobriety tracking, mood and trigger logging, guided meditations, breathing exercises, journaling, community forums, gamification features, AI-powered insights, sleep tracking, and motivational content.
 
 THE APP IS DESIGNED SOLELY AS A SUPPLEMENTARY WELLNESS TOOL. It is not a medical device, therapeutic service, counseling platform, or substitute for professional addiction treatment, mental health services, or medical care of any kind. The App does not establish a doctor-patient, therapist-client, or any other professional healthcare relationship between you and the Company.
 
@@ -138,9 +138,9 @@ PRICE CHANGES: We reserve the right to change subscription pricing. Existing sub
     {
       icon: BookOpen,
       title: "10. Intellectual Property",
-      content: `All content, features, functionality, designs, text, graphics, logos, icons, images, audio, video, software, and the compilation thereof ("Company Content") are the exclusive property of Sobable and/or its licensors and are protected by United States and international copyright, trademark, trade secret, patent, and other intellectual property laws.
+      content: `All content, features, functionality, designs, text, graphics, logos, icons, images, audio, video, software, and the compilation thereof ("Company Content") are the exclusive property of Clean & Sober and/or its licensors and are protected by United States and international copyright, trademark, trade secret, patent, and other intellectual property laws.
 
-TRADEMARKS: "Sobable," the Sobable logo, and all related names, logos, product and service names, designs, and slogans are trademarks of the Company. You may not use such marks without our prior written permission.
+TRADEMARKS: "Clean & Sober," the Clean & Sober logo, and all related names, logos, product and service names, designs, and slogans are trademarks of the Company. You may not use such marks without our prior written permission.
 
 RESTRICTIONS: You may not:
 • Copy, modify, distribute, sell, lease, or create derivative works based on the App or its content
@@ -193,7 +193,7 @@ This indemnification obligation will survive the termination of your account and
       title: "13. Dispute Resolution & Arbitration",
       content: `PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT.
 
-INFORMAL RESOLUTION: Before filing any formal dispute, you agree to first contact us at legal@sobable.app and attempt to resolve the dispute informally for at least 30 days.
+INFORMAL RESOLUTION: Before filing any formal dispute, you agree to first contact us at legal@cleanandsober.app and attempt to resolve the dispute informally for at least 30 days.
 
 BINDING ARBITRATION: If informal resolution fails, any dispute, controversy, or claim arising out of or relating to these Terms or the App shall be resolved exclusively through binding individual arbitration administered by the American Arbitration Association ("AAA") under its Consumer Arbitration Rules. The arbitration shall be conducted in English, and the arbitrator's decision shall be final and binding.
 
@@ -203,7 +203,7 @@ JURY TRIAL WAIVER: YOU HEREBY WAIVE YOUR RIGHT TO A JURY TRIAL FOR ANY CLAIMS CO
 
 EXCEPTIONS: Notwithstanding the above, either party may: (a) bring an individual action in small claims court; (b) seek injunctive or equitable relief in any court of competent jurisdiction to prevent the actual or threatened infringement of intellectual property rights.
 
-OPT-OUT: You may opt out of this arbitration agreement by sending written notice to legal@sobable.app within 30 days of first accepting these Terms. The notice must include your name, account information, and a clear statement that you wish to opt out.`
+OPT-OUT: You may opt out of this arbitration agreement by sending written notice to legal@cleanandsober.app within 30 days of first accepting these Terms. The notice must include your name, account information, and a clear statement that you wish to opt out.`
     },
     {
       icon: Globe,
@@ -272,7 +272,7 @@ SURVIVAL: All provisions of these Terms which by their nature should survive ter
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-4">Terms of Service</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Please read these terms carefully before using Sobable. By using our app, you agree to these terms and conditions.
+            Please read these terms carefully before using Clean & Sober. By using our app, you agree to these terms and conditions.
           </p>
           <p className="text-sm text-muted-foreground mt-4">
             Effective Date: February 6, 2026 · Last Updated: February 6, 2026
@@ -378,9 +378,9 @@ SURVIVAL: All provisions of these Terms which by their nature should survive ter
             If you have questions about these Terms, wish to report a violation, or need to exercise any rights described herein, please contact us:
           </p>
           <div className="space-y-1 text-sm">
-            <p><span className="text-muted-foreground">Legal inquiries: </span><span className="text-primary font-medium">legal@sobable.app</span></p>
-            <p><span className="text-muted-foreground">General support: </span><span className="text-primary font-medium">support@sobable.app</span></p>
-            <p><span className="text-muted-foreground">Privacy concerns: </span><span className="text-primary font-medium">privacy@sobable.app</span></p>
+            <p><span className="text-muted-foreground">Legal inquiries: </span><span className="text-primary font-medium">legal@cleanandsober.app</span></p>
+            <p><span className="text-muted-foreground">General support: </span><span className="text-primary font-medium">support@cleanandsober.app</span></p>
+            <p><span className="text-muted-foreground">Privacy concerns: </span><span className="text-primary font-medium">privacy@cleanandsober.app</span></p>
           </div>
         </motion.div>
 

@@ -75,7 +75,7 @@ const testimonials = [
     name: "Sarah M.",
     days: 247,
     saved: "$3,200",
-    quote: "I tried 4 other apps. Sobable is the only one that stuck. Seeing my counter at 247 days makes me tear up every time.",
+    quote: "I tried 4 other apps. Clean & Sober is the only one that stuck. Seeing my counter at 247 days makes me tear up every time.",
   },
   {
     name: "Michael R.",
@@ -93,7 +93,7 @@ const testimonials = [
 
 const faqs = [
   {
-    q: "Is Sobable really free?",
+    q: "Is Clean & Sober really free?",
     a: "Yes! All core features — day counter, money saved, mood tracking, trigger logging — are 100% free forever. We offer an optional premium 'Sober Club' for advanced AI coaching and community features.",
   },
   {
@@ -102,11 +102,11 @@ const faqs = [
   },
   {
     q: "What if I relapse?",
-    a: "Recovery isn't linear. Sobable has a built-in relapse prevention plan, emergency SOS button, and supportive community. You can reset your counter without shame — what matters is getting back up.",
+    a: "Recovery isn't linear. Clean & Sober has a built-in relapse prevention plan, emergency SOS button, and supportive community. You can reset your counter without shame — what matters is getting back up.",
   },
   {
     q: "Does it work for all addictions?",
-    a: "Yes. Sobable works for alcohol, drugs, smoking, gambling, and more. You customize it to your specific recovery journey during onboarding.",
+    a: "Yes. Clean & Sober works for alcohol, drugs, smoking, gambling, and more. You customize it to your specific recovery journey during onboarding.",
   },
 ];
 
@@ -164,7 +164,7 @@ const Landing = () => {
             transition={{ duration: 0.8, delay: 0.25 }}
             className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto"
           >
-            Now let Sobable help you keep it. Track your sober days, see your money saved, and build the life you deserve — one day at a time.
+            Now let Clean & Sober help you keep it. Track your sober days, see your money saved, and build the life you deserve — one day at a time.
           </motion.p>
 
           <motion.div
@@ -261,7 +261,7 @@ const Landing = () => {
               >
                 <img
                   src={screenshotDashboard}
-                  alt="Sobable app dashboard showing sobriety counter and daily stats"
+                  alt="Clean & Sober app dashboard showing sobriety counter and daily stats"
                   width={288}
                   height={512}
                   className="w-64 sm:w-72 h-auto rounded-3xl shadow-2xl border border-border/20"
@@ -275,7 +275,7 @@ const Landing = () => {
               >
                 <img
                   src={screenshotMoodCheckin}
-                  alt="Sobable mood check-in screen"
+                  alt="Clean & Sober mood check-in screen"
                   width={200}
                   height={356}
                   className="w-48 h-auto rounded-3xl shadow-xl opacity-80 border border-border/20"
@@ -293,9 +293,9 @@ const Landing = () => {
             transition={{ duration: 0.7 }}
           >
             <div className="flex items-center gap-3 mb-6">
-              <img src={sobableLogo} alt="Sobable" className="w-10 h-10" />
+              <img src={sobableLogo} alt="Clean & Sober" className="w-10 h-10" />
               <span className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-primary bg-clip-text text-transparent">
-                Sobable
+                Clean & Sober
               </span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
@@ -577,7 +577,7 @@ const Landing = () => {
             </div>
             <h2 className="text-2xl md:text-3xl font-bold mb-3">Your Privacy is Sacred</h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Your recovery is personal. We built Sobable with privacy-first architecture.
+              Your recovery is personal. We built Clean & Sober with privacy-first architecture.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               {["No Account Needed", "Offline Access", "Bank-Level Encryption", "Anonymous Forever"].map((item, i) => (
@@ -607,7 +607,7 @@ const Landing = () => {
           <div className="p-10 sm:p-14 rounded-3xl bg-gradient-to-br from-amber-500/[0.08] via-card to-primary/[0.05] border border-amber-500/20 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
 
-            <img src={sobableLogo} alt="Sobable" className="w-16 h-16 mx-auto mb-6" />
+            <img src={sobableLogo} alt="Clean & Sober" className="w-16 h-16 mx-auto mb-6" />
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 leading-tight">
               Every Sober Day Counts.{" "}
@@ -645,9 +645,9 @@ const Landing = () => {
       <footer className="py-8 px-6 border-t border-border/30">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src={sobableLogo} alt="Sobable" className="w-6 h-6" />
+            <img src={sobableLogo} alt="Clean & Sober" className="w-6 h-6" />
             <span className="font-semibold bg-gradient-to-r from-amber-400 to-primary bg-clip-text text-transparent">
-              Sobable
+              Clean & Sober
             </span>
           </div>
           <p className="text-muted-foreground text-sm">Rise. Recover. Renew.</p>
