@@ -1,5 +1,5 @@
-// Service Worker for Sobable PWA
-const CACHE_NAME = 'sobable-v1';
+// Service Worker for Clean & Sober PWA
+const CACHE_NAME = 'clean-and-sober-v1';
 const urlsToCache = [
   '/',
   '/index.html',

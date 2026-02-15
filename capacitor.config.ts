@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.94e498b2e0e1433a9333abea9f12a84c',
-  appName: 'Sobable',
+  appName: 'Clean & Sober',
   webDir: 'dist',
   server: {
     url: 'https://94e498b2-e0e1-433a-9333-abea9f12a84c.lovableproject.com?forceHideBadge=true',
@@ -31,7 +31,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
-    scheme: 'Sobable',
+    scheme: 'CleanAndSober',
   },
   android: {
     allowMixedContent: true,
