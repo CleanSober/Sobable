@@ -145,7 +145,7 @@ export const AccountabilityPartner = () => {
     }
   };
 
-  if (!isPremium) return null;
+  // Premium lock is handled by PremiumLockOverlay wrapper in parent
 
   const activeMatches = matches.filter(m => m.status === "active");
 

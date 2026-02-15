@@ -99,7 +99,7 @@ export const GuidedPathways = () => {
     return Math.round((prog.completed_tasks.length / totalTasks) * 100);
   };
 
-  if (!isPremium) return null;
+  // Premium lock is handled by PremiumLockOverlay wrapper in parent
 
   return (
     <>
