@@ -161,7 +161,7 @@ export const SmartRiskScore = () => {
     }
   }, [isPremium, user]);
 
-  if (!isPremium) return null;
+  // Premium lock is handled by PremiumLockOverlay wrapper in parent
 
   const getRiskColor = () => {
     if (riskLevel === "high") return "text-red-500";

@@ -72,8 +72,9 @@ export const WeeklyRecap = ({ daysSober, moneySaved }: WeeklyRecapProps) => {
   }, [isPremium, user, daysSober, moneySaved]);
 
   const handleShare = async () => {
-    const text = stats
-      ? `🎉 My Recovery Week Recap:\n🔥 ${stats.daysSober} days sober\n😊 Mood: ${stats.moodAvg.toFixed(1)}/10\n😴 Sleep: ${stats.sleepAvg.toFixed(1)}h avg\n📝 ${stats.journalCount} journal entries\n💰 $${stats.moneySaved.toFixed(0)} saved\n\n#Recovery #Sobable`
+    const s = stats || displayStats;
+    const text = s
+      ? `🎉 My Recovery Week Recap:\n🔥 ${s.daysSober} days sober\n😊 Mood: ${s.moodAvg.toFixed(1)}/10\n😴 Sleep: ${s.sleepAvg.toFixed(1)}h avg\n📝 ${s.journalCount} journal entries\n💰 $${s.moneySaved.toFixed(0)} saved\n\n#Recovery #CleanAndSober`
       : "";
 
     if (navigator.share) {
@@ -86,13 +87,18 @@ export const WeeklyRecap = ({ daysSober, moneySaved }: WeeklyRecapProps) => {
     }
   };
 
-  if (!isPremium || loading || !stats) return null;
+  if (loading) return null;
+
+  const displayStats: WeekStats = stats || {
+    moodAvg: 7.2, sleepAvg: 7.5, journalCount: 5, goalsCompleted: 4,
+    totalGoals: 7, triggersResisted: 3, totalTriggers: 4, daysSober, moneySaved
+  };
 
   const highlights = [
-    { icon: Heart, label: "Mood", value: `${stats.moodAvg.toFixed(1)}/10`, color: "text-pink-500", bg: "bg-pink-500/10" },
-    { icon: Moon, label: "Sleep", value: `${stats.sleepAvg.toFixed(1)}h`, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-    { icon: Flame, label: "Streak", value: `${stats.daysSober}d`, color: "text-accent", bg: "bg-accent/10" },
-    { icon: Award, label: "Goals", value: `${stats.goalsCompleted}/${stats.totalGoals}`, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { icon: Heart, label: "Mood", value: `${displayStats.moodAvg.toFixed(1)}/10`, color: "text-pink-500", bg: "bg-pink-500/10" },
+    { icon: Moon, label: "Sleep", value: `${displayStats.sleepAvg.toFixed(1)}h`, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { icon: Flame, label: "Streak", value: `${displayStats.daysSober}d`, color: "text-accent", bg: "bg-accent/10" },
+    { icon: Award, label: "Goals", value: `${displayStats.goalsCompleted}/${displayStats.totalGoals}`, color: "text-emerald-500", bg: "bg-emerald-500/10" },
   ];
 
   return (
@@ -139,10 +145,10 @@ export const WeeklyRecap = ({ daysSober, moneySaved }: WeeklyRecapProps) => {
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-primary" />
               <span className="text-[10px] font-semibold text-foreground">
-                {stats.journalCount} journal entries • {stats.triggersResisted}/{stats.totalTriggers} triggers managed
+                {displayStats.journalCount} journal entries • {displayStats.triggersResisted}/{displayStats.totalTriggers} triggers managed
               </span>
             </div>
-            <span className="text-[10px] font-bold text-accent">${stats.moneySaved.toFixed(0)} saved</span>
+            <span className="text-[10px] font-bold text-accent">${displayStats.moneySaved.toFixed(0)} saved</span>
           </div>
         </CardContent>
       </Card>

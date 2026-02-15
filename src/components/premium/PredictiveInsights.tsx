@@ -207,7 +207,7 @@ export const PredictiveInsights = () => {
     }
   };
 
-  if (!isPremium) return null;
+  // Premium lock is handled by PremiumLockOverlay wrapper in parent
 
   const getInsightIcon = (type: string) => {
     switch (type) {

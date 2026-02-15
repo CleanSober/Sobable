@@ -37,13 +37,13 @@ import { RiskPrediction } from "@/components/RiskPrediction";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
-import { PremiumUpsellBanner } from "@/components/PremiumUpsellBanner";
 import { SmartRiskScore } from "@/components/premium/SmartRiskScore";
 import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
 import { GuidedPathways } from "@/components/premium/GuidedPathways";
 import { AccountabilityPartner } from "@/components/premium/AccountabilityPartner";
 import { PredictiveInsights } from "@/components/premium/PredictiveInsights";
 import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
+import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -210,29 +210,34 @@ const Index = () => {
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
-            <PremiumUpsellBanner message="Get AI-powered risk alerts & recovery coaching" />
-            <SmartRiskScore />
+            <PremiumLockOverlay featureName="AI risk assessment">
+              <SmartRiskScore />
+            </PremiumLockOverlay>
             {/* AI Recovery Coach Card */}
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setCoachOpen(true)}
-              className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
-            >
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 border border-accent/30">
-                <Bot className="w-5 h-5 text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
-                  <Crown className="w-3 h-3 text-accent" />
+            <PremiumLockOverlay featureName="AI recovery coaching">
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setCoachOpen(true)}
+                className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
+              >
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 border border-accent/30">
+                  <Bot className="w-5 h-5 text-accent" />
                 </div>
-                <p className="text-[10px] text-muted-foreground">Personalized insights from your recovery data</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </motion.button>
-            <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
+                    <Crown className="w-3 h-3 text-accent" />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Personalized insights from your recovery data</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </motion.button>
+            </PremiumLockOverlay>
+            <PremiumLockOverlay featureName="weekly recap">
+              <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
+            </PremiumLockOverlay>
             <AchievementBadges daysSober={daysSober} />
           </div>
         );
@@ -250,7 +255,7 @@ const Index = () => {
             <BreathingExercise />
             <GuidedMeditations />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
-            <PremiumUpsellBanner message="Unlock AI journal insights & guided meditations" />
+            
           </div>
         );
 
@@ -267,7 +272,7 @@ const Index = () => {
             <PatternAnalysis />
             <RelapsePreventionPlan />
             <CrisisResources />
-            <PremiumUpsellBanner message="Get daily risk scores & predictive pattern analysis" />
+            
           </div>
         );
 
@@ -279,9 +284,15 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
-            <GuidedPathways />
-            <PredictiveInsights />
-            <AccountabilityPartner />
+            <PremiumLockOverlay featureName="recovery pathways">
+              <GuidedPathways />
+            </PremiumLockOverlay>
+            <PremiumLockOverlay featureName="predictive insights">
+              <PredictiveInsights />
+            </PremiumLockOverlay>
+            <PremiumLockOverlay featureName="accountability partner">
+              <AccountabilityPartner />
+            </PremiumLockOverlay>
             <PersonalizedRecommendations />
             <PremiumAnalytics />
           </div>
