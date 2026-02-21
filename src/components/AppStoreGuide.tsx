@@ -88,12 +88,12 @@ const TextBlock = ({
 
 // App Store Content
 const appStoreContent = {
-  appName: "Clean & Sober",
+  appName: "Sobable",
   subtitle: "Sobriety Tracker & Recovery", // iOS only, 30 chars max
   
   shortDescription: "Track your sobriety journey with daily check-ins, mood logging, and milestone celebrations. 100% private.", // 80 chars for Google Play
   
-  fullDescriptionIOS: `Begin your recovery journey with Clean & Sober - the most supportive and private sobriety tracking app designed with compassion.
+  fullDescriptionIOS: `Begin your recovery journey with Sobable - the most supportive and private sobriety tracking app designed with compassion.
 
 TRACK YOUR PROGRESS
 • Count your sober days with a beautiful, motivating counter
@@ -125,11 +125,11 @@ PRIVACY FIRST
 • Optional cloud sync with full encryption
 • We never sell or share your information
 
-Whether you're in early recovery or maintaining long-term sobriety, Clean & Sober provides the tools, motivation, and support you need. Every day clean is a victory worth celebrating.
+Whether you're in early recovery or maintaining long-term sobriety, Sobable provides the tools, motivation, and support you need. Every day clean is a victory worth celebrating.
 
 Download now and take the first step toward a healthier life.`,
 
-  fullDescriptionAndroid: `Begin your recovery journey with Clean & Sober - the most supportive and private sobriety tracking app designed with compassion.
+  fullDescriptionAndroid: `Begin your recovery journey with Sobable - the most supportive and private sobriety tracking app designed with compassion.
 
 ★ TRACK YOUR PROGRESS
 • Count your sober days with a beautiful, motivating counter
@@ -161,7 +161,7 @@ Download now and take the first step toward a healthier life.`,
 • Optional cloud sync with full encryption
 • We never sell or share your information
 
-Whether you're in early recovery or maintaining long-term sobriety, Clean & Sober provides the tools, motivation, and support you need.
+Whether you're in early recovery or maintaining long-term sobriety, Sobable provides the tools, motivation, and support you need.
 
 Download now and take the first step toward a healthier life.`,
 
@@ -181,9 +181,9 @@ Download now and take the first step toward a healthier life.`,
   
   ageRating: "12+", // Due to references to substance use
   
-  supportURL: "https://cleanandsober.app/support",
-  privacyURL: "https://cleanandsober.app/privacy",
-  marketingURL: "https://cleanandsober.app",
+  supportURL: "https://sobable.app/support",
+  privacyURL: "https://sobable.app/privacy",
+  marketingURL: "https://sobable.app",
 };
 
 const screenshotSpecs = {

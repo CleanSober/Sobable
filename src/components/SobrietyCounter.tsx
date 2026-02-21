@@ -103,7 +103,7 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
             <Sparkles className="absolute -top-1 -right-3 w-4 h-4 text-accent animate-pulse" />
           </motion.div>
           <p className="text-base text-foreground/80 font-medium tracking-wide">
-            {daysSober === 1 ? "Day" : "Days"} Clean & Sober
+            {daysSober === 1 ? "Day" : "Days"} Sober
           </p>
         </div>
 
