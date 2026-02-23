@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-const BYPASS_PAYWALL = false;
+const BYPASS_PAYWALL = true;
 
 export const usePremiumStatus = () => {
   const { user } = useAuth();
