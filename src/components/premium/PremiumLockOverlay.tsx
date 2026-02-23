@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, Crown, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Lock, Crown, Sparkles, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
@@ -9,9 +8,10 @@ import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 interface PremiumLockOverlayProps {
   children: React.ReactNode;
   featureName?: string;
+  icon?: React.ReactNode;
 }
 
-export const PremiumLockOverlay = ({ children, featureName = "this feature" }: PremiumLockOverlayProps) => {
+export const PremiumLockOverlay = ({ children, featureName = "this feature", icon }: PremiumLockOverlayProps) => {
   const { isPremium, loading } = usePremiumStatus();
   const [showPricing, setShowPricing] = useState(false);
 
@@ -21,37 +21,39 @@ export const PremiumLockOverlay = ({ children, featureName = "this feature" }: P
 
   return (
     <>
-      <div className="relative rounded-2xl overflow-hidden">
-        {/* Faded preview content */}
-        <div className="opacity-40 blur-[1px] pointer-events-none select-none" aria-hidden="true">
-          {children}
-        </div>
+      <motion.button
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        onClick={() => setShowPricing(true)}
+        className="w-full rounded-2xl border border-amber-500/15 bg-gradient-to-br from-amber-500/[0.06] to-orange-500/[0.04] p-4 text-left group hover:border-amber-500/30 transition-all duration-200 active:scale-[0.98]"
+      >
+        <div className="flex items-center gap-3">
+          {/* Icon */}
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center">
+            <Lock className="w-4 h-4 text-amber-500" />
+          </div>
 
-        {/* Lock overlay */}
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={() => setShowPricing(true)}
-          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-background/30 via-background/60 to-background/80 cursor-pointer group"
-        >
-          <div className="p-2.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
-            <Lock className="w-4 h-4 text-white" />
+          {/* Text */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Crown className="w-3 h-3 text-amber-500 flex-shrink-0" />
+              <span className="text-xs font-semibold text-foreground truncate">
+                {featureName}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5 text-amber-500/70 flex-shrink-0" />
+              <span className="text-[10px] text-muted-foreground">
+                Sober Club · Try free for 7 days
+              </span>
+            </div>
           </div>
-          <div className="text-center px-4">
-            <p className="text-xs font-semibold text-foreground flex items-center gap-1 justify-center">
-              <Crown className="w-3 h-3 text-amber-500" />
-              Sober Club
-            </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              Unlock {featureName}
-            </p>
-          </div>
-          <span className="text-[10px] font-medium text-amber-500 group-hover:underline flex items-center gap-1 mt-0.5">
-            <Sparkles className="w-3 h-3" />
-            Try free for 7 days
-          </span>
-        </motion.button>
-      </div>
+
+          {/* Arrow */}
+          <ChevronRight className="w-4 h-4 text-amber-500/50 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+        </div>
+      </motion.button>
 
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
         <DialogContent className="max-w-lg p-0 overflow-hidden">
