@@ -44,6 +44,7 @@ import { AccountabilityPartner } from "@/components/premium/AccountabilityPartne
 import { PredictiveInsights } from "@/components/premium/PredictiveInsights";
 import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
+import { PremiumFeatureSection } from "@/components/premium/PremiumFeatureSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -210,11 +211,10 @@ const Index = () => {
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
-            <PremiumLockOverlay featureName="AI risk assessment">
+            <PremiumLockOverlay featureName="AI Risk Assessment">
               <SmartRiskScore />
             </PremiumLockOverlay>
-            {/* AI Recovery Coach Card */}
-            <PremiumLockOverlay featureName="AI recovery coaching">
+            <PremiumLockOverlay featureName="AI Recovery Coach">
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -235,7 +235,7 @@ const Index = () => {
                 <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               </motion.button>
             </PremiumLockOverlay>
-            <PremiumLockOverlay featureName="weekly recap">
+            <PremiumLockOverlay featureName="Weekly Recap">
               <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
             </PremiumLockOverlay>
             <AchievementBadges daysSober={daysSober} />
@@ -288,21 +288,22 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
-            <PremiumLockOverlay featureName="recovery pathways">
+            <PremiumFeatureSection
+              title="Sober Club Premium"
+              features={[
+                { name: "Recovery Pathways" },
+                { name: "Predictive Insights" },
+                { name: "Accountability Partner" },
+                { name: "AI Recommendations" },
+                { name: "Advanced Analytics" },
+              ]}
+            >
               <GuidedPathways />
-            </PremiumLockOverlay>
-            <PremiumLockOverlay featureName="predictive insights">
               <PredictiveInsights />
-            </PremiumLockOverlay>
-            <PremiumLockOverlay featureName="accountability partner">
               <AccountabilityPartner />
-            </PremiumLockOverlay>
-            <PremiumLockOverlay featureName="AI Recommendations">
               <PersonalizedRecommendations />
-            </PremiumLockOverlay>
-            <PremiumLockOverlay featureName="Advanced Analytics">
               <PremiumAnalytics />
-            </PremiumLockOverlay>
+            </PremiumFeatureSection>
           </div>
         );
 
