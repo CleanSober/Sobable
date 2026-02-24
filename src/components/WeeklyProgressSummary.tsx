@@ -2,17 +2,14 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   FileText, TrendingUp, TrendingDown, Minus, Calendar, 
-  DollarSign, Brain, Heart, Crown, Lock, Flame, Target,
+  DollarSign, Brain, Heart, Crown, Flame, Target,
   CheckCircle2, AlertTriangle, Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
-import { PricingPlans } from "@/components/PricingPlans";
 import { calculateDaysSober, type UserData } from "@/lib/storage";
 
 interface WeeklyProgressSummaryProps {
@@ -46,7 +43,7 @@ export const WeeklyProgressSummary = ({ userData }: WeeklyProgressSummaryProps) 
   const { isPremium } = usePremiumStatus();
   const [stats, setStats] = useState<WeeklyStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showPricing, setShowPricing] = useState(false);
+  
 
   useEffect(() => {
     if (!user) return;
@@ -230,7 +227,6 @@ export const WeeklyProgressSummary = ({ userData }: WeeklyProgressSummaryProps) 
   }
 
   return (
-    <>
       <Card className="gradient-card border-border/50 overflow-hidden">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -343,15 +339,13 @@ export const WeeklyProgressSummary = ({ userData }: WeeklyProgressSummaryProps) 
             </div>
           </motion.div>
 
-          {/* Premium AI Insights - Blurred Preview */}
-          <div className="relative">
+          {/* Premium AI Insights */}
+          {isPremium && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className={`p-4 rounded-xl border ${
-                isPremium ? 'bg-primary/5 border-primary/20' : 'bg-muted/30 border-border'
-              } ${!isPremium ? 'blur-[2px]' : ''}`}
+              className="p-4 rounded-xl border bg-primary/5 border-primary/20"
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className={`p-1.5 rounded-lg ${getRiskColor(stats.riskLevel)}`}>
@@ -388,30 +382,7 @@ export const WeeklyProgressSummary = ({ userData }: WeeklyProgressSummaryProps) 
                 </p>
               </div>
             </motion.div>
-
-            {/* Premium Overlay */}
-            {!isPremium && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-xl backdrop-blur-sm">
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                    <Crown className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-sm font-medium mb-1">AI-Powered Insights</p>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Unlock risk assessments & recommendations
-                  </p>
-                  <Button
-                    size="sm"
-                    onClick={() => setShowPricing(true)}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                  >
-                    <Lock className="w-3 h-3 mr-1" />
-                    Unlock
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Activity Summary */}
           <div className="grid grid-cols-3 gap-2 text-center">
@@ -429,14 +400,6 @@ export const WeeklyProgressSummary = ({ userData }: WeeklyProgressSummaryProps) 
             </div>
           </div>
         </CardContent>
-      </Card>
-
-      {/* Pricing Dialog */}
-      <Dialog open={showPricing} onOpenChange={setShowPricing}>
-        <DialogContent className="max-w-lg p-0 overflow-hidden">
-          <PricingPlans onClose={() => setShowPricing(false)} />
-        </DialogContent>
-      </Dialog>
-    </>
+    </Card>
   );
 };

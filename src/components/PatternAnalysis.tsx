@@ -88,50 +88,9 @@ export const PatternAnalysis = () => {
 
   const hasData = analysis.totalEntries > 0;
 
-  // Premium gate for advanced pattern analysis
+  // Premium gate handled by PremiumLockOverlay wrapper
   if (!premiumLoading && !isPremium) {
-    return (
-      <Card className="gradient-card border-border/50 overflow-hidden">
-        <CardHeader className="pb-2 pt-3 px-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Brain className="w-4 h-4 text-primary" />
-            Pattern Analysis
-            <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-amber-500">
-              <Crown className="w-3.5 h-3.5" />
-              Sober Club
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3">
-          <div className="relative">
-            <div className="blur-sm pointer-events-none opacity-50">
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="p-3 rounded-xl bg-secondary/50 text-center">
-                  <p className="text-lg font-bold">12</p>
-                  <p className="text-[10px] text-muted-foreground">Triggers</p>
-                </div>
-                <div className="p-3 rounded-xl bg-success/10 text-center">
-                  <p className="text-lg font-bold text-success">85%</p>
-                  <p className="text-[10px] text-muted-foreground">Resisted</p>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <div className="h-6 bg-secondary/30 rounded-lg" />
-                <div className="h-6 bg-secondary/30 rounded-lg" />
-              </div>
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
-              <Lock className="w-6 h-6 text-amber-500 mb-2" />
-              <h3 className="font-semibold text-sm text-foreground mb-0.5">Unlock Pattern Analysis</h3>
-              <p className="text-xs text-muted-foreground text-center mb-3 px-4">
-                Understand your triggers and high-risk situations
-              </p>
-              <PremiumGate />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   if (loading || premiumLoading) {

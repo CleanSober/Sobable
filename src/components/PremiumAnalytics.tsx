@@ -460,46 +460,9 @@ export const PremiumAnalytics = () => {
     );
   }
 
+  // Premium gate handled by PremiumLockOverlay wrapper
   if (!isPremium) {
-    return (
-      <Card className="gradient-card border-border/50 overflow-hidden">
-        <CardHeader className="pb-2 pt-3 px-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <BarChart3 className="w-4 h-4 text-primary" />
-            Advanced Analytics
-            <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-amber-500">
-              <Crown className="w-3.5 h-3.5" />
-              Sober Club
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3">
-          <div className="relative">
-            <div className="blur-sm pointer-events-none opacity-50">
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="p-3 rounded-xl bg-primary/10 text-center">
-                  <div className="text-lg font-bold text-primary">87</div>
-                  <div className="text-[10px] text-muted-foreground">Recovery Score</div>
-                </div>
-                <div className="p-3 rounded-xl bg-emerald-500/10 text-center">
-                  <div className="text-lg font-bold text-emerald-500">+12%</div>
-                  <div className="text-[10px] text-muted-foreground">This Week</div>
-                </div>
-              </div>
-              <div className="h-24 bg-secondary/30 rounded-xl" />
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
-              <Lock className="w-6 h-6 text-amber-500 mb-2" />
-              <h3 className="font-semibold text-sm text-foreground mb-0.5">Unlock Analytics</h3>
-              <p className="text-xs text-muted-foreground text-center mb-3 px-4">
-                AI insights, alerts & recovery scoring
-              </p>
-              <PremiumGate />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   if (loading) {
