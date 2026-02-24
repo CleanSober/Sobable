@@ -38,7 +38,7 @@ export const PremiumLockOverlay = ({ children, featureName = "this feature", ico
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
               <Crown className="w-3 h-3 text-amber-500 flex-shrink-0" />
-              <span className="text-xs font-semibold text-foreground truncate">
+              <span className="text-xs font-semibold text-foreground truncate capitalize">
                 {featureName}
               </span>
             </div>
