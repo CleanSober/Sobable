@@ -267,9 +267,13 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">Know yourself to protect yourself</p>
             </motion.div>
             <CravingTimer />
-            <RiskPrediction />
+            <PremiumLockOverlay featureName="Risk Insights">
+              <RiskPrediction />
+            </PremiumLockOverlay>
             <TriggerLogger />
-            <PatternAnalysis />
+            <PremiumLockOverlay featureName="Pattern Analysis">
+              <PatternAnalysis />
+            </PremiumLockOverlay>
             <RelapsePreventionPlan />
             <CrisisResources />
             
@@ -293,8 +297,12 @@ const Index = () => {
             <PremiumLockOverlay featureName="accountability partner">
               <AccountabilityPartner />
             </PremiumLockOverlay>
-            <PersonalizedRecommendations />
-            <PremiumAnalytics />
+            <PremiumLockOverlay featureName="AI Recommendations">
+              <PersonalizedRecommendations />
+            </PremiumLockOverlay>
+            <PremiumLockOverlay featureName="Advanced Analytics">
+              <PremiumAnalytics />
+            </PremiumLockOverlay>
           </div>
         );
 

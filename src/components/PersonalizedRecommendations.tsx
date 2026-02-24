@@ -113,30 +113,9 @@ export const PersonalizedRecommendations = () => {
     );
   }
 
+  // Premium gate handled by PremiumLockOverlay wrapper
   if (!isPremium) {
-    return (
-      <Card className="gradient-card border-border/50 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5" />
-        <CardHeader className="pb-2 pt-3 px-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            AI Recommendations
-            <Badge variant="secondary" className="ml-auto bg-amber-500/20 text-amber-600 text-[10px]">
-              <Crown className="w-3 h-3 mr-0.5" />
-              Premium
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3">
-          <div className="text-center py-3">
-            <p className="text-xs text-muted-foreground mb-3">
-              Get AI-powered recommendations for your recovery.
-            </p>
-            <PremiumGate />
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
