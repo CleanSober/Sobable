@@ -30,7 +30,7 @@ interface PricingPlansProps {
 }
 
 export const PricingPlans = memo(({ onClose }: PricingPlansProps) => {
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("monthly");
   const { startCheckout, checkoutLoading, isPremium, planName, openCustomerPortal } = useSubscription();
 
   const handleSubscribe = async () => {

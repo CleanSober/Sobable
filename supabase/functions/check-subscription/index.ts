@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
@@ -55,25 +55,34 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
+    // Check active subscriptions first, then trialing
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      limit: 10,
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+    
+    const activeSub = subscriptions.data.find(
+      (s) => s.status === "active" || s.status === "trialing"
+    );
+    
+    const hasActiveSub = !!activeSub;
     let productId: string | null = null;
     let priceId: string | null = null;
     let subscriptionEnd: string | null = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      // Safely handle current_period_end - it may be undefined in some cases
-      if (subscription.current_period_end) {
-        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    if (hasActiveSub && activeSub) {
+      if (activeSub.current_period_end) {
+        subscriptionEnd = new Date(activeSub.current_period_end * 1000).toISOString();
       }
-      productId = subscription.items.data[0]?.price?.product as string || null;
-      priceId = subscription.items.data[0]?.price?.id || null;
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd, productId, priceId });
+      productId = activeSub.items.data[0]?.price?.product as string || null;
+      priceId = activeSub.items.data[0]?.price?.id || null;
+      logStep("Active subscription found", { 
+        subscriptionId: activeSub.id, 
+        status: activeSub.status,
+        endDate: subscriptionEnd, 
+        productId, 
+        priceId 
+      });
     } else {
       logStep("No active subscription found");
     }
