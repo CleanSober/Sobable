@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
@@ -27,20 +27,16 @@ serve(async (req) => {
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: authError } = await supabaseClient.auth.getClaims(token);
-    if (authError || !claimsData?.claims) {
-      throw new Error("User not authenticated");
-    }
-
-    const userId = claimsData.claims.sub;
-    const userEmail = claimsData.claims.email as string;
-    if (!userEmail) throw new Error("Email not available");
-    logStep("User authenticated", { userId, email: userEmail });
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+    if (authError) throw new Error(`Authentication error: ${authError.message}`);
+    const user = userData.user;
+    if (!user?.email) throw new Error("User not authenticated or email not available");
+    logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { priceId } = await req.json();
     if (!priceId || typeof priceId !== "string") throw new Error("Valid Price ID is required");
@@ -52,7 +48,7 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
     // Check for existing customer
-    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string | undefined;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
@@ -63,7 +59,7 @@ serve(async (req) => {
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : userEmail,
+      customer_email: customerId ? undefined : user.email,
       line_items: [
         {
           price: priceId,
@@ -75,8 +71,8 @@ serve(async (req) => {
         trial_period_days: 7,
       },
       payment_method_collection: "always",
-      success_url: `${origin}/?checkout=success`,
-      cancel_url: `${origin}/?checkout=cancelled`,
+      success_url: `${origin}/app?checkout=success`,
+      cancel_url: `${origin}/app?checkout=cancelled`,
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

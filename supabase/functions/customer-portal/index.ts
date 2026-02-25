@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
@@ -30,17 +30,17 @@ serve(async (req) => {
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: authError } = await supabaseClient.auth.getClaims(token);
-    if (authError || !claimsData?.claims) throw new Error("Authentication failed");
-    
-    const userEmail = claimsData.claims.email as string;
-    if (!userEmail) throw new Error("Email not available");
-    logStep("User authenticated", { userId: claimsData.claims.sub, email: userEmail });
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+    if (authError) throw new Error(`Authentication error: ${authError.message}`);
+    const user = userData.user;
+    if (!user?.email) throw new Error("Email not available");
+    const userEmail = user.email;
+    logStep("User authenticated", { userId: user.id, email: userEmail });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
@@ -53,7 +53,7 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "http://localhost:3000";
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${origin}/`,
+      return_url: `${origin}/app`,
     });
     logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
 
