@@ -333,7 +333,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl border-b border-border/30" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           
-          <div className="container max-w-2xl mx-auto px-3 py-2 flex items-center justify-between relative">
+          <div className="container max-w-lg mx-auto px-3 py-2 flex items-center justify-between relative">
             <div className="flex items-center gap-2">
               <span className="text-base font-bold text-foreground tracking-tight">Sobable</span>
               {(userXP?.daily_login_streak ?? 0) > 0 && (
@@ -356,7 +356,7 @@ const Index = () => {
         </motion.header>
 
         <main
-          className="container max-w-2xl mx-auto px-3 py-3 pb-20 relative overflow-x-hidden"
+          className="container max-w-lg mx-auto px-3 py-3 pb-24 relative overflow-x-hidden"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
