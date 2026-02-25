@@ -49,7 +49,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
       {/* Glow effect at top */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       
-      <div className="container max-w-lg mx-auto px-1 relative">
+      <div className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-1 relative">
         <div className="flex items-center justify-around py-1.5">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
