@@ -17,6 +17,7 @@ const AppStoreGuide = lazy(() => import("./components/AppStoreGuide"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/profile" element={<Profile />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
