@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
-import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar, Cell } from "recharts";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 interface MoneySavedProps {
   totalSaved: number;
@@ -25,7 +26,6 @@ const useAnimatedCounter = (target: number, duration = 1200) => {
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(start + diff * eased));
 
@@ -45,7 +45,7 @@ const useAnimatedCounter = (target: number, duration = 1200) => {
 // Generate savings growth data
 const generateGrowthData = (daysSober: number, dailySpending: number) => {
   const points: { day: string; saved: number; invested: number }[] = [];
-  const annualReturn = 0.08; // 8% annual return
+  const annualReturn = 0.08;
   const dailyReturn = Math.pow(1 + annualReturn, 1 / 365) - 1;
 
   const totalPoints = Math.min(daysSober, 90);
@@ -55,7 +55,6 @@ const generateGrowthData = (daysSober: number, dailySpending: number) => {
 
   for (let i = 0; i <= totalPoints; i += step) {
     const saved = i * dailySpending;
-    // Compound interest calculation
     investedTotal = 0;
     for (let d = 0; d < i; d++) {
       investedTotal = (investedTotal + dailySpending) * (1 + dailyReturn);
@@ -68,7 +67,6 @@ const generateGrowthData = (daysSober: number, dailySpending: number) => {
     });
   }
 
-  // Always include the current day
   if (totalPoints % step !== 0) {
     const saved = totalPoints * dailySpending;
     investedTotal = 0;
@@ -99,7 +97,6 @@ const getSavingsMilestones = (totalSaved: number) => [
 
 // Spending categories
 const getSpendingCategories = (dailySpending: number) => {
-  // Typical breakdown of substance-related spending
   return [
     { name: "Substance", amount: dailySpending * 0.60, pct: 60, color: "hsl(0 75% 55%)", icon: "🚫" },
     { name: "Related costs", amount: dailySpending * 0.20, pct: 20, color: "hsl(42 100% 55%)", icon: "🚕" },
@@ -137,7 +134,67 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+// --- Premium: Multi-year projection calculator ---
+const generateMultiYearProjection = (dailySpending: number, daysSober: number) => {
+  const annualReturn = 0.08;
+  const monthlyContribution = dailySpending * 30;
+  const currentSaved = dailySpending * daysSober;
+
+  const projections = [
+    { year: "Now", cash: currentSaved, conservative: currentSaved, moderate: currentSaved, aggressive: currentSaved },
+  ];
+
+  for (let y = 1; y <= 10; y++) {
+    const cash = currentSaved + monthlyContribution * 12 * y;
+    const calcInvested = (rate: number) => {
+      let total = currentSaved;
+      for (let m = 0; m < y * 12; m++) {
+        total = (total + monthlyContribution) * (1 + rate / 12);
+      }
+      return Math.round(total);
+    };
+    projections.push({
+      year: `${y}Y`,
+      cash: Math.round(cash),
+      conservative: calcInvested(0.05),
+      moderate: calcInvested(0.08),
+      aggressive: calcInvested(0.12),
+    });
+  }
+  return projections;
+};
+
+// Monthly breakdown for premium
+const generateMonthlyBreakdown = (daysSober: number, dailySpending: number) => {
+  const months: { month: string; saved: number; cumulative: number }[] = [];
+  const totalMonths = Math.min(Math.ceil(daysSober / 30), 12);
+
+  let cumulative = 0;
+  for (let m = 0; m < Math.max(totalMonths, 1); m++) {
+    const daysInMonth = m < totalMonths - 1 ? 30 : Math.min(daysSober - m * 30, 30);
+    const saved = daysInMonth * dailySpending;
+    cumulative += saved;
+    months.push({
+      month: m === 0 ? "Month 1" : `Month ${m + 1}`,
+      saved: Math.round(saved),
+      cumulative: Math.round(cumulative),
+    });
+  }
+  return months;
+};
+
+// Financial freedom goals
+const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
+  { name: "Emergency Fund (3 mo)", target: 3000, icon: "🛡️", daysNeeded: Math.ceil(3000 / dailySpending) },
+  { name: "Vacation Fund", target: 5000, icon: "🏝️", daysNeeded: Math.ceil(5000 / dailySpending) },
+  { name: "Down Payment Seed", target: 10000, icon: "🏠", daysNeeded: Math.ceil(10000 / dailySpending) },
+  { name: "Debt Freedom", target: 15000, icon: "⛓️‍💥", daysNeeded: Math.ceil(15000 / dailySpending) },
+  { name: "Retirement Boost", target: 25000, icon: "🌅", daysNeeded: Math.ceil(25000 / dailySpending) },
+  { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
+];
+
 export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedProps) => {
+  const { isPremium } = usePremiumStatus();
   const animatedTotal = useAnimatedCounter(totalSaved);
   const weeklyRate = dailySpending * 7;
   const monthlyRate = dailySpending * 30;
@@ -171,6 +228,19 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
     }
     return Math.round(total);
   })();
+
+  // Premium data
+  const multiYearData = useMemo(() => generateMultiYearProjection(dailySpending, daysSober), [dailySpending, daysSober]);
+  const monthlyData = useMemo(() => generateMonthlyBreakdown(daysSober, dailySpending), [daysSober, dailySpending]);
+  const financialGoals = useMemo(() => getFinancialGoals(totalSaved, dailySpending), [totalSaved, dailySpending]);
+
+  // Premium stats
+  const fiveYearModerate = multiYearData.find(d => d.year === "5Y")?.moderate || 0;
+  const tenYearModerate = multiYearData.find(d => d.year === "10Y")?.moderate || 0;
+  const tenYearCash = multiYearData.find(d => d.year === "10Y")?.cash || 0;
+  const compoundGain10Y = tenYearModerate - tenYearCash;
+  const savingsRate = dailySpending; // per day
+  const monthlyInvestmentIncome = Math.round((tenYearModerate * 0.04) / 12); // 4% withdrawal rate
 
   return (
     <motion.div
@@ -235,10 +305,16 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
 
         {/* Tabs for different views */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-3 bg-muted/30 h-8">
+          <TabsList className={`grid w-full mb-3 bg-muted/30 h-8 ${isPremium ? "grid-cols-4" : "grid-cols-3"}`}>
             <TabsTrigger value="overview" className="text-[10px]">Overview</TabsTrigger>
             <TabsTrigger value="growth" className="text-[10px]">Growth</TabsTrigger>
             <TabsTrigger value="goals" className="text-[10px]">Goals</TabsTrigger>
+            {isPremium && (
+              <TabsTrigger value="advanced" className="text-[10px] flex items-center gap-0.5">
+                <Crown className="w-2.5 h-2.5" />
+                Pro
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Overview Tab */}
@@ -530,7 +606,241 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
               </div>
             </div>
           </TabsContent>
+
+          {/* ========== PREMIUM ADVANCED TAB ========== */}
+          {isPremium && (
+            <TabsContent value="advanced" className="space-y-4 mt-0">
+              {/* Premium header badge */}
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-accent/15 via-primary/10 to-accent/15 border border-accent/25">
+                <Crown className="w-4 h-4 text-accent" />
+                <span className="text-xs font-semibold text-accent">Advanced Financial Intelligence</span>
+              </div>
+
+              {/* Key premium stats */}
+              <div className="grid grid-cols-2 gap-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="stat-box text-center"
+                >
+                  <Calculator className="w-4 h-4 text-accent mx-auto mb-1" />
+                  <p className="text-lg font-bold text-accent">${fiveYearModerate.toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground">5-Year (invested)</p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="stat-box text-center"
+                >
+                  <Gem className="w-4 h-4 text-primary mx-auto mb-1" />
+                  <p className="text-lg font-bold text-primary">${tenYearModerate.toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground">10-Year (invested)</p>
+                </motion.div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="stat-box text-center">
+                  <Percent className="w-3.5 h-3.5 text-accent mx-auto mb-1" />
+                  <p className="text-base font-bold text-foreground">${compoundGain10Y.toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground">Compound interest earned</p>
+                </div>
+                <div className="stat-box text-center">
+                  <DollarSign className="w-3.5 h-3.5 text-primary mx-auto mb-1" />
+                  <p className="text-base font-bold text-foreground">${monthlyInvestmentIncome}/mo</p>
+                  <p className="text-[10px] text-muted-foreground">Passive income (4%)</p>
+                </div>
+              </div>
+
+              {/* Multi-year projection chart */}
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <LineChart className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-medium text-foreground">10-Year Projection</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      { color: "hsl(215 18% 60%)", label: "Cash" },
+                      { color: "hsl(168 84% 45%)", label: "5%" },
+                      { color: "hsl(42 100% 55%)", label: "8%" },
+                      { color: "hsl(280 65% 60%)", label: "12%" },
+                    ].map(l => (
+                      <div key={l.label} className="flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: l.color }} />
+                        <span className="text-[9px] text-muted-foreground">{l.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={multiYearData} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="aggressiveGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(280 65% 60%)" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="hsl(280 65% 60%)" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="moderateGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(42 100% 55%)" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="hsl(42 100% 55%)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis
+                        dataKey="year"
+                        tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="cash" name="Cash" stroke="hsl(215 18% 60%)" strokeWidth={1.5} strokeDasharray="4 4" fill="none" />
+                      <Area type="monotone" dataKey="conservative" name="Conservative (5%)" stroke="hsl(168 84% 45%)" strokeWidth={1.5} fill="none" />
+                      <Area type="monotone" dataKey="moderate" name="Moderate (8%)" stroke="hsl(42 100% 55%)" strokeWidth={2} fill="url(#moderateGrad)" />
+                      <Area type="monotone" dataKey="aggressive" name="Aggressive (12%)" stroke="hsl(280 65% 60%)" strokeWidth={1.5} fill="url(#aggressiveGrad)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Monthly savings breakdown */}
+              {monthlyData.length > 1 && (
+                <div className="glass-card rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CalendarDays className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Monthly Savings</span>
+                  </div>
+                  <div className="h-36">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                        <XAxis
+                          dataKey="month"
+                          tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(v) => `$${v}`}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar dataKey="saved" name="Saved" radius={[4, 4, 0, 0]}>
+                          {monthlyData.map((_, index) => (
+                            <Cell key={index} fill={`hsl(168 ${70 + index * 3}% ${50 - index * 2}%)`} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              {/* Financial Freedom Goals */}
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-medium text-foreground">Financial Freedom Tracker</span>
+                </div>
+                <div className="space-y-3">
+                  {financialGoals.map((goal, index) => {
+                    const progress = Math.min((totalSaved / goal.target) * 100, 100);
+                    const daysLeft = Math.max(0, Math.ceil((goal.target - totalSaved) / dailySpending));
+                    const reached = totalSaved >= goal.target;
+
+                    return (
+                      <motion.div
+                        key={goal.name}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * index }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{goal.icon}</span>
+                            <span className={`text-xs font-medium ${reached ? "text-accent" : "text-foreground"}`}>
+                              {goal.name}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">
+                            {reached ? "✅ Achieved!" : `~${daysLeft} days`}
+                          </span>
+                        </div>
+                        <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 0.8, delay: 0.1 * index }}
+                            className="h-full rounded-full"
+                            style={{
+                              background: reached
+                                ? "linear-gradient(135deg, hsl(168 84% 45%), hsl(42 100% 55%))"
+                                : "hsl(168 84% 45%)",
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-between mt-0.5">
+                          <span className="text-[9px] text-muted-foreground">
+                            ${Math.min(totalSaved, goal.target).toLocaleString()}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground">
+                            ${goal.target.toLocaleString()}
+                          </span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Compound interest insight */}
+              <div className="glass-card rounded-xl p-4 border border-accent/20 bg-gradient-to-br from-accent/5 to-transparent">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-accent/15">
+                    <Sparkles className="w-4 h-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground mb-1">The Power of Compound Interest</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      At ${dailySpending}/day invested at 8%, your money earns{" "}
+                      <span className="text-accent font-semibold">${compoundGain10Y.toLocaleString()}</span>{" "}
+                      in interest alone over 10 years. That's{" "}
+                      <span className="text-accent font-semibold">
+                        {tenYearCash > 0 ? Math.round((compoundGain10Y / tenYearCash) * 100) : 0}%
+                      </span>{" "}
+                      more than just saving cash. Every sober day is an investment in your future.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
+
+        {/* Premium upsell if not premium */}
+        {!isPremium && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-4 p-3 rounded-xl border border-accent/20 bg-gradient-to-r from-accent/5 via-primary/5 to-accent/5"
+          >
+            <div className="flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5 text-accent" />
+              <span className="text-xs font-medium text-foreground">Unlock Advanced Financials</span>
+              <Crown className="w-3 h-3 text-accent ml-auto" />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              10-year projections, investment scenarios, passive income calculator & financial freedom tracker
+            </p>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
