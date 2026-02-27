@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  User, Calendar, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail
+  User, Calendar, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import NotificationSettings from "@/components/NotificationSettings";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { BottomTabs, type TabId } from "@/components/BottomTabs";
+import { Switch } from "@/components/ui/switch";
 import { calculateDaysSober } from "@/lib/storage";
 
 const Profile = () => {
@@ -39,6 +40,9 @@ const Profile = () => {
   const [emergencyContact, setEmergencyContact] = useState("");
   const [personalReminder, setPersonalReminder] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return !document.documentElement.classList.contains("light");
+  });
 
   useEffect(() => {
     if (!user) {
@@ -349,6 +353,43 @@ const Profile = () => {
                   maxLength={500}
                 />
               </div>
+            </div>
+          </motion.div>
+
+          {/* Appearance */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="card-enhanced p-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
+              Appearance
+            </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                  {isDarkMode ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-foreground" />}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{isDarkMode ? "Dark Mode" : "Light Mode"}</p>
+                  <p className="text-xs text-muted-foreground">Toggle between dark and light theme</p>
+                </div>
+              </div>
+              <Switch
+                checked={isDarkMode}
+                onCheckedChange={(checked) => {
+                  setIsDarkMode(checked);
+                  if (checked) {
+                    document.documentElement.classList.remove("light");
+                    localStorage.setItem("theme", "dark");
+                  } else {
+                    document.documentElement.classList.add("light");
+                    localStorage.setItem("theme", "light");
+                  }
+                }}
+              />
             </div>
           </motion.div>
 
