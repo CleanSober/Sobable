@@ -2,12 +2,23 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  User, Calendar, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon
+  User, Calendar, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
@@ -31,6 +42,8 @@ const Profile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("home");
 
   const [name, setName] = useState("");
@@ -74,6 +87,31 @@ const Profile = () => {
     await signOut();
     toast.success("Signed out successfully");
     navigate("/");
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      const response = await supabase.functions.invoke("delete-account", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (response.error) throw response.error;
+
+      toast.success("Account deleted successfully");
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Delete account error:", error);
+      toast.error("Failed to delete account. Please try again.");
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmText("");
+    }
   };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,6 +318,62 @@ const Profile = () => {
               <LogOut className="w-5 h-5 text-destructive" />
               <span className="text-sm font-medium text-destructive flex-1">Sign Out</span>
             </button>
+            <div className="h-px bg-border/30 mx-4" />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full flex items-center gap-3 p-4 hover:bg-destructive/10 transition-colors text-left">
+                  <Trash2 className="w-5 h-5 text-destructive" />
+                  <span className="text-sm font-medium text-destructive flex-1">Delete Account</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="w-5 h-5" />
+                    Delete Account Permanently
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-3">
+                    <p>This action is <strong className="text-foreground">irreversible</strong>. All your data will be permanently deleted, including:</p>
+                    <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                      <li>Sobriety progress & streaks</li>
+                      <li>Journal entries & mood logs</li>
+                      <li>Community posts & messages</li>
+                      <li>Subscription & premium features</li>
+                    </ul>
+                    <div className="pt-2">
+                      <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">
+                        Type <strong className="text-foreground">DELETE</strong> to confirm
+                      </Label>
+                      <Input
+                        id="deleteConfirm"
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="DELETE"
+                        className="mt-1.5"
+                      />
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmText !== "DELETE" || deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Delete My Account"
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </motion.div>
 
           {/* Settings Form */}
