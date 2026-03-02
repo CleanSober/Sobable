@@ -53,6 +53,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useGamification, XP_REWARDS } from '@/hooks/useGamification';
 import { useJournal, JournalEntry } from '@/hooks/useJournal';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 const promptCategories = [
@@ -70,6 +72,7 @@ interface JournalProps {
 }
 
 export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
+  const { user } = useAuth();
   const { isPremium } = usePremiumStatus();
   const {
     entries,
@@ -130,6 +133,13 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
       mood_analysis: moodAnalysis ? JSON.stringify(moodAnalysis) : null,
       tags: newEntry.tags,
     });
+
+    // Mark daily goal as complete
+    const today = new Date().toISOString().split("T")[0];
+    await supabase.from("daily_goals").upsert(
+      { user_id: user?.id, date: today, journal_written: true },
+      { onConflict: "user_id,date" }
+    );
 
     // Award XP for journaling
     await addXP(XP_REWARDS.journal, 'journal', 'Wrote a journal entry');
