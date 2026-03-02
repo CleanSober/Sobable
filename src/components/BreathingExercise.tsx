@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { supabase } from "@/integrations/supabase/client";
 
 type BreathingPhase = "inhale" | "hold" | "exhale" | "rest";
 type BreathingTechnique = "478" | "box" | "calm" | "energize";
@@ -78,6 +81,8 @@ const phaseLabels: Record<BreathingPhase, string> = {
 };
 
 export const BreathingExercise = () => {
+  const { user } = useAuth();
+  const { addXP } = useGamification();
   const [selectedTechnique, setSelectedTechnique] = useState<Technique | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
@@ -136,6 +141,15 @@ export const BreathingExercise = () => {
               setCompleted(true);
               if ("vibrate" in navigator) {
                 navigator.vibrate([100, 50, 100]);
+              }
+              // Mark meditation daily goal and award XP
+              if (user) {
+                const today = new Date().toISOString().split("T")[0];
+                supabase.from("daily_goals").upsert(
+                  { user_id: user.id, date: today, meditation_done: true },
+                  { onConflict: "user_id,date" }
+                );
+                addXP(XP_REWARDS.meditation, 'breathing_exercise', 'Completed breathing exercise');
               }
               toast.success("Breathing exercise complete! Great job 🌟");
               return 0;

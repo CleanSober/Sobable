@@ -4,6 +4,8 @@ import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { toast } from "sonner";
 
 const CRAVING_DURATION = 20 * 60; // 20 minutes in seconds
 
@@ -25,6 +27,7 @@ const motivationalMessages = [
 ];
 
 export const CravingTimer = () => {
+  const { addXP } = useGamification();
   const [isActive, setIsActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(CRAVING_DURATION);
   const [currentExercise, setCurrentExercise] = useState(0);
@@ -41,9 +44,11 @@ export const CravingTimer = () => {
       interval = setInterval(() => {
         setTimeRemaining((prev) => prev - 1);
       }, 1000);
-    } else if (timeRemaining === 0) {
+    } else if (timeRemaining === 0 && !cravingSurvived) {
       setCravingSurvived(true);
       setIsActive(false);
+      addXP(XP_REWARDS.trigger_log, 'craving_survived', 'Survived a 20-min craving timer');
+      toast.success("You survived the craving! +XP 💪", { duration: 5000 });
     }
 
     return () => clearInterval(interval);
