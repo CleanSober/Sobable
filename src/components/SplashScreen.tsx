@@ -19,14 +19,18 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
     return () => clearTimeout(timer);
   }, [minDisplayTime]);
 
-  const handleAnimationComplete = () => {
+  // Fallback: if exit animation doesn't fire onExitComplete, force complete after extra delay
+  useEffect(() => {
     if (!isVisible) {
-      onComplete();
+      const fallback = setTimeout(() => {
+        onComplete();
+      }, 800); // exit animation is 500ms, so 800ms is safe
+      return () => clearTimeout(fallback);
     }
-  };
+  }, [isVisible, onComplete]);
 
   return (
-    <AnimatePresence onExitComplete={handleAnimationComplete}>
+    <AnimatePresence onExitComplete={onComplete}>
       {isVisible && (
         <motion.div
           initial={{ opacity: 1 }}
