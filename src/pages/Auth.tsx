@@ -27,7 +27,7 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && mode !== "reset") navigate("/");
+    if (user && mode !== "reset") navigate("/app");
   }, [user, navigate, mode]);
 
   // Detect password recovery event from URL
@@ -98,7 +98,7 @@ const Auth = () => {
           toast.error(error.message);
         } else {
           toast.success("Password updated successfully!");
-          navigate("/");
+          navigate("/app");
         }
       } finally {
         setLoading(false);
@@ -120,7 +120,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Welcome back!");
-          navigate("/");
+          navigate("/app");
         }
       } else {
         const { error } = await signUp(email, password);
@@ -132,7 +132,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Account created! Welcome to your recovery journey.");
-          navigate("/");
+          navigate("/app");
         }
       }
     } finally {

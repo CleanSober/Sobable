@@ -115,9 +115,7 @@ export const useUserProfiles = () => {
     if (uncachedIds.length === 0) return;
 
     const { data } = await supabase
-      .from("profiles")
-      .select("user_id, display_name")
-      .in("user_id", uncachedIds);
+      .rpc("get_public_profiles", { profile_user_ids: uncachedIds });
 
     if (data) {
       setProfiles((prev) => {

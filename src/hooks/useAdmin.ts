@@ -246,13 +246,13 @@ export const useCommunityStats = () => {
     queryKey: ["community-stats"],
     queryFn: async () => {
       const [
-        { count: totalUsers },
+        userCountRes,
         { count: totalPosts },
         { count: totalReports },
         { count: pendingReports },
         { count: activeBans },
       ] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.rpc("admin_count_users"),
         supabase.from("forum_posts").select("*", { count: "exact", head: true }),
         supabase.from("content_reports").select("*", { count: "exact", head: true }),
         supabase.from("content_reports").select("*", { count: "exact", head: true }).eq("status", "pending"),
@@ -260,7 +260,7 @@ export const useCommunityStats = () => {
       ]);
 
       return {
-        totalUsers: totalUsers || 0,
+        totalUsers: (userCountRes.data as number) || 0,
         totalPosts: totalPosts || 0,
         totalReports: totalReports || 0,
         pendingReports: pendingReports || 0,
