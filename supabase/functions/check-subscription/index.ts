@@ -87,6 +87,31 @@ serve(async (req) => {
       logStep("No active subscription found");
     }
 
+    // Sync subscription status back to local subscriptions table
+    const planType = hasActiveSub ? "premium" : "free";
+    const subStatus = hasActiveSub ? (activeSub?.status === "trialing" ? "trialing" : "active") : "active";
+    
+    const { error: upsertError } = await supabaseClient
+      .from("subscriptions")
+      .update({
+        plan_type: planType,
+        status: subStatus,
+        stripe_customer_id: customerId || null,
+        stripe_subscription_id: activeSub?.id || null,
+        current_period_start: activeSub?.current_period_start 
+          ? new Date(activeSub.current_period_start * 1000).toISOString() 
+          : null,
+        current_period_end: subscriptionEnd,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id);
+    
+    if (upsertError) {
+      logStep("Failed to sync subscription to DB", { error: upsertError.message });
+    } else {
+      logStep("Synced subscription status to DB", { planType, subStatus });
+    }
+
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       product_id: productId,
