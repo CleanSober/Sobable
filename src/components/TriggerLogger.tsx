@@ -124,6 +124,8 @@ export const TriggerLogger = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showBreathingOverlay, setShowBreathingOverlay] = useState(false);
 
   // Form state
   const [trigger, setTrigger] = useState("");
@@ -463,18 +465,79 @@ export const TriggerLogger = () => {
                   <span className="text-xs font-medium text-destructive">Quick tools for right now</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+                  <button
+                    onClick={() => setShowBreathingOverlay(true)}
+                    className="text-[10px] px-2.5 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20 active:bg-destructive/25 transition-colors"
+                  >
                     🫁 Breathe 4-7-8
-                  </span>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+                  </button>
+                  <button
+                    onClick={() => {
+                      resetForm();
+                      // Scroll to craving timer (it's above TriggerLogger in the page)
+                      document.querySelector('[data-craving-timer]')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="text-[10px] px-2.5 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20 active:bg-destructive/25 transition-colors"
+                  >
                     ⏱️ Start timer
-                  </span>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+                  </button>
+                  <button
+                    onClick={() => {
+                      const phone = localStorage.getItem('cleanSober_userData');
+                      try {
+                        const data = phone ? JSON.parse(phone) : null;
+                        const emergencyNum = data?.emergencyContact || data?.sponsorPhone;
+                        if (emergencyNum) {
+                          window.open(`tel:${emergencyNum}`, '_self');
+                        } else {
+                          toast.info("Add an emergency contact in your profile first");
+                        }
+                      } catch {
+                        toast.info("Add an emergency contact in your profile first");
+                      }
+                    }}
+                    className="text-[10px] px-2.5 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20 active:bg-destructive/25 transition-colors"
+                  >
                     📞 Call someone
-                  </span>
+                  </button>
                 </div>
               </motion.div>
             )}
+
+            {/* Quick breathing overlay */}
+            <AnimatePresence>
+              {showBreathingOverlay && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm p-4"
+                >
+                  <div className="w-full max-w-sm space-y-6 text-center">
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.3, 1.3, 1],
+                      }}
+                      transition={{
+                        duration: 19,
+                        repeat: Infinity,
+                        times: [0, 0.21, 0.58, 1],
+                      }}
+                      className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center border-2 border-primary/40"
+                    >
+                      <span className="text-4xl">🫁</span>
+                    </motion.div>
+                    <div>
+                      <p className="text-lg font-semibold text-foreground">4-7-8 Breathing</p>
+                      <p className="text-sm text-muted-foreground mt-1">Inhale 4s → Hold 7s → Exhale 8s</p>
+                    </div>
+                    <Button variant="outline" onClick={() => setShowBreathingOverlay(false)} className="text-sm">
+                      <X className="w-4 h-4 mr-1.5" /> Close
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         );
 
@@ -859,12 +922,30 @@ export const TriggerLogger = () => {
                             {entry.notes && (
                               <p className="text-[10px] text-muted-foreground">{entry.notes}</p>
                             )}
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }}
-                              className="text-[10px] text-destructive/60 hover:text-destructive transition-colors"
-                            >
-                              Delete entry
-                            </button>
+                            {deleteConfirm === entry.id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-destructive">Delete this entry?</span>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); setDeleteConfirm(null); }}
+                                  className="text-[10px] font-semibold text-destructive px-2 py-0.5 rounded bg-destructive/10"
+                                >
+                                  Yes, delete
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setDeleteConfirm(null); }}
+                                  className="text-[10px] text-muted-foreground px-2 py-0.5 rounded bg-secondary/50"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setDeleteConfirm(entry.id); }}
+                                className="text-[10px] text-destructive/60 hover:text-destructive transition-colors"
+                              >
+                                Delete entry
+                              </button>
+                            )}
                           </div>
                         </motion.div>
                       )}

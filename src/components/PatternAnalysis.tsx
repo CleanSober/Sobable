@@ -88,10 +88,8 @@ export const PatternAnalysis = () => {
 
   const hasData = analysis.totalEntries > 0;
 
-  // Premium gate handled by PremiumLockOverlay wrapper
-  if (!premiumLoading && !isPremium) {
-    return null;
-  }
+  // Let the parent PremiumLockOverlay handle premium gating — render content so overlay works
+  // (returning null here would prevent the overlay from showing)
 
   if (loading || premiumLoading) {
     return (
