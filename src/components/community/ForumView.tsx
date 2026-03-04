@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import { toast } from "sonner";
 import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent, createMentionNotifications } from "@/hooks/useCommunity";
 import { useCommunityBot } from "@/hooks/useCommunityBot";
@@ -32,6 +33,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const { user } = useAuth();
   const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
   const { triggerBotReply } = useCommunityBot();
+  const { checkRateLimit, recordAction } = useRateLimit("forum_post");
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +91,10 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       return;
     }
 
+    // Rate limit check
+    const allowed = await checkRateLimit(user.id);
+    if (!allowed) return;
+
     setSubmitting(true);
     
     try {
@@ -100,6 +106,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       }).select().single();
 
       if (error) throw error;
+      recordAction();
       
       // Trigger bot auto-reply after random delay (1-5 min)
       if (data) {
