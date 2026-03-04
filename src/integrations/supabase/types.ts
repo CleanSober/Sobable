@@ -280,6 +280,36 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_submissions: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          message: string | null
+          platform: string | null
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          platform?: string | null
+          rating: number
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          platform?: string | null
+          rating?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       forum_posts: {
         Row: {
           content: string
