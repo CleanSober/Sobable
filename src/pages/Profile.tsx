@@ -2,12 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  User, Calendar, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle
+  User, Calendar as CalendarIcon, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -406,17 +410,43 @@ const Profile = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sobrietyDate" className="flex items-center gap-2 text-xs">
-                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                <Label className="flex items-center gap-2 text-xs">
+                  <CalendarIcon className="w-3.5 h-3.5 text-primary" />
                   Sobriety Start Date
                 </Label>
-                <Input
-                  id="sobrietyDate"
-                  type="date"
-                  value={sobrietyDate}
-                  onChange={(e) => setSobrietyDate(e.target.value)}
-                  max={new Date().toISOString().split("T")[0]}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-10",
+                        !sobrietyDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {sobrietyDate
+                        ? format(new Date(sobrietyDate + "T00:00:00"), "PPP")
+                        : "Pick your start date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={sobrietyDate ? new Date(sobrietyDate + "T00:00:00") : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const yyyy = date.getFullYear();
+                          const mm = String(date.getMonth() + 1).padStart(2, "0");
+                          const dd = String(date.getDate()).padStart(2, "0");
+                          setSobrietyDate(`${yyyy}-${mm}-${dd}`);
+                        }
+                      }}
+                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
