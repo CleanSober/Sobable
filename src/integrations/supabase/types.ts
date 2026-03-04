@@ -1465,6 +1465,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_forum_post_likes: {
+        Args: { p_increment?: number; p_post_id: string }
+        Returns: undefined
+      }
+      increment_forum_reply_count: {
+        Args: { p_increment?: number; p_post_id: string }
+        Returns: undefined
+      }
       is_admin: { Args: { check_user_id: string }; Returns: boolean }
       is_premium_user: { Args: { check_user_id: string }; Returns: boolean }
       is_user_blocked: {
