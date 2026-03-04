@@ -25,7 +25,7 @@ export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
   useEffect(() => {
     if (!user) return;
     fetchMoodEntries();
-  }, [user]);
+  }, [user, currentMonth]);
 
   const fetchMoodEntries = async () => {
     if (!user) return;

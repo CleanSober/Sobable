@@ -60,6 +60,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
   const [currentStats, setCurrentStats] = useState<PeriodStats>(emptyStats);
   const [prevStats, setPrevStats] = useState<PeriodStats>(emptyStats);
   const [weekActivity, setWeekActivity] = useState<DayActivity[]>([]);
+  const [streakData, setStreakData] = useState<{ current: number; longest: number; type: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const yearlyProjection = dailySpending * 365;
@@ -102,7 +103,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
     const moodValues = moods.map(m => m.mood);
     const cravingValues = moods.map(m => m.craving_level);
     const sleepValues = sleeps.map(s => s.hours_slept);
-    const completedGoals = goals.filter(g => g.meditation_done && g.mood_logged && g.journal_written).length;
+    const completedGoals = goals.filter(g => g.meditation_done && g.mood_logged && g.journal_written && g.trigger_logged).length;
 
     return {
       moodAvg: moodValues.length > 0 ? moodValues.reduce((a, b) => a + b, 0) / moodValues.length : 0,
@@ -122,25 +123,35 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
   const fetchWeekActivity = async () => {
     if (!user) return;
     const now = new Date();
-    const days: DayActivity[] = [];
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - 6);
+    const startStr = startDate.toISOString().split("T")[0];
+    const endStr = now.toISOString().split("T")[0];
 
+    // Batch fetch all 7 days in 4 queries instead of 28
+    const [moodRes, journalRes, sleepRes, goalRes] = await Promise.all([
+      supabase.from("mood_entries").select("date").eq("user_id", user.id).gte("date", startStr).lte("date", endStr),
+      supabase.from("journal_entries").select("created_at").eq("user_id", user.id).gte("created_at", startStr + "T00:00:00").lte("created_at", endStr + "T23:59:59"),
+      supabase.from("sleep_entries").select("date").eq("user_id", user.id).gte("date", startStr).lte("date", endStr),
+      supabase.from("daily_goals").select("date, mood_logged, journal_written, meditation_done, trigger_logged").eq("user_id", user.id).gte("date", startStr).lte("date", endStr),
+    ]);
+
+    const moodDates = new Set((moodRes.data || []).map(m => m.date));
+    const journalDates = new Set((journalRes.data || []).map(j => j.created_at.split("T")[0]));
+    const sleepDates = new Set((sleepRes.data || []).map(s => s.date));
+    const goalsByDate = new Map((goalRes.data || []).map(g => [g.date, g]));
+
+    const days: DayActivity[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
       const dateStr = d.toISOString().split("T")[0];
 
-      const [moodRes, journalRes, sleepRes, goalRes] = await Promise.all([
-        supabase.from("mood_entries").select("id").eq("user_id", user.id).eq("date", dateStr),
-        supabase.from("journal_entries").select("id").eq("user_id", user.id).gte("created_at", dateStr + "T00:00:00").lte("created_at", dateStr + "T23:59:59"),
-        supabase.from("sleep_entries").select("id").eq("user_id", user.id).eq("date", dateStr),
-        supabase.from("daily_goals").select("mood_logged, journal_written, meditation_done, trigger_logged").eq("user_id", user.id).eq("date", dateStr),
-      ]);
-
       const activities: string[] = [];
-      if ((moodRes.data?.length || 0) > 0) activities.push("mood");
-      if ((journalRes.data?.length || 0) > 0) activities.push("journal");
-      if ((sleepRes.data?.length || 0) > 0) activities.push("sleep");
-      const goal = goalRes.data?.[0];
+      if (moodDates.has(dateStr)) activities.push("mood");
+      if (journalDates.has(dateStr)) activities.push("journal");
+      if (sleepDates.has(dateStr)) activities.push("sleep");
+      const goal = goalsByDate.get(dateStr);
       if (goal?.meditation_done) activities.push("meditation");
 
       const score = Math.min(100, activities.length * 25);
@@ -159,13 +170,15 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
       const { start, end } = getDateRange(currentOffset);
       const { start: prevStart, end: prevEnd } = getDateRange(currentOffset + 1);
 
-      const [current, prev] = await Promise.all([
+      const [current, prev, streakRes] = await Promise.all([
         fetchPeriodStats(start, end),
         fetchPeriodStats(prevStart, prevEnd),
+        supabase.from("user_streaks").select("current_streak, longest_streak, streak_type").eq("user_id", user.id),
       ]);
 
       setCurrentStats(current);
       setPrevStats(prev);
+      setStreakData((streakRes.data || []).map(s => ({ current: s.current_streak, longest: s.longest_streak, type: s.streak_type })));
       await fetchWeekActivity();
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -370,6 +383,31 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
           })}
         </div>
       </motion.div>
+
+      {/* Streak Summary */}
+      {streakData.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="card-enhanced p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Flame className="w-3.5 h-3.5 text-accent" />
+            <span className="text-xs font-semibold text-foreground">Active Streaks</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {streakData.map((s) => {
+              const label = s.type === "check_in" ? "Check-In" : s.type === "journal" ? "Journal" : s.type === "meditation" ? "Meditation" : s.type;
+              return (
+                <div key={s.type} className="p-2 rounded-xl bg-secondary/50 border border-border/30">
+                  <p className="text-[9px] text-muted-foreground mb-0.5">{label}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-bold text-foreground">{s.current}</span>
+                    <span className="text-[9px] text-muted-foreground">days</span>
+                  </div>
+                  <p className="text-[8px] text-muted-foreground/70">Best: {s.longest}</p>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats Grid with Trends */}
       <AnimatePresence mode="wait">
