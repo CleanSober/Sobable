@@ -299,7 +299,37 @@ serve(async (req) => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
+
+    // Require admin auth or service key to prevent unauthorized mass emailing
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !userData.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Check if user is admin
+      const { data: isAdmin } = await supabase.rpc("is_admin", { check_user_id: userData.user.id });
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Admin access required" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      // Allow calls without auth only from scheduled invocations (no origin header)
+      const origin = req.headers.get("origin");
+      if (origin) {
+        return new Response(JSON.stringify({ error: "Authorization required" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Get app URL from environment or use default
     const appUrl = Deno.env.get("APP_URL") || "https://id-preview--94e498b2-e0e1-433a-9333-abea9f12a84c.lovable.app";
 
