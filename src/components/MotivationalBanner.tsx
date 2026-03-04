@@ -17,7 +17,12 @@ const motivationalMessages = [
 
 export const MotivationalBanner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(() => {
+    const saved = localStorage.getItem('sobable_liked_quotes');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const isLiked = liked[currentIndex] === true;
 
   useEffect(() => {
     const today = new Date().toDateString();
@@ -27,7 +32,12 @@ export const MotivationalBanner = () => {
 
   const nextMessage = () => {
     setCurrentIndex((prev) => (prev + 1) % motivationalMessages.length);
-    setLiked(false);
+  };
+
+  const toggleLike = () => {
+    const updated = { ...liked, [currentIndex]: !liked[currentIndex] };
+    setLiked(updated);
+    localStorage.setItem('sobable_liked_quotes', JSON.stringify(updated));
   };
 
   const message = motivationalMessages[currentIndex];
@@ -73,12 +83,12 @@ export const MotivationalBanner = () => {
         <div className="flex items-center gap-1">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setLiked(!liked)}
+            onClick={toggleLike}
             className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
           >
             <Heart 
               className={`w-4 h-4 transition-all duration-300 ${
-                liked 
+                isLiked 
                   ? "fill-destructive text-destructive scale-110" 
                   : "text-muted-foreground"
               }`} 
