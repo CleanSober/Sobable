@@ -1,6 +1,7 @@
-import { Bell, BellOff, Check, Sparkles, Calendar, Flame, AlertTriangle, FileText, Brain, BookOpen } from "lucide-react";
+import { Bell, BellOff, Check, Sparkles, Calendar, Flame, AlertTriangle, FileText, Brain, BookOpen, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
@@ -9,6 +10,12 @@ import { toast } from "sonner";
 interface NotificationSettingsProps {
   sobrietyStartDate?: string;
 }
+
+const formatHour = (h: number) => {
+  if (h === 0) return "12 AM";
+  if (h === 12) return "12 PM";
+  return h > 12 ? `${h - 12} PM` : `${h} AM`;
+};
 
 const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) => {
   const { permission, settings, updateSettings, isSupported } = useNotifications(sobrietyStartDate);
@@ -164,6 +171,17 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       onChange: (checked: boolean) => updateSettings({ milestones: checked }),
       disabled: !smartSettings.enabled,
     },
+    {
+      key: "quietHours",
+      icon: Moon,
+      color: "bg-violet-500/10",
+      iconColor: "text-violet-500",
+      label: "Quiet Hours",
+      desc: `${formatHour(smartSettings.quietHoursStart)} – ${formatHour(smartSettings.quietHoursEnd)}`,
+      checked: smartSettings.quietHoursEnabled,
+      onChange: (checked: boolean) => updateSmartSettings({ quietHoursEnabled: checked }),
+      disabled: !smartSettings.enabled,
+    },
   ];
 
   return (
@@ -199,6 +217,39 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
             </div>
           );
         })}
+
+        {/* Quiet Hours Time Selectors */}
+        {smartSettings.enabled && smartSettings.quietHoursEnabled && (
+          <div className="flex items-center gap-2 pt-2 pl-12">
+            <Select
+              value={String(smartSettings.quietHoursStart)}
+              onValueChange={(v) => updateSmartSettings({ quietHoursStart: Number(v) })}
+            >
+              <SelectTrigger className="w-24 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => (
+                  <SelectItem key={i} value={String(i)}>{formatHour(i)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">to</span>
+            <Select
+              value={String(smartSettings.quietHoursEnd)}
+              onValueChange={(v) => updateSmartSettings({ quietHoursEnd: Number(v) })}
+            >
+              <SelectTrigger className="w-24 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => (
+                  <SelectItem key={i} value={String(i)}>{formatHour(i)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Status Indicators */}
         {smartSettings.enabled && (
