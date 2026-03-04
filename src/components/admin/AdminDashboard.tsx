@@ -2,11 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Flag, Users, Activity, Ban, FileText } from "lucide-react";
+import { Shield, Flag, Users, Activity, Ban, FileText, MessageSquare } from "lucide-react";
 import { useAdminRole, useCommunityStats } from "@/hooks/useAdmin";
 import { ReportsPanel } from "./ReportsPanel";
 import { BansPanel } from "./BansPanel";
 import { ModerationLogsPanel } from "./ModerationLogsPanel";
+import { FeedbackPanel } from "./FeedbackPanel";
 import { Loader2 } from "lucide-react";
 
 export const AdminDashboard = () => {
@@ -91,7 +92,7 @@ export const AdminDashboard = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Flag className="w-4 h-4" />
             Reports
@@ -99,6 +100,10 @@ export const AdminDashboard = () => {
           <TabsTrigger value="bans" className="flex items-center gap-2">
             <Ban className="w-4 h-4" />
             Bans
+          </TabsTrigger>
+          <TabsTrigger value="feedback" className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Feedback
           </TabsTrigger>
           <TabsTrigger value="logs" className="flex items-center gap-2">
             <Activity className="w-4 h-4" />
@@ -112,6 +117,10 @@ export const AdminDashboard = () => {
 
         <TabsContent value="bans" className="mt-6">
           <BansPanel isAdmin={role.isAdmin} />
+        </TabsContent>
+
+        <TabsContent value="feedback" className="mt-6">
+          <FeedbackPanel />
         </TabsContent>
 
         <TabsContent value="logs" className="mt-6">
