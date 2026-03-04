@@ -1420,6 +1420,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_count_users: { Args: never; Returns: number }
       calculate_level_from_xp: { Args: { xp_amount: number }; Returns: number }
       can_use_streak_freeze: {
         Args: { check_streak_type?: string; check_user_id: string }
@@ -1430,8 +1431,26 @@ export type Database = {
         Args: { p_action_type: string; p_minutes?: number; p_user_id: string }
         Returns: number
       }
+      find_partner_candidates: {
+        Args: { p_exclude_ids: string[]; p_limit?: number; p_user_id: string }
+        Returns: {
+          display_name: string
+          sobriety_start_date: string
+          substances: string[]
+          user_id: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          sobriety_start_date: string
+          user_id: string
+        }[]
+      }
+      get_public_profiles: {
+        Args: { profile_user_ids: string[] }
         Returns: {
           avatar_url: string
           display_name: string

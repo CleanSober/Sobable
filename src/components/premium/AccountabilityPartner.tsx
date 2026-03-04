@@ -55,7 +55,7 @@ export const AccountabilityPartner = () => {
     if (data) {
       const enriched = await Promise.all(data.map(async (m) => {
         const partnerId = m.user_id === user.id ? m.partner_id : m.user_id;
-        const { data: profile } = await supabase.from("profiles").select("display_name, sobriety_start_date").eq("user_id", partnerId).maybeSingle();
+        const { data: profile } = await supabase.rpc("get_public_profile", { profile_user_id: partnerId }).maybeSingle();
         const days = profile?.sobriety_start_date ? Math.floor((Date.now() - new Date(profile.sobriety_start_date).getTime()) / 86400000) : 0;
         return { ...m, partner_name: profile?.display_name || "Anonymous", partner_days: days };
       }));
@@ -69,7 +69,7 @@ export const AccountabilityPartner = () => {
     setSearching(true);
 
     try {
-      // Find users with similar sobriety stage
+      // Find users with similar sobriety stage - use own profile (RLS allows)
       const { data: myProfile } = await supabase.from("profiles").select("sobriety_start_date, substances").eq("user_id", user.id).maybeSingle();
       const myDays = myProfile?.sobriety_start_date ? Math.floor((Date.now() - new Date(myProfile.sobriety_start_date).getTime()) / 86400000) : 0;
 
@@ -78,11 +78,11 @@ export const AccountabilityPartner = () => {
       existingIds.push(user.id);
 
       const { data: candidates } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, sobriety_start_date, substances")
-        .not("user_id", "in", `(${existingIds.join(",")})`)
-        .not("display_name", "is", null)
-        .limit(20);
+        .rpc("find_partner_candidates", { 
+          p_user_id: user.id, 
+          p_exclude_ids: existingIds,
+          p_limit: 20 
+        });
 
       if (!candidates || candidates.length === 0) {
         toast.info("No matches available yet. Check back soon!");
