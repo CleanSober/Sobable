@@ -325,7 +325,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
       .limit(1)
       .maybeSingle();
 
-    if (recentMood && recentMood.craving_level >= 8) {
+    if (recentMood && recentMood.craving_level >= 3) {
       // Only alert if entry was within last 30 min
       const entryTime = new Date(recentMood.created_at);
       const minutesAgo = (now.getTime() - entryTime.getTime()) / 60000;
