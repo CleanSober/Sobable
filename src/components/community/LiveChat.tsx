@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, MessageCircle, Users, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -138,6 +139,8 @@ export const LiveChat = () => {
     setError(null);
   }, []);
 
+  const { checkRateLimit, recordAction } = useRateLimit("chat_message");
+
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
     
@@ -147,6 +150,10 @@ export const LiveChat = () => {
       toast.error(`Message must be between 1 and ${MAX_MESSAGE_LENGTH} characters`);
       return;
     }
+
+    // Rate limit check
+    const allowed = await checkRateLimit(user.id);
+    if (!allowed) return;
 
     setSending(true);
     stopTyping(currentUserDisplayName);
@@ -163,6 +170,7 @@ export const LiveChat = () => {
         .single();
 
       if (error) throw error;
+      recordAction();
       
       // Create mention notifications
       await createMentionNotifications(
