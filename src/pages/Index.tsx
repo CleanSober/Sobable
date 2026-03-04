@@ -19,6 +19,9 @@ import { UserProfile } from "@/components/UserProfile";
 import { AchievementBadges } from "@/components/AchievementBadges";
 import { CravingTimer } from "@/components/CravingTimer";
 import { CalendarHeatmap } from "@/components/CalendarHeatmap";
+import { CheckInProgress } from "@/components/CheckInProgress";
+import { HydrationTracker } from "@/components/HydrationTracker";
+import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { RelapsePreventionPlan } from "@/components/RelapsePreventionPlan";
 import { SleepTracker } from "@/components/SleepTracker";
 import { QuickActions } from "@/components/QuickActions";
@@ -249,13 +252,15 @@ const Index = () => {
               <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
               <p className="text-xs text-muted-foreground">How are you feeling today?</p>
             </motion.div>
+            <CheckInProgress />
+            <DailyAffirmation />
             <MoodCheckIn />
             <SleepTracker />
+            <HydrationTracker />
             <Journal daysSober={daysSober} />
             <BreathingExercise />
             <GuidedMeditations />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
-            
           </div>
         );
 
