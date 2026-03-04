@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from "react";
-import { differenceInDays, differenceInHours, isToday, parseISO, startOfDay } from "date-fns";
+import { differenceInDays, differenceInHours, isToday, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,9 +10,13 @@ interface SmartNotificationSettings {
   missedMeditation: boolean;
   streakAtRisk: boolean;
   weeklyReport: boolean;
+  cravingSpike: boolean;
   lastMissedCheckInReminder: string | null;
+  lastMissedJournalReminder: string | null;
+  lastMissedMeditationReminder: string | null;
   lastStreakRiskReminder: string | null;
   lastWeeklyReportReminder: string | null;
+  lastCravingSpikeReminder: string | null;
 }
 
 interface MissedAction {
@@ -21,6 +25,8 @@ interface MissedAction {
   daysAgo: number;
 }
 
+const STORAGE_KEY = "smart_notification_settings";
+
 const getDefaultSettings = (): SmartNotificationSettings => ({
   enabled: false,
   missedCheckIn: true,
@@ -28,9 +34,13 @@ const getDefaultSettings = (): SmartNotificationSettings => ({
   missedMeditation: true,
   streakAtRisk: true,
   weeklyReport: true,
+  cravingSpike: true,
   lastMissedCheckInReminder: null,
+  lastMissedJournalReminder: null,
+  lastMissedMeditationReminder: null,
   lastStreakRiskReminder: null,
   lastWeeklyReportReminder: null,
+  lastCravingSpikeReminder: null,
 });
 
 export const useSmartNotifications = (sobrietyStartDate?: string) => {
@@ -44,11 +54,29 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if ("Notification" in window) {
       setPermission(Notification.permission);
     }
-    const saved = localStorage.getItem("smart_notification_settings");
+    const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      setSettings(JSON.parse(saved));
+      try {
+        const parsed = JSON.parse(saved);
+        setSettings({ ...getDefaultSettings(), ...parsed });
+      } catch {
+        setSettings(getDefaultSettings());
+      }
     }
   }, []);
+
+  const requestPermission = useCallback(async () => {
+    if (!("Notification" in window)) return false;
+    const result = await Notification.requestPermission();
+    setPermission(result);
+    if (result === "granted") {
+      const newSettings = { ...settings, enabled: true };
+      setSettings(newSettings);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+      return true;
+    }
+    return false;
+  }, [settings]);
 
   // Check for missed actions
   const checkMissedActions = useCallback(async () => {
@@ -90,19 +118,19 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
 
     if (!lastJournal || !isToday(parseISO(lastJournal.created_at))) {
       const daysAgo = lastJournal ? differenceInDays(new Date(), parseISO(lastJournal.created_at)) : 999;
-      if (daysAgo >= 2) { // Only flag if 2+ days
+      if (daysAgo >= 2) {
         missed.push({ type: 'journal', lastCompleted: lastJournal?.created_at || null, daysAgo });
       }
     }
 
     // Check meditation status
-    if (todayGoals && !todayGoals.meditation_done) {
+    if (!todayGoals || !todayGoals.meditation_done) {
       missed.push({ type: 'meditation', lastCompleted: null, daysAgo: 0 });
     }
 
     setMissedActions(missed);
 
-    // Check if streak is at risk (last activity was yesterday and nothing done today)
+    // Check if streak is at risk
     const { data: streakData } = await supabase
       .from("user_streaks")
       .select("current_streak, last_activity_date")
@@ -116,15 +144,13 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().split("T")[0];
-        
-        // Streak at risk if last activity was yesterday and it's getting late
         const currentHour = new Date().getHours();
-        if (lastActivity === yesterdayStr || (lastActivity < yesterdayStr)) {
+
+        if (lastActivity <= yesterdayStr) {
           setStreakAtRisk(true);
         } else if (lastActivity === today) {
           setStreakAtRisk(false);
         } else if (currentHour >= 18 && lastActivity !== today) {
-          // Evening warning if haven't checked in today
           setStreakAtRisk(true);
         } else {
           setStreakAtRisk(false);
@@ -136,41 +162,23 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
   useEffect(() => {
     if (user) {
       checkMissedActions();
-      const interval = setInterval(checkMissedActions, 5 * 60 * 1000); // Check every 5 minutes
+      const interval = setInterval(checkMissedActions, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }
   }, [user, checkMissedActions]);
 
-  const requestPermission = useCallback(async () => {
-    if (!("Notification" in window)) {
-      return false;
-    }
-
-    const result = await Notification.requestPermission();
-    setPermission(result);
-    
-    if (result === "granted") {
-      const newSettings = { ...settings, enabled: true };
-      setSettings(newSettings);
-      localStorage.setItem("smart_notification_settings", JSON.stringify(newSettings));
-      return true;
-    }
-    return false;
-  }, [settings]);
-
   const updateSettings = useCallback((updates: Partial<SmartNotificationSettings>) => {
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
-    localStorage.setItem("smart_notification_settings", JSON.stringify(newSettings));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
   }, [settings]);
 
   const sendNotification = useCallback((title: string, options?: NotificationOptions) => {
     if (permission !== "granted" || !settings.enabled) return;
-
     try {
       new Notification(title, {
-        icon: "/favicon.ico",
-        badge: "/favicon.ico",
+        icon: "/icons/icon-192x192.png",
+        badge: "/icons/icon-96x96.png",
         ...options,
       });
     } catch (error) {
@@ -178,24 +186,19 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     }
   }, [permission, settings.enabled]);
 
-  // Smart notification for missed check-in (only after 2PM if not checked in)
+  // Missed check-in reminder (after 2PM)
   const checkMissedCheckInReminder = useCallback(() => {
     if (!settings.enabled || !settings.missedCheckIn) return;
     if (missedActions.every(m => m.type !== 'checkIn')) return;
 
     const now = new Date();
     const lastReminder = settings.lastMissedCheckInReminder;
-    
-    if (lastReminder) {
-      const hoursSinceReminder = differenceInHours(now, new Date(lastReminder));
-      if (hoursSinceReminder < 6) return; // Don't remind more than every 6 hours
-    }
+    if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 6) return;
 
     const currentHour = now.getHours();
-    // Send reminder after 2PM if not checked in
     if (currentHour >= 14 && currentHour < 20) {
       const checkIn = missedActions.find(m => m.type === 'checkIn');
-      const message = checkIn && checkIn.daysAgo > 1 
+      const message = checkIn && checkIn.daysAgo > 1
         ? `You haven't checked in for ${checkIn.daysAgo} days. How are you feeling?`
         : "Take a quick moment to log how you're feeling today.";
 
@@ -207,20 +210,55 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     }
   }, [settings, missedActions, sendNotification, updateSettings]);
 
+  // Missed journal reminder (after 4PM, only if 2+ days missed)
+  const checkMissedJournalReminder = useCallback(() => {
+    if (!settings.enabled || !settings.missedJournal) return;
+
+    const journalMissed = missedActions.find(m => m.type === 'journal');
+    if (!journalMissed || journalMissed.daysAgo < 2) return;
+
+    const now = new Date();
+    const lastReminder = settings.lastMissedJournalReminder;
+    if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 24) return;
+
+    const currentHour = now.getHours();
+    if (currentHour >= 16 && currentHour < 21) {
+      sendNotification("📝 Your journal misses you", {
+        body: `It's been ${journalMissed.daysAgo} days since your last entry. Writing helps process emotions.`,
+        tag: "missed-journal",
+      });
+      updateSettings({ lastMissedJournalReminder: now.toISOString() });
+    }
+  }, [settings, missedActions, sendNotification, updateSettings]);
+
+  // Missed meditation reminder (after 6PM)
+  const checkMissedMeditationReminder = useCallback(() => {
+    if (!settings.enabled || !settings.missedMeditation) return;
+    if (missedActions.every(m => m.type !== 'meditation')) return;
+
+    const now = new Date();
+    const lastReminder = settings.lastMissedMeditationReminder;
+    if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 12) return;
+
+    const currentHour = now.getHours();
+    if (currentHour >= 18 && currentHour < 22) {
+      sendNotification("🧘 Time for some peace", {
+        body: "A short breathing exercise can lower stress and cravings. Try 5 minutes tonight.",
+        tag: "missed-meditation",
+      });
+      updateSettings({ lastMissedMeditationReminder: now.toISOString() });
+    }
+  }, [settings, missedActions, sendNotification, updateSettings]);
+
   // Streak at risk notification
   const checkStreakRiskReminder = useCallback(() => {
     if (!settings.enabled || !settings.streakAtRisk || !streakAtRisk) return;
 
     const now = new Date();
     const lastReminder = settings.lastStreakRiskReminder;
-    
-    if (lastReminder) {
-      const hoursSinceReminder = differenceInHours(now, new Date(lastReminder));
-      if (hoursSinceReminder < 4) return;
-    }
+    if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 4) return;
 
     const currentHour = now.getHours();
-    // Alert in evening if streak at risk
     if (currentHour >= 18 && currentHour < 22) {
       sendNotification("🔥 Streak at risk!", {
         body: "Complete your daily check-in before midnight to keep your streak alive!",
@@ -237,14 +275,10 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     const now = new Date();
     const dayOfWeek = now.getDay();
     const currentHour = now.getHours();
-    
-    // Sunday between 9-11 AM
+
     if (dayOfWeek === 0 && currentHour >= 9 && currentHour < 11) {
       const lastReminder = settings.lastWeeklyReportReminder;
-      if (lastReminder) {
-        const daysSince = differenceInDays(now, new Date(lastReminder));
-        if (daysSince < 6) return;
-      }
+      if (lastReminder && differenceInDays(now, new Date(lastReminder)) < 6) return;
 
       sendNotification("📊 Your Weekly Report is Ready!", {
         body: "See your progress, insights, and achievements from this week.",
@@ -254,21 +288,57 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     }
   }, [settings, sendNotification, updateSettings]);
 
+  // Craving spike alert — check recent mood entries for high cravings
+  const checkCravingSpikeAlert = useCallback(async () => {
+    if (!settings.enabled || !settings.cravingSpike || !user) return;
+
+    const now = new Date();
+    const lastReminder = settings.lastCravingSpikeReminder;
+    if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 4) return;
+
+    // Check the most recent mood entry from today
+    const today = now.toISOString().split("T")[0];
+    const { data: recentMood } = await supabase
+      .from("mood_entries")
+      .select("craving_level, created_at")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (recentMood && recentMood.craving_level >= 8) {
+      // Only alert if entry was within last 30 min
+      const entryTime = new Date(recentMood.created_at);
+      const minutesAgo = (now.getTime() - entryTime.getTime()) / 60000;
+      if (minutesAgo <= 30) {
+        sendNotification("💪 High craving detected", {
+          body: "Your craving level is high. Try the breathing exercise or craving timer now — you've got this!",
+          tag: "craving-spike",
+        });
+        updateSettings({ lastCravingSpikeReminder: now.toISOString() });
+      }
+    }
+  }, [settings, user, sendNotification, updateSettings]);
+
   // Run notification checks
   useEffect(() => {
     if (!settings.enabled) return;
 
     const checkAllNotifications = () => {
       checkMissedCheckInReminder();
+      checkMissedJournalReminder();
+      checkMissedMeditationReminder();
       checkStreakRiskReminder();
       checkWeeklyReportReminder();
+      checkCravingSpikeAlert();
     };
 
     checkAllNotifications();
-    const interval = setInterval(checkAllNotifications, 30 * 60 * 1000); // Every 30 min
+    const interval = setInterval(checkAllNotifications, 15 * 60 * 1000); // Every 15 min
 
     return () => clearInterval(interval);
-  }, [settings.enabled, checkMissedCheckInReminder, checkStreakRiskReminder, checkWeeklyReportReminder]);
+  }, [settings.enabled, checkMissedCheckInReminder, checkMissedJournalReminder, checkMissedMeditationReminder, checkStreakRiskReminder, checkWeeklyReportReminder, checkCravingSpikeAlert]);
 
   return {
     permission,
