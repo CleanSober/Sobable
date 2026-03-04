@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Send, MessageSquare, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,11 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { getPlatform } from "@/hooks/useCapacitor";
 import { Capacitor } from "@capacitor/core";
 
 const APP_STORE_URL = "https://apps.apple.com/app/sobable/id0000000000"; // Replace with real App Store ID
-const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=app.lovable.94e498b2e0e1433a9333abea9f12a84c";
+const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=app.lovable.94e498b2e0e1433a9333abea9f12a84c";
 
 const FEEDBACK_CATEGORIES = [
   { value: "bug", label: "Bug Report" },
@@ -28,25 +28,66 @@ const FEEDBACK_CATEGORIES = [
   { value: "other", label: "Other" },
 ];
 
+const COOLDOWN_KEY = "feedback_last_submitted";
+const COOLDOWN_HOURS = 24;
+
+function getDetectedPlatform(): string {
+  if (Capacitor.isNativePlatform()) return Capacitor.getPlatform();
+  const ua = navigator.userAgent.toLowerCase();
+  if (/iphone|ipad|ipod/.test(ua)) return "ios";
+  if (/android/.test(ua)) return "android";
+  return "web";
+}
+
+function getStoreUrl(platform: string) {
+  return platform === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
+}
+
+function getStoreName(platform: string) {
+  return platform === "ios" ? "App Store" : "Google Play Store";
+}
+
+function isInCooldown(): boolean {
+  const last = localStorage.getItem(COOLDOWN_KEY);
+  if (!last) return false;
+  const elapsed = Date.now() - parseInt(last, 10);
+  return elapsed < COOLDOWN_HOURS * 60 * 60 * 1000;
+}
+
+function setCooldown() {
+  localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
+}
+
+async function insertFeedback(data: {
+  user_id: string;
+  rating: number;
+  platform: string;
+  category: string | null;
+  message: string | null;
+}) {
+  // Use the Supabase client with type assertion for the new table
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("feedback_submissions" as any) as any).insert(data);
+  return { error };
+}
+
 export const FeedbackRating = () => {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [step, setStep] = useState<"rate" | "form" | "store" | "done">("rate");
+  const [step, setStep] = useState<"rate" | "form" | "store" | "done" | "cooldown">("rate");
   const [category, setCategory] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const detectedPlatform = Capacitor.isNativePlatform() ? getPlatform() : "web";
+  const platform = getDetectedPlatform();
 
-  const getStoreUrl = () => {
-    if (detectedPlatform === "ios") return APP_STORE_URL;
-    if (detectedPlatform === "android") return PLAY_STORE_URL;
-    // On web, try to detect from user agent
-    const ua = navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(ua)) return APP_STORE_URL;
-    return PLAY_STORE_URL;
-  };
+  // Check cooldown on mount
+  useEffect(() => {
+    if (isInCooldown()) {
+      setStep("cooldown");
+    }
+  }, []);
 
   const handleRatingSelect = (star: number) => {
     setRating(star);
@@ -57,21 +98,19 @@ export const FeedbackRating = () => {
     }
   };
 
-  const handleOpenStore = () => {
-    window.open(getStoreUrl(), "_blank");
-    // Also save the 5-star rating
+  const handleOpenStore = async () => {
+    window.open(getStoreUrl(platform), "_blank");
+
     if (user) {
-      supabase
-        .from("feedback_submissions" as never)
-        .insert({
-          user_id: user.id,
-          rating: 5,
-          platform: detectedPlatform,
-          category: "app_store_review",
-          message: "Redirected to app store",
-        } as never)
-        .then(() => {});
+      await insertFeedback({
+        user_id: user.id,
+        rating: 5,
+        platform,
+        category: "app_store_review",
+        message: "Redirected to app store",
+      });
     }
+    setCooldown();
     setStep("done");
     toast.success("Thank you for your support! 🎉");
   };
@@ -85,25 +124,28 @@ export const FeedbackRating = () => {
       toast.error("Please write some feedback");
       return;
     }
-
-    setSubmitting(true);
-    const { error } = await supabase
-      .from("feedback_submissions" as never)
-      .insert({
-        user_id: user.id,
-        rating,
-        platform: detectedPlatform,
-        category: category || null,
-        message: message.trim().slice(0, 2000),
-      } as never);
-
-    setSubmitting(false);
-
-    if (error) {
-      toast.error("Failed to submit feedback");
+    if (message.trim().length < 10) {
+      toast.error("Please provide at least 10 characters of feedback");
       return;
     }
 
+    setSubmitting(true);
+    const { error } = await insertFeedback({
+      user_id: user.id,
+      rating,
+      platform,
+      category: category || null,
+      message: message.trim().slice(0, 2000),
+    });
+    setSubmitting(false);
+
+    if (error) {
+      console.error("Feedback submission error:", error);
+      toast.error("Failed to submit feedback. Please try again.");
+      return;
+    }
+
+    setCooldown();
     setStep("done");
     toast.success("Thank you for your feedback! We'll use it to improve.");
   };
@@ -130,6 +172,23 @@ export const FeedbackRating = () => {
       </p>
 
       <AnimatePresence mode="wait">
+        {/* Cooldown state */}
+        {step === "cooldown" && (
+          <motion.div
+            key="cooldown"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center gap-2 py-2 text-center"
+          >
+            <div className="text-2xl">✅</div>
+            <p className="text-sm font-medium text-foreground">Feedback received!</p>
+            <p className="text-xs text-muted-foreground">
+              You can submit again in 24 hours
+            </p>
+          </motion.div>
+        )}
+
         {/* Step 1: Star Rating */}
         {step === "rate" && (
           <motion.div
@@ -148,6 +207,7 @@ export const FeedbackRating = () => {
                   onMouseEnter={() => setHoveredStar(star)}
                   onMouseLeave={() => setHoveredStar(0)}
                   className="transition-transform hover:scale-110 active:scale-95"
+                  aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                 >
                   <Star
                     className={`w-8 h-8 transition-colors ${
@@ -159,6 +219,7 @@ export const FeedbackRating = () => {
                 </button>
               ))}
             </div>
+            <p className="text-[10px] text-muted-foreground">Tap a star to rate</p>
           </motion.div>
         )}
 
@@ -180,23 +241,17 @@ export const FeedbackRating = () => {
               We're so glad you love Sobable! 🎉
             </p>
             <p className="text-xs text-muted-foreground">
-              Would you mind leaving a review on the{" "}
-              {detectedPlatform === "ios" || /iphone|ipad/i.test(navigator.userAgent)
-                ? "App Store"
-                : "Google Play Store"}
-              ? It really helps others find us!
+              Would you mind leaving a review on the {getStoreName(platform)}?
+              It really helps others find us!
             </p>
             <div className="flex gap-2 w-full">
-              <Button
-                onClick={handleOpenStore}
-                className="flex-1 gap-2"
-                size="sm"
-              >
+              <Button onClick={handleOpenStore} className="flex-1 gap-2" size="sm">
                 <ExternalLink className="w-4 h-4" />
                 Leave a Review
               </Button>
               <Button
                 onClick={() => {
+                  setCooldown();
                   setStep("done");
                   toast.success("Thank you! ❤️");
                 }}
@@ -232,7 +287,10 @@ export const FeedbackRating = () => {
                 ))}
               </div>
               <button
-                onClick={() => { setRating(0); setStep("rate"); }}
+                onClick={() => {
+                  setRating(0);
+                  setStep("rate");
+                }}
                 className="text-xs text-primary hover:underline"
               >
                 Change
@@ -271,15 +329,20 @@ export const FeedbackRating = () => {
                 rows={4}
                 className="text-sm resize-none"
               />
-              <p className="text-[10px] text-muted-foreground text-right">
-                {message.length}/2000
-              </p>
+              <div className="flex justify-between">
+                <p className="text-[10px] text-muted-foreground">
+                  {message.trim().length < 10 && message.length > 0
+                    ? "Min 10 characters"
+                    : ""}
+                </p>
+                <p className="text-[10px] text-muted-foreground">{message.length}/2000</p>
+              </div>
             </div>
 
             <div className="flex gap-2">
               <Button
                 onClick={handleSubmitFeedback}
-                disabled={submitting || !message.trim()}
+                disabled={submitting || !message.trim() || message.trim().length < 10}
                 className="flex-1 gap-2"
                 size="sm"
               >
@@ -291,7 +354,10 @@ export const FeedbackRating = () => {
                 Submit Feedback
               </Button>
               <Button
-                onClick={() => { setRating(0); setStep("rate"); }}
+                onClick={() => {
+                  setRating(0);
+                  setStep("rate");
+                }}
                 variant="outline"
                 size="sm"
               >
