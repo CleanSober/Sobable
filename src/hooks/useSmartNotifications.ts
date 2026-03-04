@@ -11,6 +11,9 @@ interface SmartNotificationSettings {
   streakAtRisk: boolean;
   weeklyReport: boolean;
   cravingSpike: boolean;
+  quietHoursEnabled: boolean;
+  quietHoursStart: number; // 0-23
+  quietHoursEnd: number;   // 0-23
   lastMissedCheckInReminder: string | null;
   lastMissedJournalReminder: string | null;
   lastMissedMeditationReminder: string | null;
@@ -35,6 +38,9 @@ const getDefaultSettings = (): SmartNotificationSettings => ({
   streakAtRisk: true,
   weeklyReport: true,
   cravingSpike: true,
+  quietHoursEnabled: true,
+  quietHoursStart: 22, // 10 PM
+  quietHoursEnd: 8,    // 8 AM
   lastMissedCheckInReminder: null,
   lastMissedJournalReminder: null,
   lastMissedMeditationReminder: null,
@@ -173,8 +179,20 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
   }, [settings]);
 
+  const isInQuietHours = useCallback(() => {
+    if (!settings.quietHoursEnabled) return false;
+    const hour = new Date().getHours();
+    const { quietHoursStart, quietHoursEnd } = settings;
+    // Handle overnight ranges (e.g. 22-8 wraps past midnight)
+    if (quietHoursStart > quietHoursEnd) {
+      return hour >= quietHoursStart || hour < quietHoursEnd;
+    }
+    return hour >= quietHoursStart && hour < quietHoursEnd;
+  }, [settings.quietHoursEnabled, settings.quietHoursStart, settings.quietHoursEnd]);
+
   const sendNotification = useCallback((title: string, options?: NotificationOptions) => {
     if (permission !== "granted" || !settings.enabled) return;
+    if (isInQuietHours()) return;
     try {
       new Notification(title, {
         icon: "/icons/icon-192x192.png",
@@ -184,7 +202,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     } catch (error) {
       console.error("Failed to send notification:", error);
     }
-  }, [permission, settings.enabled]);
+  }, [permission, settings.enabled, isInQuietHours]);
 
   // Missed check-in reminder (after 2PM)
   const checkMissedCheckInReminder = useCallback(() => {
