@@ -144,7 +144,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       color: "bg-red-500/10",
       iconColor: "text-red-500",
       label: "Craving Spike Alert",
-      desc: "Alert when cravings are high (8+/10)",
+      desc: "Alert when cravings are High or Intense",
       checked: smartSettings.cravingSpike,
       onChange: (checked: boolean) => updateSmartSettings({ cravingSpike: checked }),
       disabled: !smartSettings.enabled,
