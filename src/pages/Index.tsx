@@ -295,6 +295,8 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">Every step counts</p>
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+            <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+            <AchievementBadges daysSober={daysSober} />
             <PremiumFeatureSection
               title="Sober Club Premium"
               features={[
