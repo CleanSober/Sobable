@@ -62,7 +62,10 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       action: () => {
         if (onNavigateToCheckIn) {
           onNavigateToCheckIn();
-          toast.info("Scroll down to Breathing Exercises 🧘", { duration: 3000 });
+          // Delay scroll to let check-in tab render
+          setTimeout(() => {
+            document.querySelector('[data-breathing-exercise]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 400);
         }
       }
     },

@@ -194,7 +194,7 @@ export const BreathingExercise = () => {
   };
 
   return (
-    <Card className="gradient-card border-border/50 overflow-hidden">
+    <Card className="gradient-card border-border/50 overflow-hidden" data-breathing-exercise>
       <CardHeader className="pb-2 pt-3 px-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Wind className="w-4 h-4 text-primary" />

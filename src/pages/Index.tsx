@@ -22,6 +22,7 @@ import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { HydrationTracker } from "@/components/HydrationTracker";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
+import { HealthBenefitsTimeline } from "@/components/HealthBenefitsTimeline";
 import { RelapsePreventionPlan } from "@/components/RelapsePreventionPlan";
 import { SleepTracker } from "@/components/SleepTracker";
 import { QuickActions } from "@/components/QuickActions";
@@ -211,6 +212,7 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            <HealthBenefitsTimeline daysSober={daysSober} />
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
