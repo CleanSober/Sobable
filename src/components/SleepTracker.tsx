@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { emitFeedbackTrigger } from "@/hooks/useFeedbackPrompt";
 import { motion } from "framer-motion";
 import { Moon, Sun, Bed, TrendingUp, Save, RefreshCw, Cloud } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,6 +120,7 @@ export const SleepTracker = () => {
       toast.error("Failed to save. Please try again.");
     } else {
       toast.success("Sleep logged successfully!");
+      emitFeedbackTrigger();
       loadEntries();
     }
     

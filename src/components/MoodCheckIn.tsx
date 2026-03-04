@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { emitFeedbackTrigger } from "@/hooks/useFeedbackPrompt";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, Zap, MessageCircle, Check, Sparkles, ChevronRight, ChevronLeft,
@@ -200,6 +201,7 @@ export const MoodCheckIn = () => {
         ? "Check-in updated!"
         : `Check-in saved! +${XP_REWARDS.mood_log} XP 💪`
     );
+    emitFeedbackTrigger();
   };
 
   const toggleEmotion = (label: string) => {
