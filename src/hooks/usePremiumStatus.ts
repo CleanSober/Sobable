@@ -28,11 +28,12 @@ export const usePremiumStatus = () => {
           .from("subscriptions")
           .select("plan_type, status")
           .eq("user_id", user.id)
-          .eq("status", "active")
+          .in("status", ["active", "trialing"])
+          .in("plan_type", ["premium", "pro"])
           .maybeSingle();
 
         if (!error && data) {
-          setIsPremium(data.plan_type === "premium" || data.plan_type === "pro");
+          setIsPremium(true);
         } else {
           setIsPremium(false);
         }
