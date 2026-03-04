@@ -123,13 +123,16 @@ const Auth = () => {
           navigate("/app");
         }
       } else {
-        const { error } = await signUp(email, password);
+        const { error, needsConfirmation } = await signUp(email, password);
         if (error) {
           if (error.message.includes("already registered")) {
             toast.error("This email is already registered. Please sign in.");
           } else {
             toast.error(error.message);
           }
+        } else if (needsConfirmation) {
+          toast.success("Check your email to confirm your account before signing in.", { duration: 6000 });
+          switchMode("login");
         } else {
           toast.success("Account created! Welcome to your recovery journey.");
           navigate("/app");
@@ -144,7 +147,7 @@ const Auth = () => {
     setSocialLoading(provider);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/app`,
       });
       if (result.error) {
         toast.error(result.error.message || `Failed to sign in with ${provider}`);
