@@ -28,6 +28,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationSettings from "@/components/NotificationSettings";
 import TermsAndConditions from "@/components/TermsAndConditions";
+import { FeedbackRating } from "@/components/FeedbackRating";
 import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { Switch } from "@/components/ui/switch";
 import { calculateDaysSober } from "@/lib/storage";
@@ -537,6 +538,9 @@ const Profile = () => {
             </h3>
             <NotificationSettings sobrietyStartDate={sobrietyDate} />
           </motion.div>
+
+          {/* Feedback */}
+          <FeedbackRating />
 
           {/* Legal */}
           <motion.div
