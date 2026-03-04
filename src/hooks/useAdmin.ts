@@ -154,8 +154,9 @@ export const useBanUser = () => {
       isPermanent: boolean;
       expiresAt?: string;
     }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase
-        .from("user_bans" as never) as ReturnType<typeof supabase.from>)
+        .from("user_bans" as never) as any)
         .insert({
           user_id: userId,
           banned_by: user?.id,
@@ -166,7 +167,8 @@ export const useBanUser = () => {
 
       if (error) throw error;
 
-      await (supabase.from("moderation_logs" as never) as ReturnType<typeof supabase.from>)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from("moderation_logs" as never) as any)
         .insert({
           moderator_id: user?.id,
           action_type: "ban_user",
@@ -206,7 +208,8 @@ export const useUnbanUser = () => {
 
       if (error) throw error;
 
-      await (supabase.from("moderation_logs" as never) as ReturnType<typeof supabase.from>)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from("moderation_logs" as never) as any)
         .insert({
           moderator_id: user?.id,
           action_type: "unban_user",
@@ -294,7 +297,8 @@ export const useDeleteContent = () => {
 
       if (error) throw error;
 
-      await (supabase.from("moderation_logs" as never) as ReturnType<typeof supabase.from>)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from("moderation_logs" as never) as any)
         .insert({
           moderator_id: user?.id,
           action_type: "delete_content",
