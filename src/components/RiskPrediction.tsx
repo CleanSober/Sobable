@@ -232,10 +232,7 @@ export const RiskPrediction = () => {
     setLoading(false);
   };
 
-  // Premium gate handled by PremiumLockOverlay wrapper
-  if (!premiumLoading && !isPremium) {
-    return null;
-  }
+  // Let the parent PremiumLockOverlay handle premium gating — render content so overlay works
 
   if (loading || premiumLoading) {
     return null; // Don't show loading state for this widget

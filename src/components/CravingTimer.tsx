@@ -131,7 +131,7 @@ export const CravingTimer = () => {
           Cravings typically pass within 15-20 minutes
         </p>
       </CardHeader>
-      <CardContent className="space-y-4 px-3 pb-3">
+      <CardContent className="space-y-4 px-3 pb-3" data-craving-timer>
         <AnimatePresence mode="wait">
           {cravingSurvived ? (
             <motion.div
