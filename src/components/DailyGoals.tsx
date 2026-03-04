@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { emitFeedbackTrigger } from "@/hooks/useFeedbackPrompt";
 import { motion, AnimatePresence } from "framer-motion";
 import { Target, CheckCircle2, Circle, Flame, Trophy, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -110,6 +111,7 @@ export const DailyGoals = () => {
         updateStreak();
         setTimeout(() => setShowConfetti(false), 3000);
         toast.success("All daily goals completed! Amazing work! 🏆");
+        emitFeedbackTrigger();
         
         // Show interstitial ad after completing all goals (natural break point)
         setTimeout(() => {

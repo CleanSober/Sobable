@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { emitFeedbackTrigger } from "@/hooks/useFeedbackPrompt";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, AlertTriangle, Clock, X, Check, Lightbulb, ChevronRight, ChevronLeft,
@@ -251,6 +252,7 @@ export const TriggerLogger = () => {
     resetForm();
     setLoading(false);
     toast.success("Trigger logged. You're building self-awareness! 💪");
+    emitFeedbackTrigger();
   };
 
   const handleDelete = async (id: string) => {

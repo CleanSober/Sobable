@@ -49,6 +49,8 @@ import { PredictiveInsights } from "@/components/premium/PredictiveInsights";
 import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
 import { PremiumFeatureSection } from "@/components/premium/PremiumFeatureSection";
+import { FeedbackPromptDialog } from "@/components/FeedbackPromptDialog";
+import { useFeedbackPrompt } from "@/hooks/useFeedbackPrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -58,6 +60,7 @@ const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const { userXP } = useGamification();
+  const { showPrompt: showFeedback, triggerFeedback, dismiss: dismissFeedback, markSubmitted: feedbackSubmitted } = useFeedbackPrompt();
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
@@ -132,6 +135,16 @@ const Index = () => {
       return () => clearTimeout(timer);
     }
   }, [user, profile?.onboarding_complete]);
+
+  // Trigger feedback prompt on milestone days
+  useEffect(() => {
+    if (!profile?.sobriety_start_date || !user) return;
+    const days = calculateDaysSober(profile.sobriety_start_date);
+    const milestones = [7, 14, 30, 60, 90, 180, 365];
+    if (milestones.includes(days)) {
+      triggerFeedback("milestone");
+    }
+  }, [profile?.sobriety_start_date, user, triggerFeedback]);
 
   if (authLoading || profileLoading) {
     return (
@@ -386,6 +399,7 @@ const Index = () => {
         <BottomTabs activeTab={activeTab} onTabChange={handleTabChange} />
         <AIRecoveryCoach isOpen={coachOpen} onOpenChange={setCoachOpen} />
         <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />
+        <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />
         <AdBanner position="bottom" />
       </div>
     </XPNotificationProvider>
