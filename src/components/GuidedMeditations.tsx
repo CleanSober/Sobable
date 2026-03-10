@@ -65,7 +65,7 @@ export const GuidedMeditations = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   const { 
     isLoading: musicLoading, 

@@ -38,7 +38,7 @@ export const CravingTimer = () => {
   const progress = ((CRAVING_DURATION - timeRemaining) / CRAVING_DURATION) * 100;
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isActive && timeRemaining > 0) {
       interval = setInterval(() => {
