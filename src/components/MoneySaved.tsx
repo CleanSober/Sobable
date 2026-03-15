@@ -249,7 +249,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
       }))
     : null;
 
-  const growthData = generateGrowthData(daysSober, dailySpending);
+  const growthData = generateGrowthData(daysSober, dailySpending, effectiveReturnRate);
   const milestones = getSavingsMilestones(totalSaved);
   const allMilestones = [
     ...milestones,
