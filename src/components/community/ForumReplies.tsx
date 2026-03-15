@@ -114,6 +114,10 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
       return;
     }
 
+    // Rate limit check
+    const allowed = await checkRateLimit(user.id);
+    if (!allowed) return;
+
     setSubmitting(true);
     try {
       const { data, error } = await supabase
