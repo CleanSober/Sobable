@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import { toast } from "sonner";
 import { 
   useUserProfiles, 
@@ -45,6 +46,7 @@ const MAX_REPLY_LENGTH = 2000;
 export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRepliesProps) => {
   const { user } = useAuth();
   const { profiles, fetchProfiles, getDisplayNameForUser, getAllProfiles } = useUserProfiles();
+  const { checkRateLimit, recordAction } = useRateLimit("forum_reply");
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -112,6 +114,10 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
       return;
     }
 
+    // Rate limit check
+    const allowed = await checkRateLimit(user.id);
+    if (!allowed) return;
+
     setSubmitting(true);
     try {
       const { data, error } = await supabase
@@ -125,6 +131,7 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
         .single();
 
       if (error) throw error;
+      recordAction();
 
       // Update reply count on post
       const newCount = localReplyCount + 1;
