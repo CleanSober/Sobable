@@ -108,9 +108,15 @@ export const usePremiumStatus = () => {
 // Custom hook for user profiles with caching
 export const useUserProfiles = () => {
   const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
+  const profilesRef = useRef<Map<string, UserProfile>>(new Map());
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    profilesRef.current = profiles;
+  }, [profiles]);
 
   const fetchProfiles = useCallback(async (userIds: string[]) => {
-    const uncachedIds = userIds.filter((id) => !profiles.has(id));
+    const uncachedIds = userIds.filter((id) => !profilesRef.current.has(id));
     
     if (uncachedIds.length === 0) return;
 
@@ -130,7 +136,7 @@ export const useUserProfiles = () => {
         return newMap;
       });
     }
-  }, [profiles]);
+  }, []);
 
   const getDisplayNameForUser = useCallback(
     (userId: string) => {
