@@ -1189,7 +1189,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
               <Crown className="w-3 h-3 text-accent ml-auto" />
             </div>
             <p className="text-[10px] text-muted-foreground mt-1">
-              10-year projections, investment scenarios, passive income calculator & financial freedom tracker
+              Custom return rates, debt payoff calculator, editable spending categories, 10-year projections & passive income tracker
             </p>
           </motion.div>
         )}
