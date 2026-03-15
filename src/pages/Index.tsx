@@ -273,77 +273,86 @@ const Index = () => {
 
       case "checkin":
         return (
-          <div className="space-y-3">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
-              <p className="text-xs text-muted-foreground">How are you feeling today?</p>
-            </motion.div>
-            <CheckInProgress />
-            <DailyAffirmation />
-            <MoodCheckIn />
-            <SleepTracker />
-            <HydrationTracker />
-            <Journal daysSober={daysSober} />
-            <BreathingExercise />
-            <GuidedMeditations />
-            <CalendarHeatmap startDate={userData.sobrietyStartDate} />
-          </div>
+          <Suspense fallback={<TabLoader />}>
+            <div className="space-y-3">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
+                <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
+                <p className="text-xs text-muted-foreground">How are you feeling today?</p>
+              </motion.div>
+              <CheckInProgress />
+              <DailyAffirmation />
+              <MoodCheckIn />
+              <SleepTracker />
+              <HydrationTracker />
+              <Journal daysSober={daysSober} />
+              <BreathingExercise />
+              <GuidedMeditations />
+              <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+            </div>
+          </Suspense>
         );
 
       case "triggers":
         return (
-          <div className="space-y-3">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-lg font-bold text-foreground mb-0.5">Triggers & Coping</h1>
-              <p className="text-xs text-muted-foreground">Know yourself to protect yourself</p>
-            </motion.div>
-            <CravingTimer />
-            <PremiumLockOverlay featureName="Risk Insights">
-              <RiskPrediction />
-            </PremiumLockOverlay>
-            <TriggerLogger />
-            <PremiumLockOverlay featureName="Pattern Analysis">
-              <PatternAnalysis />
-            </PremiumLockOverlay>
-            <RelapsePreventionPlan />
-            <CrisisResources />
-            
-          </div>
+          <Suspense fallback={<TabLoader />}>
+            <div className="space-y-3">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
+                <h1 className="text-lg font-bold text-foreground mb-0.5">Triggers & Coping</h1>
+                <p className="text-xs text-muted-foreground">Know yourself to protect yourself</p>
+              </motion.div>
+              <CravingTimer />
+              <PremiumLockOverlay featureName="Risk Insights">
+                <RiskPrediction />
+              </PremiumLockOverlay>
+              <TriggerLogger />
+              <PremiumLockOverlay featureName="Pattern Analysis">
+                <PatternAnalysis />
+              </PremiumLockOverlay>
+              <RelapsePreventionPlan />
+              <CrisisResources />
+            </div>
+          </Suspense>
         );
 
       case "progress":
         return (
-          <div className="space-y-3">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-lg font-bold text-foreground mb-0.5">Your Journey</h1>
-              <p className="text-xs text-muted-foreground">Every step counts</p>
-            </motion.div>
-            <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
-            <CalendarHeatmap startDate={userData.sobrietyStartDate} />
-            <PremiumLockOverlay featureName="Deep Insights & Analytics">
-              <PremiumProgressInsights daysSober={daysSober} />
-            </PremiumLockOverlay>
-            <PremiumFeatureSection
-              title="Sober Club Premium"
-              features={[
-                { name: "Recovery Pathways" },
-                { name: "Predictive Insights" },
-                { name: "Accountability Partner" },
-                { name: "AI Recommendations" },
-                { name: "Advanced Analytics" },
-              ]}
-            >
-              <GuidedPathways />
-              <PredictiveInsights />
-              <AccountabilityPartner />
-              <PersonalizedRecommendations />
-              <PremiumAnalytics />
-            </PremiumFeatureSection>
-          </div>
+          <Suspense fallback={<TabLoader />}>
+            <div className="space-y-3">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
+                <h1 className="text-lg font-bold text-foreground mb-0.5">Your Journey</h1>
+                <p className="text-xs text-muted-foreground">Every step counts</p>
+              </motion.div>
+              <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+              <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+              <PremiumLockOverlay featureName="Deep Insights & Analytics">
+                <PremiumProgressInsights daysSober={daysSober} />
+              </PremiumLockOverlay>
+              <PremiumFeatureSection
+                title="Sober Club Premium"
+                features={[
+                  { name: "Recovery Pathways" },
+                  { name: "Predictive Insights" },
+                  { name: "Accountability Partner" },
+                  { name: "AI Recommendations" },
+                  { name: "Advanced Analytics" },
+                ]}
+              >
+                <GuidedPathways />
+                <PredictiveInsights />
+                <AccountabilityPartner />
+                <PersonalizedRecommendations />
+                <PremiumAnalytics />
+              </PremiumFeatureSection>
+            </div>
+          </Suspense>
         );
 
       case "community":
-        return <CommunityHub />;
+        return (
+          <Suspense fallback={<TabLoader />}>
+            <CommunityHub />
+          </Suspense>
+        );
 
       default:
         return null;
