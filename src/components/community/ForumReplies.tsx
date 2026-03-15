@@ -46,6 +46,7 @@ const MAX_REPLY_LENGTH = 2000;
 export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRepliesProps) => {
   const { user } = useAuth();
   const { profiles, fetchProfiles, getDisplayNameForUser, getAllProfiles } = useUserProfiles();
+  const { checkRateLimit, recordAction } = useRateLimit("forum_reply");
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
