@@ -277,6 +277,9 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
           <Button variant={viewMode === "monthly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("monthly"); setMonthOffset(0); }} className="rounded-lg h-7 text-[10px] px-2">
             <BarChart3 className="w-3.5 h-3.5 mr-1" /> Monthly
           </Button>
+          <Button variant={viewMode === "yearly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("yearly"); setYearOffset(0); }} className="rounded-lg h-7 text-[10px] px-2">
+            <Award className="w-3.5 h-3.5 mr-1" /> Yearly
+          </Button>
         </div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={handlePrev} className="h-7 w-7"><ChevronLeft className="w-3.5 h-3.5" /></Button>
