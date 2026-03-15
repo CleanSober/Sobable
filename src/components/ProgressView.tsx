@@ -56,6 +56,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
   const { reached, next } = getMilestones(daysSober);
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [weekOffset, setWeekOffset] = useState(0);
+  const [yearOffset, setYearOffset] = useState(0);
   const [monthOffset, setMonthOffset] = useState(0);
   const [currentStats, setCurrentStats] = useState<PeriodStats>(emptyStats);
   const [prevStats, setPrevStats] = useState<PeriodStats>(emptyStats);
