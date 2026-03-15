@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, Shield, MessageSquare, Users, Heart, Bot, Brain, Star, Compass, Zap } from "lucide-react";
+import { Crown, Shield, MessageSquare, Users, Bot, Brain, Compass, Zap, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -10,7 +10,7 @@ interface PremiumGateProps {
   onUpgrade?: () => void;
 }
 
-const features = [
+const highlights = [
   { icon: Bot, text: "AI Recovery Coach — 24/7 support" },
   { icon: Brain, text: "Predictive Insights & Risk Score" },
   { icon: Users, text: "Accountability Partner matching" },
@@ -39,7 +39,6 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
       >
         <Card className="max-w-sm w-full gradient-card border-primary/20 shadow-xl shadow-primary/5">
           <CardContent className="pt-5 pb-4 text-center space-y-4">
-            {/* Crown icon */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -56,7 +55,6 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
               </p>
             </div>
 
-            {/* Stars */}
             <div className="flex items-center justify-center gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -64,9 +62,8 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
               <span className="text-[10px] text-muted-foreground ml-1">4.9/5</span>
             </div>
 
-            {/* Features list */}
             <ul className="space-y-2 text-left bg-secondary/50 rounded-xl p-3" role="list">
-              {features.map(({ icon: Icon, text }, index) => (
+              {highlights.map(({ icon: Icon, text }, index) => (
                 <motion.li
                   key={text}
                   initial={{ opacity: 0, x: -10 }}
@@ -82,7 +79,6 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
               ))}
             </ul>
 
-            {/* CTA button */}
             <Button 
               onClick={handleUpgradeClick}
               className="w-full h-10 text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
@@ -100,8 +96,8 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
       </motion.div>
 
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
-        <DialogContent className="max-w-lg p-0 overflow-hidden">
-          <PricingPlans onClose={() => setShowPricing(false)} />
+        <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
+          <PricingPlans onClose={() => setShowPricing(false)} featureContext="Community" />
         </DialogContent>
       </Dialog>
     </>
