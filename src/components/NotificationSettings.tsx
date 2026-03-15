@@ -21,6 +21,7 @@ const formatHour = (h: number) => {
 };
 
 const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) => {
+  const { user } = useAuth();
   const { permission, settings, updateSettings, isSupported } = useNotifications(sobrietyStartDate);
   const {
     permission: smartPermission,
@@ -30,6 +31,35 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     missedActions,
     streakAtRisk,
   } = useSmartNotifications(sobrietyStartDate);
+
+  const [digestEnabled, setDigestEnabled] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("app_settings")
+      .select("weekly_digest_enabled")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setDigestEnabled(data.weekly_digest_enabled);
+      });
+  }, [user]);
+
+  const toggleDigest = async (enabled: boolean) => {
+    if (!user) return;
+    setDigestEnabled(enabled);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ user_id: user.id, weekly_digest_enabled: enabled }, { onConflict: "user_id" });
+    if (error) {
+      console.error("Failed to update digest setting:", error);
+      setDigestEnabled(!enabled);
+      toast.error("Failed to update setting");
+    } else {
+      toast.success(enabled ? "Weekly digest enabled" : "Weekly digest disabled");
+    }
+  };
 
   const handleEnableNotifications = async () => {
     // Enable both notification systems
