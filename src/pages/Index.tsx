@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
@@ -12,50 +12,58 @@ import { MoodCheckIn } from "@/components/MoodCheckIn";
 
 import { Onboarding } from "@/components/Onboarding";
 import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
-import { ProgressView } from "@/components/ProgressView";
-import { TriggerLogger } from "@/components/TriggerLogger";
-import { PatternAnalysis } from "@/components/PatternAnalysis";
 import { UserProfile } from "@/components/UserProfile";
-import { AchievementBadges } from "@/components/AchievementBadges";
-import { CravingTimer } from "@/components/CravingTimer";
-import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 import { CheckInProgress } from "@/components/CheckInProgress";
-import { HydrationTracker } from "@/components/HydrationTracker";
-import { DailyAffirmation } from "@/components/DailyAffirmation";
-import { HealthBenefitsTimeline } from "@/components/HealthBenefitsTimeline";
-import { RelapsePreventionPlan } from "@/components/RelapsePreventionPlan";
-import { SleepTracker } from "@/components/SleepTracker";
-import { QuickActions } from "@/components/QuickActions";
 import { DailyRitual } from "@/components/DailyRitual";
 import { MotivationalBanner } from "@/components/MotivationalBanner";
-import { CommunityHub } from "@/components/community/CommunityHub";
+import { QuickActions } from "@/components/QuickActions";
 import { NotificationsBell } from "@/components/community/NotificationsBell";
-import { BreathingExercise } from "@/components/BreathingExercise";
-import { GuidedMeditations } from "@/components/GuidedMeditations";
-import { CrisisResources } from "@/components/CrisisResources";
-import { PremiumAnalytics } from "@/components/PremiumAnalytics";
-import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
-import { Journal } from "@/components/Journal";
-import { RiskPrediction } from "@/components/RiskPrediction";
-import { NotificationCenter } from "@/components/NotificationCenter";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
-import { SmartRiskScore } from "@/components/premium/SmartRiskScore";
-import { PremiumProgressInsights } from "@/components/progress/PremiumProgressInsights";
-import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
-import { GuidedPathways } from "@/components/premium/GuidedPathways";
-import { AccountabilityPartner } from "@/components/premium/AccountabilityPartner";
-import { PredictiveInsights } from "@/components/premium/PredictiveInsights";
-import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
-import { PremiumFeatureSection } from "@/components/premium/PremiumFeatureSection";
+import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
 import { FeedbackPromptDialog } from "@/components/FeedbackPromptDialog";
 import { useFeedbackPrompt } from "@/hooks/useFeedbackPrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
+import { NotificationCenter } from "@/components/NotificationCenter";
+
+// Lazy load heavy tab content that isn't needed on initial render
+const ProgressView = lazy(() => import("@/components/ProgressView").then(m => ({ default: m.ProgressView })));
+const TriggerLogger = lazy(() => import("@/components/TriggerLogger").then(m => ({ default: m.TriggerLogger })));
+const PatternAnalysis = lazy(() => import("@/components/PatternAnalysis").then(m => ({ default: m.PatternAnalysis })));
+const AchievementBadges = lazy(() => import("@/components/AchievementBadges").then(m => ({ default: m.AchievementBadges })));
+const CravingTimer = lazy(() => import("@/components/CravingTimer").then(m => ({ default: m.CravingTimer })));
+const CalendarHeatmap = lazy(() => import("@/components/CalendarHeatmap").then(m => ({ default: m.CalendarHeatmap })));
+const HydrationTracker = lazy(() => import("@/components/HydrationTracker").then(m => ({ default: m.HydrationTracker })));
+const DailyAffirmation = lazy(() => import("@/components/DailyAffirmation").then(m => ({ default: m.DailyAffirmation })));
+const HealthBenefitsTimeline = lazy(() => import("@/components/HealthBenefitsTimeline").then(m => ({ default: m.HealthBenefitsTimeline })));
+const RelapsePreventionPlan = lazy(() => import("@/components/RelapsePreventionPlan").then(m => ({ default: m.RelapsePreventionPlan })));
+const SleepTracker = lazy(() => import("@/components/SleepTracker").then(m => ({ default: m.SleepTracker })));
+const CommunityHub = lazy(() => import("@/components/community/CommunityHub").then(m => ({ default: m.CommunityHub })));
+const BreathingExercise = lazy(() => import("@/components/BreathingExercise").then(m => ({ default: m.BreathingExercise })));
+const GuidedMeditations = lazy(() => import("@/components/GuidedMeditations").then(m => ({ default: m.GuidedMeditations })));
+const CrisisResources = lazy(() => import("@/components/CrisisResources").then(m => ({ default: m.CrisisResources })));
+const PremiumAnalytics = lazy(() => import("@/components/PremiumAnalytics").then(m => ({ default: m.PremiumAnalytics })));
+const PersonalizedRecommendations = lazy(() => import("@/components/PersonalizedRecommendations").then(m => ({ default: m.PersonalizedRecommendations })));
+const Journal = lazy(() => import("@/components/Journal").then(m => ({ default: m.Journal })));
+const RiskPrediction = lazy(() => import("@/components/RiskPrediction").then(m => ({ default: m.RiskPrediction })));
+const SmartRiskScore = lazy(() => import("@/components/premium/SmartRiskScore").then(m => ({ default: m.SmartRiskScore })));
+const PremiumProgressInsights = lazy(() => import("@/components/progress/PremiumProgressInsights").then(m => ({ default: m.PremiumProgressInsights })));
+const WeeklyRecap = lazy(() => import("@/components/premium/WeeklyRecap").then(m => ({ default: m.WeeklyRecap })));
+const GuidedPathways = lazy(() => import("@/components/premium/GuidedPathways").then(m => ({ default: m.GuidedPathways })));
+const AccountabilityPartner = lazy(() => import("@/components/premium/AccountabilityPartner").then(m => ({ default: m.AccountabilityPartner })));
+const PredictiveInsights = lazy(() => import("@/components/premium/PredictiveInsights").then(m => ({ default: m.PredictiveInsights })));
+const PremiumFeatureSection = lazy(() => import("@/components/premium/PremiumFeatureSection").then(m => ({ default: m.PremiumFeatureSection })));
+
+const TabLoader = () => (
+  <div className="flex items-center justify-center py-12">
+    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+  </div>
+);
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
