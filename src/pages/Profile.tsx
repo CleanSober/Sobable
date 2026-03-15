@@ -62,6 +62,9 @@ const Profile = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return !document.documentElement.classList.contains("light");
   });
+  const [isColorblind, setIsColorblind] = useState(() => {
+    return document.documentElement.classList.contains("colorblind");
+  });
 
   useEffect(() => {
     if (!user) {
