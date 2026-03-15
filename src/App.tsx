@@ -29,14 +29,23 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  // Only show splash on first load per session (not on in-app navigations)
+  const [showSplash, setShowSplash] = useState(() => {
+    if (sessionStorage.getItem("sobable_splash_shown")) return false;
+    return true;
+  });
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem("sobable_splash_shown", "true");
+    setShowSplash(false);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
           {showSplash && (
-            <SplashScreen onComplete={() => setShowSplash(false)} />
+            <SplashScreen onComplete={handleSplashComplete} />
           )}
           <Toaster />
           <Sonner />

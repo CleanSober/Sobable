@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ export const useUserData = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
       setLoading(false);
@@ -43,7 +43,7 @@ export const useUserData = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) return { error: new Error("Not authenticated") };
