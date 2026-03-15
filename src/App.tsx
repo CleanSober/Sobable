@@ -45,7 +45,7 @@ const App = () => {
       <AuthProvider>
         <TooltipProvider>
           {showSplash && (
-            <SplashScreen onComplete={() => setShowSplash(false)} />
+            <SplashScreen onComplete={handleSplashComplete} />
           )}
           <Toaster />
           <Sonner />
