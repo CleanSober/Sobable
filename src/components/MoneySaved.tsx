@@ -98,10 +98,10 @@ const getSavingsMilestones = (totalSaved: number) => [
 // Spending categories
 const getSpendingCategories = (dailySpending: number) => {
   return [
-    { name: "Substance", amount: dailySpending * 0.60, pct: 60, color: "hsl(0 75% 55%)", icon: "🚫" },
-    { name: "Related costs", amount: dailySpending * 0.20, pct: 20, color: "hsl(42 100% 55%)", icon: "🚕" },
-    { name: "Impulse buys", amount: dailySpending * 0.12, pct: 12, color: "hsl(168 84% 45%)", icon: "🛒" },
-    { name: "Other", amount: dailySpending * 0.08, pct: 8, color: "hsl(215 18% 58%)", icon: "📦" },
+    { name: "Substance costs", desc: "Alcohol, drugs, or tobacco purchases", amount: dailySpending * 0.60, pct: 60, color: "hsl(0 75% 55%)", icon: "🚫" },
+    { name: "Related expenses", desc: "Rides, delivery fees, cover charges", amount: dailySpending * 0.20, pct: 20, color: "hsl(42 100% 55%)", icon: "🚕" },
+    { name: "Impulse spending", desc: "Late-night orders, unplanned purchases", amount: dailySpending * 0.12, pct: 12, color: "hsl(168 84% 45%)", icon: "🛒" },
+    { name: "Hidden costs", desc: "Health products, missed work, repairs", amount: dailySpending * 0.08, pct: 8, color: "hsl(215 18% 58%)", icon: "📦" },
   ];
 };
 
