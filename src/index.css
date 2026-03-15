@@ -110,6 +110,37 @@
     --ring: 168 76% 38%;
   }
 
+  /* Colorblind-friendly overrides */
+  .colorblind :root,
+  .colorblind {
+    --primary: 210 80% 50%;
+    --primary-foreground: 210 40% 98%;
+    --accent: 45 100% 50%;
+    --accent-foreground: 225 30% 6%;
+    --success: 210 80% 50%;
+    --success-foreground: 210 40% 98%;
+    --destructive: 30 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --warning: 60 100% 45%;
+    --warning-foreground: 225 30% 6%;
+    --ring: 210 80% 50%;
+  }
+
+  .colorblind.light {
+    --primary: 210 75% 42%;
+    --primary-foreground: 210 40% 98%;
+    --accent: 45 95% 45%;
+    --accent-foreground: 225 30% 10%;
+    --success: 210 75% 42%;
+    --success-foreground: 210 40% 98%;
+    --destructive: 30 95% 45%;
+    --destructive-foreground: 210 40% 98%;
+    --warning: 60 95% 40%;
+    --warning-foreground: 225 30% 10%;
+    --ring: 210 75% 42%;
+  }
+
+
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }

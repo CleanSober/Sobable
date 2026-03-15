@@ -496,29 +496,58 @@ const Profile = () => {
               {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
               Appearance
             </h3>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                  {isDarkMode ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-foreground" />}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                    {isDarkMode ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-foreground" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{isDarkMode ? "Dark Mode" : "Light Mode"}</p>
+                    <p className="text-xs text-muted-foreground">Toggle between dark and light theme</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{isDarkMode ? "Dark Mode" : "Light Mode"}</p>
-                  <p className="text-xs text-muted-foreground">Toggle between dark and light theme</p>
-                </div>
+                <Switch
+                  checked={isDarkMode}
+                  onCheckedChange={(checked) => {
+                    setIsDarkMode(checked);
+                    if (checked) {
+                      document.documentElement.classList.remove("light");
+                      localStorage.setItem("theme", "dark");
+                    } else {
+                      document.documentElement.classList.add("light");
+                      localStorage.setItem("theme", "light");
+                    }
+                  }}
+                />
               </div>
-              <Switch
-                checked={isDarkMode}
-                onCheckedChange={(checked) => {
-                  setIsDarkMode(checked);
-                  if (checked) {
-                    document.documentElement.classList.remove("light");
-                    localStorage.setItem("theme", "dark");
-                  } else {
-                    document.documentElement.classList.add("light");
-                    localStorage.setItem("theme", "light");
-                  }
-                }}
-              />
+
+              <div className="h-px bg-border/30" />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                    <Eye className="w-4 h-4 text-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Colorblind Mode</p>
+                    <p className="text-xs text-muted-foreground">Use high-contrast, distinguishable colors</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={isColorblind}
+                  onCheckedChange={(checked) => {
+                    setIsColorblind(checked);
+                    if (checked) {
+                      document.documentElement.classList.add("colorblind");
+                      localStorage.setItem("colorblind", "true");
+                    } else {
+                      document.documentElement.classList.remove("colorblind");
+                      localStorage.setItem("colorblind", "false");
+                    }
+                  }}
+                />
+              </div>
             </div>
           </motion.div>
 

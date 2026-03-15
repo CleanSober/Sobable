@@ -7,6 +7,9 @@ const savedTheme = localStorage.getItem("theme");
 if (savedTheme === "light") {
   document.documentElement.classList.add("light");
 }
+if (localStorage.getItem("colorblind") === "true") {
+  document.documentElement.classList.add("colorblind");
+}
 
 // Initialize app
 const container = document.getElementById("root");
