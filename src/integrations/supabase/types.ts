@@ -47,6 +47,7 @@ export type Database = {
           theme: string
           updated_at: string
           user_id: string
+          weekly_digest_enabled: boolean
         }
         Insert: {
           created_at?: string
@@ -56,6 +57,7 @@ export type Database = {
           theme?: string
           updated_at?: string
           user_id: string
+          weekly_digest_enabled?: boolean
         }
         Update: {
           created_at?: string
@@ -65,6 +67,7 @@ export type Database = {
           theme?: string
           updated_at?: string
           user_id?: string
+          weekly_digest_enabled?: boolean
         }
         Relationships: []
       }
