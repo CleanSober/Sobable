@@ -135,7 +135,7 @@ const Auth = () => {
           switchMode("login");
         } else {
           toast.success("Account created! Welcome to your recovery journey.");
-          navigate("/app");
+          navigate("/");
         }
       }
     } finally {
