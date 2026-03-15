@@ -50,8 +50,7 @@ const App = () => {
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/app" element={<Index />} />
+                <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/brand" element={<BrandAssets />} />
                 <Route path="/app-store-guide" element={<AppStoreGuide />} />
