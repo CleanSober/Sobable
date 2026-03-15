@@ -27,6 +27,7 @@ import { TypingIndicator } from "./TypingIndicator";
 import { MentionInput } from "./MentionInput";
 import { ChatRoomSelector } from "./ChatRoomSelector";
 import { OnlineUsers } from "./OnlineUsers";
+import { CommunityNotifyButton } from "./CommunityNotifyButton";
 
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -254,7 +255,12 @@ export const LiveChat = () => {
             <MessageCircle className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
             Live Chat
           </CardTitle>
-          <OnlineUsers roomId={room?.id} />
+          <div className="flex items-center gap-1">
+            {room && (
+              <CommunityNotifyButton targetType="chat_room" targetId={room.id} />
+            )}
+            <OnlineUsers roomId={room?.id} />
+          </div>
         </div>
         
         <ChatRoomSelector
