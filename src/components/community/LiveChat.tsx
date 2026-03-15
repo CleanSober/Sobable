@@ -27,6 +27,7 @@ import { TypingIndicator } from "./TypingIndicator";
 import { MentionInput } from "./MentionInput";
 import { ChatRoomSelector } from "./ChatRoomSelector";
 import { OnlineUsers } from "./OnlineUsers";
+import { CommunityNotifyButton } from "./CommunityNotifyButton";
 
 const MAX_MESSAGE_LENGTH = 2000;
 
