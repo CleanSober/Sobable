@@ -3,6 +3,7 @@ import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-r
 import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 export type TabId = "home" | "checkin" | "triggers" | "progress" | "community";
 export const TAB_ORDER: TabId[] = ["home", "checkin", "triggers", "progress", "community"];
