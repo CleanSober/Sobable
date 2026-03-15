@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { 
-  TrendingUp, BarChart3, Brain, Zap, Download,
+  TrendingUp, BarChart3, Brain, Zap, Download, Crown,
   Moon, Heart, ArrowUpRight, ArrowDownRight, Minus
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
