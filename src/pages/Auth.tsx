@@ -98,7 +98,7 @@ const Auth = () => {
           toast.error(error.message);
         } else {
           toast.success("Password updated successfully!");
-          navigate("/app");
+          navigate("/");
         }
       } finally {
         setLoading(false);
