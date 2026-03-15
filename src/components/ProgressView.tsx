@@ -20,7 +20,7 @@ interface ProgressViewProps {
   dailySpending: number;
 }
 
-type ViewMode = "weekly" | "monthly";
+type ViewMode = "weekly" | "monthly" | "yearly";
 
 interface PeriodStats {
   moodAvg: number;
