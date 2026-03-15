@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
-import Landing from "./pages/Landing";
-
 // Lazy load non-critical routes to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
