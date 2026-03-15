@@ -58,8 +58,8 @@ export const PremiumUpsellBanner = memo(({
       </AnimatePresence>
 
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
-        <DialogContent className="max-w-lg p-0 overflow-hidden">
-          <PricingPlans onClose={() => setShowPricing(false)} />
+        <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
+          <PricingPlans onClose={() => setShowPricing(false)} featureContext="Premium Features" />
         </DialogContent>
       </Dialog>
     </>
