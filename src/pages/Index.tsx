@@ -42,6 +42,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
 import { SmartRiskScore } from "@/components/premium/SmartRiskScore";
+import { PremiumProgressInsights } from "@/components/progress/PremiumProgressInsights";
 import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
 import { GuidedPathways } from "@/components/premium/GuidedPathways";
 import { AccountabilityPartner } from "@/components/premium/AccountabilityPartner";
@@ -309,6 +310,9 @@ const Index = () => {
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+            <PremiumLockOverlay featureName="Deep Insights & Analytics">
+              <PremiumProgressInsights daysSober={daysSober} />
+            </PremiumLockOverlay>
             <PremiumFeatureSection
               title="Sober Club Premium"
               features={[
