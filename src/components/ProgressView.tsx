@@ -171,7 +171,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
     setLoading(true);
 
     try {
-      const currentOffset = viewMode === "weekly" ? weekOffset : monthOffset;
+      const currentOffset = viewMode === "weekly" ? weekOffset : viewMode === "monthly" ? monthOffset : yearOffset;
       const { start, end } = getDateRange(currentOffset);
       const { start: prevStart, end: prevEnd } = getDateRange(currentOffset + 1);
 
