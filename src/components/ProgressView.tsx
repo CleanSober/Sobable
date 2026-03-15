@@ -76,10 +76,14 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       return { start: startOfWeek, end: endOfWeek };
-    } else {
+    } else if (viewMode === "monthly") {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth() - offset, 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() - offset + 1, 0);
       return { start: startOfMonth, end: endOfMonth };
+    } else {
+      const startOfYear = new Date(now.getFullYear() - offset, 0, 1);
+      const endOfYear = new Date(now.getFullYear() - offset, 11, 31);
+      return { start: startOfYear, end: endOfYear };
     }
   };
 
