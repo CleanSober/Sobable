@@ -120,7 +120,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Welcome back!");
-          navigate("/app");
+          navigate("/");
         }
       } else {
         const { error, needsConfirmation } = await signUp(email, password);
