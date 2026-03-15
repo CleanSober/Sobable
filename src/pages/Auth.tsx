@@ -27,7 +27,7 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && mode !== "reset") navigate("/app");
+    if (user && mode !== "reset") navigate("/");
   }, [user, navigate, mode]);
 
   // Detect password recovery event from URL
