@@ -220,7 +220,7 @@ export const PremiumProgressInsights = ({ daysSober }: PremiumProgressInsightsPr
               <Brain className="w-4 h-4 text-indigo-500" />
             </div>
             <span className="text-sm font-semibold text-foreground">Sleep-Mood Correlation</span>
-            <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium">PRO</span>
+            <Crown className="ml-auto w-3.5 h-3.5 text-amber-500" />
           </div>
           <p className="text-[10px] text-muted-foreground mb-3">
             Based on {correlationInsight.dataPoints} days of data
