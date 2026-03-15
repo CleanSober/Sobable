@@ -3,6 +3,7 @@ import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-r
 import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 export type TabId = "home" | "checkin" | "triggers" | "progress" | "community";
 export const TAB_ORDER: TabId[] = ["home", "checkin", "triggers", "progress", "community"];
@@ -30,11 +31,12 @@ interface BottomTabsProps {
 export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
   const { impact } = useHaptics();
   const onlineCount = useOnlineCount();
+  const { isPremium } = usePremiumStatus();
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleTabChange = (tabId: TabId) => {
     impact('light');
-    if (tabId === "community" && onlineCount > 0) {
+    if (tabId === "community" && isPremium && onlineCount > 0) {
       setShowTooltip(true);
       setTimeout(() => setShowTooltip(false), 2000);
     }
@@ -114,8 +116,8 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     />
                   </motion.div>
                   
-                  {/* Online users count badge for community tab */}
-                  {tab.id === "community" && onlineCount > 0 && (
+                  {/* Online users count badge for community tab (premium only) */}
+                  {tab.id === "community" && isPremium && onlineCount > 0 && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -127,8 +129,17 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     </motion.div>
                   )}
 
-                  {/* Premium crown badge */}
-                  {isPremium && tab.id !== "community" && (
+                  {/* Crown badge for community tab (free users) or other premium tabs */}
+                  {isPremium === false && tab.id === "community" && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg"
+                    >
+                      <Crown className="w-2.5 h-2.5 text-white" />
+                    </motion.div>
+                  )}
+                  {isPremium && tab.isPremium && tab.id !== "community" && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
