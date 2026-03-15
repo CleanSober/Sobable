@@ -344,10 +344,13 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
 
             {/* Spending breakdown */}
             <div className="glass-card rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-1">
                 <Wallet className="w-4 h-4 text-accent" />
                 <span className="text-sm font-medium text-foreground">Daily spending breakdown</span>
               </div>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                Estimated based on your ${dailySpending}/day addiction-related costs
+              </p>
               <div className="space-y-2.5">
                 {categories.map((cat, index) => (
                   <motion.div
@@ -359,10 +362,11 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                   >
                     <span className="text-sm">{cat.icon}</span>
                     <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-muted-foreground">{cat.name}</span>
+                      <div className="flex justify-between items-center mb-0.5">
+                        <span className="text-xs text-foreground font-medium">{cat.name}</span>
                         <span className="text-xs font-medium text-foreground">${cat.amount.toFixed(2)}</span>
                       </div>
+                      <p className="text-[10px] text-muted-foreground mb-1">{cat.desc}</p>
                       <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
