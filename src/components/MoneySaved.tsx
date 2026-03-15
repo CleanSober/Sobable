@@ -135,35 +135,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-// --- Premium: Multi-year projection calculator ---
-const generateMultiYearProjection = (dailySpending: number, daysSober: number) => {
-  const annualReturn = 0.08;
-  const monthlyContribution = dailySpending * 30;
-  const currentSaved = dailySpending * daysSober;
-
-  const projections = [
-    { year: "Now", cash: currentSaved, conservative: currentSaved, moderate: currentSaved, aggressive: currentSaved },
-  ];
-
-  for (let y = 1; y <= 10; y++) {
-    const cash = currentSaved + monthlyContribution * 12 * y;
-    const calcInvested = (rate: number) => {
-      let total = currentSaved;
-      for (let m = 0; m < y * 12; m++) {
-        total = (total + monthlyContribution) * (1 + rate / 12);
-      }
-      return Math.round(total);
-    };
-    projections.push({
-      year: `${y}Y`,
-      cash: Math.round(cash),
-      conservative: calcInvested(0.05),
-      moderate: calcInvested(0.08),
-      aggressive: calcInvested(0.12),
-    });
-  }
-  return projections;
-};
+// (Multi-year projection is computed inline below using the user's custom rate)
 
 // Monthly breakdown for premium
 const generateMonthlyBreakdown = (daysSober: number, dailySpending: number) => {
