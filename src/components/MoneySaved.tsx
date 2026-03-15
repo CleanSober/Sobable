@@ -231,8 +231,36 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
     setCustomMilestones(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Investment projection (8% annual return)
-  const annualReturn = 0.08;
+  // Pro customization settings
+  const [proSettings, setProSettings] = useState(() => {
+    try {
+      const stored = localStorage.getItem("sobable_pro_finance_settings");
+      return stored ? JSON.parse(stored) : {
+        returnRate: 8,
+        currency: "USD",
+        customCategories: null, // null = use defaults
+        debtAmount: 0,
+        debtInterest: 18,
+        savingsGoalName: "",
+        savingsGoalAmount: 0,
+      };
+    } catch { return { returnRate: 8, currency: "USD", customCategories: null, debtAmount: 0, debtInterest: 18, savingsGoalName: "", savingsGoalAmount: 0 }; }
+  });
+  const [showProSettings, setShowProSettings] = useState(false);
+
+  useEffect(() => {
+    if (isPremium) {
+      localStorage.setItem("sobable_pro_finance_settings", JSON.stringify(proSettings));
+    }
+  }, [proSettings, isPremium]);
+
+  const updateProSetting = useCallback((key: string, value: any) => {
+    setProSettings((prev: any) => ({ ...prev, [key]: value }));
+  }, []);
+
+  // Use Pro return rate if premium, else default 8%
+  const effectiveReturnRate = isPremium ? proSettings.returnRate / 100 : 0.08;
+  const annualReturn = effectiveReturnRate;
   const dailyReturn = Math.pow(1 + annualReturn, 1 / 365) - 1;
   let investedValue = 0;
   for (let d = 0; d < daysSober; d++) {
@@ -240,13 +268,23 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
   }
   const investmentGain = Math.round(investedValue - totalSaved);
 
+  // Custom spending categories for Pro
+  const defaultCategories = getSpendingCategories(dailySpending);
+  const proCustomCategories = isPremium && proSettings.customCategories
+    ? (proSettings.customCategories as { name: string; desc: string; pct: number; icon: string }[]).map(c => ({
+        ...c,
+        amount: dailySpending * (c.pct / 100),
+        color: c.pct >= 50 ? "hsl(0 75% 55%)" : c.pct >= 20 ? "hsl(42 100% 55%)" : c.pct >= 10 ? "hsl(168 84% 45%)" : "hsl(215 18% 58%)",
+      }))
+    : null;
+
   const growthData = generateGrowthData(daysSober, dailySpending);
   const milestones = getSavingsMilestones(totalSaved);
   const allMilestones = [
     ...milestones,
     ...customMilestones.map(m => ({ ...m, unlocked: totalSaved >= m.target })),
   ].sort((a, b) => a.target - b.target);
-  const categories = getSpendingCategories(dailySpending);
+  const categories = proCustomCategories || defaultCategories;
   const affordableItems = alternatives.filter((item) => totalSaved >= item.cost);
 
   const nextMilestone = allMilestones.find((m) => !m.unlocked);
