@@ -224,8 +224,8 @@ const Index = () => {
               </h1>
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
+            <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
-            
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
