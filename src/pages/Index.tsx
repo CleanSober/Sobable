@@ -310,6 +310,9 @@ const Index = () => {
             </motion.div>
             <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
             <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+            <PremiumLockOverlay featureName="Deep Insights & Analytics">
+              <PremiumProgressInsights daysSober={daysSober} />
+            </PremiumLockOverlay>
             <PremiumFeatureSection
               title="Sober Club Premium"
               features={[
