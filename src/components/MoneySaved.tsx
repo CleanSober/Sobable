@@ -602,12 +602,69 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                   <Trophy className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-foreground">Savings Milestones</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{unlockedCount}/{milestones.length}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{unlockedCount}/{allMilestones.length}</span>
+                  <button
+                    onClick={() => setShowAddMilestone(!showAddMilestone)}
+                    className="p-1 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-primary" />
+                  </button>
+                </div>
               </div>
-              <div className="space-y-2">
-                {milestones.map((milestone, index) => (
+
+              {/* Add custom milestone form */}
+              <AnimatePresence>
+                {showAddMilestone && (
                   <motion.div
-                    key={milestone.label}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden mb-3"
+                  >
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
+                      <p className="text-xs font-medium text-foreground">Add a personal savings goal</p>
+                      <Input
+                        placeholder="e.g. New laptop, Vacation fund"
+                        value={newMilestoneLabel}
+                        onChange={(e) => setNewMilestoneLabel(e.target.value.slice(0, 50))}
+                        className="h-9 text-xs bg-secondary/50 border-border/50"
+                        maxLength={50}
+                      />
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                          <Input
+                            type="number"
+                            placeholder="Amount"
+                            value={newMilestoneAmount}
+                            onChange={(e) => setNewMilestoneAmount(e.target.value)}
+                            className="h-9 pl-7 text-xs bg-secondary/50 border-border/50"
+                            min={1}
+                            max={1000000}
+                          />
+                        </div>
+                        <button
+                          onClick={addCustomMilestone}
+                          disabled={!newMilestoneLabel.trim() || !newMilestoneAmount || parseFloat(newMilestoneAmount) <= 0}
+                          className="px-3 h-9 rounded-md bg-primary text-primary-foreground text-xs font-medium disabled:opacity-40 hover:bg-primary/90 transition-colors flex items-center gap-1"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="space-y-2">
+                {allMilestones.map((milestone, index) => {
+                  const isCustom = customMilestones.some(m => m.label === milestone.label && m.target === milestone.target);
+                  const customIndex = customMilestones.findIndex(m => m.label === milestone.label && m.target === milestone.target);
+                  return (
+                  <motion.div
+                    key={`${milestone.label}-${milestone.target}`}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.04 * index }}
@@ -626,8 +683,17 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                       </p>
                       <p className="text-[10px] text-muted-foreground">
                         ${milestone.target.toLocaleString()}
+                        {isCustom && " • Custom goal"}
                       </p>
                     </div>
+                    {isCustom && (
+                      <button
+                        onClick={() => removeCustomMilestone(customIndex)}
+                        className="p-1 rounded-full hover:bg-destructive/10 transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                      </button>
+                    )}
                     {milestone.unlocked ? (
                       <motion.div
                         initial={{ scale: 0 }}
@@ -640,7 +706,8 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                       <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
                     )}
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </TabsContent>
