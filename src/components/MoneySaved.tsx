@@ -45,10 +45,9 @@ const useAnimatedCounter = (target: number, duration = 1200) => {
 };
 
 // Generate savings growth data
-const generateGrowthData = (daysSober: number, dailySpending: number) => {
+const generateGrowthData = (daysSober: number, dailySpending: number, annualReturnRate: number = 0.08) => {
   const points: { day: string; saved: number; invested: number }[] = [];
-  const annualReturn = 0.08;
-  const dailyReturn = Math.pow(1 + annualReturn, 1 / 365) - 1;
+  const dailyReturn = Math.pow(1 + annualReturnRate, 1 / 365) - 1;
 
   const totalPoints = Math.min(daysSober, 90);
   const step = Math.max(1, Math.floor(totalPoints / 15));
