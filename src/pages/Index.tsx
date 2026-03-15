@@ -42,6 +42,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
 import { SmartRiskScore } from "@/components/premium/SmartRiskScore";
+import { PremiumProgressInsights } from "@/components/progress/PremiumProgressInsights";
 import { WeeklyRecap } from "@/components/premium/WeeklyRecap";
 import { GuidedPathways } from "@/components/premium/GuidedPathways";
 import { AccountabilityPartner } from "@/components/premium/AccountabilityPartner";
