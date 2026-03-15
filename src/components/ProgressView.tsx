@@ -20,7 +20,7 @@ interface ProgressViewProps {
   dailySpending: number;
 }
 
-type ViewMode = "weekly" | "monthly";
+type ViewMode = "weekly" | "monthly" | "yearly";
 
 interface PeriodStats {
   moodAvg: number;
@@ -56,6 +56,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
   const { reached, next } = getMilestones(daysSober);
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [weekOffset, setWeekOffset] = useState(0);
+  const [yearOffset, setYearOffset] = useState(0);
   const [monthOffset, setMonthOffset] = useState(0);
   const [currentStats, setCurrentStats] = useState<PeriodStats>(emptyStats);
   const [prevStats, setPrevStats] = useState<PeriodStats>(emptyStats);
@@ -75,10 +76,14 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       return { start: startOfWeek, end: endOfWeek };
-    } else {
+    } else if (viewMode === "monthly") {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth() - offset, 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() - offset + 1, 0);
       return { start: startOfMonth, end: endOfMonth };
+    } else {
+      const startOfYear = new Date(now.getFullYear() - offset, 0, 1);
+      const endOfYear = new Date(now.getFullYear() - offset, 11, 31);
+      return { start: startOfYear, end: endOfYear };
     }
   };
 
@@ -166,7 +171,7 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
     setLoading(true);
 
     try {
-      const currentOffset = viewMode === "weekly" ? weekOffset : monthOffset;
+      const currentOffset = viewMode === "weekly" ? weekOffset : viewMode === "monthly" ? monthOffset : yearOffset;
       const { start, end } = getDateRange(currentOffset);
       const { start: prevStart, end: prevEnd } = getDateRange(currentOffset + 1);
 
@@ -189,17 +194,19 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
 
   useEffect(() => {
     fetchStats();
-  }, [user, viewMode, weekOffset, monthOffset]);
+  }, [user, viewMode, weekOffset, monthOffset, yearOffset]);
 
-  const currentOffset = viewMode === "weekly" ? weekOffset : monthOffset;
+  const currentOffset = viewMode === "weekly" ? weekOffset : viewMode === "monthly" ? monthOffset : yearOffset;
   const { start, end } = getDateRange(currentOffset);
   const dateRangeLabel = viewMode === "weekly"
     ? `${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${end.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-    : start.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    : viewMode === "monthly"
+    ? start.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : start.getFullYear().toString();
 
-  const canGoForward = viewMode === "weekly" ? weekOffset > 0 : monthOffset > 0;
-  const handlePrev = () => viewMode === "weekly" ? setWeekOffset(p => p + 1) : setMonthOffset(p => p + 1);
-  const handleNext = () => viewMode === "weekly" ? setWeekOffset(p => Math.max(0, p - 1)) : setMonthOffset(p => Math.max(0, p - 1));
+  const canGoForward = viewMode === "weekly" ? weekOffset > 0 : viewMode === "monthly" ? monthOffset > 0 : yearOffset > 0;
+  const handlePrev = () => viewMode === "weekly" ? setWeekOffset(p => p + 1) : viewMode === "monthly" ? setMonthOffset(p => p + 1) : setYearOffset(p => p + 1);
+  const handleNext = () => viewMode === "weekly" ? setWeekOffset(p => Math.max(0, p - 1)) : viewMode === "monthly" ? setMonthOffset(p => Math.max(0, p - 1)) : setYearOffset(p => Math.max(0, p - 1));
 
   // Recovery wellness score (free version)
   const wellnessScore = useMemo(() => {
@@ -269,6 +276,9 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
           </Button>
           <Button variant={viewMode === "monthly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("monthly"); setMonthOffset(0); }} className="rounded-lg h-7 text-[10px] px-2">
             <BarChart3 className="w-3.5 h-3.5 mr-1" /> Monthly
+          </Button>
+          <Button variant={viewMode === "yearly" ? "default" : "ghost"} size="sm" onClick={() => { setViewMode("yearly"); setYearOffset(0); }} className="rounded-lg h-7 text-[10px] px-2">
+            <Award className="w-3.5 h-3.5 mr-1" /> Yearly
           </Button>
         </div>
         <div className="flex items-center gap-1">
