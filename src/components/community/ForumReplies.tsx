@@ -131,6 +131,7 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
         .single();
 
       if (error) throw error;
+      recordAction();
 
       // Update reply count on post
       const newCount = localReplyCount + 1;
