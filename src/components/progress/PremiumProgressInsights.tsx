@@ -349,7 +349,7 @@ export const PremiumProgressInsights = ({ daysSober }: PremiumProgressInsightsPr
         >
           <Download className="w-3.5 h-3.5" />
           Export All Recovery Data
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium">PRO</span>
+          <Crown className="w-3.5 h-3.5 text-amber-500" />
         </Button>
       </motion.div>
     </div>
