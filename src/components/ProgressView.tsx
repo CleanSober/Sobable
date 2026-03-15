@@ -529,6 +529,152 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
 
 
 
+      {/* Consistency Score */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.11 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 rounded-lg bg-primary/10"><Shield className="w-4 h-4 text-primary" /></div>
+          <span className="text-sm font-semibold text-foreground">Consistency Score</span>
+        </div>
+        {(() => {
+          const activeDays = weekActivity.filter(d => d.score > 0).length;
+          const consistencyPct = Math.round((activeDays / 7) * 100);
+          const consistencyLabel = consistencyPct >= 85 ? "Exceptional" : consistencyPct >= 70 ? "Strong" : consistencyPct >= 50 ? "Building" : consistencyPct > 0 ? "Getting started" : "No activity yet";
+          const consistencyColor = consistencyPct >= 85 ? "text-emerald-500" : consistencyPct >= 70 ? "text-primary" : consistencyPct >= 50 ? "text-amber-500" : "text-muted-foreground";
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-xs font-medium ${consistencyColor}`}>{consistencyLabel}</span>
+                <span className="text-sm font-bold text-foreground">{consistencyPct}%</span>
+              </div>
+              <div className="h-2 bg-secondary rounded-full overflow-hidden mb-2">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${consistencyPct}%` }}
+                  transition={{ duration: 0.8 }}
+                  className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full"
+                />
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { label: "Mood", done: weekActivity.some(d => d.activities.includes("mood")) },
+                  { label: "Journal", done: weekActivity.some(d => d.activities.includes("journal")) },
+                  { label: "Sleep", done: weekActivity.some(d => d.activities.includes("sleep")) },
+                  { label: "Meditate", done: weekActivity.some(d => d.activities.includes("meditation")) },
+                ].map(habit => (
+                  <div key={habit.label} className={`p-1.5 rounded-lg text-center text-[9px] font-medium border ${habit.done ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-secondary/50 border-border/30 text-muted-foreground"}`}>
+                    {habit.done ? "✓" : "○"} {habit.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+      </motion.div>
+
+      {/* Habit Strength Meter */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-lg bg-accent/10"><Zap className="w-4 h-4 text-accent" /></div>
+          <span className="text-sm font-semibold text-foreground">Habit Strength</span>
+        </div>
+        {(() => {
+          const bestStreak = streakData.length > 0 ? Math.max(...streakData.map(s => s.current)) : 0;
+          const habitScore = Math.min(100, Math.round((bestStreak / 30) * 100));
+          const phase = bestStreak < 7 ? { name: "Forming", desc: "Building the foundation — keep showing up!", color: "text-amber-500" }
+            : bestStreak < 21 ? { name: "Strengthening", desc: "Habits are taking root — stay consistent!", color: "text-primary" }
+            : bestStreak < 66 ? { name: "Solidifying", desc: "Strong habits forming — you're on track!", color: "text-emerald-500" }
+            : { name: "Automatic", desc: "Your habits are part of who you are! 🏆", color: "text-accent" };
+
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-xs font-medium ${phase.color}`}>{phase.name}</span>
+                <span className="text-[10px] text-muted-foreground">{bestStreak} day streak</span>
+              </div>
+              <div className="h-3 bg-secondary rounded-full overflow-hidden mb-2 relative">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${habitScore}%` }}
+                  transition={{ duration: 1 }}
+                  className="h-full bg-gradient-to-r from-accent/80 to-accent rounded-full"
+                />
+                {/* Phase markers */}
+                {[7, 21, 66].map(marker => (
+                  <div key={marker} className="absolute top-0 h-full w-px bg-foreground/20" style={{ left: `${(marker / 30) * 100}%` }} />
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground">{phase.desc}</p>
+            </div>
+          );
+        })()}
+      </motion.div>
+
+      {/* Recovery Insights */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 rounded-lg bg-blue-500/10"><TrendingUp className="w-4 h-4 text-blue-500" /></div>
+          <span className="text-sm font-semibold text-foreground">Recovery Insights</span>
+        </div>
+        <div className="space-y-2">
+          {(() => {
+            const insights: { emoji: string; text: string }[] = [];
+
+            if (daysSober >= 1 && daysSober <= 3) insights.push({ emoji: "🌱", text: "The first 72 hours are the hardest. You're doing something incredible right now." });
+            else if (daysSober <= 7) insights.push({ emoji: "💪", text: `${daysSober} days! Physical withdrawal symptoms typically ease by day 7.` });
+            else if (daysSober <= 14) insights.push({ emoji: "🧠", text: "Your brain is beginning to rebalance dopamine levels. Sleep should start improving." });
+            else if (daysSober <= 30) insights.push({ emoji: "✨", text: "Neural pathways are rewiring. New healthy habits are replacing old patterns." });
+            else if (daysSober <= 90) insights.push({ emoji: "🏔️", text: `${daysSober} days strong! Most people see significant mental clarity improvements by day 90.` });
+            else insights.push({ emoji: "🏆", text: `${daysSober} days! Research shows relapse risk significantly decreases after 90 days.` });
+
+            if (currentStats.moodAvg >= 7) insights.push({ emoji: "😊", text: "Your mood average is above 7 — that's a sign of strong emotional resilience." });
+            if (currentStats.cravingAvg > 0 && currentStats.cravingAvg <= 3) insights.push({ emoji: "🛡️", text: "Cravings are well-managed. Your coping strategies are working." });
+            if (currentStats.meditationCount >= 3) insights.push({ emoji: "🧘", text: `${currentStats.meditationCount} meditation sessions this period — mindfulness builds lasting resilience.` });
+            if (currentStats.journalCount >= 3) insights.push({ emoji: "📝", text: "Regular journaling is linked to 23% better outcomes in recovery studies." });
+
+            if (insights.length === 0) insights.push({ emoji: "📊", text: "Log more activities to unlock personalized recovery insights!" });
+
+            return insights.slice(0, 3).map((insight, i) => (
+              <div key={i} className="p-2 rounded-lg bg-secondary/50 border border-border/30">
+                <p className="text-[10px] text-foreground leading-relaxed">
+                  {insight.emoji} {insight.text}
+                </p>
+              </div>
+            ));
+          })()}
+        </div>
+      </motion.div>
+
+      {/* Best Day Analysis */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }} className="card-enhanced p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 rounded-lg bg-amber-500/10"><Trophy className="w-4 h-4 text-amber-500" /></div>
+          <span className="text-sm font-semibold text-foreground">Best Day This {viewMode === "weekly" ? "Week" : viewMode === "monthly" ? "Month" : "Year"}</span>
+        </div>
+        {(() => {
+          const bestDay = weekActivity.reduce((best, day) => day.score > best.score ? day : best, weekActivity[0] || { date: "", score: 0, activities: [] });
+          if (!bestDay || bestDay.score === 0) {
+            return <p className="text-[10px] text-muted-foreground py-2 text-center">Complete activities to see your best day! 🎯</p>;
+          }
+          const dayLabel = new Date(bestDay.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+          return (
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-amber-500/5 border border-amber-500/15">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center">
+                <span className="text-base">🌟</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-medium text-foreground">{dayLabel}</p>
+                <p className="text-[9px] text-muted-foreground mt-0.5">
+                  {bestDay.activities.length} activities: {bestDay.activities.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(", ")}
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-sm font-bold text-amber-500">{bestDay.score}%</span>
+              </div>
+            </div>
+          );
+        })()}
+      </motion.div>
+
       {/* Health Benefits Timeline */}
       <HealthBenefitsTimeline daysSober={daysSober} />
 
