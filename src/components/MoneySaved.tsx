@@ -98,10 +98,10 @@ const getSavingsMilestones = (totalSaved: number) => [
 // Spending categories
 const getSpendingCategories = (dailySpending: number) => {
   return [
-    { name: "Substance", amount: dailySpending * 0.60, pct: 60, color: "hsl(0 75% 55%)", icon: "🚫" },
-    { name: "Related costs", amount: dailySpending * 0.20, pct: 20, color: "hsl(42 100% 55%)", icon: "🚕" },
-    { name: "Impulse buys", amount: dailySpending * 0.12, pct: 12, color: "hsl(168 84% 45%)", icon: "🛒" },
-    { name: "Other", amount: dailySpending * 0.08, pct: 8, color: "hsl(215 18% 58%)", icon: "📦" },
+    { name: "Substance costs", desc: "Alcohol, drugs, or tobacco purchases", amount: dailySpending * 0.60, pct: 60, color: "hsl(0 75% 55%)", icon: "🚫" },
+    { name: "Related expenses", desc: "Rides, delivery fees, cover charges", amount: dailySpending * 0.20, pct: 20, color: "hsl(42 100% 55%)", icon: "🚕" },
+    { name: "Impulse spending", desc: "Late-night orders, unplanned purchases", amount: dailySpending * 0.12, pct: 12, color: "hsl(168 84% 45%)", icon: "🛒" },
+    { name: "Hidden costs", desc: "Health products, missed work, repairs", amount: dailySpending * 0.08, pct: 8, color: "hsl(215 18% 58%)", icon: "📦" },
   ];
 };
 
@@ -344,10 +344,13 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
 
             {/* Spending breakdown */}
             <div className="glass-card rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-1">
                 <Wallet className="w-4 h-4 text-accent" />
                 <span className="text-sm font-medium text-foreground">Daily spending breakdown</span>
               </div>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                Estimated based on your ${dailySpending}/day addiction-related costs
+              </p>
               <div className="space-y-2.5">
                 {categories.map((cat, index) => (
                   <motion.div
@@ -359,10 +362,11 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                   >
                     <span className="text-sm">{cat.icon}</span>
                     <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-muted-foreground">{cat.name}</span>
+                      <div className="flex justify-between items-center mb-0.5">
+                        <span className="text-xs text-foreground font-medium">{cat.name}</span>
                         <span className="text-xs font-medium text-foreground">${cat.amount.toFixed(2)}</span>
                       </div>
+                      <p className="text-[10px] text-muted-foreground mb-1">{cat.desc}</p>
                       <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
