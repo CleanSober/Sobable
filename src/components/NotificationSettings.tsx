@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, BellOff, Check, Sparkles, Calendar, Flame, AlertTriangle, FileText, Brain, BookOpen, Moon, Mail } from "lucide-react";
+import { Bell, BellOff, Check, Sparkles, Calendar, Flame, AlertTriangle, FileText, Brain, BookOpen, Moon, Mail, Heart, Sunrise, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,7 +62,6 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   };
 
   const handleEnableNotifications = async () => {
-    // Enable both notification systems
     const granted = await requestSmartPermission();
     if (granted) {
       updateSettings({ enabled: true });
@@ -99,7 +98,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
             Smart Notifications
           </CardTitle>
           <CardDescription>
-            Get reminders when you miss check-ins, not at random times.
+            Get personal reminders that keep you on track — not random noise.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -128,12 +127,23 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       disabled: false,
     },
     {
+      key: "dailyMotivation",
+      icon: Sunrise,
+      color: "bg-amber-500/10",
+      iconColor: "text-amber-500",
+      label: "Morning Motivation",
+      desc: "Daily encouraging message at 8 AM",
+      checked: smartSettings.dailyMotivation,
+      onChange: (checked: boolean) => updateSmartSettings({ dailyMotivation: checked }),
+      disabled: !smartSettings.enabled,
+    },
+    {
       key: "missedCheckIn",
       icon: Calendar,
       color: "bg-blue-500/10",
       iconColor: "text-blue-500",
       label: "Missed Check-In",
-      desc: "Remind if not logged by 2 PM",
+      desc: "Gentle nudge if not logged by 2 PM",
       checked: smartSettings.missedCheckIn,
       onChange: (checked: boolean) => updateSmartSettings({ missedCheckIn: checked }),
       disabled: !smartSettings.enabled,
@@ -144,7 +154,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       color: "bg-teal-500/10",
       iconColor: "text-teal-500",
       label: "Missed Journal",
-      desc: "Remind after 2+ days without writing",
+      desc: "Reminder after 2+ days without writing",
       checked: smartSettings.missedJournal,
       onChange: (checked: boolean) => updateSmartSettings({ missedJournal: checked }),
       disabled: !smartSettings.enabled,
@@ -155,7 +165,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       color: "bg-indigo-500/10",
       iconColor: "text-indigo-500",
       label: "Missed Meditation",
-      desc: "Evening reminder if not completed",
+      desc: "Evening calm reminder",
       checked: smartSettings.missedMeditation,
       onChange: (checked: boolean) => updateSmartSettings({ missedMeditation: checked }),
       disabled: !smartSettings.enabled,
@@ -166,7 +176,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       color: "bg-orange-500/10",
       iconColor: "text-orange-500",
       label: "Streak at Risk",
-      desc: "Alert before losing your streak",
+      desc: "Save your streak before midnight",
       checked: smartSettings.streakAtRisk,
       onChange: (checked: boolean) => updateSmartSettings({ streakAtRisk: checked }),
       disabled: !smartSettings.enabled,
@@ -176,10 +186,32 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       icon: AlertTriangle,
       color: "bg-red-500/10",
       iconColor: "text-red-500",
-      label: "Craving Spike Alert",
-      desc: "Alert when cravings are High or Intense",
+      label: "Craving Support",
+      desc: "Immediate help when cravings hit hard",
       checked: smartSettings.cravingSpike,
       onChange: (checked: boolean) => updateSmartSettings({ cravingSpike: checked }),
+      disabled: !smartSettings.enabled,
+    },
+    {
+      key: "progressCelebration",
+      icon: Trophy,
+      color: "bg-yellow-500/10",
+      iconColor: "text-yellow-500",
+      label: "Milestone Celebrations",
+      desc: "Sobriety & streak achievements",
+      checked: smartSettings.progressCelebration,
+      onChange: (checked: boolean) => updateSmartSettings({ progressCelebration: checked }),
+      disabled: !smartSettings.enabled,
+    },
+    {
+      key: "comebackNudge",
+      icon: Heart,
+      color: "bg-pink-500/10",
+      iconColor: "text-pink-500",
+      label: "Comeback Nudge",
+      desc: "Gentle check-in if you've been away 3+ days",
+      checked: smartSettings.comebackNudge,
+      onChange: (checked: boolean) => updateSmartSettings({ comebackNudge: checked }),
       disabled: !smartSettings.enabled,
     },
     {
@@ -188,7 +220,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       color: "bg-purple-500/10",
       iconColor: "text-purple-500",
       label: "Weekly Report",
-      desc: "Sunday morning summary",
+      desc: "Sunday morning progress summary",
       checked: smartSettings.weeklyReport,
       onChange: (checked: boolean) => updateSmartSettings({ weeklyReport: checked }),
       disabled: !smartSettings.enabled,
@@ -196,10 +228,10 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     {
       key: "milestones",
       icon: Sparkles,
-      color: "bg-amber-500/10",
-      iconColor: "text-amber-500",
-      label: "Milestone Celebrations",
-      desc: "1, 7, 30, 90, 365+ days",
+      color: "bg-emerald-500/10",
+      iconColor: "text-emerald-500",
+      label: "Legacy Milestones",
+      desc: "Classic milestone alerts",
       checked: settings.milestones,
       onChange: (checked: boolean) => updateSettings({ milestones: checked }),
       disabled: !smartSettings.enabled,
@@ -225,7 +257,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           Notification Settings
         </CardTitle>
         <CardDescription>
-          Smart reminders based on your activity
+          Smart, personal reminders that keep you coming back
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
