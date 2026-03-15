@@ -114,7 +114,8 @@ const ForumCard = memo(({
               )}
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground flex-shrink-0 ml-2">
+          <div className="flex items-center gap-1 text-muted-foreground flex-shrink-0 ml-2">
+            <CommunityNotifyButton targetType="forum" targetId={forum.id} />
             <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="text-xs font-medium">{forum.post_count}</span>
             <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
