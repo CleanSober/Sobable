@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem } from "lucide-react";
+import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem, Plus, X, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar, Cell } from "recharts";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
