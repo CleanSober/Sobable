@@ -307,6 +307,20 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
             )}
           </div>
         )}
+
+        {/* Weekly Email Digest */}
+        <div className="pt-3 border-t border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Weekly Email Digest</p>
+                <p className="text-[10px] text-muted-foreground">Progress summary every Sunday</p>
+              </div>
+            </div>
+            <Switch checked={digestEnabled} onCheckedChange={toggleDigest} />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
