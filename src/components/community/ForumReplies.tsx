@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import { toast } from "sonner";
 import { 
   useUserProfiles, 
