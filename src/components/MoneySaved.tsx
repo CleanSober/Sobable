@@ -201,6 +201,35 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
   const monthlyRate = dailySpending * 30;
   const yearlyProjection = dailySpending * 365;
 
+  // Custom milestones
+  const [customMilestones, setCustomMilestones] = useState<{ label: string; target: number; icon: string }[]>(() => {
+    try {
+      const stored = localStorage.getItem("sobable_custom_milestones");
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+  const [showAddMilestone, setShowAddMilestone] = useState(false);
+  const [newMilestoneLabel, setNewMilestoneLabel] = useState("");
+  const [newMilestoneAmount, setNewMilestoneAmount] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("sobable_custom_milestones", JSON.stringify(customMilestones));
+  }, [customMilestones]);
+
+  const addCustomMilestone = () => {
+    const amount = parseFloat(newMilestoneAmount);
+    const label = newMilestoneLabel.trim().slice(0, 50);
+    if (!label || isNaN(amount) || amount <= 0 || amount > 1000000) return;
+    setCustomMilestones(prev => [...prev, { label, target: amount, icon: "🎯" }]);
+    setNewMilestoneLabel("");
+    setNewMilestoneAmount("");
+    setShowAddMilestone(false);
+  };
+
+  const removeCustomMilestone = (index: number) => {
+    setCustomMilestones(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Investment projection (8% annual return)
   const annualReturn = 0.08;
   const dailyReturn = Math.pow(1 + annualReturn, 1 / 365) - 1;
@@ -212,11 +241,15 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
 
   const growthData = generateGrowthData(daysSober, dailySpending);
   const milestones = getSavingsMilestones(totalSaved);
+  const allMilestones = [
+    ...milestones,
+    ...customMilestones.map(m => ({ ...m, unlocked: totalSaved >= m.target })),
+  ].sort((a, b) => a.target - b.target);
   const categories = getSpendingCategories(dailySpending);
   const affordableItems = alternatives.filter((item) => totalSaved >= item.cost);
 
-  const nextMilestone = milestones.find((m) => !m.unlocked);
-  const unlockedCount = milestones.filter((m) => m.unlocked).length;
+  const nextMilestone = allMilestones.find((m) => !m.unlocked);
+  const unlockedCount = allMilestones.filter((m) => m.unlocked).length;
   const progressToNext = nextMilestone
     ? Math.min((totalSaved / nextMilestone.target) * 100, 100)
     : 100;
