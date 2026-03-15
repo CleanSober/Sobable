@@ -1,10 +1,13 @@
-import { Bell, BellOff, Check, Sparkles, Calendar, Flame, AlertTriangle, FileText, Brain, BookOpen, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, BellOff, Check, Sparkles, Calendar, Flame, AlertTriangle, FileText, Brain, BookOpen, Moon, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface NotificationSettingsProps {
@@ -18,6 +21,7 @@ const formatHour = (h: number) => {
 };
 
 const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) => {
+  const { user } = useAuth();
   const { permission, settings, updateSettings, isSupported } = useNotifications(sobrietyStartDate);
   const {
     permission: smartPermission,
@@ -27,6 +31,35 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     missedActions,
     streakAtRisk,
   } = useSmartNotifications(sobrietyStartDate);
+
+  const [digestEnabled, setDigestEnabled] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("app_settings")
+      .select("weekly_digest_enabled")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setDigestEnabled(data.weekly_digest_enabled);
+      });
+  }, [user]);
+
+  const toggleDigest = async (enabled: boolean) => {
+    if (!user) return;
+    setDigestEnabled(enabled);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ user_id: user.id, weekly_digest_enabled: enabled }, { onConflict: "user_id" });
+    if (error) {
+      console.error("Failed to update digest setting:", error);
+      setDigestEnabled(!enabled);
+      toast.error("Failed to update setting");
+    } else {
+      toast.success(enabled ? "Weekly digest enabled" : "Weekly digest disabled");
+    }
+  };
 
   const handleEnableNotifications = async () => {
     // Enable both notification systems
@@ -274,6 +307,20 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
             )}
           </div>
         )}
+
+        {/* Weekly Email Digest */}
+        <div className="pt-3 border-t border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Weekly Email Digest</p>
+                <p className="text-[10px] text-muted-foreground">Progress summary every Sunday</p>
+              </div>
+            </div>
+            <Switch checked={digestEnabled} onCheckedChange={toggleDigest} />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

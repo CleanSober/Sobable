@@ -21,9 +21,16 @@ interface UserDigestData {
 
 interface WeeklyStats {
   moodCheckIns: number;
+  moodAvg: number;
   journalEntries: number;
-  meditationMinutes: number;
+  meditationSessions: number;
   triggersLogged: number;
+  triggersResisted: number;
+  sleepEntries: number;
+  sleepAvg: number;
+  cravingAvg: number;
+  goalsCompleted: number;
+  totalGoalDays: number;
   xpGained: number;
   currentLevel: number;
   achievements: string[];
@@ -38,60 +45,47 @@ interface CommunityStats {
 async function getWeeklyStats(supabase: any, userId: string): Promise<WeeklyStats> {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const weekAgoStr = oneWeekAgo.toISOString().split('T')[0];
+  const weekAgoStr = oneWeekAgo.toISOString().split("T")[0];
 
-  // Get mood check-ins
-  const { count: moodCount } = await supabase
-    .from('mood_entries')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('date', weekAgoStr);
+  const [moodRes, journalRes, triggerRes, sleepRes, goalsRes, xpRes, userXpRes, badgesRes] = await Promise.all([
+    supabase.from("mood_entries").select("mood, craving_level").eq("user_id", userId).gte("date", weekAgoStr),
+    supabase.from("journal_entries").select("id", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", oneWeekAgo.toISOString()),
+    supabase.from("trigger_entries").select("id, outcome").eq("user_id", userId).gte("date", weekAgoStr),
+    supabase.from("sleep_entries").select("hours_slept").eq("user_id", userId).gte("date", weekAgoStr),
+    supabase.from("daily_goals").select("meditation_done, mood_logged, journal_written, trigger_logged").eq("user_id", userId).gte("date", weekAgoStr),
+    supabase.from("xp_history").select("xp_amount").eq("user_id", userId).gte("created_at", oneWeekAgo.toISOString()),
+    supabase.from("user_xp").select("current_level").eq("user_id", userId).single(),
+    supabase.from("user_badges").select("badge_name").eq("user_id", userId).gte("earned_at", oneWeekAgo.toISOString()),
+  ]);
 
-  // Get journal entries
-  const { count: journalCount } = await supabase
-    .from('journal_entries')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('created_at', oneWeekAgo.toISOString());
+  const moods = moodRes.data || [];
+  const triggers = triggerRes.data || [];
+  const sleeps = (sleepRes.data || []).map((s: any) => ({ ...s, hours_slept: Number(s.hours_slept) }));
+  const goals = goalsRes.data || [];
+  const xpData = xpRes.data || [];
 
-  // Get triggers logged
-  const { count: triggerCount } = await supabase
-    .from('trigger_entries')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('date', weekAgoStr);
+  const moodValues = moods.map((m: any) => m.mood);
+  const cravingValues = moods.map((m: any) => m.craving_level);
+  const sleepValues = sleeps.map((s: any) => s.hours_slept);
+  const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a: number, b: number) => a + b, 0) / arr.length : 0;
 
-  // Get XP gained this week
-  const { data: xpData } = await supabase
-    .from('xp_history')
-    .select('xp_amount')
-    .eq('user_id', userId)
-    .gte('created_at', oneWeekAgo.toISOString());
-
-  const xpGained = xpData?.reduce((sum: number, entry: { xp_amount: number }) => sum + entry.xp_amount, 0) || 0;
-
-  // Get current level
-  const { data: userXp } = await supabase
-    .from('user_xp')
-    .select('current_level')
-    .eq('user_id', userId)
-    .single();
-
-  // Get new badges this week
-  const { data: badges } = await supabase
-    .from('user_badges')
-    .select('badge_name')
-    .eq('user_id', userId)
-    .gte('earned_at', oneWeekAgo.toISOString());
+  const completedGoals = goals.filter((g: any) => g.meditation_done && g.mood_logged && g.journal_written && g.trigger_logged).length;
 
   return {
-    moodCheckIns: moodCount || 0,
-    journalEntries: journalCount || 0,
-    meditationMinutes: 0,
-    triggersLogged: triggerCount || 0,
-    xpGained,
-    currentLevel: userXp?.current_level || 1,
-    achievements: badges?.map((b: { badge_name: string }) => b.badge_name) || [],
+    moodCheckIns: moods.length,
+    moodAvg: Math.round(avg(moodValues) * 10) / 10,
+    journalEntries: journalRes.count || 0,
+    meditationSessions: goals.filter((g: any) => g.meditation_done).length,
+    triggersLogged: triggers.length,
+    triggersResisted: triggers.filter((t: any) => t.outcome === "resisted" || t.outcome === "stayed_sober").length,
+    sleepEntries: sleeps.length,
+    sleepAvg: Math.round(avg(sleepValues) * 10) / 10,
+    cravingAvg: Math.round(avg(cravingValues) * 10) / 10,
+    goalsCompleted: completedGoals,
+    totalGoalDays: goals.length,
+    xpGained: xpData.reduce((sum: number, entry: any) => sum + entry.xp_amount, 0),
+    currentLevel: userXpRes.data?.current_level || 1,
+    achievements: (badgesRes.data || []).map((b: any) => b.badge_name),
   };
 }
 
@@ -99,30 +93,16 @@ async function getCommunityStats(supabase: any): Promise<CommunityStats> {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  // Get new posts count
-  const { count: newPosts } = await supabase
-    .from('forum_posts')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', oneWeekAgo.toISOString());
-
-  // Get new replies count
-  const { count: newReplies } = await supabase
-    .from('forum_replies')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', oneWeekAgo.toISOString());
-
-  // Get active discussions (most replied)
-  const { data: activeDiscussions } = await supabase
-    .from('forum_posts')
-    .select('title, reply_count')
-    .gte('created_at', oneWeekAgo.toISOString())
-    .order('reply_count', { ascending: false })
-    .limit(3);
+  const [postsRes, repliesRes, activeRes] = await Promise.all([
+    supabase.from("forum_posts").select("*", { count: "exact", head: true }).gte("created_at", oneWeekAgo.toISOString()),
+    supabase.from("forum_replies").select("*", { count: "exact", head: true }).gte("created_at", oneWeekAgo.toISOString()),
+    supabase.from("forum_posts").select("title, reply_count").gte("created_at", oneWeekAgo.toISOString()).order("reply_count", { ascending: false }).limit(3),
+  ]);
 
   return {
-    newPosts: newPosts || 0,
-    newReplies: newReplies || 0,
-    activeDiscussions: activeDiscussions?.map((d: { title: string }) => d.title) || [],
+    newPosts: postsRes.count || 0,
+    newReplies: repliesRes.count || 0,
+    activeDiscussions: (activeRes.data || []).map((d: any) => d.title),
   };
 }
 
@@ -130,8 +110,25 @@ function calculateDaysSober(sobrietyStartDate: string | null): number {
   if (!sobrietyStartDate) return 0;
   const start = new Date(sobrietyStartDate);
   const now = new Date();
-  const diffTime = Math.abs(now.getTime() - start.getTime());
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.floor(Math.abs(now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function getMoodEmoji(mood: number): string {
+  if (mood >= 8) return "😊";
+  if (mood >= 6) return "🙂";
+  if (mood >= 4) return "😐";
+  if (mood >= 2) return "😔";
+  return "😢";
+}
+
+function getMotivationalMessage(daysSober: number, stats: WeeklyStats): string {
+  if (stats.goalsCompleted >= 5) return "Incredible consistency this week — you're building unshakable habits! 🏆";
+  if (stats.moodAvg >= 7) return "Your mood has been great this week — your hard work is paying off! ✨";
+  if (stats.cravingAvg > 0 && stats.cravingAvg <= 3) return "Cravings are under control — your resilience is growing stronger every day! 💪";
+  if (daysSober >= 90) return "Over 90 days strong — you're in a whole new chapter of your life! 📖";
+  if (daysSober >= 30) return "A full month and beyond — every day adds to your incredible foundation! 🏗️";
+  if (daysSober >= 7) return "One week at a time — you're proving what's possible! 🌟";
+  return "Every single day counts. You're choosing a better life! 💚";
 }
 
 function generateEmailHtml(
@@ -141,114 +138,180 @@ function generateEmailHtml(
   communityStats: CommunityStats,
   appUrl: string
 ): string {
+  const resistRate = stats.triggersLogged > 0
+    ? Math.round((stats.triggersResisted / stats.triggersLogged) * 100)
+    : null;
+
+  const goalRate = stats.totalGoalDays > 0
+    ? Math.round((stats.goalsCompleted / stats.totalGoalDays) * 100)
+    : null;
+
+  const motivationalMessage = getMotivationalMessage(daysSober, stats);
+
   const achievementsHtml = stats.achievements.length > 0
-    ? `<h2 style="color: #374151; font-size: 20px; font-weight: 600; margin: 24px 0 12px; padding: 0 30px;">🏆 New Achievements</h2>
-       <div style="padding: 0 30px;">${stats.achievements.map(a => `<p style="margin: 6px 0; color: #4b5563;">✨ ${a}</p>`).join('')}</div>`
-    : '';
+    ? `<tr><td style="padding: 0 30px;">
+        <h2 style="color: #374151; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">🏆 New Achievements</h2>
+        ${stats.achievements.map(a => `<div style="background: #fef3c7; border-radius: 8px; padding: 10px 14px; margin: 6px 0; color: #92400e; font-size: 14px;">✨ ${a}</div>`).join("")}
+      </td></tr>`
+    : "";
 
   const discussionsHtml = communityStats.activeDiscussions.length > 0
-    ? `<p style="color: #6b7280; font-size: 14px; font-weight: 600; padding: 0 30px; margin: 12px 0 8px;">Hot discussions:</p>
-       ${communityStats.activeDiscussions.slice(0, 3).map(t => `<p style="color: #4b5563; font-size: 14px; padding: 4px 30px; margin: 0;">💬 ${t}</p>`).join('')}`
-    : '';
+    ? communityStats.activeDiscussions.slice(0, 3).map(t =>
+        `<div style="color: #4b5563; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f3f4f6;">💬 ${t}</div>`
+      ).join("")
+    : '<p style="color: #9ca3af; font-size: 13px; margin: 0;">No new discussions this week</p>';
 
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Weekly Recovery Progress</title>
 </head>
-<body style="background-color: #f6f9fc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px;">
-  <div style="background-color: #ffffff; margin: 0 auto; padding: 20px 0 48px; max-width: 600px; border-radius: 12px;">
+<body style="background-color: #0f1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;">
     
     <!-- Header -->
-    <div style="padding: 20px 30px; text-align: center;">
-      <p style="font-size: 24px; font-weight: bold; color: #16a34a; margin: 0;">🌿 Sobable</p>
-    </div>
-    
-    <!-- Greeting -->
-    <h1 style="color: #1f2937; font-size: 28px; font-weight: bold; margin: 30px 0 10px; padding: 0 30px;">
-      Hey ${displayName}! 👋
-    </h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 26px; padding: 0 30px; margin: 0 0 10px;">
-      Here's your weekly recovery journey summary. You're doing amazing!
-    </p>
-    
-    <!-- Sobriety Counter -->
-    <div style="background-color: #ecfdf5; border-radius: 12px; padding: 24px; margin: 20px 30px; text-align: center;">
-      <p style="font-size: 48px; font-weight: bold; color: #16a34a; margin: 0; line-height: 1;">${daysSober}</p>
-      <p style="font-size: 16px; color: #065f46; margin: 8px 0 0; font-weight: 500;">Days Sober</p>
-    </div>
-    
-    <hr style="border-color: #e5e7eb; margin: 24px 30px;">
-    
-    <!-- Weekly Activity -->
-    <h2 style="color: #374151; font-size: 20px; font-weight: 600; margin: 24px 0 12px; padding: 0 30px;">📊 This Week's Activity</h2>
-    
-    <table style="width: 100%; padding: 0 30px; border-collapse: collapse;">
-      <tr>
-        <td style="text-align: center; padding: 12px; width: 50%;">
-          <p style="font-size: 32px; font-weight: bold; color: #3b82f6; margin: 0; line-height: 1.2;">${stats.moodCheckIns}</p>
-          <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Mood Check-ins</p>
-        </td>
-        <td style="text-align: center; padding: 12px; width: 50%;">
-          <p style="font-size: 32px; font-weight: bold; color: #3b82f6; margin: 0; line-height: 1.2;">${stats.journalEntries}</p>
-          <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Journal Entries</p>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: center; padding: 12px; width: 50%;">
-          <p style="font-size: 32px; font-weight: bold; color: #3b82f6; margin: 0; line-height: 1.2;">${stats.meditationMinutes}</p>
-          <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Meditation Min</p>
-        </td>
-        <td style="text-align: center; padding: 12px; width: 50%;">
-          <p style="font-size: 32px; font-weight: bold; color: #3b82f6; margin: 0; line-height: 1.2;">${stats.triggersLogged}</p>
-          <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Triggers Logged</p>
-        </td>
-      </tr>
-    </table>
-    
-    <hr style="border-color: #e5e7eb; margin: 24px 30px;">
-    
-    <!-- XP & Level -->
-    <h2 style="color: #374151; font-size: 20px; font-weight: 600; margin: 24px 0 12px; padding: 0 30px;">🎮 Gamification Progress</h2>
-    <div style="background-color: #fef3c7; border-radius: 8px; padding: 16px 20px; margin: 0 30px;">
-      <p style="color: #4b5563; font-size: 16px; margin: 0;">
-        <strong>+${stats.xpGained} XP</strong> earned this week! You're now at <strong>Level ${stats.currentLevel}</strong>.
-      </p>
-    </div>
-    
-    ${achievementsHtml}
-    
-    <hr style="border-color: #e5e7eb; margin: 24px 30px;">
-    
-    <!-- Community -->
-    <h2 style="color: #374151; font-size: 20px; font-weight: 600; margin: 24px 0 12px; padding: 0 30px;">👥 Community Highlights</h2>
-    <p style="color: #4b5563; font-size: 16px; line-height: 26px; padding: 0 30px; margin: 0 0 10px;">
-      This week in the community: <strong>${communityStats.newPosts}</strong> new posts and <strong>${communityStats.newReplies}</strong> replies!
-    </p>
-    ${discussionsHtml}
-    
-    <hr style="border-color: #e5e7eb; margin: 24px 30px;">
-    
-    <!-- CTA -->
-    <div style="text-align: center; padding: 20px 30px;">
-      <a href="${appUrl}" style="background-color: #16a34a; border-radius: 8px; color: #fff; font-size: 16px; font-weight: bold; text-decoration: none; display: inline-block; padding: 14px 32px;">
-        Continue Your Journey
-      </a>
-    </div>
-    
-    <!-- Footer -->
-    <div style="background-color: #f9fafb; border-radius: 0 0 12px 12px; padding: 24px 30px; margin-top: 24px;">
-      <p style="color: #374151; font-size: 16px; text-align: center; margin: 0 0 12px;">
-        Keep going strong! Every day is a victory. 💪
-      </p>
-      <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0 0 8px;">
-        Sobable App • You're receiving this because you opted in to weekly digests.
-      </p>
-    </div>
-  </div>
+    <tr><td style="text-align: center; padding: 32px 0 16px;">
+      <p style="font-size: 28px; font-weight: bold; color: #22c55e; margin: 0;">🌿 Sobable</p>
+      <p style="font-size: 12px; color: #6b7280; margin: 8px 0 0; text-transform: uppercase; letter-spacing: 1.5px;">Weekly Progress Report</p>
+    </td></tr>
+
+    <!-- Main Card -->
+    <tr><td>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background: #1a1d27; border-radius: 16px; overflow: hidden;">
+        
+        <!-- Greeting -->
+        <tr><td style="padding: 28px 30px 12px;">
+          <h1 style="color: #f9fafb; font-size: 22px; font-weight: bold; margin: 0;">
+            Hey ${displayName}! 👋
+          </h1>
+          <p style="color: #9ca3af; font-size: 14px; line-height: 22px; margin: 8px 0 0;">
+            Here's your weekly recovery snapshot.
+          </p>
+        </td></tr>
+
+        <!-- Sobriety Counter -->
+        <tr><td style="padding: 16px 30px;">
+          <div style="background: linear-gradient(135deg, #065f46, #047857); border-radius: 12px; padding: 24px; text-align: center;">
+            <p style="font-size: 56px; font-weight: bold; color: #ffffff; margin: 0; line-height: 1;">${daysSober}</p>
+            <p style="font-size: 14px; color: #a7f3d0; margin: 8px 0 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Days Sober</p>
+          </div>
+        </td></tr>
+
+        <!-- Motivational Banner -->
+        <tr><td style="padding: 0 30px 16px;">
+          <div style="background: #22c55e15; border: 1px solid #22c55e30; border-radius: 10px; padding: 14px 16px;">
+            <p style="color: #86efac; font-size: 14px; margin: 0; line-height: 20px;">${motivationalMessage}</p>
+          </div>
+        </td></tr>
+
+        <!-- Divider -->
+        <tr><td style="padding: 0 30px;"><hr style="border: none; border-top: 1px solid #2a2d38; margin: 8px 0;"></td></tr>
+
+        <!-- Weekly Activity Stats -->
+        <tr><td style="padding: 16px 30px 8px;">
+          <h2 style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0;">📊 This Week's Activity</h2>
+        </td></tr>
+
+        <tr><td style="padding: 0 30px;">
+          <table width="100%" cellpadding="0" cellspacing="8" style="border-collapse: separate;">
+            <tr>
+              <td width="50%" style="background: #252836; border-radius: 10px; padding: 14px; text-align: center;">
+                <p style="font-size: 28px; font-weight: bold; color: #f472b6; margin: 0;">${stats.moodCheckIns}</p>
+                <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Mood Check-ins</p>
+                ${stats.moodAvg > 0 ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0;">Avg: ${stats.moodAvg}/10 ${getMoodEmoji(stats.moodAvg)}</p>` : ""}
+              </td>
+              <td width="50%" style="background: #252836; border-radius: 10px; padding: 14px; text-align: center;">
+                <p style="font-size: 28px; font-weight: bold; color: #818cf8; margin: 0;">${stats.sleepEntries}</p>
+                <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Sleep Logs</p>
+                ${stats.sleepAvg > 0 ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0;">Avg: ${stats.sleepAvg}h/night</p>` : ""}
+              </td>
+            </tr>
+            <tr>
+              <td width="50%" style="background: #252836; border-radius: 10px; padding: 14px; text-align: center;">
+                <p style="font-size: 28px; font-weight: bold; color: #60a5fa; margin: 0;">${stats.journalEntries}</p>
+                <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Journal Entries</p>
+              </td>
+              <td width="50%" style="background: #252836; border-radius: 10px; padding: 14px; text-align: center;">
+                <p style="font-size: 28px; font-weight: bold; color: #34d399; margin: 0;">${stats.meditationSessions}</p>
+                <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Meditations</p>
+              </td>
+            </tr>
+            <tr>
+              <td width="50%" style="background: #252836; border-radius: 10px; padding: 14px; text-align: center;">
+                <p style="font-size: 28px; font-weight: bold; color: #fb923c; margin: 0;">${stats.triggersLogged}</p>
+                <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Triggers Logged</p>
+                ${resistRate !== null ? `<p style="font-size: 12px; color: ${resistRate >= 70 ? "#34d399" : "#fbbf24"}; margin: 4px 0 0;">${resistRate}% resisted</p>` : ""}
+              </td>
+              <td width="50%" style="background: #252836; border-radius: 10px; padding: 14px; text-align: center;">
+                <p style="font-size: 28px; font-weight: bold; color: #fbbf24; margin: 0;">${stats.cravingAvg > 0 ? stats.cravingAvg : "—"}</p>
+                <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Avg Craving</p>
+                ${stats.cravingAvg > 0 ? `<p style="font-size: 12px; color: ${stats.cravingAvg <= 3 ? "#34d399" : stats.cravingAvg <= 6 ? "#fbbf24" : "#f87171"}; margin: 4px 0 0;">${stats.cravingAvg <= 3 ? "Well managed" : stats.cravingAvg <= 6 ? "Moderate" : "Stay alert"}</p>` : ""}
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <!-- Goal Completion -->
+        ${goalRate !== null ? `
+        <tr><td style="padding: 16px 30px 0;">
+          <div style="background: #252836; border-radius: 10px; padding: 14px 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #d1d5db; font-size: 13px;">🎯 Daily Goals Completed</span>
+              <span style="color: ${goalRate >= 70 ? "#34d399" : goalRate >= 40 ? "#fbbf24" : "#f87171"}; font-size: 16px; font-weight: bold;">${goalRate}%</span>
+            </div>
+            <p style="color: #6b7280; font-size: 12px; margin: 6px 0 0;">${stats.goalsCompleted} of ${stats.totalGoalDays} days with all goals met</p>
+          </div>
+        </td></tr>` : ""}
+
+        <!-- Divider -->
+        <tr><td style="padding: 8px 30px;"><hr style="border: none; border-top: 1px solid #2a2d38; margin: 8px 0;"></td></tr>
+
+        <!-- XP & Level -->
+        <tr><td style="padding: 8px 30px;">
+          <h2 style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 12px;">🎮 Progress</h2>
+          <div style="background: linear-gradient(135deg, #78350f, #92400e); border-radius: 10px; padding: 16px;">
+            <p style="color: #fef3c7; font-size: 15px; margin: 0;">
+              <strong>+${stats.xpGained} XP</strong> earned this week · Level <strong>${stats.currentLevel}</strong>
+            </p>
+          </div>
+        </td></tr>
+
+        ${achievementsHtml}
+
+        <!-- Divider -->
+        <tr><td style="padding: 8px 30px;"><hr style="border: none; border-top: 1px solid #2a2d38; margin: 8px 0;"></td></tr>
+
+        <!-- Community -->
+        <tr><td style="padding: 8px 30px;">
+          <h2 style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 8px;">👥 Community</h2>
+          <p style="color: #9ca3af; font-size: 13px; margin: 0 0 10px;">
+            <strong style="color: #d1d5db;">${communityStats.newPosts}</strong> new posts · <strong style="color: #d1d5db;">${communityStats.newReplies}</strong> replies this week
+          </p>
+          ${discussionsHtml}
+        </td></tr>
+
+        <!-- CTA -->
+        <tr><td style="text-align: center; padding: 28px 30px;">
+          <a href="${appUrl}" style="background: linear-gradient(135deg, #16a34a, #15803d); border-radius: 10px; color: #fff; font-size: 15px; font-weight: bold; text-decoration: none; display: inline-block; padding: 14px 36px;">
+            Continue Your Journey →
+          </a>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="background: #12141c; border-radius: 0 0 16px 16px; padding: 20px 30px;">
+          <p style="color: #6b7280; font-size: 12px; text-align: center; margin: 0 0 6px;">
+            Sobable · Your recovery companion
+          </p>
+          <p style="color: #4b5563; font-size: 11px; text-align: center; margin: 0;">
+            You're receiving this because you have weekly digests enabled. Manage in app settings.
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 }
@@ -264,7 +327,7 @@ async function sendDigestToUser(
     const daysSober = calculateDaysSober(user.sobrietyStartDate);
 
     const html = generateEmailHtml(
-      user.displayName || 'Friend',
+      user.displayName || "Friend",
       daysSober,
       stats,
       communityStats,
@@ -272,9 +335,9 @@ async function sendDigestToUser(
     );
 
     const { error } = await resend.emails.send({
-      from: "Sobable <onboarding@resend.dev>",
+      from: "Sobable <digest@sobable.com>",
       to: [user.email],
-      subject: `Your Weekly Recovery Progress - ${daysSober} Days Strong! 🌟`,
+      subject: `📊 Week ${Math.ceil(daysSober / 7)} — ${daysSober} Days Strong!`,
       html,
     });
 
@@ -283,16 +346,15 @@ async function sendDigestToUser(
       return { success: false, email: user.email, error };
     }
 
-    console.log(`Successfully sent digest to ${user.email}`);
+    console.log(`Sent digest to ${user.email}`);
     return { success: true, email: user.email };
   } catch (error) {
-    console.error(`Error processing digest for ${user.email}:`, error);
+    console.error(`Error for ${user.email}:`, error);
     return { success: false, email: user.email, error };
   }
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -300,7 +362,7 @@ serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Require admin auth or service key to prevent unauthorized mass emailing
+    // Auth: require admin or scheduled invocation (no origin)
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
@@ -311,7 +373,6 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Check if user is admin
       const { data: isAdmin } = await supabase.rpc("is_admin", { check_user_id: userData.user.id });
       if (!isAdmin) {
         return new Response(JSON.stringify({ error: "Admin access required" }), {
@@ -320,7 +381,6 @@ serve(async (req) => {
         });
       }
     } else {
-      // Allow calls without auth only from scheduled invocations (no origin header)
       const origin = req.headers.get("origin");
       if (origin) {
         return new Response(JSON.stringify({ error: "Authorization required" }), {
@@ -330,95 +390,103 @@ serve(async (req) => {
       }
     }
 
-    // Get app URL from environment or use default
-    const appUrl = Deno.env.get("APP_URL") || "https://id-preview--94e498b2-e0e1-433a-9333-abea9f12a84c.lovable.app";
+    const appUrl = Deno.env.get("APP_URL") || "https://sobable.com";
 
-    // Parse request body for optional filters
     let targetUserId: string | null = null;
     try {
       const body = await req.json();
       targetUserId = body?.userId || null;
     } catch {
-      // No body provided, send to all users
+      // No body = send to all opted-in users
     }
 
-    // Get users who have completed onboarding
-    let query = supabase
-      .from('profiles')
-      .select('user_id, display_name, sobriety_start_date');
+    // Get profiles with digest enabled
+    // First get users who opted-in (or have no settings row = default enabled)
+    let profilesQuery = supabase
+      .from("profiles")
+      .select("user_id, display_name, sobriety_start_date")
+      .eq("onboarding_complete", true);
 
     if (targetUserId) {
-      query = query.eq('user_id', targetUserId);
-    } else {
-      query = query.eq('onboarding_complete', true);
+      profilesQuery = profilesQuery.eq("user_id", targetUserId);
     }
 
-    const { data: profiles, error: profilesError } = await query;
-
-    if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
-      throw profilesError;
-    }
+    const { data: profiles, error: profilesError } = await profilesQuery;
+    if (profilesError) throw profilesError;
 
     if (!profiles || profiles.length === 0) {
-      return new Response(
-        JSON.stringify({ message: "No users to send digests to" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ message: "No users to send digests to" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Get user emails from auth.users
+    // Filter out users who opted out
+    const userIds = profiles.map((p: any) => p.user_id);
+    const { data: optedOutSettings } = await supabase
+      .from("app_settings")
+      .select("user_id")
+      .in("user_id", userIds)
+      .eq("weekly_digest_enabled", false);
+
+    const optedOutIds = new Set((optedOutSettings || []).map((s: any) => s.user_id));
+    const eligibleProfiles = targetUserId
+      ? profiles // Always send if targeting specific user
+      : profiles.filter((p: any) => !optedOutIds.has(p.user_id));
+
+    if (eligibleProfiles.length === 0) {
+      return new Response(JSON.stringify({ message: "All users opted out" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get emails
     const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+    if (authError) throw authError;
 
-    if (authError) {
-      console.error("Error fetching auth users:", authError);
-      throw authError;
-    }
+    const usersWithEmails: UserDigestData[] = eligibleProfiles
+      .map((profile: any) => {
+        const authUser = authData.users.find((u: any) => u.id === profile.user_id);
+        return {
+          userId: profile.user_id,
+          email: authUser?.email || "",
+          displayName: profile.display_name,
+          sobrietyStartDate: profile.sobriety_start_date,
+        };
+      })
+      .filter((u: UserDigestData) => u.email);
 
-    // Map profiles to include emails
-    const usersWithEmails: UserDigestData[] = profiles.map((profile) => {
-      const authUser = authData.users.find((u) => u.id === profile.user_id);
-      return {
-        userId: profile.user_id,
-        email: authUser?.email || '',
-        displayName: profile.display_name,
-        sobrietyStartDate: profile.sobriety_start_date,
-      };
-    }).filter((u) => u.email);
-
-    // Get community stats once (shared across all digests)
     const communityStats = await getCommunityStats(supabase);
 
-    // Send digests to all users
-    const results = await Promise.all(
-      usersWithEmails.map((user) => sendDigestToUser(user, supabase, communityStats, appUrl))
-    );
+    // Send in batches of 5 to avoid rate limits
+    const batchSize = 5;
+    const results: any[] = [];
+    for (let i = 0; i < usersWithEmails.length; i += batchSize) {
+      const batch = usersWithEmails.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map((user) => sendDigestToUser(user, supabase, communityStats, appUrl))
+      );
+      results.push(...batchResults);
+      if (i + batchSize < usersWithEmails.length) {
+        await new Promise((r) => setTimeout(r, 1000)); // 1s delay between batches
+      }
+    }
 
     const successful = results.filter((r) => r.success).length;
     const failed = results.filter((r) => !r.success).length;
 
-    console.log(`Weekly digest completed: ${successful} sent, ${failed} failed`);
+    console.log(`Weekly digest: ${successful} sent, ${failed} failed out of ${results.length}`);
 
     return new Response(
-      JSON.stringify({
-        message: "Weekly digest processing complete",
-        successful,
-        failed,
-        details: results,
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ message: "Weekly digest complete", successful, failed, total: results.length }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error in weekly-digest function:", error);
+    console.error("Weekly digest error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
