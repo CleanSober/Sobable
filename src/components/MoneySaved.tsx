@@ -302,18 +302,48 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
     return Math.round(total);
   })();
 
-  // Premium data
-  const multiYearData = useMemo(() => generateMultiYearProjection(dailySpending, daysSober), [dailySpending, daysSober]);
+  // Premium data — use user's custom return rate
+  const customRate = proSettings.returnRate / 100;
+  const multiYearData = useMemo(() => {
+    const monthlyContribution = dailySpending * 30;
+    const currentSaved = dailySpending * daysSober;
+    const projections = [{ year: "Now", cash: currentSaved, conservative: currentSaved, moderate: currentSaved, aggressive: currentSaved }];
+    const rates = { conservative: Math.max(customRate - 0.03, 0.02), moderate: customRate, aggressive: customRate + 0.04 };
+    for (let y = 1; y <= 10; y++) {
+      const cash = currentSaved + monthlyContribution * 12 * y;
+      const calc = (rate: number) => {
+        let total = currentSaved;
+        for (let m = 0; m < y * 12; m++) total = (total + monthlyContribution) * (1 + rate / 12);
+        return Math.round(total);
+      };
+      projections.push({ year: `${y}Y`, cash: Math.round(cash), conservative: calc(rates.conservative), moderate: calc(rates.moderate), aggressive: calc(rates.aggressive) });
+    }
+    return projections;
+  }, [dailySpending, daysSober, customRate]);
   const monthlyData = useMemo(() => generateMonthlyBreakdown(daysSober, dailySpending), [daysSober, dailySpending]);
   const financialGoals = useMemo(() => getFinancialGoals(totalSaved, dailySpending), [totalSaved, dailySpending]);
+
+  // Debt payoff calculation for Pro
+  const debtPayoffMonths = useMemo(() => {
+    if (!proSettings.debtAmount || proSettings.debtAmount <= 0) return null;
+    const monthlyPayment = dailySpending * 30;
+    const monthlyInterestRate = (proSettings.debtInterest / 100) / 12;
+    if (monthlyPayment <= proSettings.debtAmount * monthlyInterestRate) return Infinity;
+    let balance = proSettings.debtAmount;
+    let months = 0;
+    while (balance > 0 && months < 600) {
+      balance = balance * (1 + monthlyInterestRate) - monthlyPayment;
+      months++;
+    }
+    return months;
+  }, [proSettings.debtAmount, proSettings.debtInterest, dailySpending]);
 
   // Premium stats
   const fiveYearModerate = multiYearData.find(d => d.year === "5Y")?.moderate || 0;
   const tenYearModerate = multiYearData.find(d => d.year === "10Y")?.moderate || 0;
   const tenYearCash = multiYearData.find(d => d.year === "10Y")?.cash || 0;
   const compoundGain10Y = tenYearModerate - tenYearCash;
-  const savingsRate = dailySpending; // per day
-  const monthlyInvestmentIncome = Math.round((tenYearModerate * 0.04) / 12); // 4% withdrawal rate
+  const monthlyInvestmentIncome = Math.round((tenYearModerate * 0.04) / 12);
 
   return (
     <motion.div
