@@ -450,17 +450,30 @@ const Auth = () => {
 
                   {/* Toggle login/signup */}
                   {(mode === "login" || mode === "signup") && (
-                    <div className="mt-5 text-center">
-                      <button
-                        onClick={() => switchMode(mode === "login" ? "signup" : "login")}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {mode === "login" ? (
-                          <>Don't have an account? <span className="text-primary font-medium">Sign up</span></>
-                        ) : (
-                          <>Already have an account? <span className="text-primary font-medium">Sign in</span></>
-                        )}
-                      </button>
+                    <div className="mt-5">
+                      {mode === "login" ? (
+                        <div className="text-center space-y-3">
+                          <p className="text-sm text-muted-foreground">Don't have an account yet?</p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full h-11 font-semibold border-primary/50 text-primary hover:bg-primary/10 transition-all"
+                            onClick={() => switchMode("signup")}
+                          >
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Create Your Free Account
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <button
+                            onClick={() => switchMode("login")}
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Already have an account? <span className="text-primary font-medium">Sign in</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
