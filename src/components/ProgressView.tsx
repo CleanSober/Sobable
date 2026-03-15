@@ -194,17 +194,19 @@ export const ProgressView = ({ daysSober, totalSaved, dailySpending }: ProgressV
 
   useEffect(() => {
     fetchStats();
-  }, [user, viewMode, weekOffset, monthOffset]);
+  }, [user, viewMode, weekOffset, monthOffset, yearOffset]);
 
-  const currentOffset = viewMode === "weekly" ? weekOffset : monthOffset;
+  const currentOffset = viewMode === "weekly" ? weekOffset : viewMode === "monthly" ? monthOffset : yearOffset;
   const { start, end } = getDateRange(currentOffset);
   const dateRangeLabel = viewMode === "weekly"
     ? `${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${end.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-    : start.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    : viewMode === "monthly"
+    ? start.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : start.getFullYear().toString();
 
-  const canGoForward = viewMode === "weekly" ? weekOffset > 0 : monthOffset > 0;
-  const handlePrev = () => viewMode === "weekly" ? setWeekOffset(p => p + 1) : setMonthOffset(p => p + 1);
-  const handleNext = () => viewMode === "weekly" ? setWeekOffset(p => Math.max(0, p - 1)) : setMonthOffset(p => Math.max(0, p - 1));
+  const canGoForward = viewMode === "weekly" ? weekOffset > 0 : viewMode === "monthly" ? monthOffset > 0 : yearOffset > 0;
+  const handlePrev = () => viewMode === "weekly" ? setWeekOffset(p => p + 1) : viewMode === "monthly" ? setMonthOffset(p => p + 1) : setYearOffset(p => p + 1);
+  const handleNext = () => viewMode === "weekly" ? setWeekOffset(p => Math.max(0, p - 1)) : viewMode === "monthly" ? setMonthOffset(p => Math.max(0, p - 1)) : setYearOffset(p => Math.max(0, p - 1));
 
   // Recovery wellness score (free version)
   const wellnessScore = useMemo(() => {
