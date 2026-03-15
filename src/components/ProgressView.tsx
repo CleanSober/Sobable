@@ -4,7 +4,8 @@ import {
   DollarSign, Calendar, Award, Target, 
   BarChart3, Activity, Flame, Brain, Moon, Heart, Minus,
   ChevronLeft, ChevronRight, Sparkles,
-  Check, ArrowUpRight, ArrowDownRight
+  Check, ArrowUpRight, ArrowDownRight,
+  Trophy, Zap, TrendingUp, Shield
 } from "lucide-react";
 import { getMilestones } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
