@@ -174,7 +174,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               transition={{ duration: 0.5, delay: 0.9 }}
               className="text-muted-foreground text-base font-medium"
             >
-              Your journey to recovery
+              Rise. Recover. Renew.
             </motion.p>
           </motion.div>
 
