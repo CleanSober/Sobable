@@ -271,7 +271,7 @@ export const PremiumProgressInsights = ({ daysSober }: PremiumProgressInsightsPr
               <Zap className="w-4 h-4 text-orange-500" />
             </div>
             <span className="text-sm font-semibold text-foreground">Trigger Patterns</span>
-            <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium">PRO</span>
+            <Crown className="ml-auto w-3.5 h-3.5 text-amber-500" />
           </div>
           <p className="text-[10px] text-muted-foreground mb-2">Top triggers over the past 30 days</p>
 
