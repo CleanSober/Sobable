@@ -147,7 +147,7 @@ const Auth = () => {
     setSocialLoading(provider);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/app`,
+        redirect_uri: `${window.location.origin}/`,
       });
       if (result.error) {
         toast.error(result.error.message || `Failed to sign in with ${provider}`);

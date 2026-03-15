@@ -71,8 +71,8 @@ serve(async (req) => {
         trial_period_days: 7,
       },
       payment_method_collection: "always",
-      success_url: `${origin}/app?checkout=success`,
-      cancel_url: `${origin}/app?checkout=cancelled`,
+      success_url: `${origin}/?checkout=success`,
+      cancel_url: `${origin}/?checkout=cancelled`,
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

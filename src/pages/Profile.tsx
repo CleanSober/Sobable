@@ -676,7 +676,7 @@ const Profile = () => {
       </main>
 
       <BottomTabs activeTab={activeTab} onTabChange={(tab) => {
-        navigate("/app");
+        navigate("/");
       }} />
     </div>
   );
