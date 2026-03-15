@@ -36,7 +36,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
 
   const handleTabChange = (tabId: TabId) => {
     impact('light');
-    if (tabId === "community" && onlineCount > 0) {
+    if (tabId === "community" && isPremium && onlineCount > 0) {
       setShowTooltip(true);
       setTimeout(() => setShowTooltip(false), 2000);
     }
