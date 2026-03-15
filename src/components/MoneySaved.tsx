@@ -45,10 +45,9 @@ const useAnimatedCounter = (target: number, duration = 1200) => {
 };
 
 // Generate savings growth data
-const generateGrowthData = (daysSober: number, dailySpending: number) => {
+const generateGrowthData = (daysSober: number, dailySpending: number, annualReturnRate: number = 0.08) => {
   const points: { day: string; saved: number; invested: number }[] = [];
-  const annualReturn = 0.08;
-  const dailyReturn = Math.pow(1 + annualReturn, 1 / 365) - 1;
+  const dailyReturn = Math.pow(1 + annualReturnRate, 1 / 365) - 1;
 
   const totalPoints = Math.min(daysSober, 90);
   const step = Math.max(1, Math.floor(totalPoints / 15));
@@ -136,35 +135,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-// --- Premium: Multi-year projection calculator ---
-const generateMultiYearProjection = (dailySpending: number, daysSober: number) => {
-  const annualReturn = 0.08;
-  const monthlyContribution = dailySpending * 30;
-  const currentSaved = dailySpending * daysSober;
-
-  const projections = [
-    { year: "Now", cash: currentSaved, conservative: currentSaved, moderate: currentSaved, aggressive: currentSaved },
-  ];
-
-  for (let y = 1; y <= 10; y++) {
-    const cash = currentSaved + monthlyContribution * 12 * y;
-    const calcInvested = (rate: number) => {
-      let total = currentSaved;
-      for (let m = 0; m < y * 12; m++) {
-        total = (total + monthlyContribution) * (1 + rate / 12);
-      }
-      return Math.round(total);
-    };
-    projections.push({
-      year: `${y}Y`,
-      cash: Math.round(cash),
-      conservative: calcInvested(0.05),
-      moderate: calcInvested(0.08),
-      aggressive: calcInvested(0.12),
-    });
-  }
-  return projections;
-};
+// (Multi-year projection is computed inline below using the user's custom rate)
 
 // Monthly breakdown for premium
 const generateMonthlyBreakdown = (daysSober: number, dailySpending: number) => {
@@ -278,7 +249,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
       }))
     : null;
 
-  const growthData = generateGrowthData(daysSober, dailySpending);
+  const growthData = generateGrowthData(daysSober, dailySpending, effectiveReturnRate);
   const milestones = getSavingsMilestones(totalSaved);
   const allMilestones = [
     ...milestones,
@@ -401,7 +372,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
               className="text-[10px] text-primary mt-0.5 flex items-center justify-center gap-1"
             >
               <Landmark className="w-3 h-3" />
-              +${investmentGain.toLocaleString()} if invested at 8% return
+              +${investmentGain.toLocaleString()} if invested at {Math.round(effectiveReturnRate * 100)}% return
             </motion.p>
           )}
         </div>
