@@ -31,6 +31,7 @@ interface BottomTabsProps {
 export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
   const { impact } = useHaptics();
   const onlineCount = useOnlineCount();
+  const { isPremium } = usePremiumStatus();
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleTabChange = (tabId: TabId) => {
