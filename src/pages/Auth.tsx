@@ -27,7 +27,7 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && mode !== "reset") navigate("/app");
+    if (user && mode !== "reset") navigate("/");
   }, [user, navigate, mode]);
 
   // Detect password recovery event from URL
@@ -98,7 +98,7 @@ const Auth = () => {
           toast.error(error.message);
         } else {
           toast.success("Password updated successfully!");
-          navigate("/app");
+          navigate("/");
         }
       } finally {
         setLoading(false);
@@ -120,7 +120,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Welcome back!");
-          navigate("/app");
+          navigate("/");
         }
       } else {
         const { error, needsConfirmation } = await signUp(email, password);
@@ -135,7 +135,7 @@ const Auth = () => {
           switchMode("login");
         } else {
           toast.success("Account created! Welcome to your recovery journey.");
-          navigate("/app");
+          navigate("/");
         }
       }
     } finally {
@@ -147,7 +147,7 @@ const Auth = () => {
     setSocialLoading(provider);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/app`,
+        redirect_uri: `${window.location.origin}/`,
       });
       if (result.error) {
         toast.error(result.error.message || `Failed to sign in with ${provider}`);
