@@ -784,11 +784,163 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
           {/* ========== PREMIUM ADVANCED TAB ========== */}
           {isPremium && (
             <TabsContent value="advanced" className="space-y-4 mt-0">
-              {/* Premium header badge */}
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-accent/15 via-primary/10 to-accent/15 border border-accent/25">
-                <Crown className="w-4 h-4 text-accent" />
-                <span className="text-xs font-semibold text-accent">Advanced Financial Intelligence</span>
+              {/* Premium header with settings toggle */}
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-accent/15 via-primary/10 to-accent/15 border border-accent/25">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-accent" />
+                  <span className="text-xs font-semibold text-accent">Advanced Financial Intelligence</span>
+                </div>
+                <button
+                  onClick={() => setShowProSettings(!showProSettings)}
+                  className="p-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 transition-colors"
+                >
+                  <Settings className={`w-3.5 h-3.5 text-accent transition-transform ${showProSettings ? "rotate-90" : ""}`} />
+                </button>
               </div>
+
+              {/* ===== CUSTOMIZATION PANEL ===== */}
+              <AnimatePresence>
+                {showProSettings && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="glass-card rounded-xl p-4 space-y-4 border border-accent/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sliders className="w-4 h-4 text-accent" />
+                        <span className="text-sm font-semibold text-foreground">Your Financial Settings</span>
+                      </div>
+
+                      {/* Expected return rate */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-muted-foreground">Expected annual return</span>
+                          <span className="text-xs font-bold text-accent">{proSettings.returnRate}%</span>
+                        </div>
+                        <Slider
+                          value={[proSettings.returnRate]}
+                          onValueChange={([v]) => updateProSetting("returnRate", v)}
+                          min={2}
+                          max={15}
+                          step={0.5}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between mt-1">
+                          <span className="text-[9px] text-muted-foreground">Savings (2%)</span>
+                          <span className="text-[9px] text-muted-foreground">S&P 500 avg (~10%)</span>
+                          <span className="text-[9px] text-muted-foreground">Aggressive (15%)</span>
+                        </div>
+                      </div>
+
+                      {/* Debt payoff calculator */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-xs font-medium text-foreground">Debt Payoff Calculator</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[10px] text-muted-foreground mb-1 block">Total debt ($)</label>
+                            <Input
+                              type="number"
+                              value={proSettings.debtAmount || ""}
+                              onChange={(e) => updateProSetting("debtAmount", Math.min(parseFloat(e.target.value) || 0, 1000000))}
+                              placeholder="0"
+                              className="h-8 text-xs bg-secondary/50 border-border/50"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-muted-foreground mb-1 block">Interest rate (%)</label>
+                            <Input
+                              type="number"
+                              value={proSettings.debtInterest || ""}
+                              onChange={(e) => updateProSetting("debtInterest", Math.min(parseFloat(e.target.value) || 0, 50))}
+                              placeholder="18"
+                              className="h-8 text-xs bg-secondary/50 border-border/50"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Custom spending categories */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Receipt className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="text-xs font-medium text-foreground">Spending Categories</span>
+                          </div>
+                          {proSettings.customCategories && (
+                            <button
+                              onClick={() => updateProSetting("customCategories", null)}
+                              className="text-[10px] text-primary hover:underline"
+                            >
+                              Reset to defaults
+                            </button>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          {(proSettings.customCategories || [
+                            { name: "Substance costs", desc: "Alcohol, drugs, or tobacco", pct: 60, icon: "🚫" },
+                            { name: "Related expenses", desc: "Rides, delivery, cover charges", pct: 20, icon: "🚕" },
+                            { name: "Impulse spending", desc: "Late-night orders, unplanned buys", pct: 12, icon: "🛒" },
+                            { name: "Hidden costs", desc: "Health, missed work, repairs", pct: 8, icon: "📦" },
+                          ]).map((cat: any, idx: number) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <span className="text-sm w-6">{cat.icon}</span>
+                              <Input
+                                value={cat.name}
+                                onChange={(e) => {
+                                  const cats = proSettings.customCategories || [
+                                    { name: "Substance costs", desc: "Alcohol, drugs, or tobacco", pct: 60, icon: "🚫" },
+                                    { name: "Related expenses", desc: "Rides, delivery, cover charges", pct: 20, icon: "🚕" },
+                                    { name: "Impulse spending", desc: "Late-night orders, unplanned buys", pct: 12, icon: "🛒" },
+                                    { name: "Hidden costs", desc: "Health, missed work, repairs", pct: 8, icon: "📦" },
+                                  ];
+                                  const updated = [...cats];
+                                  updated[idx] = { ...updated[idx], name: e.target.value.slice(0, 30) };
+                                  updateProSetting("customCategories", updated);
+                                }}
+                                className="h-7 text-[11px] bg-secondary/50 border-border/50 flex-1"
+                                maxLength={30}
+                              />
+                              <div className="flex items-center gap-1 min-w-[50px]">
+                                <Input
+                                  type="number"
+                                  value={cat.pct}
+                                  onChange={(e) => {
+                                    const cats = proSettings.customCategories || [
+                                      { name: "Substance costs", desc: "Alcohol, drugs, or tobacco", pct: 60, icon: "🚫" },
+                                      { name: "Related expenses", desc: "Rides, delivery, cover charges", pct: 20, icon: "🚕" },
+                                      { name: "Impulse spending", desc: "Late-night orders, unplanned buys", pct: 12, icon: "🛒" },
+                                      { name: "Hidden costs", desc: "Health, missed work, repairs", pct: 8, icon: "📦" },
+                                    ];
+                                    const updated = [...cats];
+                                    updated[idx] = { ...updated[idx], pct: Math.min(Math.max(parseInt(e.target.value) || 0, 0), 100) };
+                                    updateProSetting("customCategories", updated);
+                                  }}
+                                  className="h-7 text-[11px] bg-secondary/50 border-border/50 w-12 text-center"
+                                />
+                                <span className="text-[10px] text-muted-foreground">%</span>
+                              </div>
+                            </div>
+                          ))}
+                          {(() => {
+                            const cats = proSettings.customCategories || [{ pct: 60 }, { pct: 20 }, { pct: 12 }, { pct: 8 }];
+                            const totalPct = cats.reduce((s: number, c: any) => s + (c.pct || 0), 0);
+                            return totalPct !== 100 ? (
+                              <p className="text-[10px] text-destructive">Total: {totalPct}% — should equal 100%</p>
+                            ) : (
+                              <p className="text-[10px] text-primary">Total: 100% ✓</p>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Key premium stats */}
               <div className="grid grid-cols-2 gap-2">
@@ -799,7 +951,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                 >
                   <Calculator className="w-4 h-4 text-accent mx-auto mb-1" />
                   <p className="text-lg font-bold text-accent">${fiveYearModerate.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">5-Year (invested)</p>
+                  <p className="text-[10px] text-muted-foreground">5-Year at {proSettings.returnRate}%</p>
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -809,7 +961,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                 >
                   <Gem className="w-4 h-4 text-primary mx-auto mb-1" />
                   <p className="text-lg font-bold text-primary">${tenYearModerate.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">10-Year (invested)</p>
+                  <p className="text-[10px] text-muted-foreground">10-Year at {proSettings.returnRate}%</p>
                 </motion.div>
               </div>
 
@@ -817,12 +969,79 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                 <div className="stat-box text-center">
                   <Percent className="w-3.5 h-3.5 text-accent mx-auto mb-1" />
                   <p className="text-base font-bold text-foreground">${compoundGain10Y.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">Compound interest earned</p>
+                  <p className="text-[10px] text-muted-foreground">Interest earned (10Y)</p>
                 </div>
                 <div className="stat-box text-center">
                   <DollarSign className="w-3.5 h-3.5 text-primary mx-auto mb-1" />
                   <p className="text-base font-bold text-foreground">${monthlyInvestmentIncome}/mo</p>
                   <p className="text-[10px] text-muted-foreground">Passive income (4%)</p>
+                </div>
+              </div>
+
+              {/* Debt payoff insight */}
+              {proSettings.debtAmount > 0 && debtPayoffMonths !== null && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="glass-card rounded-xl p-4 border border-primary/20"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <CreditCard className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Debt Freedom Countdown</span>
+                  </div>
+                  {debtPayoffMonths === Infinity ? (
+                    <p className="text-xs text-muted-foreground">
+                      Your daily savings (${dailySpending}/day = ${(dailySpending * 30).toLocaleString()}/mo) won't cover the interest on ${proSettings.debtAmount.toLocaleString()} at {proSettings.debtInterest}%. Consider increasing your savings or reducing the interest rate.
+                    </p>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-2xl font-bold text-primary">
+                          {debtPayoffMonths < 12 ? `${debtPayoffMonths} months` : `${(debtPayoffMonths / 12).toFixed(1)} years`}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Redirecting ${(dailySpending * 30).toLocaleString()}/mo from addiction costs could eliminate ${proSettings.debtAmount.toLocaleString()} of debt at {proSettings.debtInterest}% interest
+                      </p>
+                      <div className="mt-2 h-2 rounded-full bg-muted/40 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min((daysSober / (debtPayoffMonths * 30)) * 100, 100)}%` }}
+                          transition={{ duration: 1 }}
+                          className="h-full rounded-full bg-primary"
+                        />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {Math.min(Math.round((daysSober / (debtPayoffMonths * 30)) * 100), 100)}% of the way there
+                      </p>
+                    </>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Cost per use insight */}
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Banknote className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-medium text-foreground">True Cost of Addiction</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { period: "Per week", amount: dailySpending * 7, sub: "7 days" },
+                    { period: "Per month", amount: dailySpending * 30, sub: "30 days" },
+                    { period: "Per year", amount: dailySpending * 365, sub: "365 days" },
+                  ].map((item) => (
+                    <div key={item.period} className="text-center p-2 rounded-lg bg-destructive/5 border border-destructive/10">
+                      <p className="text-xs font-bold text-destructive">${item.amount.toLocaleString()}</p>
+                      <p className="text-[10px] text-muted-foreground">{item.period}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 p-2.5 rounded-lg bg-primary/5 border border-primary/15">
+                  <p className="text-[11px] text-muted-foreground">
+                    <span className="font-semibold text-foreground">Lifetime cost avoided:</span> If you stay sober for 20 years, you'll save{" "}
+                    <span className="font-bold text-primary">${(dailySpending * 365 * 20).toLocaleString()}</span> in direct costs alone — not counting health, relationships, and opportunities.
+                  </p>
                 </div>
               </div>
 
@@ -836,9 +1055,9 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                   <div className="flex flex-wrap items-center gap-2">
                     {[
                       { color: "hsl(215 18% 60%)", label: "Cash" },
-                      { color: "hsl(168 84% 45%)", label: "5%" },
-                      { color: "hsl(42 100% 55%)", label: "8%" },
-                      { color: "hsl(280 65% 60%)", label: "12%" },
+                      { color: "hsl(168 84% 45%)", label: `${Math.max(proSettings.returnRate - 3, 2)}%` },
+                      { color: "hsl(42 100% 55%)", label: `${proSettings.returnRate}%` },
+                      { color: "hsl(280 65% 60%)", label: `${proSettings.returnRate + 4}%` },
                     ].map(l => (
                       <div key={l.label} className="flex items-center gap-1">
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: l.color }} />
@@ -860,26 +1079,19 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                           <stop offset="95%" stopColor="hsl(42 100% 55%)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <XAxis
-                        dataKey="year"
-                        tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`}
-                      />
+                      <XAxis dataKey="year" tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`} />
                       <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" dataKey="cash" name="Cash" stroke="hsl(215 18% 60%)" strokeWidth={1.5} strokeDasharray="4 4" fill="none" />
-                      <Area type="monotone" dataKey="conservative" name="Conservative (5%)" stroke="hsl(168 84% 45%)" strokeWidth={1.5} fill="none" />
-                      <Area type="monotone" dataKey="moderate" name="Moderate (8%)" stroke="hsl(42 100% 55%)" strokeWidth={2} fill="url(#moderateGrad)" />
-                      <Area type="monotone" dataKey="aggressive" name="Aggressive (12%)" stroke="hsl(280 65% 60%)" strokeWidth={1.5} fill="url(#aggressiveGrad)" />
+                      <Area type="monotone" dataKey="conservative" name={`Conservative (${Math.max(proSettings.returnRate - 3, 2)}%)`} stroke="hsl(168 84% 45%)" strokeWidth={1.5} fill="none" />
+                      <Area type="monotone" dataKey="moderate" name={`Your Rate (${proSettings.returnRate}%)`} stroke="hsl(42 100% 55%)" strokeWidth={2} fill="url(#moderateGrad)" />
+                      <Area type="monotone" dataKey="aggressive" name={`Aggressive (${proSettings.returnRate + 4}%)`} stroke="hsl(280 65% 60%)" strokeWidth={1.5} fill="url(#aggressiveGrad)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
+                <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                  Based on historical S&P 500 avg ~10% • Adjust via ⚙️ settings above
+                </p>
               </div>
 
               {/* Monthly savings breakdown */}
@@ -892,18 +1104,8 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                   <div className="h-36">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                        <XAxis
-                          dataKey="month"
-                          tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }}
-                          axisLine={false}
-                          tickLine={false}
-                          tickFormatter={(v) => `$${v}`}
-                        />
+                        <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="saved" name="Saved" radius={[4, 4, 0, 0]}>
                           {monthlyData.map((_, index) => (
@@ -927,45 +1129,21 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                     const progress = Math.min((totalSaved / goal.target) * 100, 100);
                     const daysLeft = Math.max(0, Math.ceil((goal.target - totalSaved) / dailySpending));
                     const reached = totalSaved >= goal.target;
-
                     return (
-                      <motion.div
-                        key={goal.name}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.05 * index }}
-                      >
+                      <motion.div key={goal.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * index }}>
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <span className="text-sm">{goal.icon}</span>
-                            <span className={`text-xs font-medium ${reached ? "text-accent" : "text-foreground"}`}>
-                              {goal.name}
-                            </span>
+                            <span className={`text-xs font-medium ${reached ? "text-accent" : "text-foreground"}`}>{goal.name}</span>
                           </div>
-                          <span className="text-[10px] text-muted-foreground">
-                            {reached ? "✅ Achieved!" : `~${daysLeft} days`}
-                          </span>
+                          <span className="text-[10px] text-muted-foreground">{reached ? "✅ Achieved!" : `~${daysLeft} days`}</span>
                         </div>
                         <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 0.8, delay: 0.1 * index }}
-                            className="h-full rounded-full"
-                            style={{
-                              background: reached
-                                ? "linear-gradient(135deg, hsl(168 84% 45%), hsl(42 100% 55%))"
-                                : "hsl(168 84% 45%)",
-                            }}
-                          />
+                          <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.8, delay: 0.1 * index }} className="h-full rounded-full" style={{ background: reached ? "linear-gradient(135deg, hsl(168 84% 45%), hsl(42 100% 55%))" : "hsl(168 84% 45%)" }} />
                         </div>
                         <div className="flex justify-between mt-0.5">
-                          <span className="text-[9px] text-muted-foreground">
-                            ${Math.min(totalSaved, goal.target).toLocaleString()}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground">
-                            ${goal.target.toLocaleString()}
-                          </span>
+                          <span className="text-[9px] text-muted-foreground">${Math.min(totalSaved, goal.target).toLocaleString()}</span>
+                          <span className="text-[9px] text-muted-foreground">${goal.target.toLocaleString()}</span>
                         </div>
                       </motion.div>
                     );
@@ -982,7 +1160,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
                   <div>
                     <p className="text-xs font-semibold text-foreground mb-1">The Power of Compound Interest</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      At ${dailySpending}/day invested at 8%, your money earns{" "}
+                      At ${dailySpending}/day invested at {proSettings.returnRate}%, your money earns{" "}
                       <span className="text-accent font-semibold">${compoundGain10Y.toLocaleString()}</span>{" "}
                       in interest alone over 10 years. That's{" "}
                       <span className="text-accent font-semibold">
