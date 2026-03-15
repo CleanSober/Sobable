@@ -372,7 +372,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
               className="text-[10px] text-primary mt-0.5 flex items-center justify-center gap-1"
             >
               <Landmark className="w-3 h-3" />
-              +${investmentGain.toLocaleString()} if invested at 8% return
+              +${investmentGain.toLocaleString()} if invested at {Math.round(effectiveReturnRate * 100)}% return
             </motion.p>
           )}
         </div>
