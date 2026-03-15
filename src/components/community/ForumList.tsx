@@ -1,6 +1,7 @@
 import { useState, useEffect, memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, ChevronRight, Plus, Users, Search, TrendingUp, Clock } from "lucide-react";
+import { CommunityNotifyButton } from "./CommunityNotifyButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
