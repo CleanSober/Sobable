@@ -308,7 +308,7 @@ export const PremiumProgressInsights = ({ daysSober }: PremiumProgressInsightsPr
               <TrendingUp className="w-4 h-4 text-primary" />
             </div>
             <span className="text-sm font-semibold text-foreground">Week Comparison</span>
-            <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium">PRO</span>
+            <Crown className="ml-auto w-3.5 h-3.5 text-amber-500" />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
