@@ -97,7 +97,41 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Welcome back toast with streak info
+  // Daily motivational messages pool
+  const dailyMotivations = useMemo(() => [
+    { emoji: "💪", message: "Every single day you choose yourself. That's real strength." },
+    { emoji: "🌅", message: "A new sunrise, a new chance to be proud of who you're becoming." },
+    { emoji: "🦋", message: "Growth isn't always visible — but it's always happening inside you." },
+    { emoji: "⭐", message: "You are doing something most people only dream about. Keep going." },
+    { emoji: "🔥", message: "Your courage today is writing your comeback story." },
+    { emoji: "🌊", message: "Waves come and go. You're still standing. That's everything." },
+    { emoji: "🏔️", message: "One step at a time — you're climbing higher than you think." },
+    { emoji: "🌟", message: "The hardest battles are fought by the strongest people. That's you." },
+    { emoji: "🌿", message: "Healing isn't linear, but every moment of sobriety counts." },
+    { emoji: "💎", message: "Pressure creates diamonds. You're becoming unbreakable." },
+    { emoji: "🕊️", message: "Freedom isn't given — it's earned. And you're earning it every day." },
+    { emoji: "🌻", message: "You're not just surviving anymore. You're learning to thrive." },
+    { emoji: "🎯", message: "Showing up is the hardest part — and you just did it." },
+    { emoji: "🧠", message: "Your brain is literally rewiring itself right now. Trust the process." },
+    { emoji: "❤️‍🔥", message: "The version of you a year from now will thank you for today." },
+    { emoji: "🛡️", message: "You've already proven you're stronger than your worst day." },
+    { emoji: "🌈", message: "After every storm comes clarity. You're in the clearing now." },
+    { emoji: "⚡", message: "Recovery isn't weakness — it's the most powerful thing you'll ever do." },
+    { emoji: "🎭", message: "You don't have to pretend anymore. This is the real you, and you're amazing." },
+    { emoji: "🌙", message: "Rest when you need to, but never quit. Tomorrow needs you sober." },
+    { emoji: "🏆", message: "Champions aren't born — they're built one sober day at a time." },
+    { emoji: "🧭", message: "You may not see the whole path, but you're heading in the right direction." },
+    { emoji: "🌱", message: "Small roots grow into mighty trees. Your consistency is your superpower." },
+    { emoji: "✨", message: "The world is brighter when you're present in it. Stay." },
+    { emoji: "🫂", message: "You're never alone in this — even when it feels like it." },
+    { emoji: "🔑", message: "You hold the key to your own freedom. And you're using it." },
+    { emoji: "🌄", message: "Look how far you've come. Don't you dare give up now." },
+    { emoji: "💜", message: "Be gentle with yourself today. You're doing harder things than most people know." },
+    { emoji: "🎶", message: "Life has a rhythm again because you chose recovery. Feel it." },
+    { emoji: "🪴", message: "You planted a seed the day you started. Watch what grows." },
+  ], []);
+
+  // Welcome back toast with daily motivation
   const welcomeShownRef = useRef(false);
   useEffect(() => {
     if (welcomeShownRef.current || authLoading || profileLoading || !user || !profile?.onboarding_complete) return;
@@ -107,13 +141,24 @@ const Index = () => {
 
     const streak = userXP.daily_login_streak ?? 0;
     const name = profile?.display_name;
-    const greeting = name ? `Welcome back, ${name}!` : "Welcome back!";
+    const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
 
-    // Small delay so the page renders first
+    // Pick today's motivation based on date so it's consistent within a day
+    const today = new Date();
+    const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % dailyMotivations.length;
+    const motivation = dailyMotivations[dayIndex];
+
+    // Only show the daily motivation once per calendar day
+    const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    const lastMotivationDay = localStorage.getItem(`sobable_daily_motivation_${user.id}`);
+    const isNewDay = lastMotivationDay !== todayKey;
+
     const timer = setTimeout(() => {
+      // First toast: personalized greeting with streak
+      const greeting = name ? `Welcome back, ${name}!` : "Welcome back!";
       if (streak > 1) {
         toast(greeting, {
-          description: `🔥 ${streak}-day streak! Keep it going!`,
+          description: `🔥 ${streak}-day streak${daysSober > 0 ? ` · ${daysSober} days sober` : ""}! Keep it going!`,
           duration: 4000,
         });
       } else if (streak === 1) {
@@ -123,14 +168,25 @@ const Index = () => {
         });
       } else {
         toast(greeting, {
-          description: "✨ Great to see you again!",
-          duration: 3000,
+          description: daysSober > 0 ? `✨ ${daysSober} days of strength. Great to see you!` : "✨ Great to see you again!",
+          duration: 3500,
         });
+      }
+
+      // Second toast: daily motivational message (only once per day)
+      if (isNewDay) {
+        localStorage.setItem(`sobable_daily_motivation_${user.id}`, todayKey);
+        setTimeout(() => {
+          toast(`${motivation.emoji} Daily Inspiration`, {
+            description: motivation.message,
+            duration: 6000,
+          });
+        }, 2500);
       }
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [authLoading, profileLoading, user, userXP, profile]);
+  }, [authLoading, profileLoading, user, userXP, profile, dailyMotivations]);
 
   // Show premium features onboarding once after first login
   useEffect(() => {
