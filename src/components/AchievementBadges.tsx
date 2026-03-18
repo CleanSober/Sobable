@@ -159,53 +159,86 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
   }, [unlockedBadges.length, showAd]);
 
   return (
-    <Card className="gradient-card border-border/50">
+    <Card className="gradient-card border-border/50 overflow-hidden">
       <CardHeader className="pb-2 pt-3 px-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Award className="w-4 h-4 text-primary" />
-          Achievement Badges
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Award className="w-4 h-4 text-primary" />
+            Achievement Badges
+          </CardTitle>
+          <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            {unlockedBadges.length}/{badges.length}
+          </span>
+        </div>
         {nextBadge && (
-          <p className="text-[10px] text-muted-foreground">
-            {daysToNext} days until <span className="text-primary font-medium">{nextBadge.name}</span>
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60"
+                initial={{ width: 0 }}
+                animate={{ width: `${((nextBadge.daysRequired - daysToNext) / nextBadge.daysRequired) * 100}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground whitespace-nowrap">
+              {daysToNext}d → <span className="text-primary font-medium">{nextBadge.name}</span>
+            </p>
+          </div>
         )}
       </CardHeader>
       <CardContent className="px-3 pb-3">
-        <ScrollArea className="h-[260px] pr-1">
-          <div className="grid grid-cols-4 gap-1.5">
+        <ScrollArea className="h-[280px]">
+          <div className="grid grid-cols-4 gap-2 pt-1 pb-1 pr-2">
           {badges.map((badge, index) => {
             const isUnlocked = daysSober >= badge.daysRequired;
             const Icon = badge.icon;
+            const isNextUp = nextBadge?.id === badge.id;
 
             return (
               <motion.button
                 key={badge.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.02 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.015 }}
                 onClick={() => setSelectedBadge(badge)}
-                className={`relative flex flex-col items-center p-2 rounded-lg transition-all ${
+                className={`relative flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all border ${
                   isUnlocked
-                    ? "bg-gradient-to-br " + badge.color + " shadow-md active:scale-95"
-                    : "bg-muted/50 opacity-50"
+                    ? "bg-gradient-to-br " + badge.color + " border-white/20 shadow-lg shadow-black/10 active:scale-95"
+                    : isNextUp
+                    ? "bg-muted/30 border-primary/30 border-dashed"
+                    : "bg-muted/20 border-transparent opacity-40"
                 }`}
               >
-                {isUnlocked ? (
-                  <Icon className="w-5 h-5 text-white mb-0.5" />
-                ) : (
-                  <Lock className="w-5 h-5 text-muted-foreground mb-0.5" />
-                )}
-                <span className={`text-[8px] text-center font-medium leading-tight ${isUnlocked ? "text-white" : "text-muted-foreground"}`}>
+                <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center ${
+                  isUnlocked ? "bg-white/20" : "bg-muted/50"
+                }`}>
+                  {isUnlocked ? (
+                    <Icon className="w-4 h-4 text-white" />
+                  ) : (
+                    <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                  )}
+                </div>
+                <span className={`text-[7px] text-center font-semibold leading-tight line-clamp-2 ${
+                  isUnlocked ? "text-white" : "text-muted-foreground"
+                }`}>
                   {badge.name}
                 </span>
                 {isUnlocked && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center"
+                    className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-card"
                   >
                     <Star className="w-2 h-2 text-white" />
+                  </motion.div>
+                )}
+                {isNextUp && !isUnlocked && (
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center ring-2 ring-card"
+                  >
+                    <Zap className="w-2 h-2 text-primary-foreground" />
                   </motion.div>
                 )}
               </motion.button>
