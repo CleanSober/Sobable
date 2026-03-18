@@ -235,7 +235,7 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
                 {isNextUp && !isUnlocked && (
                   <motion.div
                     animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    transition={{ duration: 2, repeat: 999 }}
                     className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center ring-2 ring-card"
                   >
                     <Zap className="w-2 h-2 text-primary-foreground" />
