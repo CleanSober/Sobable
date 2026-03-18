@@ -85,7 +85,6 @@ export const DailyAffirmation = () => {
       toast.success("Copied to clipboard!");
       setTimeout(() => setJustCopied(false), 2000);
     } catch {
-      // Fallback for environments where clipboard API fails
       const textarea = document.createElement("textarea");
       textarea.value = shareText;
       textarea.style.position = "fixed";
@@ -116,7 +115,7 @@ export const DailyAffirmation = () => {
         await navigator.share({ text: shareText });
         setShowShareMenu(false);
       } catch {
-        // User cancelled — ignore
+        // User cancelled
       }
     } else {
       setShowShareMenu(true);
@@ -149,12 +148,7 @@ export const DailyAffirmation = () => {
         </motion.p>
 
         <div className="flex items-center gap-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-[10px]"
-            onClick={toggleSave}
-          >
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px]" onClick={toggleSave}>
             <Heart
               className={`w-3 h-3 mr-1 transition-colors ${
                 isSaved ? "fill-pink-400 text-pink-400" : "text-muted-foreground"
@@ -162,27 +156,16 @@ export const DailyAffirmation = () => {
             />
             {isSaved ? "Saved" : "Save"}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-[10px]"
-            onClick={shareNative}
-          >
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px]" onClick={shareNative}>
             <Share2 className="w-3 h-3 mr-1 text-muted-foreground" />
             Share
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-[10px] ml-auto"
-            onClick={shuffle}
-          >
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] ml-auto" onClick={shuffle}>
             <RefreshCw className="w-3 h-3 mr-1 text-muted-foreground" />
             New
           </Button>
         </div>
 
-        {/* Share menu fallback when native share isn't available */}
         <AnimatePresence>
           {showShareMenu && (
             <motion.div
@@ -198,118 +181,20 @@ export const DailyAffirmation = () => {
                 </button>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 flex-1 text-[10px] gap-1"
-                  onClick={copyToClipboard}
-                >
-                  {justCopied ? (
-                    <Check className="w-3 h-3 text-green-500" />
-                  ) : (
-                    <Copy className="w-3 h-3" />
-                  )}
+                <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={copyToClipboard}>
+                  {justCopied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
                   {justCopied ? "Copied!" : "Copy"}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 flex-1 text-[10px] gap-1"
-                  onClick={shareToWhatsApp}
-                >
+                <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={shareToWhatsApp}>
                   💬 WhatsApp
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 flex-1 text-[10px] gap-1"
-                  onClick={shareToTwitter}
-                >
+                <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={shareToTwitter}>
                   𝕏 Post
                 </Button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-};
-  // Seed by today's date so it's consistent per day
-  const todayIndex = useMemo(() => {
-    const d = new Date();
-    return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % affirmations.length;
-  }, []);
-
-  const [index, setIndex] = useState(todayIndex);
-  const [liked, setLiked] = useState(false);
-
-  const shuffle = () => {
-    let next: number;
-    do { next = Math.floor(Math.random() * affirmations.length); } while (next === index);
-    setIndex(next);
-    setLiked(false);
-  };
-
-  const share = async () => {
-    const text = affirmations[index];
-    if (navigator.share) {
-      await navigator.share({ text: `"${text}" — Sobable` });
-    } else {
-      await navigator.clipboard.writeText(`"${text}" — Sobable`);
-      toast.success("Copied to clipboard!");
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="card-enhanced relative overflow-hidden"
-    >
-      {/* Subtle glow */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 blur-[50px] rounded-full pointer-events-none" />
-
-      <div className="relative p-3">
-        <div className="flex items-center gap-1.5 mb-2">
-          <Sparkles className="w-3.5 h-3.5 text-accent" />
-          <span className="text-[10px] font-semibold text-accent uppercase tracking-wider">
-            Daily Affirmation
-          </span>
-        </div>
-
-        <motion.p
-          key={index}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-sm font-medium text-foreground italic leading-relaxed mb-3"
-        >
-          "{affirmations[index]}"
-        </motion.p>
-
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-[10px]"
-            onClick={() => setLiked(!liked)}
-          >
-            <Heart
-              className={`w-3 h-3 mr-1 transition-colors ${
-                liked ? "fill-pink-400 text-pink-400" : "text-muted-foreground"
-              }`}
-            />
-            {liked ? "Saved" : "Save"}
-          </Button>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px]" onClick={share}>
-            <Share2 className="w-3 h-3 mr-1 text-muted-foreground" />
-            Share
-          </Button>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] ml-auto" onClick={shuffle}>
-            <RefreshCw className="w-3 h-3 mr-1 text-muted-foreground" />
-            New
-          </Button>
-        </div>
       </div>
     </motion.div>
   );
