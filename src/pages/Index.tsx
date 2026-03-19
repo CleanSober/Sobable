@@ -17,7 +17,7 @@ import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
 
 import { QuickActions } from "@/components/QuickActions";
-import { NotificationsBell } from "@/components/community/NotificationsBell";
+
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
