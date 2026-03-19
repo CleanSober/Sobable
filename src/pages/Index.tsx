@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, Flame, Bot, Crown, ChevronRight } from "lucide-react";
-import sobableLogo from "@/assets/sobable-logo.png";
+
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
