@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, Flame, Bot, Crown, ChevronRight } from "lucide-react";
-import sobableLogo from "@/assets/sobable-logo.png";
+
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
 import { MoneySaved } from "@/components/MoneySaved";
@@ -15,9 +15,9 @@ import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { UserProfile } from "@/components/UserProfile";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
-import { MotivationalBanner } from "@/components/MotivationalBanner";
+
 import { QuickActions } from "@/components/QuickActions";
-import { NotificationsBell } from "@/components/community/NotificationsBell";
+
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { AdBanner } from "@/components/AdBanner";
@@ -40,7 +40,7 @@ const CravingTimer = lazy(() => import("@/components/CravingTimer").then(m => ({
 const CalendarHeatmap = lazy(() => import("@/components/CalendarHeatmap").then(m => ({ default: m.CalendarHeatmap })));
 const HydrationTracker = lazy(() => import("@/components/HydrationTracker").then(m => ({ default: m.HydrationTracker })));
 const DailyAffirmation = lazy(() => import("@/components/DailyAffirmation").then(m => ({ default: m.DailyAffirmation })));
-const HealthBenefitsTimeline = lazy(() => import("@/components/HealthBenefitsTimeline").then(m => ({ default: m.HealthBenefitsTimeline })));
+
 const RelapsePreventionPlan = lazy(() => import("@/components/RelapsePreventionPlan").then(m => ({ default: m.RelapsePreventionPlan })));
 const SleepTracker = lazy(() => import("@/components/SleepTracker").then(m => ({ default: m.SleepTracker })));
 const CommunityHub = lazy(() => import("@/components/community/CommunityHub").then(m => ({ default: m.CommunityHub })));
@@ -51,7 +51,7 @@ const PremiumAnalytics = lazy(() => import("@/components/PremiumAnalytics").then
 const PersonalizedRecommendations = lazy(() => import("@/components/PersonalizedRecommendations").then(m => ({ default: m.PersonalizedRecommendations })));
 const Journal = lazy(() => import("@/components/Journal").then(m => ({ default: m.Journal })));
 const RiskPrediction = lazy(() => import("@/components/RiskPrediction").then(m => ({ default: m.RiskPrediction })));
-const SmartRiskScore = lazy(() => import("@/components/premium/SmartRiskScore").then(m => ({ default: m.SmartRiskScore })));
+
 const PremiumProgressInsights = lazy(() => import("@/components/progress/PremiumProgressInsights").then(m => ({ default: m.PremiumProgressInsights })));
 const WeeklyRecap = lazy(() => import("@/components/premium/WeeklyRecap").then(m => ({ default: m.WeeklyRecap })));
 const GuidedPathways = lazy(() => import("@/components/premium/GuidedPathways").then(m => ({ default: m.GuidedPathways })));
@@ -292,12 +292,8 @@ const Index = () => {
             <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
-            <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
-              <PremiumLockOverlay featureName="AI Risk Assessment">
-                <SmartRiskScore />
-              </PremiumLockOverlay>
               <PremiumLockOverlay featureName="AI Recovery Coach">
                 <motion.button
                   initial={{ opacity: 0, y: 10 }}
@@ -335,7 +331,6 @@ const Index = () => {
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
                 <p className="text-xs text-muted-foreground">How are you feeling today?</p>
               </motion.div>
-              <CheckInProgress />
               <DailyAffirmation />
               <MoodCheckIn />
               <SleepTracker />
@@ -343,7 +338,6 @@ const Index = () => {
               <Journal daysSober={daysSober} />
               <BreathingExercise />
               <GuidedMeditations />
-              <CalendarHeatmap startDate={userData.sobrietyStartDate} />
             </div>
           </Suspense>
         );
