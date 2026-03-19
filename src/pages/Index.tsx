@@ -15,7 +15,7 @@ import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { UserProfile } from "@/components/UserProfile";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
-import { MotivationalBanner } from "@/components/MotivationalBanner";
+
 import { QuickActions } from "@/components/QuickActions";
 import { NotificationsBell } from "@/components/community/NotificationsBell";
 import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
