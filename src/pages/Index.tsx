@@ -292,12 +292,8 @@ const Index = () => {
             <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
-            <MotivationalBanner />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
-              <PremiumLockOverlay featureName="AI Risk Assessment">
-                <SmartRiskScore />
-              </PremiumLockOverlay>
               <PremiumLockOverlay featureName="AI Recovery Coach">
                 <motion.button
                   initial={{ opacity: 0, y: 10 }}
