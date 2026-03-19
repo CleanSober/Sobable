@@ -51,7 +51,7 @@ const PremiumAnalytics = lazy(() => import("@/components/PremiumAnalytics").then
 const PersonalizedRecommendations = lazy(() => import("@/components/PersonalizedRecommendations").then(m => ({ default: m.PersonalizedRecommendations })));
 const Journal = lazy(() => import("@/components/Journal").then(m => ({ default: m.Journal })));
 const RiskPrediction = lazy(() => import("@/components/RiskPrediction").then(m => ({ default: m.RiskPrediction })));
-const SmartRiskScore = lazy(() => import("@/components/premium/SmartRiskScore").then(m => ({ default: m.SmartRiskScore })));
+
 const PremiumProgressInsights = lazy(() => import("@/components/progress/PremiumProgressInsights").then(m => ({ default: m.PremiumProgressInsights })));
 const WeeklyRecap = lazy(() => import("@/components/premium/WeeklyRecap").then(m => ({ default: m.WeeklyRecap })));
 const GuidedPathways = lazy(() => import("@/components/premium/GuidedPathways").then(m => ({ default: m.GuidedPathways })));
