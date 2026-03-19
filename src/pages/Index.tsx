@@ -40,7 +40,7 @@ const CravingTimer = lazy(() => import("@/components/CravingTimer").then(m => ({
 const CalendarHeatmap = lazy(() => import("@/components/CalendarHeatmap").then(m => ({ default: m.CalendarHeatmap })));
 const HydrationTracker = lazy(() => import("@/components/HydrationTracker").then(m => ({ default: m.HydrationTracker })));
 const DailyAffirmation = lazy(() => import("@/components/DailyAffirmation").then(m => ({ default: m.DailyAffirmation })));
-const HealthBenefitsTimeline = lazy(() => import("@/components/HealthBenefitsTimeline").then(m => ({ default: m.HealthBenefitsTimeline })));
+
 const RelapsePreventionPlan = lazy(() => import("@/components/RelapsePreventionPlan").then(m => ({ default: m.RelapsePreventionPlan })));
 const SleepTracker = lazy(() => import("@/components/SleepTracker").then(m => ({ default: m.SleepTracker })));
 const CommunityHub = lazy(() => import("@/components/community/CommunityHub").then(m => ({ default: m.CommunityHub })));
