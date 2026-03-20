@@ -60,12 +60,13 @@ export const CommunityHub = () => {
       className="space-y-3"
     >
       {/* Header */}
-      <header className="text-center py-0.5">
-        <div className="flex items-center justify-center gap-1.5 mb-0">
+      <header className="text-center py-1">
+        <div className="flex items-center justify-center gap-1.5 mb-0.5">
           <Crown className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
           <h1 className="text-base font-bold text-foreground">Community</h1>
+          <Sparkles className="w-3 h-3 text-primary/60" aria-hidden="true" />
         </div>
-        <p className="text-xs text-muted-foreground">Connect with others on the journey</p>
+        <p className="text-[10px] text-muted-foreground">Share, support, and grow together</p>
       </header>
 
       {/* Tabs navigation */}

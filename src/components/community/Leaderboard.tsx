@@ -3,10 +3,12 @@ import { Trophy, Medal, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLeaderboard } from "@/hooks/useForumFeatures";
 import { useUserProfiles } from "@/hooks/useCommunity";
+import { useAuth } from "@/contexts/AuthContext";
 import { getInitials, getAvatarColor } from "@/lib/anonymousNames";
 import { useEffect } from "react";
 
 export const Leaderboard = () => {
+  const { user } = useAuth();
   const { leaders, loading } = useLeaderboard(10);
   const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
 
@@ -61,6 +63,8 @@ export const Leaderboard = () => {
     }
   };
 
+  const userRank = user ? leaders.findIndex((l) => l.user_id === user.id) : -1;
+
   return (
     <Card className="gradient-card border-border/50">
       <CardHeader className="pb-2 pt-3 px-3">
@@ -70,9 +74,23 @@ export const Leaderboard = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-1.5 px-3 pb-3">
+        {/* Your rank summary */}
+        {user && userRank >= 0 && (
+          <div className="mb-2 p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-[10px] text-muted-foreground">Your rank</p>
+            <p className="text-sm font-bold text-primary">#{userRank + 1} of {leaders.length}</p>
+          </div>
+        )}
+        {user && userRank === -1 && (
+          <div className="mb-2 p-2 rounded-lg bg-secondary/40 text-center">
+            <p className="text-[10px] text-muted-foreground">Start posting to appear on the leaderboard!</p>
+          </div>
+        )}
+
         {leaders.map((leader, index) => {
           const displayName = getDisplayNameForUser(leader.user_id);
           const rank = index + 1;
+          const isCurrentUser = user?.id === leader.user_id;
 
           return (
             <motion.div
@@ -80,7 +98,11 @@ export const Leaderboard = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center gap-2.5 p-2 rounded-lg bg-secondary/20 hover:bg-secondary/40 transition-colors"
+              className={`flex items-center gap-2.5 p-2 rounded-lg transition-colors ${
+                isCurrentUser
+                  ? "bg-primary/10 border border-primary/20 ring-1 ring-primary/10"
+                  : "bg-secondary/20 hover:bg-secondary/40"
+              }`}
             >
               <div className="w-5 flex justify-center">
                 {getRankIcon(rank)}
@@ -93,7 +115,9 @@ export const Leaderboard = () => {
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{displayName}</p>
+                <p className="text-xs font-medium truncate">
+                  {isCurrentUser ? "You" : displayName}
+                </p>
                 <p className="text-[10px] text-muted-foreground">
                   {leader.posts_count}p · {leader.replies_count}r
                 </p>

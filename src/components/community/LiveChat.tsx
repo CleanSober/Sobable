@@ -281,17 +281,37 @@ export const LiveChat = () => {
               </div>
             ) : (
               <AnimatePresence mode="popLayout">
-                {messages.map((msg) => (
-                  <MessageBubble
-                    key={msg.id}
-                    id={msg.id}
-                    message={msg.message}
-                    createdAt={msg.created_at}
-                    displayName={getDisplayNameForUser(msg.user_id)}
-                    userId={msg.user_id}
-                    isOwn={isOwnMessage(msg.user_id)}
-                  />
-                ))}
+                {messages.map((msg, idx) => {
+                  const msgDate = new Date(msg.created_at);
+                  const prevDate = idx > 0 ? new Date(messages[idx - 1].created_at) : null;
+                  const showDateSep = !prevDate || !isSameDay(msgDate, prevDate);
+
+                  return (
+                    <div key={msg.id}>
+                      {showDateSep && (
+                        <div className="flex items-center gap-3 my-3">
+                          <div className="flex-1 h-px bg-border/50" />
+                          <span className="text-[10px] text-muted-foreground font-medium px-2">
+                            {isToday(msgDate)
+                              ? "Today"
+                              : isYesterday(msgDate)
+                              ? "Yesterday"
+                              : format(msgDate, "MMM d, yyyy")}
+                          </span>
+                          <div className="flex-1 h-px bg-border/50" />
+                        </div>
+                      )}
+                      <MessageBubble
+                        id={msg.id}
+                        message={msg.message}
+                        createdAt={msg.created_at}
+                        displayName={getDisplayNameForUser(msg.user_id)}
+                        userId={msg.user_id}
+                        isOwn={isOwnMessage(msg.user_id)}
+                      />
+                    </div>
+                  );
+                })}
               </AnimatePresence>
             )}
           </div>
