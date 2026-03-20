@@ -258,11 +258,25 @@ export const PostCard = memo(({
             
             {/* Footer with reactions and actions */}
             {!isEditing && (
-              <footer className="flex items-center justify-between gap-2 flex-wrap">
-                <EmojiReactions targetId={id} targetType="forum_post" />
-                <div className="flex items-center gap-1">
-                  <BookmarkButton postId={id} compact />
-                  <SubscribeButton postId={id} compact />
+              <footer className="space-y-2">
+                {/* Tags */}
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-[9px] px-1.5 py-0 bg-secondary/50">
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <EmojiReactions targetId={id} targetType="forum_post" />
+                  <div className="flex items-center gap-1">
+                    {!isOwn && <FollowButton userId={userId} compact />}
+                    <BookmarkButton postId={id} compact />
+                    <SubscribeButton postId={id} compact />
+                  </div>
                 </div>
               </footer>
             )}
