@@ -46,6 +46,10 @@ export const CommunityHub = () => {
     return <PremiumGate />;
   }
 
+  if (!guidelinesAccepted) {
+    return <CommunityGuidelines onAccepted={() => setGuidelinesAccepted(true)} />;
+  }
+
   if (selectedForum) {
     return (
       <ForumView
