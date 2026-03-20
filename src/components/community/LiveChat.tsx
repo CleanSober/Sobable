@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRateLimit } from "@/hooks/useRateLimit";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, MessageCircle, Users, AlertCircle, RefreshCw } from "lucide-react";
+import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
