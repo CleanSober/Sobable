@@ -9,6 +9,7 @@ import { ForumView } from "./ForumView";
 import { LiveChat } from "./LiveChat";
 import { Leaderboard } from "./Leaderboard";
 import { CreateForumModal } from "./CreateForumModal";
+import { CommunityGuidelines, hasAcceptedGuidelines } from "./CommunityGuidelines";
 
 interface Forum {
   id: string;
@@ -24,6 +25,7 @@ export const CommunityHub = () => {
   const [activeTab, setActiveTab] = useState("chat");
   const [showCreateForumModal, setShowCreateForumModal] = useState(false);
   const [forumRefreshKey, setForumRefreshKey] = useState(0);
+  const [guidelinesAccepted, setGuidelinesAccepted] = useState(hasAcceptedGuidelines);
 
   const handleForumCreated = useCallback(() => {
     setForumRefreshKey((prev) => prev + 1);
