@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, MessageSquare, Crown, Trophy, Sparkles } from "lucide-react";
+import { Users, MessageSquare, Crown, Trophy, Sparkles, Bookmark } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./PremiumGate";
