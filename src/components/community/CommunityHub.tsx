@@ -78,7 +78,7 @@ export const CommunityHub = () => {
 
       {/* Tabs navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-8">
+        <TabsList className="grid w-full grid-cols-4 h-8">
           <TabsTrigger 
             value="chat" 
             className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
@@ -92,6 +92,13 @@ export const CommunityHub = () => {
           >
             <Users className="w-3 h-3" aria-hidden="true" />
             <span>Forums</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="saved" 
+            className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
+          >
+            <Bookmark className="w-3 h-3" aria-hidden="true" />
+            <span>Saved</span>
           </TabsTrigger>
           <TabsTrigger 
             value="leaderboard" 
