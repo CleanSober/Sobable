@@ -242,6 +242,51 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
                 </p>
               )}
             </div>
+            {/* Tags input */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Tag className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground">Tags (optional, max 5)</span>
+              </div>
+              {newTags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-1.5">
+                  {newTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 gap-0.5">
+                      #{tag}
+                      <button
+                        type="button"
+                        onClick={() => setNewTags(newTags.filter(t => t !== tag))}
+                        className="ml-0.5 hover:text-destructive"
+                        aria-label={`Remove tag ${tag}`}
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              {newTags.length < 5 && (
+                <Input
+                  placeholder="Type a tag and press Enter..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value.replace(/[^a-zA-Z0-9-_ ]/g, ''))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const tag = tagInput.trim().toLowerCase().replace(/\s+/g, '-');
+                      if (tag && !newTags.includes(tag) && tag.length <= 30) {
+                        setNewTags([...newTags, tag]);
+                        setTagInput("");
+                      }
+                    }
+                  }}
+                  maxLength={30}
+                  className="h-7 text-xs"
+                  aria-label="Add a tag"
+                />
+              )}
+            </div>
+
             <div className="flex gap-2">
               <Button 
                 variant="outline" 
@@ -249,6 +294,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
                   setShowNewPost(false);
                   setNewTitle("");
                   setNewContent("");
+                  setNewTags([]);
+                  setTagInput("");
                 }}
               >
                 Cancel
