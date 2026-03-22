@@ -45,6 +45,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const [newContent, setNewContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<PostSortOption>("newest");
+  const [newTags, setNewTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
     fetchPosts();
