@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, MessageCircle, Send, Plus, AlertCircle, TrendingUp, Clock, Pin } from "lucide-react";
+import { ArrowLeft, MessageCircle, Send, Plus, AlertCircle, TrendingUp, Clock, Pin, X, Tag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
