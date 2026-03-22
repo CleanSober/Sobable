@@ -121,6 +121,10 @@ export const CommunityHub = () => {
           />
         </TabsContent>
 
+        <TabsContent value="saved" className="mt-2 focus-visible:outline-none">
+          <BookmarkedPosts />
+        </TabsContent>
+
         <TabsContent value="leaderboard" className="mt-2 focus-visible:outline-none">
           <Leaderboard />
         </TabsContent>
