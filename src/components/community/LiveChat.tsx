@@ -275,9 +275,11 @@ export const LiveChat = () => {
           <div className="space-y-1.5 p-2">
             {messages.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <Users className="w-10 h-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
-                <p className="font-medium text-sm">No messages yet</p>
-                <p className="text-xs mt-1">Start the conversation!</p>
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+                  <MessageCircle className="w-7 h-7 text-primary/60" aria-hidden="true" />
+                </div>
+                <p className="font-medium text-sm text-foreground">Welcome to the chat! 👋</p>
+                <p className="text-xs mt-1 max-w-[220px] mx-auto">This is a safe space. Say hello and connect with others on the same journey.</p>
               </div>
             ) : (
               <AnimatePresence mode="popLayout">

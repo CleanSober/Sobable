@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, MessageCircle, Send, Plus, AlertCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle, Send, Plus, AlertCircle, TrendingUp, Clock, Pin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent, createMentionNotifications } from "@/hooks/useCommunity";
 import { useCommunityBot } from "@/hooks/useCommunityBot";
 import { PostCard } from "./PostCard";
+import { Badge } from "@/components/ui/badge";
 
 interface Forum {
   id: string;
@@ -29,18 +30,21 @@ interface ForumViewProps {
 const MAX_TITLE_LENGTH = 200;
 const MAX_CONTENT_LENGTH = 10000;
 
+type PostSortOption = "newest" | "most_replied";
+
 export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const { user } = useAuth();
   const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
   const { triggerBotReply } = useCommunityBot();
   const { checkRateLimit, recordAction } = useRateLimit("forum_post");
-  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [posts, setPosts] = useState<(ForumPost & { is_pinned?: boolean; tags?: string[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewPost, setShowNewPost] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<PostSortOption>("newest");
 
   useEffect(() => {
     fetchPosts();
@@ -52,7 +56,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     try {
       const { data, error } = await supabase
         .from("forum_posts")
-        .select("id, title, content, likes, reply_count, created_at, user_id, forum_id")
+        .select("id, title, content, likes, reply_count, created_at, user_id, forum_id, is_pinned, tags")
         .eq("forum_id", forum.id)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -72,6 +76,18 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       setLoading(false);
     }
   }, [forum.id, fetchProfiles]);
+
+  // Sort posts: pinned first, then by sort option
+  const sortedPosts = useMemo(() => {
+    const pinned = posts.filter(p => p.is_pinned);
+    const unpinned = posts.filter(p => !p.is_pinned);
+    
+    const sortFn = sortBy === "most_replied" 
+      ? (a: typeof posts[0], b: typeof posts[0]) => b.reply_count - a.reply_count
+      : (a: typeof posts[0], b: typeof posts[0]) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    
+    return [...pinned.sort(sortFn), ...unpinned.sort(sortFn)];
+  }, [posts, sortBy]);
 
   const { addXP } = useGamification();
 
@@ -156,6 +172,28 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
           )}
         </div>
       </header>
+
+      {/* Sort controls */}
+      <div className="flex items-center gap-1.5">
+        <Button
+          size="sm"
+          variant={sortBy === "newest" ? "default" : "outline"}
+          onClick={() => setSortBy("newest")}
+          className="shrink-0 h-7 text-[10px] px-2"
+        >
+          <Clock className="w-3 h-3 mr-0.5" />
+          Newest
+        </Button>
+        <Button
+          size="sm"
+          variant={sortBy === "most_replied" ? "default" : "outline"}
+          onClick={() => setSortBy("most_replied")}
+          className="shrink-0 h-7 text-[10px] px-2"
+        >
+          <TrendingUp className="w-3 h-3 mr-0.5" />
+          Most Replied
+        </Button>
+      </div>
 
       {/* Create post section */}
       {!showNewPost ? (
@@ -245,7 +283,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
         </div>
       ) : (
         <section className="space-y-3" aria-label="Forum posts">
-          {posts.map((post, index) => (
+          {sortedPosts.map((post, index) => (
             <PostCard
               key={post.id}
               id={post.id}
@@ -257,6 +295,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
               userId={post.user_id}
               isOwn={isOwnPost(post.user_id)}
               index={index}
+              isPinned={post.is_pinned}
+              tags={post.tags || []}
               onPostUpdated={fetchPosts}
               onPostDeleted={fetchPosts}
             />

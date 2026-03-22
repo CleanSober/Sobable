@@ -248,6 +248,12 @@ export const PostCard = memo(({
               </div>
             ) : (
               <>
+                {isPinned && (
+                  <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-amber-500/10 text-amber-500 mb-1 w-fit">
+                    <Pin className="w-2.5 h-2.5 mr-0.5" />
+                    Pinned
+                  </Badge>
+                )}
                 <h3 className="text-xs font-semibold text-foreground mb-1 leading-snug">{title}</h3>
                 <MentionText 
                   text={content} 
