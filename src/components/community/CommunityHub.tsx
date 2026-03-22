@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, MessageSquare, Crown, Trophy, Sparkles } from "lucide-react";
+import { Users, MessageSquare, Crown, Trophy, Sparkles, Bookmark } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./PremiumGate";
@@ -8,6 +8,7 @@ import { ForumList } from "./ForumList";
 import { ForumView } from "./ForumView";
 import { LiveChat } from "./LiveChat";
 import { Leaderboard } from "./Leaderboard";
+import { BookmarkedPosts } from "./BookmarkedPosts";
 import { CreateForumModal } from "./CreateForumModal";
 import { CommunityGuidelines, hasAcceptedGuidelines } from "./CommunityGuidelines";
 
@@ -77,7 +78,7 @@ export const CommunityHub = () => {
 
       {/* Tabs navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-8">
+        <TabsList className="grid w-full grid-cols-4 h-8">
           <TabsTrigger 
             value="chat" 
             className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
@@ -91,6 +92,13 @@ export const CommunityHub = () => {
           >
             <Users className="w-3 h-3" aria-hidden="true" />
             <span>Forums</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="saved" 
+            className="flex items-center gap-1 text-[10px] data-[state=active]:bg-primary/10"
+          >
+            <Bookmark className="w-3 h-3" aria-hidden="true" />
+            <span>Saved</span>
           </TabsTrigger>
           <TabsTrigger 
             value="leaderboard" 
@@ -111,6 +119,10 @@ export const CommunityHub = () => {
             onSelectForum={setSelectedForum}
             onCreateForum={() => setShowCreateForumModal(true)}
           />
+        </TabsContent>
+
+        <TabsContent value="saved" className="mt-2 focus-visible:outline-none">
+          <BookmarkedPosts />
         </TabsContent>
 
         <TabsContent value="leaderboard" className="mt-2 focus-visible:outline-none">
