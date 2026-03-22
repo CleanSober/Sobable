@@ -56,7 +56,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     try {
       const { data, error } = await supabase
         .from("forum_posts")
-        .select("id, title, content, likes, reply_count, created_at, user_id, forum_id")
+        .select("id, title, content, likes, reply_count, created_at, user_id, forum_id, is_pinned, tags")
         .eq("forum_id", forum.id)
         .order("created_at", { ascending: false })
         .limit(50);
