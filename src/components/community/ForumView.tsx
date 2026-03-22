@@ -30,18 +30,21 @@ interface ForumViewProps {
 const MAX_TITLE_LENGTH = 200;
 const MAX_CONTENT_LENGTH = 10000;
 
+type PostSortOption = "newest" | "most_replied";
+
 export const ForumView = ({ forum, onBack }: ForumViewProps) => {
   const { user } = useAuth();
   const { fetchProfiles, getDisplayNameForUser } = useUserProfiles();
   const { triggerBotReply } = useCommunityBot();
   const { checkRateLimit, recordAction } = useRateLimit("forum_post");
-  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [posts, setPosts] = useState<(ForumPost & { is_pinned?: boolean; tags?: string[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewPost, setShowNewPost] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<PostSortOption>("newest");
 
   useEffect(() => {
     fetchPosts();
