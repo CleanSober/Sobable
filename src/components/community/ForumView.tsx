@@ -77,6 +77,18 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
     }
   }, [forum.id, fetchProfiles]);
 
+  // Sort posts: pinned first, then by sort option
+  const sortedPosts = useMemo(() => {
+    const pinned = posts.filter(p => p.is_pinned);
+    const unpinned = posts.filter(p => !p.is_pinned);
+    
+    const sortFn = sortBy === "most_replied" 
+      ? (a: typeof posts[0], b: typeof posts[0]) => b.reply_count - a.reply_count
+      : (a: typeof posts[0], b: typeof posts[0]) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    
+    return [...pinned.sort(sortFn), ...unpinned.sort(sortFn)];
+  }, [posts, sortBy]);
+
   const { addXP } = useGamification();
 
   const createPost = async () => {
