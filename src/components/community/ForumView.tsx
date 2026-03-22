@@ -173,6 +173,28 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
         </div>
       </header>
 
+      {/* Sort controls */}
+      <div className="flex items-center gap-1.5">
+        <Button
+          size="sm"
+          variant={sortBy === "newest" ? "default" : "outline"}
+          onClick={() => setSortBy("newest")}
+          className="shrink-0 h-7 text-[10px] px-2"
+        >
+          <Clock className="w-3 h-3 mr-0.5" />
+          Newest
+        </Button>
+        <Button
+          size="sm"
+          variant={sortBy === "most_replied" ? "default" : "outline"}
+          onClick={() => setSortBy("most_replied")}
+          className="shrink-0 h-7 text-[10px] px-2"
+        >
+          <TrendingUp className="w-3 h-3 mr-0.5" />
+          Most Replied
+        </Button>
+      </div>
+
       {/* Create post section */}
       {!showNewPost ? (
         <Button 
