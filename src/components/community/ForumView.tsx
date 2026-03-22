@@ -142,6 +142,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       toast.success("Post created!");
       setNewTitle("");
       setNewContent("");
+      setNewTags([]);
+      setTagInput("");
       setShowNewPost(false);
       await fetchPosts();
     } catch {
