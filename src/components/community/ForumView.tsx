@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useUserProfiles, ForumPost, validatePostTitle, validatePostContent, createMentionNotifications } from "@/hooks/useCommunity";
 import { useCommunityBot } from "@/hooks/useCommunityBot";
 import { PostCard } from "./PostCard";
+import { Badge } from "@/components/ui/badge";
 
 interface Forum {
   id: string;
