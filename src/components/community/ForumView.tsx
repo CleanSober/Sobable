@@ -283,7 +283,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
         </div>
       ) : (
         <section className="space-y-3" aria-label="Forum posts">
-          {posts.map((post, index) => (
+          {sortedPosts.map((post, index) => (
             <PostCard
               key={post.id}
               id={post.id}
@@ -295,6 +295,8 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
               userId={post.user_id}
               isOwn={isOwnPost(post.user_id)}
               index={index}
+              isPinned={post.is_pinned}
+              tags={post.tags || []}
               onPostUpdated={fetchPosts}
               onPostDeleted={fetchPosts}
             />
