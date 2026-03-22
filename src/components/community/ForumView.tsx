@@ -121,6 +121,7 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
         user_id: user.id,
         title: trimmedTitle,
         content: trimmedContent,
+        tags: newTags.length > 0 ? newTags : null,
       }).select().single();
 
       if (error) throw error;
