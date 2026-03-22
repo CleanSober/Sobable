@@ -8,6 +8,7 @@ import { ForumList } from "./ForumList";
 import { ForumView } from "./ForumView";
 import { LiveChat } from "./LiveChat";
 import { Leaderboard } from "./Leaderboard";
+import { BookmarkedPosts } from "./BookmarkedPosts";
 import { CreateForumModal } from "./CreateForumModal";
 import { CommunityGuidelines, hasAcceptedGuidelines } from "./CommunityGuidelines";
 
