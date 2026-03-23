@@ -95,6 +95,27 @@ const Index = () => {
   // Initialize Capacitor for native mobile features
   useCapacitor();
 
+  // Initialize smart notifications system - runs all notification checks periodically
+  const { requestPermission: requestNotifPermission } = useSmartNotifications(profile?.sobriety_start_date || undefined);
+
+  // Prompt notification permission once after onboarding
+  useEffect(() => {
+    if (!user || !profile?.onboarding_complete) return;
+    const prompted = localStorage.getItem(`sobable_notif_prompted_${user.id}`);
+    if (prompted) return;
+    
+    const timer = setTimeout(async () => {
+      if ("Notification" in window && Notification.permission === "default") {
+        const granted = await requestNotifPermission();
+        if (granted) {
+          toast.success("🔔 Notifications enabled!", { description: "You'll get smart reminders to stay on track." });
+        }
+      }
+      localStorage.setItem(`sobable_notif_prompted_${user.id}`, "true");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [user, profile?.onboarding_complete, requestNotifPermission]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
