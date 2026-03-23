@@ -26,6 +26,12 @@ const PageLoader = () => (
   </div>
 );
 
+const AppContent = () => {
+  // Track affiliate referral codes from URL
+  useReferralTracking();
+  return null; // Just runs the hook inside Router context
+};
+
 const App = () => {
   // Only show splash on first load per session (not on in-app navigations)
   const [showSplash, setShowSplash] = useState(() => {
