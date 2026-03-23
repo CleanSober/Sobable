@@ -17,6 +17,7 @@ import { DailyRitual } from "@/components/DailyRitual";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
 import { useFeedbackPrompt } from "@/hooks/useFeedbackPrompt";
+import { useMilestoneUpgrade } from "@/hooks/useMilestoneUpgrade";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
