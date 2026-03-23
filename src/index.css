@@ -341,7 +341,7 @@
   /* Premium stat box */
   .stat-box {
     @apply relative p-4 rounded-xl;
-    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--muted)));
+    background: hsl(var(--secondary));
     border: 1px solid hsl(var(--border) / 0.5);
   }
 
