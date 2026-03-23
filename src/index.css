@@ -305,7 +305,7 @@
   /* Enhanced Card with glow */
   .card-enhanced {
     @apply relative rounded-2xl overflow-hidden;
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(225 25% 8%));
+    background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     box-shadow: var(--shadow-card);
     transition: all 0.3s ease;
