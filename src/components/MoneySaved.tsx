@@ -1259,6 +1259,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
                 onClick={() => {
                   onReset?.();
                   setShowResetConfirm(false);
+                  setUndoAvailable(true);
                 }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
               >
