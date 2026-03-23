@@ -337,8 +337,33 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
                 <span>All caught up — great work today! 🎉</span>
               </div>
             )}
-          </div>
-        )}
+            </div>
+          )}
+
+          {/* Test notification */}
+          {smartSettings.enabled && (
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+                onClick={() => {
+                  if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("🔔 Test Notification", {
+                      body: "Notifications are working perfectly! You'll receive smart reminders based on your activity.",
+                      icon: "/icons/icon-192x192.png",
+                    });
+                    toast.success("Test notification sent!");
+                  } else {
+                    toast.error("Notifications not enabled in your browser");
+                  }
+                }}
+              >
+                <Bell className="w-3 h-3 mr-1.5" />
+                Send Test Notification
+              </Button>
+            </div>
+          )}
 
         {/* Weekly Email Digest */}
         <div className="pt-3 border-t border-border">
