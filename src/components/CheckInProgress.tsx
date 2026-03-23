@@ -18,7 +18,7 @@ const goals = [
   { key: "trigger_logged" as const, label: "Triggers", icon: AlertTriangle, color: "text-orange-400" },
 ];
 
-export const CheckInProgress = () => {
+export const CheckInProgress = memo(() => {
   const { user } = useAuth();
   const [status, setStatus] = useState<GoalStatus>({
     mood_logged: false,
