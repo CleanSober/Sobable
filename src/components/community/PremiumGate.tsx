@@ -89,7 +89,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
 
             <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
               <Shield className="w-3 h-3" aria-hidden="true" />
-              No charge for 7 days · Cancel anytime
+              Secure payment · Cancel anytime
             </p>
           </CardContent>
         </Card>

@@ -42,7 +42,7 @@ export const PremiumLockOverlay = ({ children, featureName = "this feature", ico
             <div className="flex items-center gap-1">
               <Sparkles className="w-2.5 h-2.5 text-amber-500/70 flex-shrink-0" />
               <span className="text-[10px] text-muted-foreground">
-                Sober Club · Try free for 7 days
+                Sober Club Premium
               </span>
             </div>
           </div>
