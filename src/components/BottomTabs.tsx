@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
@@ -28,7 +28,7 @@ interface BottomTabsProps {
   onTabChange: (tab: TabId) => void;
 }
 
-export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
+export const BottomTabs = memo(({ activeTab, onTabChange }: BottomTabsProps) => {
   const { impact } = useHaptics();
   const onlineCount = useOnlineCount();
   const { isPremium } = usePremiumStatus();
@@ -167,4 +167,4 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
       </div>
     </nav>
   );
-};
+});

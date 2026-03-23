@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +10,7 @@ interface SobrietyCounterProps {
   startDate: string;
 }
 
-export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) => {
+export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterProps) => {
   const { reached, next } = getMilestones(daysSober);
   const weeks = Math.floor(daysSober / 7);
   const months = Math.floor(daysSober / 30);
@@ -222,4 +222,4 @@ export const SobrietyCounter = ({ daysSober, startDate }: SobrietyCounterProps) 
       </div>
     </motion.div>
   );
-};
+});

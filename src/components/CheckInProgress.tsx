@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion } from "framer-motion";
 import { Check, Circle, Heart, BookOpen, Wind, AlertTriangle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,7 @@ const goals = [
   { key: "trigger_logged" as const, label: "Triggers", icon: AlertTriangle, color: "text-orange-400" },
 ];
 
-export const CheckInProgress = () => {
+export const CheckInProgress = memo(() => {
   const { user } = useAuth();
   const [status, setStatus] = useState<GoalStatus>({
     mood_logged: false,
@@ -140,4 +140,4 @@ export const CheckInProgress = () => {
       </div>
     </motion.div>
   );
-};
+});
