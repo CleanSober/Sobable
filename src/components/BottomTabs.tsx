@@ -56,8 +56,6 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
-            const isPremium = tab.isPremium;
-
             const isTabPremium = tab.isPremium;
 
             return (
