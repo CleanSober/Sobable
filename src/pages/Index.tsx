@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
@@ -7,8 +7,6 @@ import { Loader2, Flame, Bot, Crown, ChevronRight } from "lucide-react";
 
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
-import { MoneySaved } from "@/components/MoneySaved";
-import { MoodCheckIn } from "@/components/MoodCheckIn";
 
 import { Onboarding } from "@/components/Onboarding";
 import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
@@ -16,14 +14,8 @@ import { UserProfile } from "@/components/UserProfile";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
 
-import { QuickActions } from "@/components/QuickActions";
-
-import { AIRecoveryCoach } from "@/components/AIRecoveryCoach";
 import { XPNotificationProvider } from "@/components/XPNotification";
-import { AdBanner } from "@/components/AdBanner";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
-import { PremiumOnboarding } from "@/components/premium/PremiumOnboarding";
-import { FeedbackPromptDialog } from "@/components/FeedbackPromptDialog";
 import { useFeedbackPrompt } from "@/hooks/useFeedbackPrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
@@ -31,7 +23,16 @@ import { useCapacitor } from "@/hooks/useCapacitor";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { NotificationCenter } from "@/components/NotificationCenter";
 
-// Lazy load heavy tab content that isn't needed on initial render
+// Lazy load components not needed on initial paint
+const MoneySaved = lazy(() => import("@/components/MoneySaved").then(m => ({ default: m.MoneySaved })));
+const QuickActions = lazy(() => import("@/components/QuickActions").then(m => ({ default: m.QuickActions })));
+const MoodCheckIn = lazy(() => import("@/components/MoodCheckIn").then(m => ({ default: m.MoodCheckIn })));
+const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m => ({ default: m.AIRecoveryCoach })));
+const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
+const PremiumOnboarding = lazy(() => import("@/components/premium/PremiumOnboarding").then(m => ({ default: m.PremiumOnboarding })));
+const FeedbackPromptDialog = lazy(() => import("@/components/FeedbackPromptDialog").then(m => ({ default: m.FeedbackPromptDialog })));
+
+// Lazy load heavy tab content
 const ProgressView = lazy(() => import("@/components/ProgressView").then(m => ({ default: m.ProgressView })));
 const TriggerLogger = lazy(() => import("@/components/TriggerLogger").then(m => ({ default: m.TriggerLogger })));
 const PatternAnalysis = lazy(() => import("@/components/PatternAnalysis").then(m => ({ default: m.PatternAnalysis })));
@@ -59,11 +60,11 @@ const AccountabilityPartner = lazy(() => import("@/components/premium/Accountabi
 const PredictiveInsights = lazy(() => import("@/components/premium/PredictiveInsights").then(m => ({ default: m.PredictiveInsights })));
 const PremiumFeatureSection = lazy(() => import("@/components/premium/PremiumFeatureSection").then(m => ({ default: m.PremiumFeatureSection })));
 
-const TabLoader = () => (
+const TabLoader = memo(() => (
   <div className="flex items-center justify-center py-12">
     <Loader2 className="w-6 h-6 animate-spin text-primary" />
   </div>
-);
+));
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
