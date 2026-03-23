@@ -1179,5 +1179,57 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: Mo
         )}
       </div>
     </motion.div>
+
+    {/* Reset confirmation dialog */}
+    <AnimatePresence>
+      {showResetConfirm && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setShowResetConfirm(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-card border border-border p-5 space-y-4 shadow-float"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
+                <RefreshCw className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Reset Savings Counter</h3>
+                <p className="text-xs text-muted-foreground">Start tracking savings from today</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              This will reset your money saved counter to $0 and start counting from today. <span className="text-foreground font-medium">Your sobriety date will not change.</span>
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onReset?.();
+                  setShowResetConfirm(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+              >
+                Reset Savings
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
