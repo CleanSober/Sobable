@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
