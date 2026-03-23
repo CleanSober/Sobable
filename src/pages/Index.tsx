@@ -188,18 +188,7 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [authLoading, profileLoading, user, userXP, profile, dailyMotivations]);
 
-  // Show premium features onboarding once after first login
-  useEffect(() => {
-    if (!user || !profile?.onboarding_complete) return;
-    const key = `premium_onboarding_shown_${user.id}`;
-    if (!localStorage.getItem(key)) {
-      const timer = setTimeout(() => {
-        setShowPremiumOnboarding(true);
-        localStorage.setItem(key, "true");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [user, profile?.onboarding_complete]);
+  // Premium onboarding removed — users see premium features via PricingPlans dialog
 
   // Trigger feedback prompt on milestone days
   useEffect(() => {
