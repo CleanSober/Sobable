@@ -77,12 +77,14 @@ const Index = () => {
   const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
   const navigate = useNavigate();
 
-  const handleTabChange = (tab: TabId) => {
-    const oldIndex = TAB_ORDER.indexOf(activeTab);
-    const newIndex = TAB_ORDER.indexOf(tab);
-    setSwipeDirection(newIndex > oldIndex ? 1 : -1);
-    setActiveTab(tab);
-  };
+  const handleTabChange = useCallback((tab: TabId) => {
+    setActiveTab(prev => {
+      const oldIndex = TAB_ORDER.indexOf(prev);
+      const newIndex = TAB_ORDER.indexOf(tab);
+      setSwipeDirection(newIndex > oldIndex ? 1 : -1);
+      return tab;
+    });
+  }, []);
 
   const { onTouchStart, onTouchEnd } = useSwipeNavigation(
     TAB_ORDER,
