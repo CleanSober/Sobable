@@ -167,7 +167,8 @@ const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
   { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
 ];
 
-export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedProps) => {
+export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: MoneySavedProps) => {
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { isPremium } = usePremiumStatus();
   const animatedTotal = useAnimatedCounter(totalSaved);
   const weeklyRate = dailySpending * 7;
