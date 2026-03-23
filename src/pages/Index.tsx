@@ -33,6 +33,7 @@ const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
 const PremiumOnboarding = lazy(() => import("@/components/premium/PremiumOnboarding").then(m => ({ default: m.PremiumOnboarding })));
 const FeedbackPromptDialog = lazy(() => import("@/components/FeedbackPromptDialog").then(m => ({ default: m.FeedbackPromptDialog })));
+const MilestoneUpgradePrompt = lazy(() => import("@/components/MilestoneUpgradePrompt").then(m => ({ default: m.MilestoneUpgradePrompt })));
 
 // Lazy load heavy tab content
 const ProgressView = lazy(() => import("@/components/ProgressView").then(m => ({ default: m.ProgressView })));
