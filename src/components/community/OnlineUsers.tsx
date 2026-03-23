@@ -85,6 +85,23 @@ export const OnlineUsers = memo(({ roomId }: OnlineUsersProps) => {
   const displayedUsers = onlineUsers.slice(0, 5);
   const remainingCount = onlineUsers.length - 5;
 
+  // Free users see a crown icon instead of online users
+  if (!isPremium) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+            <Crown className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Premium</span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p className="text-xs">Upgrade to see who's online</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <div className="flex items-center gap-3">
       {/* Online indicator */}
