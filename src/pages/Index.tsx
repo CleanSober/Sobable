@@ -282,7 +282,10 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             <CheckInProgress />
-            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
+              await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
+              toast.success("Savings counter reset! Your sobriety date is unchanged.");
+            }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
