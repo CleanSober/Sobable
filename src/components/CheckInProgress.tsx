@@ -140,4 +140,4 @@ export const CheckInProgress = memo(() => {
       </div>
     </motion.div>
   );
-};
+});
