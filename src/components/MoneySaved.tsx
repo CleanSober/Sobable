@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem, Plus, X, Check, Settings, Sliders, CreditCard, Banknote, Receipt } from "lucide-react";
+import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem, Plus, X, Check, Settings, Sliders, CreditCard, Banknote, Receipt, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar, Cell } from "recharts";
