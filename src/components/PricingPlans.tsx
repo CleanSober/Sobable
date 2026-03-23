@@ -352,7 +352,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
                   ✅ No charge for 7 days — cancel anytime
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  Then ${selectedPlan === "monthly" ? "7.99/month" : "79.99/year"}
+                  Then ${selectedPlan === "monthly" ? "7.99/month" : "34.99/year"}
                 </p>
               </div>
             </div>
