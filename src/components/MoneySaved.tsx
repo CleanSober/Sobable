@@ -12,6 +12,7 @@ interface MoneySavedProps {
   dailySpending: number;
   daysSober: number;
   onReset?: () => void;
+  onUndo?: () => void;
 }
 
 // Animated counter hook
