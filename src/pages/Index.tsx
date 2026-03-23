@@ -530,6 +530,13 @@ const Index = () => {
           {showPremiumOnboarding && <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />}
           {showFeedback && <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />}
           <AdBanner position="bottom" />
+          <MilestoneUpgradePrompt
+            prompt={pendingPrompt}
+            onDismiss={dismissPrompt}
+            onUpgrade={upgradeFromPrompt}
+            showPricing={milestoneShowPricing}
+            onPricingChange={setMilestoneShowPricing}
+          />
         </Suspense>
       </div>
     </XPNotificationProvider>
