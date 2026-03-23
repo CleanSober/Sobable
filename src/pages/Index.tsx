@@ -241,7 +241,10 @@ const Index = () => {
     ? calculateDaysSober(profile.sobriety_start_date)
     : 0;
   const moneySaved = profile?.sobriety_start_date && profile?.daily_spending
-    ? calculateMoneySaved(profile.sobriety_start_date, profile.daily_spending)
+    ? calculateMoneySaved(profile.sobriety_start_date, profile.daily_spending, (profile as any).savings_start_date)
+    : 0;
+  const savingsDaysSober = profile?.sobriety_start_date
+    ? calculateDaysSober((profile as any).savings_start_date || profile.sobriety_start_date)
     : 0;
 
   // Convert profile to userData format for components that need it
@@ -279,7 +282,10 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             <CheckInProgress />
-            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={daysSober} />}
+            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
+              await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
+              toast.success("Savings counter reset! Your sobriety date is unchanged.");
+            }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>

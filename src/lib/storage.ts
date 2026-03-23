@@ -139,9 +139,11 @@ export const calculateDaysSober = (startDate: string): number => {
 
 export const calculateMoneySaved = (
   startDate: string,
-  dailySpending: number
+  dailySpending: number,
+  savingsStartDate?: string | null
 ): number => {
-  const days = calculateDaysSober(startDate);
+  const effectiveDate = savingsStartDate || startDate;
+  const days = calculateDaysSober(effectiveDate);
   return days * dailySpending;
 };
 

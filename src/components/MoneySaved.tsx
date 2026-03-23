@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem, Plus, X, Check, Settings, Sliders, CreditCard, Banknote, Receipt } from "lucide-react";
+import { DollarSign, PiggyBank, TrendingUp, Sparkles, Wallet, BarChart3, Target, ArrowUpRight, ChevronRight, Landmark, ShoppingBag, Trophy, Crown, Lock, Calculator, LineChart, Percent, Clock, CalendarDays, Gem, Plus, X, Check, Settings, Sliders, CreditCard, Banknote, Receipt, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar, Cell } from "recharts";
@@ -11,6 +11,7 @@ interface MoneySavedProps {
   totalSaved: number;
   dailySpending: number;
   daysSober: number;
+  onReset?: () => void;
 }
 
 // Animated counter hook
@@ -166,7 +167,8 @@ const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
   { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
 ];
 
-export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedProps) => {
+export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: MoneySavedProps) => {
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { isPremium } = usePremiumStatus();
   const animatedTotal = useAnimatedCounter(totalSaved);
   const weeklyRate = dailySpending * 7;
@@ -317,6 +319,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
   const monthlyInvestmentIncome = Math.round((tenYearModerate * 0.04) / 12);
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -339,11 +342,22 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
               <p className="text-[10px] text-muted-foreground">Your financial progress</p>
             </div>
           </div>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-            <ArrowUpRight className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-medium text-primary">
-              ${dailySpending}/day
-            </span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+              <ArrowUpRight className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-medium text-primary">
+                ${dailySpending}/day
+              </span>
+            </div>
+            {onReset && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors group"
+                title="Reset savings counter"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground group-hover:text-destructive transition-colors" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -1166,5 +1180,57 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober }: MoneySavedP
         )}
       </div>
     </motion.div>
+
+    {/* Reset confirmation dialog */}
+    <AnimatePresence>
+      {showResetConfirm && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setShowResetConfirm(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-card border border-border p-5 space-y-4 shadow-float"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
+                <RefreshCw className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Reset Savings Counter</h3>
+                <p className="text-xs text-muted-foreground">Start tracking savings from today</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              This will reset your money saved counter to $0 and start counting from today. <span className="text-foreground font-medium">Your sobriety date will not change.</span>
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onReset?.();
+                  setShowResetConfirm(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+              >
+                Reset Savings
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
