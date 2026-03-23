@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN savings_start_date date DEFAULT NULL;

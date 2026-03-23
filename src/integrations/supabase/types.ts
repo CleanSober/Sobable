@@ -916,6 +916,7 @@ export type Database = {
           id: string
           onboarding_complete: boolean | null
           personal_reminder: string | null
+          savings_start_date: string | null
           sobriety_start_date: string | null
           sponsor_phone: string | null
           substances: string[] | null
@@ -931,6 +932,7 @@ export type Database = {
           id?: string
           onboarding_complete?: boolean | null
           personal_reminder?: string | null
+          savings_start_date?: string | null
           sobriety_start_date?: string | null
           sponsor_phone?: string | null
           substances?: string[] | null
@@ -946,6 +948,7 @@ export type Database = {
           id?: string
           onboarding_complete?: boolean | null
           personal_reminder?: string | null
+          savings_start_date?: string | null
           sobriety_start_date?: string | null
           sponsor_phone?: string | null
           substances?: string[] | null
