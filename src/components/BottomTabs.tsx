@@ -167,4 +167,4 @@ export const BottomTabs = memo(({ activeTab, onTabChange }: BottomTabsProps) => 
       </div>
     </nav>
   );
-};
+});
