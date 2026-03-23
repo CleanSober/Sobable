@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense, memo } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
@@ -17,6 +18,7 @@ import { DailyRitual } from "@/components/DailyRitual";
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
 import { useFeedbackPrompt } from "@/hooks/useFeedbackPrompt";
+import { useMilestoneUpgrade } from "@/hooks/useMilestoneUpgrade";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
@@ -32,6 +34,7 @@ const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
 const PremiumOnboarding = lazy(() => import("@/components/premium/PremiumOnboarding").then(m => ({ default: m.PremiumOnboarding })));
 const FeedbackPromptDialog = lazy(() => import("@/components/FeedbackPromptDialog").then(m => ({ default: m.FeedbackPromptDialog })));
+const MilestoneUpgradePrompt = lazy(() => import("@/components/MilestoneUpgradePrompt").then(m => ({ default: m.MilestoneUpgradePrompt })));
 
 // Lazy load heavy tab content
 const ProgressView = lazy(() => import("@/components/ProgressView").then(m => ({ default: m.ProgressView })));
@@ -72,6 +75,7 @@ const Index = () => {
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const { userXP } = useGamification();
   const { showPrompt: showFeedback, triggerFeedback, dismiss: dismissFeedback, markSubmitted: feedbackSubmitted } = useFeedbackPrompt();
+  const { pendingPrompt, showPricing: milestoneShowPricing, setShowPricing: setMilestoneShowPricing, triggerMilestone, dismissPrompt, upgradeFromPrompt } = useMilestoneUpgrade();
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
@@ -224,6 +228,37 @@ const Index = () => {
       triggerFeedback("milestone");
     }
   }, [profile?.sobriety_start_date, user, triggerFeedback]);
+
+  // Trigger milestone upgrade prompts at key engagement moments
+  useEffect(() => {
+    if (!user || !profile?.onboarding_complete) return;
+    const streak = userXP?.daily_login_streak ?? 0;
+    const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
+
+    // Streak milestones
+    if (streak >= 3) triggerMilestone("streak_3");
+    if (streak >= 7) triggerMilestone("streak_7");
+    if (streak >= 14) triggerMilestone("streak_14");
+    if (streak >= 30) triggerMilestone("streak_30");
+
+    // Sobriety milestones
+    if (daysSober >= 7) triggerMilestone("sober_7");
+    if (daysSober >= 30) triggerMilestone("sober_30");
+    if (daysSober >= 90) triggerMilestone("sober_90");
+
+    // First-action milestones (check DB counts)
+    const checkFirstActions = async () => {
+      const [moodRes, journalRes, triggerRes] = await Promise.all([
+        supabase.from("mood_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("journal_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("trigger_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      if ((moodRes.count ?? 0) >= 1) triggerMilestone("first_mood");
+      if ((journalRes.count ?? 0) >= 1) triggerMilestone("first_journal");
+      if ((triggerRes.count ?? 0) >= 1) triggerMilestone("first_trigger");
+    };
+    checkFirstActions();
+  }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
   if (authLoading || profileLoading) {
     return (
@@ -509,6 +544,13 @@ const Index = () => {
           {showPremiumOnboarding && <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />}
           {showFeedback && <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />}
           <AdBanner position="bottom" />
+          <MilestoneUpgradePrompt
+            prompt={pendingPrompt}
+            onDismiss={dismissPrompt}
+            onUpgrade={upgradeFromPrompt}
+            showPricing={milestoneShowPricing}
+            onPricingChange={setMilestoneShowPricing}
+          />
         </Suspense>
       </div>
     </XPNotificationProvider>
