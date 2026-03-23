@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Home, Heart, TrendingUp, Users, Brain, Crown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHaptics } from "@/hooks/useHaptics";
