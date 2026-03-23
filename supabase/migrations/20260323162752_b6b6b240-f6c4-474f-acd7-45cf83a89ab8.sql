@@ -1,0 +1,1 @@
+UPDATE subscriptions SET status = 'inactive', plan_type = 'free', updated_at = now() WHERE user_id = '8045c4c5-4ba3-4581-8cc2-1511a4b70cfd';
