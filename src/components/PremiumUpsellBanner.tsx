@@ -43,7 +43,7 @@ export const PremiumUpsellBanner = memo(({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-foreground">{message}</p>
-              <p className="text-[10px] text-muted-foreground">Try free for 7 days · Cancel anytime</p>
+              <p className="text-[10px] text-muted-foreground">Starting at $2.92/mo · Cancel anytime</p>
             </div>
             <Button
               size="sm"
@@ -51,7 +51,7 @@ export const PremiumUpsellBanner = memo(({
               className="h-7 px-3 text-[11px] font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white flex-shrink-0"
             >
               <Sparkles className="w-3 h-3 mr-1" />
-              Try Free
+              Upgrade
             </Button>
           </div>
         </motion.div>
