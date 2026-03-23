@@ -482,10 +482,12 @@ const Index = () => {
         </main>
 
         <BottomTabs activeTab={activeTab} onTabChange={handleTabChange} />
-        <AIRecoveryCoach isOpen={coachOpen} onOpenChange={setCoachOpen} />
-        <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />
-        <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />
-        <AdBanner position="bottom" />
+        <Suspense fallback={null}>
+          {coachOpen && <AIRecoveryCoach isOpen={coachOpen} onOpenChange={setCoachOpen} />}
+          {showPremiumOnboarding && <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />}
+          {showFeedback && <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />}
+          <AdBanner position="bottom" />
+        </Suspense>
       </div>
     </XPNotificationProvider>
   );
