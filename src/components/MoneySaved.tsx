@@ -341,13 +341,23 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: Mo
               <p className="text-[10px] text-muted-foreground">Your financial progress</p>
             </div>
           </div>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-            <ArrowUpRight className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-medium text-primary">
-              ${dailySpending}/day
-            </span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+              <ArrowUpRight className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-medium text-primary">
+                ${dailySpending}/day
+              </span>
+            </div>
+            {onReset && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors group"
+                title="Reset savings counter"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground group-hover:text-destructive transition-colors" />
+              </button>
+            )}
           </div>
-        </div>
 
         {/* Main Amount - Animated */}
         <div className="text-center mb-3">
