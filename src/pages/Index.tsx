@@ -283,8 +283,23 @@ const Index = () => {
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
+              // Store previous savings_start_date for undo
+              const prevDate = (profile as any).savings_start_date || profile?.sobriety_start_date || null;
+              if (prevDate) {
+                localStorage.setItem("sobable_savings_reset_undo", JSON.stringify({
+                  previousDate: prevDate,
+                  resetAt: Date.now(),
+                }));
+              }
               await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
               toast.success("Savings counter reset! Your sobriety date is unchanged.");
+            }} onUndo={async () => {
+              const raw = localStorage.getItem("sobable_savings_reset_undo");
+              if (!raw) return;
+              const { previousDate } = JSON.parse(raw);
+              await updateProfile({ savings_start_date: previousDate === profile?.sobriety_start_date ? null : previousDate } as any);
+              localStorage.removeItem("sobable_savings_reset_undo");
+              toast.success("Savings reset undone! Your previous tracking has been restored.");
             }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />

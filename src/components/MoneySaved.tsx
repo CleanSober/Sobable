@@ -12,6 +12,7 @@ interface MoneySavedProps {
   dailySpending: number;
   daysSober: number;
   onReset?: () => void;
+  onUndo?: () => void;
 }
 
 // Animated counter hook
@@ -167,9 +168,19 @@ const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
   { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
 ];
 
-export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: MoneySavedProps) => {
+export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUndo }: MoneySavedProps) => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { isPremium } = usePremiumStatus();
+
+  // Check if undo is available (within 24 hours of reset)
+  const [undoAvailable, setUndoAvailable] = useState(() => {
+    try {
+      const raw = localStorage.getItem("sobable_savings_reset_undo");
+      if (!raw) return false;
+      const { resetAt } = JSON.parse(raw);
+      return Date.now() - resetAt < 24 * 60 * 60 * 1000;
+    } catch { return false; }
+  });
   const animatedTotal = useAnimatedCounter(totalSaved);
   const weeklyRate = dailySpending * 7;
   const monthlyRate = dailySpending * 30;
@@ -361,7 +372,34 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: Mo
           </div>
         </div>
 
-        {/* Main Amount - Animated */}
+        {/* Undo reset banner */}
+        <AnimatePresence>
+          {undoAvailable && onUndo && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-2 overflow-hidden"
+            >
+              <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                  <span className="text-[10px] text-amber-200 truncate">Savings reset recently</span>
+                </div>
+                <button
+                  onClick={() => {
+                    onUndo();
+                    setUndoAvailable(false);
+                  }}
+                  className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors flex-shrink-0"
+                >
+                  Undo
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="text-center mb-3">
           <motion.div
             key={totalSaved}
@@ -1221,6 +1259,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: Mo
                 onClick={() => {
                   onReset?.();
                   setShowResetConfirm(false);
+                  setUndoAvailable(true);
                 }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
               >
