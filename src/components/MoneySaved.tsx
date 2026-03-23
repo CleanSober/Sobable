@@ -168,9 +168,19 @@ const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
   { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
 ];
 
-export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: MoneySavedProps) => {
+export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUndo }: MoneySavedProps) => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { isPremium } = usePremiumStatus();
+
+  // Check if undo is available (within 24 hours of reset)
+  const [undoAvailable, setUndoAvailable] = useState(() => {
+    try {
+      const raw = localStorage.getItem("sobable_savings_reset_undo");
+      if (!raw) return false;
+      const { resetAt } = JSON.parse(raw);
+      return Date.now() - resetAt < 24 * 60 * 60 * 1000;
+    } catch { return false; }
+  });
   const animatedTotal = useAnimatedCounter(totalSaved);
   const weeklyRate = dailySpending * 7;
   const monthlyRate = dailySpending * 30;
