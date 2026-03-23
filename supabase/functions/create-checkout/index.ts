@@ -38,9 +38,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId } = await req.json();
+    const { priceId, referralCode } = await req.json();
     if (!priceId || typeof priceId !== "string") throw new Error("Valid Price ID is required");
-    logStep("Price ID received", { priceId });
+    logStep("Price ID received", { priceId, referralCode: referralCode || "none" });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
