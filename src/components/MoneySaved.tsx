@@ -372,7 +372,34 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
           </div>
         </div>
 
-        {/* Main Amount - Animated */}
+        {/* Undo reset banner */}
+        <AnimatePresence>
+          {undoAvailable && onUndo && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-2 overflow-hidden"
+            >
+              <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                  <span className="text-[10px] text-amber-200 truncate">Savings reset recently</span>
+                </div>
+                <button
+                  onClick={() => {
+                    onUndo();
+                    setUndoAvailable(false);
+                  }}
+                  className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors flex-shrink-0"
+                >
+                  Undo
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="text-center mb-3">
           <motion.div
             key={totalSaved}
