@@ -244,6 +244,19 @@ const Index = () => {
     if (daysSober >= 7) triggerMilestone("sober_7");
     if (daysSober >= 30) triggerMilestone("sober_30");
     if (daysSober >= 90) triggerMilestone("sober_90");
+
+    // First-action milestones (check DB counts)
+    const checkFirstActions = async () => {
+      const [moodRes, journalRes, triggerRes] = await Promise.all([
+        supabase.from("mood_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("journal_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("trigger_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      if ((moodRes.count ?? 0) >= 1) triggerMilestone("first_mood");
+      if ((journalRes.count ?? 0) >= 1) triggerMilestone("first_journal");
+      if ((triggerRes.count ?? 0) >= 1) triggerMilestone("first_trigger");
+    };
+    checkFirstActions();
   }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
   if (authLoading || profileLoading) {
