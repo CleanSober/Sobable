@@ -228,6 +228,24 @@ const Index = () => {
     }
   }, [profile?.sobriety_start_date, user, triggerFeedback]);
 
+  // Trigger milestone upgrade prompts at key engagement moments
+  useEffect(() => {
+    if (!user || !profile?.onboarding_complete) return;
+    const streak = userXP?.daily_login_streak ?? 0;
+    const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
+
+    // Streak milestones
+    if (streak >= 3) triggerMilestone("streak_3");
+    if (streak >= 7) triggerMilestone("streak_7");
+    if (streak >= 14) triggerMilestone("streak_14");
+    if (streak >= 30) triggerMilestone("streak_30");
+
+    // Sobriety milestones
+    if (daysSober >= 7) triggerMilestone("sober_7");
+    if (daysSober >= 30) triggerMilestone("sober_30");
+    if (daysSober >= 90) triggerMilestone("sober_90");
+  }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
+
   if (authLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
