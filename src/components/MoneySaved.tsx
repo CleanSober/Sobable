@@ -319,6 +319,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: Mo
   const monthlyInvestmentIncome = Math.round((tenYearModerate * 0.04) / 12);
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
