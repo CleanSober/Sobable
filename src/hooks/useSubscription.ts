@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlanByPriceId, STRIPE_PLANS } from "@/lib/stripe";
 import { toast } from "sonner";
+import { getStoredReferralCode } from "@/hooks/useReferralTracking";
 
 interface SubscriptionState {
   subscribed: boolean;
@@ -91,8 +92,9 @@ export const useSubscription = () => {
 
     setCheckoutLoading(true);
     try {
+      const referralCode = getStoredReferralCode();
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
+        body: { priceId, referralCode },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },

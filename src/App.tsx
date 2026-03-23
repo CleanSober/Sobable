@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState } from "react";
+import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +27,12 @@ const PageLoader = () => (
   </div>
 );
 
+const AppContent = () => {
+  // Track affiliate referral codes from URL
+  useReferralTracking();
+  return null; // Just runs the hook inside Router context
+};
+
 const App = () => {
   // Only show splash on first load per session (not on in-app navigations)
   const [showSplash, setShowSplash] = useState(() => {
@@ -48,6 +55,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AppContent />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />

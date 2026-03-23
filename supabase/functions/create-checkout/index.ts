@@ -38,9 +38,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId } = await req.json();
+    const { priceId, referralCode } = await req.json();
     if (!priceId || typeof priceId !== "string") throw new Error("Valid Price ID is required");
-    logStep("Price ID received", { priceId });
+    logStep("Price ID received", { priceId, referralCode: referralCode || "none" });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -57,7 +57,7 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Record<string, unknown> = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
@@ -69,11 +69,15 @@ serve(async (req) => {
       mode: "subscription",
       subscription_data: {
         trial_period_days: 7,
+        metadata: referralCode ? { affiliate_ref: referralCode } : {},
       },
+      metadata: referralCode ? { affiliate_ref: referralCode } : {},
       payment_method_collection: "always",
       success_url: `${origin}/?checkout=success`,
       cancel_url: `${origin}/?checkout=cancelled`,
-    });
+    };
+
+    const session = await stripe.checkout.sessions.create(sessionParams as any);
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
