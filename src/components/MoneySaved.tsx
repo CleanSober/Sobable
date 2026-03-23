@@ -358,6 +358,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset }: Mo
               </button>
             )}
           </div>
+        </div>
 
         {/* Main Amount - Animated */}
         <div className="text-center mb-3">
