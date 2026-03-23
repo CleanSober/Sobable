@@ -11,6 +11,7 @@ interface MoneySavedProps {
   totalSaved: number;
   dailySpending: number;
   daysSober: number;
+  onReset?: () => void;
 }
 
 // Animated counter hook
