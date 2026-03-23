@@ -21,9 +21,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
-import { useAuth } from "@/contexts/AuthContext";
-import { useUserData } from "@/hooks/useUserData";
-import { useCapacitor } from "@/hooks/useCapacitor";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { NotificationCenter } from "@/components/NotificationCenter";
 
