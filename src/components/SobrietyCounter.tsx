@@ -222,4 +222,4 @@ export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterPr
       </div>
     </motion.div>
   );
-};
+});
