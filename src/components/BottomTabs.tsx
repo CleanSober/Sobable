@@ -28,7 +28,7 @@ interface BottomTabsProps {
   onTabChange: (tab: TabId) => void;
 }
 
-export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
+export const BottomTabs = memo(({ activeTab, onTabChange }: BottomTabsProps) => {
   const { impact } = useHaptics();
   const onlineCount = useOnlineCount();
   const { isPremium } = usePremiumStatus();
