@@ -51,7 +51,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
             <div className="space-y-1">
               <h2 className="text-lg font-bold text-foreground">Join 2,400+ in Sober Club</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Unlock the full recovery toolkit — try free for 7 days
+                Unlock the full recovery toolkit with Premium
               </p>
             </div>
 
@@ -89,7 +89,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
 
             <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
               <Shield className="w-3 h-3" aria-hidden="true" />
-              No charge for 7 days · Cancel anytime
+              Secure payment · Cancel anytime
             </p>
           </CardContent>
         </Card>

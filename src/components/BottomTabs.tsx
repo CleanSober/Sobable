@@ -56,7 +56,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
-            const isPremium = tab.isPremium;
+            const isTabPremium = tab.isPremium;
 
             return (
               <button
@@ -66,7 +66,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
               >
                 {/* Tooltip for community tab */}
                 <AnimatePresence>
-                  {tab.id === "community" && showTooltip && onlineCount > 0 && (
+                  {tab.id === "community" && showTooltip && isPremium && onlineCount > 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: 4, scale: 0.9 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -89,7 +89,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     layoutId="activeTab"
                     className="absolute inset-0 rounded-xl"
                     style={{
-                      background: isPremium 
+                      background: isTabPremium 
                         ? "linear-gradient(135deg, hsl(42 100% 55% / 0.15), hsl(38 95% 50% / 0.1))"
                         : "linear-gradient(135deg, hsl(168 84% 45% / 0.15), hsl(158 72% 48% / 0.1))"
                     }}
@@ -105,7 +105,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                   >
                     <Icon
                       className={`w-5 h-5 relative z-10 transition-all duration-300 ${
-                        isPremium 
+                        isTabPremium 
                           ? isActive 
                             ? "text-accent drop-shadow-[0_0_8px_hsl(42_100%_55%/0.5)]" 
                             : "text-accent/60"
@@ -129,17 +129,8 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     </motion.div>
                   )}
 
-                  {/* Crown badge for community tab (free users) or other premium tabs */}
-                  {isPremium === false && tab.id === "community" && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg"
-                    >
-                      <Crown className="w-2.5 h-2.5 text-white" />
-                    </motion.div>
-                  )}
-                  {isPremium && tab.isPremium && tab.id !== "community" && (
+                  {/* Crown badge for community tab (free users) */}
+                  {!isPremium && tab.id === "community" && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -154,7 +145,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className={`absolute inset-0 blur-lg ${isPremium ? "bg-accent/30" : "bg-primary/30"}`}
+                      className={`absolute inset-0 blur-lg ${isTabPremium ? "bg-accent/30" : "bg-primary/30"}`}
                     />
                   )}
                 </div>
@@ -162,7 +153,7 @@ export const BottomTabs = ({ activeTab, onTabChange }: BottomTabsProps) => {
                 {/* Label */}
                 <span
                   className={`text-[10px] mt-1 font-medium relative z-10 transition-all duration-300 leading-tight ${
-                    isPremium
+                    isTabPremium
                       ? isActive ? "text-accent" : "text-accent/60"
                       : isActive ? "text-primary" : "text-muted-foreground"
                   }`}
