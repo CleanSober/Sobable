@@ -73,6 +73,7 @@ const Index = () => {
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const { userXP } = useGamification();
   const { showPrompt: showFeedback, triggerFeedback, dismiss: dismissFeedback, markSubmitted: feedbackSubmitted } = useFeedbackPrompt();
+  const { pendingPrompt, showPricing: milestoneShowPricing, setShowPricing: setMilestoneShowPricing, triggerMilestone, dismissPrompt, upgradeFromPrompt } = useMilestoneUpgrade();
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
