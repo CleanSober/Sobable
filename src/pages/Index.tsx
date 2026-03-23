@@ -241,7 +241,10 @@ const Index = () => {
     ? calculateDaysSober(profile.sobriety_start_date)
     : 0;
   const moneySaved = profile?.sobriety_start_date && profile?.daily_spending
-    ? calculateMoneySaved(profile.sobriety_start_date, profile.daily_spending)
+    ? calculateMoneySaved(profile.sobriety_start_date, profile.daily_spending, (profile as any).savings_start_date)
+    : 0;
+  const savingsDaysSober = profile?.sobriety_start_date
+    ? calculateDaysSober((profile as any).savings_start_date || profile.sobriety_start_date)
     : 0;
 
   // Convert profile to userData format for components that need it
