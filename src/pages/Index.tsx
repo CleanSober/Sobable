@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense, memo } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
