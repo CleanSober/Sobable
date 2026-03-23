@@ -56,10 +56,10 @@ export const NotificationCenter = () => {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      subscribeToNotifications();
-    }
+    if (!user) return;
+    fetchNotifications();
+    const cleanup = subscribeToNotifications();
+    return () => { cleanup?.(); };
   }, [user]);
 
   const fetchNotifications = async () => {
