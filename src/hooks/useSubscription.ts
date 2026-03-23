@@ -92,8 +92,9 @@ export const useSubscription = () => {
 
     setCheckoutLoading(true);
     try {
+      const referralCode = getStoredReferralCode();
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
+        body: { priceId, referralCode },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
