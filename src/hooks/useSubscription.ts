@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlanByPriceId, STRIPE_PLANS } from "@/lib/stripe";
 import { toast } from "sonner";
+import { getStoredReferralCode } from "@/hooks/useReferralTracking";
 
 interface SubscriptionState {
   subscribed: boolean;
