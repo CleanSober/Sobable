@@ -51,7 +51,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   first_trigger: {
     title: "First Trigger Logged! 🎯",
-    message: "Self-awareness is key! Premium's pattern analysis can predict and prevent future triggers.",
+    message: "Self-awareness is key! Sober Club's pattern analysis can predict and prevent future triggers.",
     emoji: "🔮",
   },
   first_mood: {
