@@ -36,7 +36,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   sober_30: {
     title: "30 Days Sober! 🎉",
-    message: "One month of strength! See detailed analytics and predictions with Premium insights.",
+    message: "One month of strength! See detailed analytics and predictions with Sober Club insights.",
     emoji: "📊",
   },
   sober_90: {
