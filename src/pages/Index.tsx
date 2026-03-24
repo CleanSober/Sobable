@@ -554,7 +554,7 @@ const Index = () => {
           
           <div className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 py-2 flex items-center justify-between relative">
             <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-foreground tracking-tight">Sobable</span>
+              <span className="text-base font-bold text-foreground tracking-tight">Sober Club</span>
               {(userXP?.daily_login_streak ?? 0) > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}

@@ -168,7 +168,7 @@ export const FeedbackRating = () => {
         Rate Your Experience
       </h3>
       <p className="text-xs text-muted-foreground mb-4">
-        Your feedback helps us improve Sobable
+        Your feedback helps us improve Sober Club
       </p>
 
       <AnimatePresence mode="wait">
@@ -198,7 +198,7 @@ export const FeedbackRating = () => {
             exit={{ opacity: 0 }}
             className="flex flex-col items-center gap-3"
           >
-            <p className="text-xs text-muted-foreground">How would you rate Sobable?</p>
+            <p className="text-xs text-muted-foreground">How would you rate Sober Club?</p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -238,7 +238,7 @@ export const FeedbackRating = () => {
               ))}
             </div>
             <p className="text-sm font-medium text-foreground">
-              We're so glad you love Sobable! 🎉
+              We're so glad you love Sober Club! 🎉
             </p>
             <p className="text-xs text-muted-foreground">
               Would you mind leaving a review on the {getStoreName(platform)}?

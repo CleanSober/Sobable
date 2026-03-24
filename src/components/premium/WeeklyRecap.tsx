@@ -74,7 +74,7 @@ export const WeeklyRecap = ({ daysSober, moneySaved }: WeeklyRecapProps) => {
   const handleShare = async () => {
     const s = stats || displayStats;
     const text = s
-      ? `🎉 My Recovery Week Recap:\n🔥 ${s.daysSober} days sober\n😊 Mood: ${s.moodAvg.toFixed(1)}/10\n😴 Sleep: ${s.sleepAvg.toFixed(1)}h avg\n📝 ${s.journalCount} journal entries\n💰 $${s.moneySaved.toFixed(0)} saved\n\n#Recovery #Sobable`
+      ? `🎉 My Recovery Week Recap:\n🔥 ${s.daysSober} days sober\n😊 Mood: ${s.moodAvg.toFixed(1)}/10\n😴 Sleep: ${s.sleepAvg.toFixed(1)}h avg\n📝 ${s.journalCount} journal entries\n💰 $${s.moneySaved.toFixed(0)} saved\n\n#Recovery #SoberClub`
       : "";
 
     if (navigator.share) {
