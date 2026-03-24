@@ -63,7 +63,7 @@ export const MilestoneUpgradePrompt = memo(({
                     className="flex-1 h-9 text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                   >
                     <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    Unlock Premium
+                    Join Sober Club
                   </Button>
                   <Button
                     onClick={onDismiss}
