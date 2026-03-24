@@ -12,7 +12,8 @@ interface SobrietyCounterProps {
   substances?: string[] | null;
 }
 
-export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterProps) => {
+export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
+  const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
   const weeks = Math.floor(daysSober / 7);
   const months = Math.floor(daysSober / 30);
