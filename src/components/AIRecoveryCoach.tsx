@@ -157,7 +157,7 @@ How can I support you today?`;
         return;
       }
       if (response.status === 402) {
-        toast.error("AI credits depleted. Please add credits in workspace settings.");
+        toast.error("AI service temporarily unavailable. Please try again later.");
         setMessages((prev) => prev.slice(0, -1));
         setIsLoading(false);
         return;
@@ -259,7 +259,7 @@ How can I support you today?`;
   return (
     <>
 
-      {/* Premium Upgrade Modal */}
+      {/* Sober Club Upgrade Modal */}
       <AnimatePresence>
         {showUpgrade && (
           <>

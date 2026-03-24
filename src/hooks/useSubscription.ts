@@ -73,7 +73,7 @@ export const useSubscription = () => {
     const checkoutStatus = params.get("checkout");
     
     if (checkoutStatus === "success") {
-      toast.success("Welcome to Premium! Your subscription is now active.");
+      toast.success("Welcome to Sober Club! Your subscription is now active.");
       // Remove query params
       window.history.replaceState({}, "", window.location.pathname);
       // Refresh subscription status
