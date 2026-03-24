@@ -31,7 +31,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   sober_7: {
     title: "1 Week Sober! 🌟",
-    message: "Your first week! Premium's AI Coach can give you personalized guidance for the road ahead.",
+    message: "Your first week! Sober Club's AI Coach can give you personalized guidance for the road ahead.",
     emoji: "🤖",
   },
   sober_30: {
