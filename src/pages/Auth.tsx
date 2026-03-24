@@ -482,12 +482,34 @@ const Auth = () => {
           </AnimatePresence>
         </div>
 
+        {/* Guest mode */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-4"
+        >
+          <button
+            onClick={() => {
+              continueAsGuest();
+              navigate("/");
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <UserX className="w-4 h-4" />
+            Continue as Guest
+          </button>
+          <p className="text-center text-[10px] text-muted-foreground/60 mt-1">
+            Basic features only · Data stored on this device
+          </p>
+        </motion.div>
+
         {/* Footer */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="text-center text-muted-foreground text-xs mt-5"
+          className="text-center text-muted-foreground text-xs mt-4"
         >
           Your journey to recovery starts here ✨
         </motion.p>
