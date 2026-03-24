@@ -4,10 +4,12 @@ import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMilestones } from "@/lib/storage";
 import { useGamification, getLevelTitle } from "@/hooks/useGamification";
+import { getPersonalizedWording } from "@/lib/substanceConfig";
 
 interface SobrietyCounterProps {
   daysSober: number;
   startDate: string;
+  substances?: string[] | null;
 }
 
 export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterProps) => {
