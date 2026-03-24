@@ -53,7 +53,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterPr
             </div>
             <div>
               <span className="text-muted-foreground text-xs font-medium">
-                Clean Since
+                {wording.sinceLabel}
               </span>
               <p className="text-foreground font-semibold text-sm">
                 {new Date(startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
