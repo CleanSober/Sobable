@@ -238,7 +238,7 @@ export const FeedbackRating = () => {
               ))}
             </div>
             <p className="text-sm font-medium text-foreground">
-              We're so glad you love Sobable! 🎉
+              We're so glad you love Sober Club! 🎉
             </p>
             <p className="text-xs text-muted-foreground">
               Would you mind leaving a review on the {getStoreName(platform)}?
