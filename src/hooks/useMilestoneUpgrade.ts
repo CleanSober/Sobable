@@ -56,7 +56,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   first_mood: {
     title: "First Mood Check-In! 💚",
-    message: "Tracking your feelings is powerful! Premium gives you deep mood trend analytics.",
+    message: "Tracking your feelings is powerful! Sober Club gives you deep mood trend analytics.",
     emoji: "📈",
   },
 };

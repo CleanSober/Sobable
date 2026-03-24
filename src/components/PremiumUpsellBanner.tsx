@@ -59,7 +59,7 @@ export const PremiumUpsellBanner = memo(({
 
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => setShowPricing(false)} featureContext="Premium Features" />
+          <PricingPlans onClose={() => setShowPricing(false)} featureContext="Sober Club" />
         </DialogContent>
       </Dialog>
     </>

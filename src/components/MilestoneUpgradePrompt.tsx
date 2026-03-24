@@ -82,7 +82,7 @@ export const MilestoneUpgradePrompt = memo(({
 
       <Dialog open={showPricing} onOpenChange={onPricingChange}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => onPricingChange(false)} featureContext="Premium Features" />
+          <PricingPlans onClose={() => onPricingChange(false)} featureContext="Sober Club" />
         </DialogContent>
       </Dialog>
     </>

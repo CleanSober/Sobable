@@ -70,7 +70,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           }
         </h2>
         <p className="text-xs text-muted-foreground max-w-[260px] mx-auto">
-          Get full access to every premium tool to support your recovery.
+          Get full access to every recovery tool in Sober Club.
         </p>
       </div>
 
