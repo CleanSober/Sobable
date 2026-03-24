@@ -199,7 +199,10 @@ export const TriggerLogger = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.info("Create a free account to save your trigger logs!", { duration: 4000 });
+      return;
+    }
     if (!trigger || !situation || !emotion) {
       toast.error("Please complete trigger, emotion, and situation steps");
       return;
