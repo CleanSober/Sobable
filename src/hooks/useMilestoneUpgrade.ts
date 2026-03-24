@@ -11,7 +11,7 @@ interface MilestonePrompt {
 const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   streak_3: {
     title: "3-Day Streak! 🔥",
-    message: "You're building momentum! Premium members get streak protection so you never lose progress.",
+    message: "You're building momentum! Sober Club members get streak protection so you never lose progress.",
     emoji: "🛡️",
   },
   streak_7: {
