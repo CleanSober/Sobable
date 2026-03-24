@@ -384,7 +384,7 @@ const Index = () => {
                 )} 🌟
               </h1>
             </motion.div>
-            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
+            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} substances={userData.substances} />
             <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
               const prevDate = effectiveProfile?.savings_start_date || effectiveProfile?.sobriety_start_date || null;
