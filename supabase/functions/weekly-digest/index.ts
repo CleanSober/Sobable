@@ -173,7 +173,7 @@ function generateEmailHtml(
     
     <!-- Header -->
     <tr><td style="text-align: center; padding: 32px 0 16px;">
-      <p style="font-size: 28px; font-weight: bold; color: #22c55e; margin: 0;">🌿 Sobable</p>
+      <p style="font-size: 28px; font-weight: bold; color: #22c55e; margin: 0;">🌿 Sober Club</p>
       <p style="font-size: 12px; color: #6b7280; margin: 8px 0 0; text-transform: uppercase; letter-spacing: 1.5px;">Weekly Progress Report</p>
     </td></tr>
 
@@ -302,7 +302,7 @@ function generateEmailHtml(
         <!-- Footer -->
         <tr><td style="background: #12141c; border-radius: 0 0 16px 16px; padding: 20px 30px;">
           <p style="color: #6b7280; font-size: 12px; text-align: center; margin: 0 0 6px;">
-            Sobable · Your recovery companion
+            Sober Club · Your recovery companion
           </p>
           <p style="color: #4b5563; font-size: 11px; text-align: center; margin: 0;">
             You're receiving this because you have weekly digests enabled. Manage in app settings.
@@ -335,7 +335,7 @@ async function sendDigestToUser(
     );
 
     const { error } = await resend.emails.send({
-      from: "Sobable <digest@sobable.com>",
+      from: "Sober Club <digest@sobable.com>",
       to: [user.email],
       subject: `📊 Week ${Math.ceil(daysSober / 7)} — ${daysSober} Days Strong!`,
       html,

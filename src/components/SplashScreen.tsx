@@ -122,7 +122,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               <div className="relative w-32 h-32 rounded-3xl overflow-hidden shadow-elevated tech-border">
                 <img 
                   src={sobableLogo} 
-                  alt="Sobable" 
+                  alt="Sober Club" 
                   className="w-full h-full object-cover"
                 />
                 {/* Shimmer overlay */}
@@ -164,7 +164,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               transition={{ duration: 0.5, delay: 0.7 }}
               className="text-4xl font-bold tracking-tight mb-3 text-gradient"
             >
-              Sobable
+              Sober Club
             </motion.h1>
 
             {/* Tagline */}

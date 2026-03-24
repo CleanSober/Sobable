@@ -12,14 +12,14 @@ const Terms = () => {
     {
       icon: CheckCircle,
       title: "1. Acceptance of Terms",
-      content: `By downloading, installing, accessing, or using the Sobable application ("App," "Service," or "Platform"), you ("User," "you," or "your") acknowledge that you have read, understood, and agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and any additional guidelines or policies referenced herein. If you do not agree to these Terms in their entirety, you must immediately cease all use of the App and delete it from your device(s).
+      content: `By downloading, installing, accessing, or using the Sober Club application ("App," "Service," or "Platform"), you ("User," "you," or "your") acknowledge that you have read, understood, and agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and any additional guidelines or policies referenced herein. If you do not agree to these Terms in their entirety, you must immediately cease all use of the App and delete it from your device(s).
 
-These Terms constitute a legally binding agreement between you and Sobable ("Company," "we," "us," or "our"). We reserve the right to modify, amend, or update these Terms at any time at our sole discretion. Material changes will be communicated through the App or via the email address associated with your account. Your continued use of the App after any modifications constitutes your binding acceptance of the revised Terms. It is your responsibility to review these Terms periodically.`
+These Terms constitute a legally binding agreement between you and Sober Club ("Company," "we," "us," or "our"). We reserve the right to modify, amend, or update these Terms at any time at our sole discretion. Material changes will be communicated through the App or via the email address associated with your account. Your continued use of the App after any modifications constitutes your binding acceptance of the revised Terms. It is your responsibility to review these Terms periodically.`
     },
     {
       icon: FileText,
       title: "2. Description of Service",
-      content: `Sobable is a digital wellness and recovery support application that provides tools including but not limited to: sobriety tracking, mood and trigger logging, guided meditations, breathing exercises, journaling, community forums, gamification features, AI-powered insights, sleep tracking, and motivational content.
+      content: `Sober Club is a digital wellness and recovery support application that provides tools including but not limited to: sobriety tracking, mood and trigger logging, guided meditations, breathing exercises, journaling, community forums, gamification features, AI-powered insights, sleep tracking, and motivational content.
 
 THE APP IS DESIGNED SOLELY AS A SUPPLEMENTARY WELLNESS TOOL. It is not a medical device, therapeutic service, counseling platform, or substitute for professional addiction treatment, mental health services, or medical care of any kind. The App does not establish a doctor-patient, therapist-client, or any other professional healthcare relationship between you and the Company.
 
@@ -138,9 +138,9 @@ PRICE CHANGES: We reserve the right to change subscription pricing. Existing sub
     {
       icon: BookOpen,
       title: "10. Intellectual Property",
-      content: `All content, features, functionality, designs, text, graphics, logos, icons, images, audio, video, software, and the compilation thereof ("Company Content") are the exclusive property of Sobable and/or its licensors and are protected by United States and international copyright, trademark, trade secret, patent, and other intellectual property laws.
+      content: `All content, features, functionality, designs, text, graphics, logos, icons, images, audio, video, software, and the compilation thereof ("Company Content") are the exclusive property of Sober Club and/or its licensors and are protected by United States and international copyright, trademark, trade secret, patent, and other intellectual property laws.
 
-TRADEMARKS: "Sobable," the Sobable logo, and all related names, logos, product and service names, designs, and slogans are trademarks of the Company. You may not use such marks without our prior written permission.
+TRADEMARKS: "Sober Club," the Sober Club logo, and all related names, logos, product and service names, designs, and slogans are trademarks of the Company. You may not use such marks without our prior written permission.
 
 RESTRICTIONS: You may not:
 • Copy, modify, distribute, sell, lease, or create derivative works based on the App or its content
@@ -272,7 +272,7 @@ SURVIVAL: All provisions of these Terms which by their nature should survive ter
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-4">Terms of Service</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Please read these terms carefully before using Sobable. By using our app, you agree to these terms and conditions.
+            Please read these terms carefully before using Sober Club. By using our app, you agree to these terms and conditions.
           </p>
           <p className="text-sm text-muted-foreground mt-4">
             Effective Date: February 6, 2026 · Last Updated: February 6, 2026
@@ -392,7 +392,7 @@ SURVIVAL: All provisions of these Terms which by their nature should survive ter
           className="card-enhanced p-5 mt-5 border-primary/20 bg-primary/5"
         >
           <p className="text-sm text-muted-foreground leading-relaxed text-center">
-            By creating an account or using the Sobable application, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service in their entirety, including the arbitration clause and class action waiver in Section 13.
+            By creating an account or using the Sober Club application, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service in their entirety, including the arbitration clause and class action waiver in Section 13.
           </p>
         </motion.div>
 
