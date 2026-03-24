@@ -96,7 +96,7 @@ export const OnlineUsers = memo(({ roomId }: OnlineUsersProps) => {
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          <p className="text-xs">Upgrade to see who's online</p>
+          <p className="text-xs">Join Sober Club to see who's online</p>
         </TooltipContent>
       </Tooltip>
     );

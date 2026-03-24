@@ -259,7 +259,7 @@ How can I support you today?`;
   return (
     <>
 
-      {/* Premium Upgrade Modal */}
+      {/* Sober Club Upgrade Modal */}
       <AnimatePresence>
         {showUpgrade && (
           <>

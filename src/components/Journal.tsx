@@ -458,7 +458,7 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
                   <Lock className="w-4 h-4 text-amber-500 flex-shrink-0" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">AI Mood Analysis</p>
-                    <p className="text-xs text-muted-foreground">Upgrade to analyze your mood automatically</p>
+                    <p className="text-xs text-muted-foreground">Join Sober Club to analyze your mood automatically</p>
                   </div>
                   <Badge variant="outline" className="text-amber-500 border-amber-500/30 text-xs flex-shrink-0">
                     <Crown className="w-3 h-3 mr-1" />
