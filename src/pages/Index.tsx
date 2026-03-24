@@ -174,14 +174,15 @@ const Index = () => {
     const name = profile?.display_name;
     const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
 
-    // Import wording dynamically based on user's substances
-    const { getPersonalizedWording } = require("@/lib/substanceConfig");
     const wording = getPersonalizedWording(profile?.substances);
 
+    const today = new Date();
     // Only show the daily motivation once per calendar day
     const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     const lastMotivationDay = localStorage.getItem(`sobable_daily_motivation_${user.id}`);
     const isNewDay = lastMotivationDay !== todayKey;
+
+    const motivation = dailyMotivations[Math.floor(Math.random() * dailyMotivations.length)];
 
     const timer = setTimeout(() => {
       // First toast: personalized greeting with streak
