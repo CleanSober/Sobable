@@ -260,7 +260,7 @@ const Index = () => {
     checkFirstActions();
   }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
-  if (authLoading || profileLoading) {
+  if (authLoading || (!isGuest && profileLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -268,7 +268,7 @@ const Index = () => {
     );
   }
 
-  if (!user) return null;
+  if (!user && !isGuest) return null;
 
   const showOnboarding = !profile?.onboarding_complete;
 
