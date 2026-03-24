@@ -129,7 +129,7 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
               className="flex flex-col items-center gap-4 py-2"
             >
               <p className="text-sm text-muted-foreground text-center">
-                You've been making great progress! How would you rate Sobable?
+                You've been making great progress! How would you rate Sober Club?
               </p>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
