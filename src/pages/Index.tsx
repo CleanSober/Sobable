@@ -448,7 +448,7 @@ const Index = () => {
                 <PremiumProgressInsights daysSober={daysSober} />
               </PremiumLockOverlay>
               <PremiumFeatureSection
-                title="Sober Club Premium"
+                title="Sober Club"
                 features={[
                   { name: "Recovery Pathways" },
                   { name: "Predictive Insights" },
