@@ -147,7 +147,11 @@ export const MoodCheckIn = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.info("Create a free account to save your check-ins across devices!", { duration: 4000 });
+      setCompleted(true);
+      return;
+    }
     setLoading(true);
 
     const today = new Date().toISOString().split("T")[0];
