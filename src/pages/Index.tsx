@@ -348,6 +348,25 @@ const Index = () => {
       case "home":
         return (
           <div className="space-y-3">
+            {/* Guest sign-up banner */}
+            {isGuest && !user && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card-enhanced p-3 flex items-center gap-3 border-primary/30"
+              >
+                <div className="p-2 rounded-xl bg-primary/15">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-foreground">Create a free account</h3>
+                  <p className="text-[10px] text-muted-foreground">Save your progress across devices & unlock all features</p>
+                </div>
+                <Button size="sm" className="gradient-primary text-primary-foreground text-xs" onClick={() => navigate("/auth")}>
+                  Sign Up
+                </Button>
+              </motion.div>
+            )}
             <motion.div 
               initial={{ opacity: 0, y: -10 }} 
               animate={{ opacity: 1, y: 0 }} 
