@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useGamification } from "@/hooks/useGamification";
-import { Loader2, Flame, Bot, Crown, ChevronRight } from "lucide-react";
+import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
@@ -71,7 +72,7 @@ const TabLoader = memo(() => (
 ));
 
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isGuest } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const { userXP } = useGamification();
   const { showPrompt: showFeedback, triggerFeedback, dismiss: dismissFeedback, markSubmitted: feedbackSubmitted } = useFeedbackPrompt();
@@ -121,10 +122,10 @@ const Index = () => {
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isGuest) {
       navigate("/auth");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, isGuest, navigate]);
 
   // Daily motivational messages pool
   const dailyMotivations = useMemo(() => [
@@ -260,7 +261,7 @@ const Index = () => {
     checkFirstActions();
   }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
-  if (authLoading || profileLoading) {
+  if (authLoading || (!isGuest && profileLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -268,9 +269,16 @@ const Index = () => {
     );
   }
 
-  if (!user) return null;
+  if (!user && !isGuest) return null;
 
-  const showOnboarding = !profile?.onboarding_complete;
+  // Guest mode: use localStorage for profile data
+  const guestProfile = isGuest && !user ? (() => {
+    const stored = localStorage.getItem("sobable_guest_profile");
+    return stored ? JSON.parse(stored) : null;
+  })() : null;
+
+  const effectiveProfile = user ? profile : guestProfile;
+  const showOnboarding = !effectiveProfile?.onboarding_complete;
 
   const handleOnboardingComplete = async (data: {
     name: string;
@@ -281,42 +289,59 @@ const Index = () => {
     emergencyContact?: string;
     personalReminder?: string;
   }) => {
-    await updateProfile({
-      display_name: data.name,
-      substances: data.substances,
-      sobriety_start_date: data.sobrietyStartDate,
-      daily_spending: data.dailySpending,
-      sponsor_phone: data.sponsorPhone,
-      emergency_contact: data.emergencyContact,
-      personal_reminder: data.personalReminder,
-      onboarding_complete: true,
-    });
+    if (user) {
+      await updateProfile({
+        display_name: data.name,
+        substances: data.substances,
+        sobriety_start_date: data.sobrietyStartDate,
+        daily_spending: data.dailySpending,
+        sponsor_phone: data.sponsorPhone,
+        emergency_contact: data.emergencyContact,
+        personal_reminder: data.personalReminder,
+        onboarding_complete: true,
+      });
+    } else {
+      // Guest mode: save to localStorage
+      const guestData = {
+        display_name: data.name,
+        substances: data.substances,
+        sobriety_start_date: data.sobrietyStartDate,
+        daily_spending: data.dailySpending,
+        sponsor_phone: data.sponsorPhone,
+        emergency_contact: data.emergencyContact,
+        personal_reminder: data.personalReminder,
+        onboarding_complete: true,
+      };
+      localStorage.setItem("sobable_guest_profile", JSON.stringify(guestData));
+      // Force re-render
+      window.location.reload();
+    }
   };
 
   if (showOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  const daysSober = profile?.sobriety_start_date
-    ? calculateDaysSober(profile.sobriety_start_date)
+  const daysSober = effectiveProfile?.sobriety_start_date
+    ? calculateDaysSober(effectiveProfile.sobriety_start_date)
     : 0;
-  const moneySaved = profile?.sobriety_start_date && profile?.daily_spending
-    ? calculateMoneySaved(profile.sobriety_start_date, profile.daily_spending, (profile as any).savings_start_date)
+  const moneySaved = effectiveProfile?.sobriety_start_date && effectiveProfile?.daily_spending
+    ? calculateMoneySaved(effectiveProfile.sobriety_start_date, effectiveProfile.daily_spending, effectiveProfile.savings_start_date)
     : 0;
-  const savingsDaysSober = profile?.sobriety_start_date
-    ? calculateDaysSober((profile as any).savings_start_date || profile.sobriety_start_date)
+  const savingsDaysSober = effectiveProfile?.sobriety_start_date
+    ? calculateDaysSober(effectiveProfile.savings_start_date || effectiveProfile.sobriety_start_date)
     : 0;
 
   // Convert profile to userData format for components that need it
   const userData = {
-    name: profile?.display_name || "",
-    substances: profile?.substances || [],
-    sobrietyStartDate: profile?.sobriety_start_date || new Date().toISOString().split("T")[0],
-    dailySpending: profile?.daily_spending || 0,
-    sponsorPhone: profile?.sponsor_phone,
-    emergencyContact: profile?.emergency_contact,
-    personalReminder: profile?.personal_reminder,
-    onboardingComplete: profile?.onboarding_complete || false,
+    name: effectiveProfile?.display_name || "",
+    substances: effectiveProfile?.substances || [],
+    sobrietyStartDate: effectiveProfile?.sobriety_start_date || new Date().toISOString().split("T")[0],
+    dailySpending: effectiveProfile?.daily_spending || 0,
+    sponsorPhone: effectiveProfile?.sponsor_phone,
+    emergencyContact: effectiveProfile?.emergency_contact,
+    personalReminder: effectiveProfile?.personal_reminder,
+    onboardingComplete: effectiveProfile?.onboarding_complete || false,
   };
 
   const renderTabContent = () => {
@@ -324,6 +349,25 @@ const Index = () => {
       case "home":
         return (
           <div className="space-y-3">
+            {/* Guest sign-up banner */}
+            {isGuest && !user && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card-enhanced p-3 flex items-center gap-3 border-primary/30"
+              >
+                <div className="p-2 rounded-xl bg-primary/15">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-foreground">Create a free account</h3>
+                  <p className="text-[10px] text-muted-foreground">Save your progress across devices & unlock all features</p>
+                </div>
+                <Button size="sm" className="gradient-primary text-primary-foreground text-xs" onClick={() => navigate("/auth")}>
+                  Sign Up
+                </Button>
+              </motion.div>
+            )}
             <motion.div 
               initial={{ opacity: 0, y: -10 }} 
               animate={{ opacity: 1, y: 0 }} 
@@ -333,8 +377,8 @@ const Index = () => {
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
               <h1 className="text-lg font-bold text-foreground">
-                {profile?.display_name ? (
-                  <>Keep going, <span className="text-gradient">{profile.display_name}</span>!</>
+                {effectiveProfile?.display_name ? (
+                  <>Keep going, <span className="text-gradient">{effectiveProfile.display_name}</span>!</>
                 ) : (
                   "You're doing amazing!"
                 )} 🌟
@@ -343,21 +387,32 @@ const Index = () => {
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
             <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
-              // Store previous savings_start_date for undo
-              const prevDate = (profile as any).savings_start_date || profile?.sobriety_start_date || null;
+              const prevDate = effectiveProfile?.savings_start_date || effectiveProfile?.sobriety_start_date || null;
               if (prevDate) {
                 localStorage.setItem("sobable_savings_reset_undo", JSON.stringify({
                   previousDate: prevDate,
                   resetAt: Date.now(),
                 }));
               }
-              await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
+              if (user) {
+                await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
+              } else {
+                const gp = JSON.parse(localStorage.getItem("sobable_guest_profile") || "{}");
+                gp.savings_start_date = new Date().toISOString().split("T")[0];
+                localStorage.setItem("sobable_guest_profile", JSON.stringify(gp));
+              }
               toast.success("Savings counter reset! Your sobriety date is unchanged.");
             }} onUndo={async () => {
               const raw = localStorage.getItem("sobable_savings_reset_undo");
               if (!raw) return;
               const { previousDate } = JSON.parse(raw);
-              await updateProfile({ savings_start_date: previousDate === profile?.sobriety_start_date ? null : previousDate } as any);
+              if (user) {
+                await updateProfile({ savings_start_date: previousDate === effectiveProfile?.sobriety_start_date ? null : previousDate } as any);
+              } else {
+                const gp = JSON.parse(localStorage.getItem("sobable_guest_profile") || "{}");
+                gp.savings_start_date = previousDate;
+                localStorage.setItem("sobable_guest_profile", JSON.stringify(gp));
+              }
               localStorage.removeItem("sobable_savings_reset_undo");
               toast.success("Savings reset undone! Your previous tracking has been restored.");
             }} />}
