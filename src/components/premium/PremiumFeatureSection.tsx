@@ -44,7 +44,7 @@ export const PremiumFeatureSection = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">{title}</h3>
-              <p className="text-[10px] text-muted-foreground">Sober Club Premium</p>
+              <p className="text-[10px] text-muted-foreground">Sober Club</p>
             </div>
           </div>
         </div>

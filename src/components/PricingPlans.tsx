@@ -66,11 +66,11 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         <h2 className="text-lg font-bold text-foreground">
           {featureContext
             ? `Unlock ${featureContext}`
-            : "Sober Club Premium"
+            : "Join Sober Club"
           }
         </h2>
         <p className="text-xs text-muted-foreground max-w-[260px] mx-auto">
-          Get full access to every premium tool to support your recovery.
+          Get full access to every recovery tool in Sober Club.
         </p>
       </div>
 

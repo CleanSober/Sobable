@@ -11,7 +11,7 @@ interface MilestonePrompt {
 const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   streak_3: {
     title: "3-Day Streak! 🔥",
-    message: "You're building momentum! Premium members get streak protection so you never lose progress.",
+    message: "You're building momentum! Sober Club members get streak protection so you never lose progress.",
     emoji: "🛡️",
   },
   streak_7: {
@@ -21,42 +21,42 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   streak_14: {
     title: "2-Week Warrior! 💪",
-    message: "Two weeks strong! Premium members get personalized recovery pathways for long-term success.",
+    message: "Two weeks strong! Sober Club members get personalized recovery pathways for long-term success.",
     emoji: "🗺️",
   },
   streak_30: {
     title: "30-Day Legend! 🏆",
-    message: "A whole month! You've proven your commitment. Premium tools can help you go even further.",
+    message: "A whole month! You've proven your commitment. Sober Club tools can help you go even further.",
     emoji: "⭐",
   },
   sober_7: {
     title: "1 Week Sober! 🌟",
-    message: "Your first week! Premium's AI Coach can give you personalized guidance for the road ahead.",
+    message: "Your first week! Sober Club's AI Coach can give you personalized guidance for the road ahead.",
     emoji: "🤖",
   },
   sober_30: {
     title: "30 Days Sober! 🎉",
-    message: "One month of strength! See detailed analytics and predictions with Premium insights.",
+    message: "One month of strength! See detailed analytics and predictions with Sober Club insights.",
     emoji: "📊",
   },
   sober_90: {
     title: "90 Days Sober! 🏅",
-    message: "A quarter year of freedom! Premium's accountability partner can help you maintain this streak.",
+    message: "A quarter year of freedom! Sober Club's accountability partner can help you maintain this streak.",
     emoji: "🤝",
   },
   first_journal: {
     title: "First Journal Entry! 📝",
-    message: "Great start! Premium unlocks AI-powered mood analysis to find patterns in your journal.",
+    message: "Great start! Sober Club unlocks AI-powered mood analysis to find patterns in your journal.",
     emoji: "✨",
   },
   first_trigger: {
     title: "First Trigger Logged! 🎯",
-    message: "Self-awareness is key! Premium's pattern analysis can predict and prevent future triggers.",
+    message: "Self-awareness is key! Sober Club's pattern analysis can predict and prevent future triggers.",
     emoji: "🔮",
   },
   first_mood: {
     title: "First Mood Check-In! 💚",
-    message: "Tracking your feelings is powerful! Premium gives you deep mood trend analytics.",
+    message: "Tracking your feelings is powerful! Sober Club gives you deep mood trend analytics.",
     emoji: "📈",
   },
 };

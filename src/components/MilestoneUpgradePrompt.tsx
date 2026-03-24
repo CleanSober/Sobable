@@ -63,7 +63,7 @@ export const MilestoneUpgradePrompt = memo(({
                     className="flex-1 h-9 text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                   >
                     <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    Unlock Premium
+                    Join Sober Club
                   </Button>
                   <Button
                     onClick={onDismiss}
@@ -82,7 +82,7 @@ export const MilestoneUpgradePrompt = memo(({
 
       <Dialog open={showPricing} onOpenChange={onPricingChange}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => onPricingChange(false)} featureContext="Premium Features" />
+          <PricingPlans onClose={() => onPricingChange(false)} featureContext="Sober Club" />
         </DialogContent>
       </Dialog>
     </>

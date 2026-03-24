@@ -284,7 +284,7 @@ const Profile = () => {
               {isPremium && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-accent/15 to-primary/15 border border-accent/25">
                   <Crown className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-xs font-semibold text-accent">Sober Club Premium</span>
+                  <span className="text-xs font-semibold text-accent">Sober Club</span>
                 </div>
               )}
             </div>
@@ -348,7 +348,7 @@ const Profile = () => {
                       <li>Sobriety progress & streaks</li>
                       <li>Journal entries & mood logs</li>
                       <li>Community posts & messages</li>
-                      <li>Subscription & premium features</li>
+                      <li>Subscription & Sober Club features</li>
                     </ul>
                     <div className="pt-2">
                       <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">

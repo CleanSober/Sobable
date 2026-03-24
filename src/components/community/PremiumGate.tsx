@@ -51,7 +51,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
             <div className="space-y-1">
               <h2 className="text-lg font-bold text-foreground">Join 2,400+ in Sober Club</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Unlock the full recovery toolkit with Premium
+                Unlock the full recovery toolkit
               </p>
             </div>
 
@@ -84,7 +84,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
               className="w-full h-10 text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
             >
               <Crown className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
-              Upgrade to Premium
+              Join Sober Club
             </Button>
 
             <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
