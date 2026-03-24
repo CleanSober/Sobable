@@ -381,9 +381,10 @@ serve(async (req) => {
         });
       }
     } else {
-      const origin = req.headers.get("origin");
-      if (origin) {
-        return new Response(JSON.stringify({ error: "Authorization required" }), {
+      // Scheduled/cron invocation — require a shared secret
+      const cronSecret = req.headers.get("x-cron-secret");
+      if (!cronSecret || cronSecret !== Deno.env.get("CRON_SECRET")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
