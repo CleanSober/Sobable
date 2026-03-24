@@ -51,7 +51,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
             <div className="space-y-1">
               <h2 className="text-lg font-bold text-foreground">Join 2,400+ in Sober Club</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Unlock the full recovery toolkit with Premium
+                Unlock the full recovery toolkit
               </p>
             </div>
 
