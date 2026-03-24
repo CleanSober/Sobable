@@ -46,7 +46,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   first_journal: {
     title: "First Journal Entry! 📝",
-    message: "Great start! Premium unlocks AI-powered mood analysis to find patterns in your journal.",
+    message: "Great start! Sober Club unlocks AI-powered mood analysis to find patterns in your journal.",
     emoji: "✨",
   },
   first_trigger: {
