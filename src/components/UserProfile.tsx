@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,23 +6,37 @@ import { useGamification } from "@/hooks/useGamification";
 import { useNavigate } from "react-router-dom";
 
 export const UserProfile = () => {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const { profile } = useUserData();
   const { userXP } = useGamification();
   const navigate = useNavigate();
 
-  const displayName = profile?.display_name || "Friend";
-  const initials = profile?.display_name
-    ? profile.display_name.slice(0, 2).toUpperCase()
-    : user?.email?.slice(0, 2).toUpperCase() || "ME";
-  const avatarUrl = (profile as any)?.avatar_url || null;
+  // Guest mode: read from localStorage
+  const guestProfile = isGuest && !user ? (() => {
+    try {
+      return JSON.parse(localStorage.getItem("sobable_guest_profile") || "null");
+    } catch { return null; }
+  })() : null;
+
+  const effectiveProfile = user ? profile : guestProfile;
+  const displayName = effectiveProfile?.display_name || "Guest";
+  const initials = effectiveProfile?.display_name
+    ? effectiveProfile.display_name.slice(0, 2).toUpperCase()
+    : isGuest ? "GU" : user?.email?.slice(0, 2).toUpperCase() || "ME";
+  const avatarUrl = effectiveProfile?.avatar_url || null;
   const currentLevel = userXP?.current_level || 1;
 
   return (
     <button
-      onClick={() => navigate("/profile")}
+      onClick={() => {
+        if (isGuest && !user) {
+          navigate("/auth");
+        } else {
+          navigate("/profile");
+        }
+      }}
       className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-secondary/50 hover:bg-secondary transition-colors border border-border/50"
-      aria-label="User profile"
+      aria-label={isGuest && !user ? "Sign up for an account" : "User profile"}
     >
       <div className="relative">
         <Avatar className="w-8 h-8 border-2 border-primary/30">
@@ -41,8 +54,7 @@ export const UserProfile = () => {
           {displayName}
         </span>
         <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-          <Zap className="w-2.5 h-2.5" />
-          Lvl {currentLevel}
+          {isGuest && !user ? "Tap to sign up" : <><Zap className="w-2.5 h-2.5" /> Lvl {currentLevel}</>}
         </span>
       </div>
     </button>
