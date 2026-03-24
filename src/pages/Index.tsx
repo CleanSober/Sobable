@@ -121,10 +121,10 @@ const Index = () => {
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isGuest) {
       navigate("/auth");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, isGuest, navigate]);
 
   // Daily motivational messages pool
   const dailyMotivations = useMemo(() => [
