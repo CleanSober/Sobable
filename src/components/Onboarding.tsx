@@ -6,17 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { useHaptics } from "@/hooks/useHaptics";
-
-const substances = [
-  { id: "alcohol", label: "Alcohol", emoji: "🍺" },
-  { id: "cocaine", label: "Cocaine", emoji: "❄️" },
-  { id: "cannabis", label: "Cannabis", emoji: "🌿" },
-  { id: "nicotine", label: "Nicotine", emoji: "🚬" },
-  { id: "opioids", label: "Opioids", emoji: "💊" },
-  { id: "gambling", label: "Gambling", emoji: "🎰" },
-  { id: "prescription", label: "Prescription", emoji: "💉" },
-  { id: "other", label: "Other", emoji: "🔄" },
-];
+import { SUBSTANCE_OPTIONS } from "@/lib/substanceConfig";
 
 interface OnboardingData {
   name: string;
