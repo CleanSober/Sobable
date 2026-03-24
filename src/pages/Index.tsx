@@ -71,7 +71,7 @@ const TabLoader = memo(() => (
 ));
 
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isGuest } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useUserData();
   const { userXP } = useGamification();
   const { showPrompt: showFeedback, triggerFeedback, dismiss: dismissFeedback, markSubmitted: feedbackSubmitted } = useFeedbackPrompt();
