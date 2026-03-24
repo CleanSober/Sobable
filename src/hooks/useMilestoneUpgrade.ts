@@ -26,7 +26,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   streak_30: {
     title: "30-Day Legend! 🏆",
-    message: "A whole month! You've proven your commitment. Premium tools can help you go even further.",
+    message: "A whole month! You've proven your commitment. Sober Club tools can help you go even further.",
     emoji: "⭐",
   },
   sober_7: {
