@@ -4,13 +4,16 @@ import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMilestones } from "@/lib/storage";
 import { useGamification, getLevelTitle } from "@/hooks/useGamification";
+import { getPersonalizedWording } from "@/lib/substanceConfig";
 
 interface SobrietyCounterProps {
   daysSober: number;
   startDate: string;
+  substances?: string[] | null;
 }
 
-export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterProps) => {
+export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
+  const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
   const weeks = Math.floor(daysSober / 7);
   const months = Math.floor(daysSober / 30);
@@ -51,7 +54,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterPr
             </div>
             <div>
               <span className="text-muted-foreground text-xs font-medium">
-                Clean Since
+                {wording.sinceLabel}
               </span>
               <p className="text-foreground font-semibold text-sm">
                 {new Date(startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -103,7 +106,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate }: SobrietyCounterPr
             <Sparkles className="absolute -top-1 -right-3 w-4 h-4 text-accent animate-pulse" />
           </motion.div>
           <p className="text-base text-foreground/80 font-medium tracking-wide">
-            {daysSober === 1 ? "Day" : "Days"} Sober
+            {wording.counterLabel}
           </p>
         </div>
 

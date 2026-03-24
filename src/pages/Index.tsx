@@ -25,6 +25,7 @@ import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
+import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
 
 // Lazy load components not needed on initial paint
@@ -173,22 +174,22 @@ const Index = () => {
     const name = profile?.display_name;
     const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
 
-    // Pick today's motivation based on date so it's consistent within a day
-    const today = new Date();
-    const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % dailyMotivations.length;
-    const motivation = dailyMotivations[dayIndex];
+    const wording = getPersonalizedWording(profile?.substances);
 
+    const today = new Date();
     // Only show the daily motivation once per calendar day
     const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     const lastMotivationDay = localStorage.getItem(`sobable_daily_motivation_${user.id}`);
     const isNewDay = lastMotivationDay !== todayKey;
+
+    const motivation = dailyMotivations[Math.floor(Math.random() * dailyMotivations.length)];
 
     const timer = setTimeout(() => {
       // First toast: personalized greeting with streak
       const greeting = name ? `Welcome back, ${name}!` : "Welcome back!";
       if (streak > 1) {
         toast(greeting, {
-          description: `🔥 ${streak}-day streak${daysSober > 0 ? ` · ${daysSober} days sober` : ""}! Keep it going!`,
+          description: `🔥 ${streak}-day streak${daysSober > 0 ? ` · ${daysSober} ${wording.counterLabel.toLowerCase()}` : ""}! Keep it going!`,
           duration: 4000,
         });
       } else if (streak === 1) {
@@ -384,7 +385,7 @@ const Index = () => {
                 )} 🌟
               </h1>
             </motion.div>
-            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} />
+            <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} substances={userData.substances} />
             <CheckInProgress />
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
               const prevDate = effectiveProfile?.savings_start_date || effectiveProfile?.sobriety_start_date || null;

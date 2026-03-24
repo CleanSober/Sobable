@@ -6,17 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { useHaptics } from "@/hooks/useHaptics";
-
-const substances = [
-  { id: "alcohol", label: "Alcohol", emoji: "🍺" },
-  { id: "cocaine", label: "Cocaine", emoji: "❄️" },
-  { id: "cannabis", label: "Cannabis", emoji: "🌿" },
-  { id: "nicotine", label: "Nicotine", emoji: "🚬" },
-  { id: "opioids", label: "Opioids", emoji: "💊" },
-  { id: "gambling", label: "Gambling", emoji: "🎰" },
-  { id: "prescription", label: "Prescription", emoji: "💉" },
-  { id: "other", label: "Other", emoji: "🔄" },
-];
+import { SUBSTANCE_OPTIONS } from "@/lib/substanceConfig";
 
 interface OnboardingData {
   name: string;
@@ -242,29 +232,61 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
               {/* Step 2: Substances */}
               {step === 2 && (
-                <div className="grid grid-cols-2 gap-2.5">
-                  {substances.map((substance) => {
-                    const selected = selectedSubstances.includes(substance.id);
-                    return (
-                      <button
-                        key={substance.id}
-                        onClick={() => toggleSubstance(substance.id)}
-                        className={`relative p-3.5 rounded-xl text-left transition-all border active:scale-[0.97] ${
-                          selected
-                            ? "border-primary bg-primary/10"
-                            : "border-border/50 bg-secondary/50"
-                        }`}
-                      >
-                        <span className="text-xl mb-1 block">{substance.emoji}</span>
-                        <span className="text-sm font-medium text-foreground">{substance.label}</span>
-                        {selected && (
-                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="w-3 h-3 text-primary-foreground" />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wider">Substances</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {SUBSTANCE_OPTIONS.filter(s => s.category === "substance").map((substance) => {
+                        const selected = selectedSubstances.includes(substance.id);
+                        return (
+                          <button
+                            key={substance.id}
+                            onClick={() => toggleSubstance(substance.id)}
+                            className={`relative p-3 rounded-xl text-left transition-all border active:scale-[0.97] ${
+                              selected
+                                ? "border-primary bg-primary/10"
+                                : "border-border/50 bg-secondary/50"
+                            }`}
+                          >
+                            <span className="text-lg mb-0.5 block">{substance.emoji}</span>
+                            <span className="text-xs font-medium text-foreground">{substance.label}</span>
+                            {selected && (
+                              <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wider">Behavioral</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {SUBSTANCE_OPTIONS.filter(s => s.category === "behavioral").map((substance) => {
+                        const selected = selectedSubstances.includes(substance.id);
+                        return (
+                          <button
+                            key={substance.id}
+                            onClick={() => toggleSubstance(substance.id)}
+                            className={`relative p-3 rounded-xl text-left transition-all border active:scale-[0.97] ${
+                              selected
+                                ? "border-primary bg-primary/10"
+                                : "border-border/50 bg-secondary/50"
+                            }`}
+                          >
+                            <span className="text-lg mb-0.5 block">{substance.emoji}</span>
+                            <span className="text-xs font-medium text-foreground">{substance.label}</span>
+                            {selected && (
+                              <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
 
