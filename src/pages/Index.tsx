@@ -357,8 +357,8 @@ const Index = () => {
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
               <h1 className="text-lg font-bold text-foreground">
-                {profile?.display_name ? (
-                  <>Keep going, <span className="text-gradient">{profile.display_name}</span>!</>
+                {effectiveProfile?.display_name ? (
+                  <>Keep going, <span className="text-gradient">{effectiveProfile.display_name}</span>!</>
                 ) : (
                   "You're doing amazing!"
                 )} 🌟
