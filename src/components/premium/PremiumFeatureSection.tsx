@@ -19,7 +19,7 @@ interface PremiumFeatureSectionProps {
 export const PremiumFeatureSection = ({ 
   children, 
   features, 
-  title = "Premium Features" 
+  title = "Sober Club Features" 
 }: PremiumFeatureSectionProps) => {
   const { isPremium, loading } = usePremiumStatus();
   const [showPricing, setShowPricing] = useState(false);
