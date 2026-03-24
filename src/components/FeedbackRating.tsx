@@ -168,7 +168,7 @@ export const FeedbackRating = () => {
         Rate Your Experience
       </h3>
       <p className="text-xs text-muted-foreground mb-4">
-        Your feedback helps us improve Sobable
+        Your feedback helps us improve Sober Club
       </p>
 
       <AnimatePresence mode="wait">
