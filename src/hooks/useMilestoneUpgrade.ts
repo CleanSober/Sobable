@@ -41,7 +41,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   sober_90: {
     title: "90 Days Sober! 🏅",
-    message: "A quarter year of freedom! Premium's accountability partner can help you maintain this streak.",
+    message: "A quarter year of freedom! Sober Club's accountability partner can help you maintain this streak.",
     emoji: "🤝",
   },
   first_journal: {
