@@ -173,10 +173,9 @@ const Index = () => {
     const name = profile?.display_name;
     const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
 
-    // Pick today's motivation based on date so it's consistent within a day
-    const today = new Date();
-    const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % dailyMotivations.length;
-    const motivation = dailyMotivations[dayIndex];
+    // Import wording dynamically based on user's substances
+    const { getPersonalizedWording } = require("@/lib/substanceConfig");
+    const wording = getPersonalizedWording(profile?.substances);
 
     // Only show the daily motivation once per calendar day
     const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
@@ -188,7 +187,7 @@ const Index = () => {
       const greeting = name ? `Welcome back, ${name}!` : "Welcome back!";
       if (streak > 1) {
         toast(greeting, {
-          description: `🔥 ${streak}-day streak${daysSober > 0 ? ` · ${daysSober} days sober` : ""}! Keep it going!`,
+          description: `🔥 ${streak}-day streak${daysSober > 0 ? ` · ${daysSober} ${wording.counterLabel.toLowerCase()}` : ""}! Keep it going!`,
           duration: 4000,
         });
       } else if (streak === 1) {
