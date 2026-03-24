@@ -3,10 +3,10 @@ export const STRIPE_PLANS = {
   premium_monthly: {
     product_id: "prod_Tt6Apu0s30j7yZ",
     price_id: "price_1SvJyIPDEHcoOCnUCygf0YgT",
-    name: "Premium Monthly",
+    name: "Sober Club Monthly",
     price: 7.99,
     interval: "month" as const,
-    description: "Full access to all premium features",
+    description: "Full access to all Sober Club features",
   },
   premium_yearly: {
     product_id: "prod_UCaeeC5KDU0MD3",
