@@ -20,7 +20,7 @@ const TermsAndConditions = () => {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-3">
           <p>
-            <strong className="text-foreground">This app is not a substitute for professional medical advice, diagnosis, or treatment.</strong> Sobable is designed as a supplementary wellness tool and does not establish any healthcare provider relationship.
+            <strong className="text-foreground">This app is not a substitute for professional medical advice, diagnosis, or treatment.</strong> Sober Club is designed as a supplementary wellness tool and does not establish any healthcare provider relationship.
           </p>
           <p>
             If you are experiencing a medical emergency, thoughts of self-harm, or need immediate assistance:
