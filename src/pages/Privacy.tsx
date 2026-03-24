@@ -248,7 +248,7 @@ LEGAL REQUIREMENTS: We may retain certain data as required by applicable laws, r
         >
           <h3 className="text-lg font-semibold text-foreground mb-3">Introduction</h3>
           <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-            Sobable ("Company," "we," "us," or "our") operates the Sobable mobile and web application ("App" or "Service"). This Privacy Policy explains how we collect, use, disclose, retain, and safeguard your information when you use our Service.
+            Sober Club ("Company," "we," "us," or "our") operates the Sober Club mobile and web application ("App" or "Service"). This Privacy Policy explains how we collect, use, disclose, retain, and safeguard your information when you use our Service.
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed mb-3">
             We understand that recovery data and health-related information is among the most sensitive personal data. We treat all user data with the utmost care and confidentiality. <strong className="text-foreground">We never sell your personal information.</strong>

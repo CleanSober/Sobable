@@ -219,7 +219,7 @@ const Auth = () => {
               }}
             />
             <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-elevated">
-              <img src={sobableLogo} alt="Sobable" className="w-full h-full object-cover" />
+              <img src={sobableLogo} alt="Sober Club" className="w-full h-full object-cover" />
             </div>
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
@@ -231,7 +231,7 @@ const Auth = () => {
             </motion.div>
           </motion.div>
 
-          <h1 className="text-2xl font-bold mb-1 text-gradient">Sobable</h1>
+          <h1 className="text-2xl font-bold mb-1 text-gradient">Sober Club</h1>
           <p className="text-sm text-muted-foreground">{header.title}</p>
         </div>
 

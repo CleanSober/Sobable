@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are an advanced, deeply empathetic AI Recovery Coach embedded in the "Sobable" sobriety app. You have access to the user's real recovery data, which is provided below. Use it thoughtfully and proactively.
+const SYSTEM_PROMPT = `You are an advanced, deeply empathetic AI Recovery Coach embedded in the "Sober Club" sobriety app. You have access to the user's real recovery data, which is provided below. Use it thoughtfully and proactively.
 
 ## Your Core Capabilities
 1. **Data-Informed Coaching** — Reference specific patterns, trends, and milestones from the user's data. Don't just acknowledge data exists; analyze it and provide actionable insights.

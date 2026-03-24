@@ -49,7 +49,7 @@ const ShareCard = ({ daysSober, moneySaved, milestone }: ShareCardProps) => {
           <div className="p-1.5 rounded-lg bg-white/20">
             <Award className="w-4 h-4" />
           </div>
-          <span className="font-semibold text-sm">Sobable</span>
+          <span className="font-semibold text-sm">Sober Club</span>
         </div>
 
         <div className="text-center mb-4">
