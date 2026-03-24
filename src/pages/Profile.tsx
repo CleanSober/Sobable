@@ -348,7 +348,7 @@ const Profile = () => {
                       <li>Sobriety progress & streaks</li>
                       <li>Journal entries & mood logs</li>
                       <li>Community posts & messages</li>
-                      <li>Subscription & premium features</li>
+                      <li>Subscription & Sober Club features</li>
                     </ul>
                     <div className="pt-2">
                       <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">
