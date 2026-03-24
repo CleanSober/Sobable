@@ -100,7 +100,7 @@ const Index = () => {
   useCapacitor();
 
   // Initialize smart notifications system - runs all notification checks periodically
-  const { requestPermission: requestNotifPermission } = useSmartNotifications(profile?.sobriety_start_date || undefined);
+  const { requestPermission: requestNotifPermission } = useSmartNotifications(effectiveProfile?.sobriety_start_date || profile?.sobriety_start_date || undefined);
 
   // Prompt notification permission once after onboarding
   useEffect(() => {
