@@ -25,6 +25,7 @@ import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
+import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
 
 // Lazy load components not needed on initial paint
