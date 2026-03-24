@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useGamification } from "@/hooks/useGamification";
-import { Loader2, Flame, Bot, Crown, ChevronRight } from "lucide-react";
+import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
