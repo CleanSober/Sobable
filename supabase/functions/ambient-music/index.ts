@@ -61,9 +61,15 @@ serve(async (req) => {
       "box": "Focused ambient music with steady, grounding rhythm, soft electronic pads, clear and centered feeling, ideal for box breathing concentration",
       "calm": "Ultra-calming ambient music with soft strings and gentle nature sounds, peaceful piano notes, soothing and tranquil atmosphere",
       "energize": "Uplifting ambient music with gentle awakening tones, soft morning vibes, refreshing and invigorating yet peaceful soundscape",
+      "physiological-sigh": "Calming ambient music with gentle wave-like rhythm, soft ocean sounds and airy synths, ideal for physiological sigh breathing",
+      "resonant": "Deep resonant ambient music with warm bass tones and gentle harmonic overtones, hypnotic and meditative, ideal for resonant breathing",
+      "diaphragmatic": "Warm grounding ambient music with soft earthen tones, gentle acoustic guitar and nature sounds, calming belly breathing atmosphere",
       "body-scan": "Warm, enveloping ambient music with soft harmonics and gentle flowing melodies, perfect for body awareness meditation",
       "mindfulness": "Minimalist ambient soundscape with subtle bell tones and soft breathing space, open and present moment awareness music",
       "sleep": "Deeply calming sleep music with soft delta wave frequencies, gentle lullaby tones, dreamy and restful atmosphere for sleep preparation",
+      "grounding": "Earthy ambient music with gentle rain sounds and soft piano, grounding and centering, perfect for 5-4-3-2-1 sensory awareness",
+      "loving-kindness": "Warm, heart-centered ambient music with gentle strings and soft choral harmonics, compassionate and loving atmosphere",
+      "urge-surfing": "Oceanic ambient soundscape with gentle wave rhythms and soft flowing synths, calm strength and resilience, perfect for riding out cravings",
       default: "Peaceful meditation ambient music with soft synth pads and gentle nature sounds, calming and centered atmosphere",
     };
 
