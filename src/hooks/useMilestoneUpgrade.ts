@@ -21,7 +21,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
   streak_14: {
     title: "2-Week Warrior! 💪",
-    message: "Two weeks strong! Premium members get personalized recovery pathways for long-term success.",
+    message: "Two weeks strong! Sober Club members get personalized recovery pathways for long-term success.",
     emoji: "🗺️",
   },
   streak_30: {
