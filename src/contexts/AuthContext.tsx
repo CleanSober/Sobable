@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -6,25 +6,35 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isGuest: boolean;
   signUp: (email: string, password: string) => Promise<{ error: Error | null; needsConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
+  continueAsGuest: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const GUEST_KEY = "sobable_guest_mode";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem(GUEST_KEY) === "true");
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        // If user logs in, exit guest mode
+        if (session?.user) {
+          setIsGuest(false);
+          localStorage.removeItem(GUEST_KEY);
+        }
         setLoading(false);
       }
     );
@@ -45,7 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       options: { emailRedirectTo: redirectUrl },
     });
-    // If signup succeeded but no session, email confirmation is required
     const needsConfirmation = !error && data?.user && !data?.session;
     return { error: error as Error | null, needsConfirmation };
   };
@@ -57,6 +66,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setIsGuest(false);
+    localStorage.removeItem(GUEST_KEY);
   };
 
   const resetPassword = async (email: string) => {
@@ -71,8 +82,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
+  const continueAsGuest = useCallback(() => {
+    setIsGuest(true);
+    localStorage.setItem(GUEST_KEY, "true");
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, resetPassword, updatePassword }}>
+    <AuthContext.Provider value={{ user, session, loading, isGuest, signUp, signIn, signOut, resetPassword, updatePassword, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   );
