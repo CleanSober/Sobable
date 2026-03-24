@@ -270,7 +270,14 @@ const Index = () => {
 
   if (!user && !isGuest) return null;
 
-  const showOnboarding = !profile?.onboarding_complete;
+  // Guest mode: use localStorage for profile data
+  const guestProfile = isGuest && !user ? (() => {
+    const stored = localStorage.getItem("sobable_guest_profile");
+    return stored ? JSON.parse(stored) : null;
+  })() : null;
+
+  const effectiveProfile = user ? profile : guestProfile;
+  const showOnboarding = !effectiveProfile?.onboarding_complete;
 
   const handleOnboardingComplete = async (data: {
     name: string;
@@ -281,42 +288,59 @@ const Index = () => {
     emergencyContact?: string;
     personalReminder?: string;
   }) => {
-    await updateProfile({
-      display_name: data.name,
-      substances: data.substances,
-      sobriety_start_date: data.sobrietyStartDate,
-      daily_spending: data.dailySpending,
-      sponsor_phone: data.sponsorPhone,
-      emergency_contact: data.emergencyContact,
-      personal_reminder: data.personalReminder,
-      onboarding_complete: true,
-    });
+    if (user) {
+      await updateProfile({
+        display_name: data.name,
+        substances: data.substances,
+        sobriety_start_date: data.sobrietyStartDate,
+        daily_spending: data.dailySpending,
+        sponsor_phone: data.sponsorPhone,
+        emergency_contact: data.emergencyContact,
+        personal_reminder: data.personalReminder,
+        onboarding_complete: true,
+      });
+    } else {
+      // Guest mode: save to localStorage
+      const guestData = {
+        display_name: data.name,
+        substances: data.substances,
+        sobriety_start_date: data.sobrietyStartDate,
+        daily_spending: data.dailySpending,
+        sponsor_phone: data.sponsorPhone,
+        emergency_contact: data.emergencyContact,
+        personal_reminder: data.personalReminder,
+        onboarding_complete: true,
+      };
+      localStorage.setItem("sobable_guest_profile", JSON.stringify(guestData));
+      // Force re-render
+      window.location.reload();
+    }
   };
 
   if (showOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  const daysSober = profile?.sobriety_start_date
-    ? calculateDaysSober(profile.sobriety_start_date)
+  const daysSober = effectiveProfile?.sobriety_start_date
+    ? calculateDaysSober(effectiveProfile.sobriety_start_date)
     : 0;
-  const moneySaved = profile?.sobriety_start_date && profile?.daily_spending
-    ? calculateMoneySaved(profile.sobriety_start_date, profile.daily_spending, (profile as any).savings_start_date)
+  const moneySaved = effectiveProfile?.sobriety_start_date && effectiveProfile?.daily_spending
+    ? calculateMoneySaved(effectiveProfile.sobriety_start_date, effectiveProfile.daily_spending, effectiveProfile.savings_start_date)
     : 0;
-  const savingsDaysSober = profile?.sobriety_start_date
-    ? calculateDaysSober((profile as any).savings_start_date || profile.sobriety_start_date)
+  const savingsDaysSober = effectiveProfile?.sobriety_start_date
+    ? calculateDaysSober(effectiveProfile.savings_start_date || effectiveProfile.sobriety_start_date)
     : 0;
 
   // Convert profile to userData format for components that need it
   const userData = {
-    name: profile?.display_name || "",
-    substances: profile?.substances || [],
-    sobrietyStartDate: profile?.sobriety_start_date || new Date().toISOString().split("T")[0],
-    dailySpending: profile?.daily_spending || 0,
-    sponsorPhone: profile?.sponsor_phone,
-    emergencyContact: profile?.emergency_contact,
-    personalReminder: profile?.personal_reminder,
-    onboardingComplete: profile?.onboarding_complete || false,
+    name: effectiveProfile?.display_name || "",
+    substances: effectiveProfile?.substances || [],
+    sobrietyStartDate: effectiveProfile?.sobriety_start_date || new Date().toISOString().split("T")[0],
+    dailySpending: effectiveProfile?.daily_spending || 0,
+    sponsorPhone: effectiveProfile?.sponsor_phone,
+    emergencyContact: effectiveProfile?.emergency_contact,
+    personalReminder: effectiveProfile?.personal_reminder,
+    onboardingComplete: effectiveProfile?.onboarding_complete || false,
   };
 
   const renderTabContent = () => {
