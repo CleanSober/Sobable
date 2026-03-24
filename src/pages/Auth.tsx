@@ -23,7 +23,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
-  const { signIn, signUp, user, resetPassword, updatePassword } = useAuth();
+  const { signIn, signUp, user, resetPassword, updatePassword, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
