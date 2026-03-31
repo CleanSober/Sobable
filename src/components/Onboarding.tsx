@@ -61,7 +61,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     const data: OnboardingData = {
       name: isAnonymous ? "" : name.trim().slice(0, 50),
       substances: selectedSubstances,
-      sobrietyStartDate: startDate,
+      sobrietyStartDate: startDate ? format(startDate, "yyyy-MM-dd") : "",
       dailySpending: parseFloat(dailySpending) || 0,
       personalReminder: personalReminder.trim().slice(0, 500) || undefined,
       sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
