@@ -1,12 +1,16 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Check, Shield, Sparkles, PartyPopper, Rocket } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, Shield, Sparkles, PartyPopper, Rocket, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { useHaptics } from "@/hooks/useHaptics";
 import { SUBSTANCE_OPTIONS } from "@/lib/substanceConfig";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface OnboardingData {
   name: string;
@@ -31,7 +35,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [name, setName] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [dailySpending, setDailySpending] = useState("");
   const [personalReminder, setPersonalReminder] = useState("");
   const [sponsorPhone, setSponsorPhone] = useState("");
@@ -57,7 +61,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     const data: OnboardingData = {
       name: isAnonymous ? "" : name.trim().slice(0, 50),
       substances: selectedSubstances,
-      sobrietyStartDate: startDate,
+      sobrietyStartDate: startDate ? format(startDate, "yyyy-MM-dd") : "",
       dailySpending: parseFloat(dailySpending) || 0,
       personalReminder: personalReminder.trim().slice(0, 500) || undefined,
       sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
@@ -73,7 +77,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     switch (step) {
       case 1: return isAnonymous || name.trim().length > 0;
       case 2: return selectedSubstances.length > 0;
-      case 3: return startDate !== "";
+      case 3: return startDate !== undefined;
       case 4: return true;
       default: return true;
     }
@@ -293,15 +297,32 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               {/* Step 3: Date + Spending combined */}
               {step === 3 && (
                 <div className="space-y-5">
-                  <div>
+                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">Sobriety start date</label>
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      max={new Date().toISOString().split("T")[0]}
-                      className="h-12 bg-secondary/50 border-border/50"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full h-12 justify-start text-left font-normal bg-secondary/50 border-border/50",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div>
