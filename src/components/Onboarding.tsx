@@ -35,7 +35,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [name, setName] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [dailySpending, setDailySpending] = useState("");
   const [personalReminder, setPersonalReminder] = useState("");
   const [sponsorPhone, setSponsorPhone] = useState("");
