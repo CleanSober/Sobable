@@ -107,7 +107,7 @@ const Index = () => {
   // Prompt notification permission once after onboarding
   useEffect(() => {
     if (!user || !profile?.onboarding_complete) return;
-    const prompted = localStorage.getItem(`sobable_notif_prompted_${user.id}`);
+    const prompted = localStorage.getItem(`sober_club_notif_prompted_${user.id}`);
     if (prompted) return;
     
     const timer = setTimeout(async () => {
@@ -117,7 +117,7 @@ const Index = () => {
           toast.success("🔔 Notifications enabled!", { description: "You'll get smart reminders to stay on track." });
         }
       }
-      localStorage.setItem(`sobable_notif_prompted_${user.id}`, "true");
+      localStorage.setItem(`sober_club_notif_prompted_${user.id}`, "true");
     }, 5000);
     return () => clearTimeout(timer);
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
@@ -179,7 +179,7 @@ const Index = () => {
     const today = new Date();
     // Only show the daily motivation once per calendar day
     const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-    const lastMotivationDay = localStorage.getItem(`sobable_daily_motivation_${user.id}`);
+    const lastMotivationDay = localStorage.getItem(`sober_club_daily_motivation_${user.id}`);
     const isNewDay = lastMotivationDay !== todayKey;
 
     const motivation = dailyMotivations[Math.floor(Math.random() * dailyMotivations.length)];
@@ -206,7 +206,7 @@ const Index = () => {
 
       // Second toast: daily motivational message (only once per day)
       if (isNewDay) {
-        localStorage.setItem(`sobable_daily_motivation_${user.id}`, todayKey);
+        localStorage.setItem(`sober_club_daily_motivation_${user.id}`, todayKey);
         setTimeout(() => {
           toast(`${motivation.emoji} Daily Inspiration`, {
             description: motivation.message,
@@ -274,7 +274,7 @@ const Index = () => {
 
   // Guest mode: use localStorage for profile data
   const guestProfile = isGuest && !user ? (() => {
-    const stored = localStorage.getItem("sobable_guest_profile");
+    const stored = localStorage.getItem("sober_club_guest_profile");
     return stored ? JSON.parse(stored) : null;
   })() : null;
 
@@ -313,7 +313,7 @@ const Index = () => {
         personal_reminder: data.personalReminder,
         onboarding_complete: true,
       };
-      localStorage.setItem("sobable_guest_profile", JSON.stringify(guestData));
+      localStorage.setItem("sober_club_guest_profile", JSON.stringify(guestData));
       // Force re-render
       window.location.reload();
     }
@@ -390,7 +390,7 @@ const Index = () => {
             {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
               const prevDate = effectiveProfile?.savings_start_date || effectiveProfile?.sobriety_start_date || null;
               if (prevDate) {
-                localStorage.setItem("sobable_savings_reset_undo", JSON.stringify({
+                localStorage.setItem("sober_club_savings_reset_undo", JSON.stringify({
                   previousDate: prevDate,
                   resetAt: Date.now(),
                 }));
@@ -398,23 +398,23 @@ const Index = () => {
               if (user) {
                 await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
               } else {
-                const gp = JSON.parse(localStorage.getItem("sobable_guest_profile") || "{}");
+                const gp = JSON.parse(localStorage.getItem("sober_club_guest_profile") || "{}");
                 gp.savings_start_date = new Date().toISOString().split("T")[0];
-                localStorage.setItem("sobable_guest_profile", JSON.stringify(gp));
+                localStorage.setItem("sober_club_guest_profile", JSON.stringify(gp));
               }
               toast.success("Savings counter reset! Your sobriety date is unchanged.");
             }} onUndo={async () => {
-              const raw = localStorage.getItem("sobable_savings_reset_undo");
+              const raw = localStorage.getItem("sober_club_savings_reset_undo");
               if (!raw) return;
               const { previousDate } = JSON.parse(raw);
               if (user) {
                 await updateProfile({ savings_start_date: previousDate === effectiveProfile?.sobriety_start_date ? null : previousDate } as any);
               } else {
-                const gp = JSON.parse(localStorage.getItem("sobable_guest_profile") || "{}");
+                const gp = JSON.parse(localStorage.getItem("sober_club_guest_profile") || "{}");
                 gp.savings_start_date = previousDate;
-                localStorage.setItem("sobable_guest_profile", JSON.stringify(gp));
+                localStorage.setItem("sober_club_guest_profile", JSON.stringify(gp));
               }
-              localStorage.removeItem("sobable_savings_reset_undo");
+              localStorage.removeItem("sober_club_savings_reset_undo");
               toast.success("Savings reset undone! Your previous tracking has been restored.");
             }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />

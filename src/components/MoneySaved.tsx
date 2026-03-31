@@ -175,7 +175,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   // Check if undo is available (within 24 hours of reset)
   const [undoAvailable, setUndoAvailable] = useState(() => {
     try {
-      const raw = localStorage.getItem("sobable_savings_reset_undo");
+      const raw = localStorage.getItem("sober_club_savings_reset_undo");
       if (!raw) return false;
       const { resetAt } = JSON.parse(raw);
       return Date.now() - resetAt < 24 * 60 * 60 * 1000;
@@ -189,7 +189,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   // Custom milestones
   const [customMilestones, setCustomMilestones] = useState<{ label: string; target: number; icon: string }[]>(() => {
     try {
-      const stored = localStorage.getItem("sobable_custom_milestones");
+      const stored = localStorage.getItem("sober_club_custom_milestones");
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   });
@@ -198,7 +198,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   const [newMilestoneAmount, setNewMilestoneAmount] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("sobable_custom_milestones", JSON.stringify(customMilestones));
+    localStorage.setItem("sober_club_custom_milestones", JSON.stringify(customMilestones));
   }, [customMilestones]);
 
   const addCustomMilestone = () => {
@@ -218,7 +218,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   // Pro customization settings
   const [proSettings, setProSettings] = useState(() => {
     try {
-      const stored = localStorage.getItem("sobable_pro_finance_settings");
+      const stored = localStorage.getItem("sober_club_pro_finance_settings");
       return stored ? JSON.parse(stored) : {
         returnRate: 8,
         currency: "USD",
@@ -234,7 +234,7 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
 
   useEffect(() => {
     if (isPremium) {
-      localStorage.setItem("sobable_pro_finance_settings", JSON.stringify(proSettings));
+      localStorage.setItem("sober_club_pro_finance_settings", JSON.stringify(proSettings));
     }
   }, [proSettings, isPremium]);
 

@@ -14,7 +14,7 @@ export const UserProfile = () => {
   // Guest mode: read from localStorage
   const guestProfile = isGuest && !user ? (() => {
     try {
-      return JSON.parse(localStorage.getItem("sobable_guest_profile") || "null");
+      return JSON.parse(localStorage.getItem("sober_club_guest_profile") || "null");
     } catch { return null; }
   })() : null;
 

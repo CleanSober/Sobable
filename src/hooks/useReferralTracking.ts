@@ -16,10 +16,10 @@ export const useReferralTracking = () => {
     if (!ref) return;
 
     // Store in localStorage for 30-day attribution (don't overwrite existing)
-    const existing = localStorage.getItem("sobable_ref");
+    const existing = localStorage.getItem("sober_club_ref");
     if (!existing) {
-      localStorage.setItem("sobable_ref", ref);
-      localStorage.setItem("sobable_ref_at", Date.now().toString());
+      localStorage.setItem("sober_club_ref", ref);
+      localStorage.setItem("sober_club_ref_at", Date.now().toString());
     }
 
     // Track the click via Welcome Hub's edge function
@@ -43,16 +43,16 @@ export const useReferralTracking = () => {
  * Get the stored referral code if still within 30-day window.
  */
 export const getStoredReferralCode = (): string | null => {
-  const code = localStorage.getItem("sobable_ref");
-  const timestamp = localStorage.getItem("sobable_ref_at");
+  const code = localStorage.getItem("sober_club_ref");
+  const timestamp = localStorage.getItem("sober_club_ref_at");
 
   if (!code || !timestamp) return null;
 
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
   if (Date.now() - parseInt(timestamp) > thirtyDaysMs) {
     // Expired — clean up
-    localStorage.removeItem("sobable_ref");
-    localStorage.removeItem("sobable_ref_at");
+    localStorage.removeItem("sober_club_ref");
+    localStorage.removeItem("sober_club_ref_at");
     return null;
   }
 

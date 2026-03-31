@@ -193,7 +193,7 @@ This indemnification obligation will survive the termination of your account and
       title: "13. Dispute Resolution & Arbitration",
       content: `PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT.
 
-INFORMAL RESOLUTION: Before filing any formal dispute, you agree to first contact us at legal@sobable.app and attempt to resolve the dispute informally for at least 30 days.
+INFORMAL RESOLUTION: Before filing any formal dispute, you agree to first contact us at legal@soberclub.app and attempt to resolve the dispute informally for at least 30 days.
 
 BINDING ARBITRATION: If informal resolution fails, any dispute, controversy, or claim arising out of or relating to these Terms or the App shall be resolved exclusively through binding individual arbitration administered by the American Arbitration Association ("AAA") under its Consumer Arbitration Rules. The arbitration shall be conducted in English, and the arbitrator's decision shall be final and binding.
 
@@ -203,7 +203,7 @@ JURY TRIAL WAIVER: YOU HEREBY WAIVE YOUR RIGHT TO A JURY TRIAL FOR ANY CLAIMS CO
 
 EXCEPTIONS: Notwithstanding the above, either party may: (a) bring an individual action in small claims court; (b) seek injunctive or equitable relief in any court of competent jurisdiction to prevent the actual or threatened infringement of intellectual property rights.
 
-OPT-OUT: You may opt out of this arbitration agreement by sending written notice to legal@sobable.app within 30 days of first accepting these Terms. The notice must include your name, account information, and a clear statement that you wish to opt out.`
+OPT-OUT: You may opt out of this arbitration agreement by sending written notice to legal@soberclub.app within 30 days of first accepting these Terms. The notice must include your name, account information, and a clear statement that you wish to opt out.`
     },
     {
       icon: Globe,
@@ -378,9 +378,9 @@ SURVIVAL: All provisions of these Terms which by their nature should survive ter
             If you have questions about these Terms, wish to report a violation, or need to exercise any rights described herein, please contact us:
           </p>
           <div className="space-y-1 text-sm">
-            <p><span className="text-muted-foreground">Legal inquiries: </span><span className="text-primary font-medium">legal@sobable.app</span></p>
-            <p><span className="text-muted-foreground">General support: </span><span className="text-primary font-medium">support@sobable.app</span></p>
-            <p><span className="text-muted-foreground">Privacy concerns: </span><span className="text-primary font-medium">privacy@sobable.app</span></p>
+            <p><span className="text-muted-foreground">Legal inquiries: </span><span className="text-primary font-medium">legal@soberclub.app</span></p>
+            <p><span className="text-muted-foreground">General support: </span><span className="text-primary font-medium">support@soberclub.app</span></p>
+            <p><span className="text-muted-foreground">Privacy concerns: </span><span className="text-primary font-medium">privacy@soberclub.app</span></p>
           </div>
         </motion.div>
 

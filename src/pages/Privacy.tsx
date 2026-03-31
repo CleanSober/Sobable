@@ -149,7 +149,7 @@ WITHDRAWAL OF CONSENT: Where processing is based on consent, you may withdraw co
 
 NON-DISCRIMINATION: We will not discriminate against you for exercising any of your privacy rights.
 
-To exercise any of these rights, contact us at privacy@sobable.app. We will respond within 30 days (or as required by applicable law).`
+To exercise any of these rights, contact us at privacy@soberclub.app. We will respond within 30 days (or as required by applicable law).`
     },
     {
       icon: Globe,
@@ -184,7 +184,7 @@ We do not use tracking technologies to monitor your activity across other websit
       title: "8. Children's Privacy",
       content: `The App is not intended for use by individuals under the age of 18 (or the age of majority in your jurisdiction). We do not knowingly collect personal information from minors.
 
-If we become aware that we have collected personal information from a person under 18, we will take immediate steps to delete such information. If you believe a minor has provided us with personal information, please contact us immediately at privacy@sobable.app.
+If we become aware that we have collected personal information from a person under 18, we will take immediate steps to delete such information. If you believe a minor has provided us with personal information, please contact us immediately at privacy@soberclub.app.
 
 Parents and guardians who believe their child has provided personal information to us may request deletion by contacting us at the email address above.`
     },
@@ -392,9 +392,9 @@ LEGAL REQUIREMENTS: We may retain certain data as required by applicable laws, r
             If you have questions about this Privacy Policy, wish to exercise your data rights, or need to report a privacy concern, please contact us:
           </p>
           <div className="space-y-1 text-sm">
-            <p><span className="text-muted-foreground">Privacy inquiries: </span><span className="text-primary font-medium">privacy@sobable.app</span></p>
-            <p><span className="text-muted-foreground">Data deletion requests: </span><span className="text-primary font-medium">privacy@sobable.app</span></p>
-            <p><span className="text-muted-foreground">General support: </span><span className="text-primary font-medium">support@sobable.app</span></p>
+            <p><span className="text-muted-foreground">Privacy inquiries: </span><span className="text-primary font-medium">privacy@soberclub.app</span></p>
+            <p><span className="text-muted-foreground">Data deletion requests: </span><span className="text-primary font-medium">privacy@soberclub.app</span></p>
+            <p><span className="text-muted-foreground">General support: </span><span className="text-primary font-medium">support@soberclub.app</span></p>
           </div>
           <p className="text-sm text-muted-foreground mt-3">
             We will respond to all privacy-related requests within 30 days (or as required by applicable law in your jurisdiction).
