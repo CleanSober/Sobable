@@ -17,7 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const GUEST_KEY = "sobable_guest_mode";
+const GUEST_KEY = "sober_club_guest_mode";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

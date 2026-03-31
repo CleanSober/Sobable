@@ -1,5 +1,5 @@
 // Service Worker for Sober Club PWA
-const CACHE_NAME = 'sobable-v1';
+const CACHE_NAME = 'sober-club-v1';
 const urlsToCache = [
   '/',
   '/index.html',

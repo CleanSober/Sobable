@@ -181,9 +181,9 @@ Download now and take the first step toward a healthier life.`,
   
   ageRating: "12+", // Due to references to substance use
   
-  supportURL: "https://sobable.app/support",
-  privacyURL: "https://sobable.app/privacy",
-  marketingURL: "https://sobable.app",
+  supportURL: "https://soberclub.app/support",
+  privacyURL: "https://soberclub.app/privacy",
+  marketingURL: "https://soberclub.app",
 };
 
 const screenshotSpecs = {

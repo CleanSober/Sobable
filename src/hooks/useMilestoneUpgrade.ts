@@ -61,7 +61,7 @@ const MILESTONE_PROMPTS: Record<string, MilestonePrompt> = {
   },
 };
 
-const STORAGE_KEY = "sobable_milestone_prompts_shown";
+const STORAGE_KEY = "sober_club_milestone_prompts_shown";
 
 export const useMilestoneUpgrade = () => {
   const { user } = useAuth();

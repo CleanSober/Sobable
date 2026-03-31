@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Global event for child components to trigger feedback without prop drilling
-export const FEEDBACK_TRIGGER_EVENT = "sobable:feedback-trigger";
+export const FEEDBACK_TRIGGER_EVENT = "sober_club:feedback-trigger";
 export function emitFeedbackTrigger() {
   window.dispatchEvent(new CustomEvent(FEEDBACK_TRIGGER_EVENT));
 }
