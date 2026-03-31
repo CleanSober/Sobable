@@ -77,7 +77,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     switch (step) {
       case 1: return isAnonymous || name.trim().length > 0;
       case 2: return selectedSubstances.length > 0;
-      case 3: return startDate !== "";
+      case 3: return startDate !== undefined;
       case 4: return true;
       default: return true;
     }
