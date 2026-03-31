@@ -41,7 +41,7 @@ const App = () => {
   });
 
   const handleSplashComplete = () => {
-    sessionStorage.setItem("sobable_splash_shown", "true");
+    sessionStorage.setItem("sober_club_splash_shown", "true");
     setShowSplash(false);
   };
 
