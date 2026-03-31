@@ -1,12 +1,16 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Check, Shield, Sparkles, PartyPopper, Rocket } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, Shield, Sparkles, PartyPopper, Rocket, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { useHaptics } from "@/hooks/useHaptics";
 import { SUBSTANCE_OPTIONS } from "@/lib/substanceConfig";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface OnboardingData {
   name: string;
