@@ -297,15 +297,32 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               {/* Step 3: Date + Spending combined */}
               {step === 3 && (
                 <div className="space-y-5">
-                  <div>
+                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">Sobriety start date</label>
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      max={new Date().toISOString().split("T")[0]}
-                      className="h-12 bg-secondary/50 border-border/50"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full h-12 justify-start text-left font-normal bg-secondary/50 border-border/50",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div>
