@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
-import sobableLogo from "@/assets/sobable-logo.png";
+import soberClubLogo from "@/assets/sober-club-logo.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -121,7 +121,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               {/* Main icon container with tech border */}
               <div className="relative w-32 h-32 rounded-3xl overflow-hidden shadow-elevated tech-border">
                 <img 
-                  src={sobableLogo} 
+                  src={soberClubLogo} 
                   alt="Sober Club" 
                   className="w-full h-full object-cover"
                 />

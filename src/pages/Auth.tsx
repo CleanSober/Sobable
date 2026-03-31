@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
-import sobableLogo from "@/assets/sobable-logo.png";
+import soberClubLogo from "@/assets/sober-club-logo.png";
 
 type AuthMode = "login" | "signup" | "forgot" | "reset";
 
@@ -219,7 +219,7 @@ const Auth = () => {
               }}
             />
             <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-elevated">
-              <img src={sobableLogo} alt="Sober Club" className="w-full h-full object-cover" />
+              <img src={soberClubLogo} alt="Sober Club" className="w-full h-full object-cover" />
             </div>
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
