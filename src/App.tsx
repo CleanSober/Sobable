@@ -36,12 +36,12 @@ const AppContent = () => {
 const App = () => {
   // Only show splash on first load per session (not on in-app navigations)
   const [showSplash, setShowSplash] = useState(() => {
-    if (sessionStorage.getItem("sobable_splash_shown")) return false;
+    if (sessionStorage.getItem("sober_club_splash_shown")) return false;
     return true;
   });
 
   const handleSplashComplete = () => {
-    sessionStorage.setItem("sobable_splash_shown", "true");
+    sessionStorage.setItem("sober_club_splash_shown", "true");
     setShowSplash(false);
   };
 

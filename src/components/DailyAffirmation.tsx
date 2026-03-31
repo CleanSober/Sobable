@@ -27,7 +27,7 @@ const affirmations = [
   "I am creating a life filled with purpose and meaning.",
 ];
 
-const SAVED_KEY = "sobable_saved_affirmations";
+const SAVED_KEY = "sober_club_saved_affirmations";
 
 const getSavedAffirmations = (): string[] => {
   try {

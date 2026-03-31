@@ -22,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Capacitor } from "@capacitor/core";
 
-const APP_STORE_URL = "https://apps.apple.com/app/sobable/id0000000000";
+const APP_STORE_URL = "https://apps.apple.com/app/sober-club/id0000000000";
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=app.lovable.94e498b2e0e1433a9333abea9f12a84c";
 

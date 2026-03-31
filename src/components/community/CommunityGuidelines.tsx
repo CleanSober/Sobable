@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const GUIDELINES_ACCEPTED_KEY = "sobable_community_guidelines_accepted";
+const GUIDELINES_ACCEPTED_KEY = "sober_club_community_guidelines_accepted";
 
 const RULES = [
   {

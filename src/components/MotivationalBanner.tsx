@@ -18,7 +18,7 @@ const motivationalMessages = [
 export const MotivationalBanner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liked, setLiked] = useState(() => {
-    const saved = localStorage.getItem('sobable_liked_quotes');
+    const saved = localStorage.getItem('sober_club_liked_quotes');
     return saved ? JSON.parse(saved) : {};
   });
 
@@ -37,7 +37,7 @@ export const MotivationalBanner = () => {
   const toggleLike = () => {
     const updated = { ...liked, [currentIndex]: !liked[currentIndex] };
     setLiked(updated);
-    localStorage.setItem('sobable_liked_quotes', JSON.stringify(updated));
+    localStorage.setItem('sober_club_liked_quotes', JSON.stringify(updated));
   };
 
   const message = motivationalMessages[currentIndex];
