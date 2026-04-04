@@ -1,39 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
 import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, InterstitialAdPluginEvents } from "@capacitor-community/admob";
-
-// Ad Unit IDs - these will be fetched from environment or use test IDs in dev
-const getAdUnitIds = () => {
-  const isIOS = Capacitor.getPlatform() === "ios";
-  const isAndroid = Capacitor.getPlatform() === "android";
-  const isDev = import.meta.env.DEV;
-  
-  // Google's official test ad unit IDs
-  const testIds = {
-    banner: isIOS 
-      ? "ca-app-pub-3940256099942544/2934735716" 
-      : "ca-app-pub-3940256099942544/6300978111",
-    interstitial: isIOS 
-      ? "ca-app-pub-3940256099942544/4411468910" 
-      : "ca-app-pub-3940256099942544/1033173712",
-  };
-
-  // In production, you would use real ad unit IDs from environment variables
-  // These would be passed from native config or a backend service
-  if (isDev) {
-    return testIds;
-  }
-
-  // Production IDs - replace with actual IDs from your AdMob account
-  return {
-    banner: isIOS
-      ? (window as any).__ADMOB_BANNER_ID_IOS || testIds.banner
-      : (window as any).__ADMOB_BANNER_ID_ANDROID || testIds.banner,
-    interstitial: isIOS
-      ? (window as any).__ADMOB_INTERSTITIAL_ID_IOS || testIds.interstitial
-      : (window as any).__ADMOB_INTERSTITIAL_ID_ANDROID || testIds.interstitial,
-  };
-};
+import { admobConfig } from "@/lib/admobConfig";
 
 interface UseAdMobReturn {
   isInitialized: boolean;
@@ -60,9 +28,16 @@ export const useAdMob = (): UseAdMobReturn => {
         return;
       }
 
+      const initializationError = admobConfig.getInitializationError();
+      if (initializationError) {
+        console.warn(`AdMob: ${initializationError}`);
+        setError(initializationError);
+        return;
+      }
+
       try {
         await AdMob.initialize({
-          initializeForTesting: import.meta.env.DEV,
+          initializeForTesting: false,
         });
         
         // Set up event listeners
@@ -110,16 +85,22 @@ export const useAdMob = (): UseAdMobReturn => {
   // Show banner ad
   const showBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
     if (!Capacitor.isNativePlatform()) return;
-    
-    const adUnitIds = getAdUnitIds();
+
+    const unitIdError = admobConfig.getUnitIdError("banner");
+    if (unitIdError) {
+      setError(unitIdError);
+      return;
+    }
+
+    const adUnitIds = admobConfig.getUnitIds();
     
     try {
       await AdMob.showBanner({
-        adId: adUnitIds.banner,
+        adId: adUnitIds.banner!,
         adSize: BannerAdSize.ADAPTIVE_BANNER,
         position: position === "top" ? BannerAdPosition.TOP_CENTER : BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
-        isTesting: import.meta.env.DEV,
+        isTesting: false,
       });
       setIsBannerVisible(true);
       setError(null);
@@ -144,13 +125,20 @@ export const useAdMob = (): UseAdMobReturn => {
   // Load interstitial ad
   const loadInterstitial = useCallback(async () => {
     if (!Capacitor.isNativePlatform()) return;
-    
-    const adUnitIds = getAdUnitIds();
+
+    const unitIdError = admobConfig.getUnitIdError("interstitial");
+    if (unitIdError) {
+      setError(unitIdError);
+      setIsInterstitialLoaded(false);
+      return;
+    }
+
+    const adUnitIds = admobConfig.getUnitIds();
     
     try {
       await AdMob.prepareInterstitial({
-        adId: adUnitIds.interstitial,
-        isTesting: import.meta.env.DEV,
+        adId: adUnitIds.interstitial!,
+        isTesting: false,
       });
       setError(null);
     } catch (err) {
