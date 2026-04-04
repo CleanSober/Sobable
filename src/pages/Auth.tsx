@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, ArrowRight, ArrowLeft, CheckCircle2, KeyRound, UserX } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
+import { NATIVE_OAUTH_REDIRECT_URL } from "@/lib/nativeOAuth";
 import { toast } from "sonner";
 import soberClubLogo from "@/assets/sober-club-logo.png";
 
@@ -146,6 +150,32 @@ const Auth = () => {
   const handleSocialLogin = async (provider: "google" | "apple") => {
     setSocialLoading(provider);
     try {
+      if (Capacitor.isNativePlatform()) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: NATIVE_OAUTH_REDIRECT_URL,
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) {
+          toast.error(error.message || `Failed to sign in with ${provider}`);
+          return;
+        }
+
+        if (!data?.url) {
+          toast.error(`Failed to start ${provider} sign in`);
+          return;
+        }
+
+        await Browser.open({
+          url: data.url,
+          presentationStyle: "fullscreen",
+        });
+        return;
+      }
+
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/`,
       });

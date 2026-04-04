@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from "react";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
+import { useNativeOAuthCallback } from "@/lib/nativeOAuth";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +31,7 @@ const PageLoader = () => (
 const AppContent = () => {
   // Track affiliate referral codes from URL
   useReferralTracking();
+  useNativeOAuthCallback();
   return null; // Just runs the hook inside Router context
 };
 

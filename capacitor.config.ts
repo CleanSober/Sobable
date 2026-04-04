@@ -31,7 +31,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
-    scheme: 'SoberClub',
+    scheme: 'com.sober.club',
   },
   android: {
     allowMixedContent: true,
