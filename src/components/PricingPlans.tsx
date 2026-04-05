@@ -182,13 +182,42 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
       </div>
 
       {isNative && (
-        <button
-          onClick={restorePurchases}
-          disabled={restoring}
-          className="w-full text-xs text-primary hover:text-primary/80 transition-colors py-1"
-        >
-          {restoring ? "Restoring..." : "Restore Purchases"}
-        </button>
+        <>
+          <p className="text-[9px] text-muted-foreground/70 text-center leading-relaxed px-2">
+            Payment will be charged to your {Capacitor.getPlatform() === "ios" ? "Apple ID" : "Google Play"} account at confirmation of purchase. 
+            Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. 
+            Your account will be charged for renewal within 24 hours prior to the end of the current period at the same price. 
+            You can manage and cancel your subscriptions by going to your account settings on the {Capacitor.getPlatform() === "ios" ? "App Store" : "Google Play Store"} after purchase.
+          </p>
+
+          <button
+            onClick={restorePurchases}
+            disabled={restoring}
+            className="w-full text-xs text-primary hover:text-primary/80 transition-colors py-1"
+          >
+            {restoring ? "Restoring..." : "Restore Purchases"}
+          </button>
+
+          <div className="flex items-center justify-center gap-3 pb-1">
+            <a
+              href="https://soberclub.app/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
+            >
+              Terms of Service
+            </a>
+            <span className="text-[10px] text-muted-foreground/40">·</span>
+            <a
+              href="https://soberclub.app/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
+            >
+              Privacy Policy
+            </a>
+          </div>
+        </>
       )}
 
       {onClose && (
