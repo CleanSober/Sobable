@@ -51,15 +51,13 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     if (!user) return;
     supabase
       .from("app_settings")
-      .select("weekly_digest_enabled, notifications_enabled, ios_apns_token, ios_fcm_token")
+      .select("weekly_digest_enabled, notifications_enabled")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setDigestEnabled(data.weekly_digest_enabled);
           setNativeNotificationsEnabled(data.notifications_enabled);
-          setStoredApnsToken(data.ios_apns_token);
-          setStoredFcmToken(data.ios_fcm_token);
         }
       });
   }, [user]);
