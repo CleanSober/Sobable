@@ -27,11 +27,16 @@ const isNativeCallbackUrl = (url: string) => {
 };
 
 const completeNativeOAuth = async (callbackUrl: string) => {
+  console.debug("[native-oauth] completing callback", { callbackUrl });
   const url = new URL(callbackUrl);
   const params = getAllParams(url);
   const errorDescription = params.get("error_description") || params.get("error");
 
   if (errorDescription) {
+    console.error("[native-oauth] callback contained oauth error", {
+      callbackUrl,
+      errorDescription,
+    });
     throw new Error(decodeURIComponent(errorDescription.replace(/\+/g, " ")));
   }
 
@@ -40,27 +45,39 @@ const completeNativeOAuth = async (callbackUrl: string) => {
   const authCode = params.get("code");
 
   if (accessToken && refreshToken) {
+    console.debug("[native-oauth] found session tokens in callback", {
+      hasAccessToken: true,
+      hasRefreshToken: true,
+    });
     const { error } = await supabase.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
 
     if (error) {
+      console.error("[native-oauth] setSession failed", { error });
       throw error;
     }
 
+    console.debug("[native-oauth] session restored from callback tokens");
     return;
   }
 
   if (authCode) {
+    console.debug("[native-oauth] found auth code in callback");
     const { error } = await supabase.auth.exchangeCodeForSession(authCode);
     if (error) {
+      console.error("[native-oauth] exchangeCodeForSession failed", { error });
       throw error;
     }
 
+    console.debug("[native-oauth] session exchanged from auth code");
     return;
   }
 
+  console.error("[native-oauth] callback missing session tokens and auth code", {
+    callbackUrl,
+  });
   throw new Error("OAuth callback did not contain a session or authorization code.");
 };
 
@@ -74,7 +91,13 @@ export const useNativeOAuthCallback = () => {
     }
 
     const handleUrl = async (callbackUrl?: string | null) => {
+      console.debug("[native-oauth] received app url", { callbackUrl });
       if (!callbackUrl || !isNativeCallbackUrl(callbackUrl) || lastHandledUrlRef.current === callbackUrl) {
+        console.debug("[native-oauth] ignoring app url", {
+          callbackUrl,
+          isMatchingCallback: Boolean(callbackUrl && isNativeCallbackUrl(callbackUrl)),
+          alreadyHandled: lastHandledUrlRef.current === callbackUrl,
+        });
         return;
       }
 
@@ -83,10 +106,12 @@ export const useNativeOAuthCallback = () => {
       try {
         await completeNativeOAuth(callbackUrl);
         await Browser.close();
+        console.debug("[native-oauth] callback completed successfully");
         toast.success("Signed in successfully.");
         navigate("/");
       } catch (error) {
         await Browser.close();
+        console.error("[native-oauth] callback completion failed", { error });
         toast.error(error instanceof Error ? error.message : "Failed to complete sign in.");
         navigate("/auth");
       }
@@ -96,9 +121,11 @@ export const useNativeOAuthCallback = () => {
 
     const setup = async () => {
       const launchUrl = await App.getLaunchUrl();
+      console.debug("[native-oauth] initial launch url", { launchUrl: launchUrl?.url ?? null });
       await handleUrl(launchUrl?.url);
 
       urlOpenListener = await App.addListener("appUrlOpen", async ({ url }) => {
+        console.debug("[native-oauth] appUrlOpen fired", { url });
         await handleUrl(url);
       });
     };

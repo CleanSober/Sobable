@@ -5,7 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "../supabase/client";
 
-const LOVABLE_HOSTED_APP_URL = "https://sober-sparkle.lovable.app";
+const LOVABLE_HOSTED_APP_URL = "https://sobable.lovable.app";
 const NATIVE_OAUTH_REDIRECT_URL = `${LOVABLE_HOSTED_APP_URL}/auth-bridge`;
 const lovableAuth = createLovableAuth({
   oauthBrokerUrl: `${LOVABLE_HOSTED_APP_URL}/~oauth/initiate`,
@@ -25,20 +25,39 @@ export const lovable = {
           redirect_uri: opts?.redirect_uri ?? NATIVE_OAUTH_REDIRECT_URL,
           ...opts?.extraParams,
         });
+        const brokerUrl = `${LOVABLE_HOSTED_APP_URL}/~oauth/initiate?${params.toString()}`;
+
+        console.debug("[lovable.auth] opening native oauth broker", {
+          provider,
+          redirectUri: opts?.redirect_uri ?? NATIVE_OAUTH_REDIRECT_URL,
+          extraParams: opts?.extraParams ?? null,
+          brokerUrl,
+        });
 
         await Browser.open({
-          url: `${LOVABLE_HOSTED_APP_URL}/~oauth/initiate?${params.toString()}`,
+          url: brokerUrl,
           presentationStyle: "fullscreen",
         });
 
         return { error: null, redirected: true as const };
       }
 
+      console.debug("[lovable.auth] starting web oauth", {
+        provider,
+        redirectUri: opts?.redirect_uri ?? null,
+        extraParams: opts?.extraParams ?? null,
+      });
+
       const result = await lovableAuth.signInWithOAuth(provider, {
         redirect_uri: opts?.redirect_uri,
         extraParams: {
           ...opts?.extraParams,
         },
+      });
+
+      console.debug("[lovable.auth] web oauth result", {
+        provider,
+        result,
       });
 
       if (result.redirected) {

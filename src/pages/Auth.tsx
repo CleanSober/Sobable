@@ -169,13 +169,29 @@ const Auth = () => {
         ...(provider === "google" ? { extraParams: { prompt: "select_account" } } : {}),
       };
 
+      console.debug("[auth] starting social login", {
+        provider,
+        isNative: Capacitor.isNativePlatform(),
+        oauthOptions,
+      });
+
       const result = await lovable.auth.signInWithOAuth(provider, {
         ...oauthOptions,
       });
+
+      console.debug("[auth] social login result", {
+        provider,
+        result,
+      });
+
       if (result.error) {
         toast.error(getSocialAuthErrorMessage(provider, result.error));
       }
     } catch (err) {
+      console.error("[auth] social login threw", {
+        provider,
+        err,
+      });
       toast.error(`Failed to sign in with ${provider}`);
     } finally {
       setSocialLoading(null);

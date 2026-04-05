@@ -12,13 +12,29 @@ export default function NativeAuthBridge() {
       const search = url.search ? url.search : "";
       const hash = url.hash ? url.hash : "";
 
+      console.debug("[auth-bridge] loaded", {
+        href: window.location.href,
+        search,
+        hash,
+      });
+
       if (search || hash) {
+        console.debug("[auth-bridge] forwarding callback params to native app", {
+          target: `${NATIVE_OAUTH_REDIRECT_URL}${search}${hash}`,
+        });
         window.location.replace(`${NATIVE_OAUTH_REDIRECT_URL}${search}${hash}`);
         return;
       }
 
       const { data, error } = await supabase.auth.getSession();
       const session = data.session;
+
+      console.debug("[auth-bridge] session lookup result", {
+        hasSession: Boolean(session),
+        hasAccessToken: Boolean(session?.access_token),
+        hasRefreshToken: Boolean(session?.refresh_token),
+        error: error?.message ?? null,
+      });
 
       if (error || !session?.access_token || !session.refresh_token) {
         setMessage("OAuth completed, but no session tokens were available to hand off.");
@@ -30,6 +46,9 @@ export default function NativeAuthBridge() {
         refresh_token: session.refresh_token,
       });
 
+      console.debug("[auth-bridge] forwarding session tokens to native app", {
+        target: `${NATIVE_OAUTH_REDIRECT_URL}?${params.toString()}`,
+      });
       window.location.replace(`${NATIVE_OAUTH_REDIRECT_URL}?${params.toString()}`);
     };
 

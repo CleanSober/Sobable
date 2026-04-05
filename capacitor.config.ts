@@ -4,10 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.sober.club',
   appName: 'Sober Club',
   webDir: 'dist',
-  // server: {
-  //   url: 'https://94e498b2-e0e1-433a-9333-abea9f12a84c.lovableproject.com?forceHideBadge=true',
-  //   cleartext: true
-  // },
+  server: {
+    url: 'https://sobable.lovable.app',
+    cleartext: true
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
