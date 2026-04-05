@@ -17,6 +17,7 @@
         "@capacitor/push-notifications": "^8.0.3",
         "@capacitor/splash-screen": "^8.0.0",
         "@capacitor/status-bar": "^8.0.0",
+        "@capgo/native-purchases": "^8.3.0",
         "@fontsource/outfit": "^5.2.8",
         "@hookform/resolvers": "^3.10.0",
         "@lovable.dev/cloud-auth-js": "^1.0.0",
@@ -121,6 +122,8 @@
     "@capacitor/splash-screen": ["@capacitor/splash-screen@8.0.0", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-zkFdUSd6C6gd3s3bIEgtO3DVjfwpaX5mmWU9er8xYTg47zr2toEkGtfyE6CPhhErG09fl4rCqrK5DfnGrXLh9w=="],
 
     "@capacitor/status-bar": ["@capacitor/status-bar@8.0.0", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-aIj3bc7z8lfPgOen8HlrBrkfnxpFnh21OCx6jCUx4Mvv+B6eEkUQ49b32DOddgVfr+igRHLX2SYi7duqIsNDXg=="],
+
+    "@capgo/native-purchases": ["@capgo/native-purchases@8.3.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capgo/native-purchases/-/native-purchases-8.3.0.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-KcB3JVh9JtyhOWxHyPrIBfBrmz0Pxo3EyynavPcKhx/4+vwXBNddQ/F4Id5xJZmwZymRliaCKsq+//lKsI5INg=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ=="],
 
