@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useNativePushNotifications } from "@/hooks/useNativePushNotifications";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,14 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   const { user } = useAuth();
   const { permission, settings, updateSettings, isSupported } = useNotifications(sobrietyStartDate);
   const {
+    isIosNative,
+    permission: nativePermission,
+    isRegistering: nativePushPending,
+    apnsToken,
+    enablePush,
+    disablePush,
+  } = useNativePushNotifications();
+  const {
     permission: smartPermission,
     settings: smartSettings,
     requestPermission: requestSmartPermission,
@@ -33,16 +42,25 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   } = useSmartNotifications(sobrietyStartDate);
 
   const [digestEnabled, setDigestEnabled] = useState(true);
+  const [nativeNotificationsEnabled, setNativeNotificationsEnabled] = useState(false);
+  const [nativeSettingPending, setNativeSettingPending] = useState(false);
+  const [storedApnsToken, setStoredApnsToken] = useState<string | null>(null);
+  const [storedFcmToken, setStoredFcmToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("app_settings")
-      .select("weekly_digest_enabled")
+      .select("weekly_digest_enabled, notifications_enabled, ios_apns_token, ios_fcm_token")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setDigestEnabled(data.weekly_digest_enabled);
+        if (data) {
+          setDigestEnabled(data.weekly_digest_enabled);
+          setNativeNotificationsEnabled(data.notifications_enabled);
+          setStoredApnsToken(data.ios_apns_token);
+          setStoredFcmToken(data.ios_fcm_token);
+        }
       });
   }, [user]);
 
@@ -72,6 +90,187 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   };
 
   const effectivePermission = permission === "granted" || smartPermission === "granted" ? "granted" : permission;
+
+  const persistNativeNotificationPreference = async (
+    enabled: boolean,
+    tokens?: {
+      apnsToken?: string | null;
+      fcmToken?: string | null;
+    },
+  ) => {
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert(
+        {
+          user_id: user.id,
+          notifications_enabled: enabled,
+          ios_apns_token: enabled ? (tokens?.apnsToken ?? storedApnsToken) : null,
+          ios_fcm_token: enabled ? (tokens?.fcmToken ?? storedFcmToken) : null,
+        },
+        { onConflict: "user_id" },
+      );
+
+    if (error) {
+      console.error("Failed to update native notification preference:", error);
+      toast.error("Failed to update notification setting");
+      return false;
+    }
+
+    return true;
+  };
+
+  useEffect(() => {
+    if (!user || !isIosNative || !apnsToken) return;
+
+    const saveApnsToken = async () => {
+      const { error } = await supabase
+        .from("app_settings")
+        .upsert(
+          {
+            user_id: user.id,
+            notifications_enabled: true,
+            ios_apns_token: apnsToken,
+          },
+          { onConflict: "user_id" },
+        );
+
+      if (error) {
+        console.error("Failed to store APNs token:", error);
+        return;
+      }
+
+      setStoredApnsToken(apnsToken);
+    };
+
+    void saveApnsToken();
+  }, [apnsToken, isIosNative, user]);
+
+  const handleNativeToggle = async (enabled: boolean) => {
+    if (!user) return;
+
+    setNativeSettingPending(true);
+
+    try {
+      if (enabled) {
+        const result = await enablePush();
+
+        if (!result.granted) {
+          toast.error(result.error?.message ?? "Push notifications are not available.");
+          return;
+        }
+
+        const persisted = await persistNativeNotificationPreference(true, {
+          apnsToken: apnsToken ?? storedApnsToken,
+          fcmToken: storedFcmToken,
+        });
+        if (persisted) {
+          setNativeNotificationsEnabled(true);
+          toast.success("Native push notifications enabled.");
+        }
+        return;
+      }
+
+      await disablePush();
+      setStoredApnsToken(null);
+      setStoredFcmToken(null);
+      const persisted = await persistNativeNotificationPreference(false, {
+        apnsToken: null,
+        fcmToken: null,
+      });
+      if (persisted) {
+        setNativeNotificationsEnabled(false);
+        toast.success("Native push notifications disabled.");
+      }
+    } finally {
+      setNativeSettingPending(false);
+    }
+  };
+
+  if (isIosNative) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Bell className="w-5 h-5 text-primary" />
+            iOS Push Notifications
+          </CardTitle>
+          <CardDescription>
+            Control iPhone push permissions and store the device token for your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Bell className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Push Notifications</p>
+                <p className="text-xs text-muted-foreground">
+                  {nativePermission === "granted"
+                    ? "Device permission granted"
+                    : nativePermission === "denied"
+                      ? "Permission denied in system settings"
+                      : "Permission not requested yet"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={nativeNotificationsEnabled && nativePermission === "granted"}
+              onCheckedChange={handleNativeToggle}
+              disabled={nativeSettingPending || nativePushPending}
+            />
+          </div>
+
+          {nativePermission === "denied" && (
+            <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-500/10 p-3 rounded-lg">
+              <AlertTriangle className="w-3 h-3" />
+              <span>Permission is denied at the OS level. Re-enable notifications from system settings.</span>
+            </div>
+          )}
+
+          <div className="space-y-2 rounded-lg border border-border/60 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs font-medium text-foreground">Stored APNs token</span>
+              <span className="text-[10px] text-muted-foreground">
+                {storedApnsToken ? "Saved" : "Not saved yet"}
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground break-all">
+              {storedApnsToken ?? "The APNs token will be saved after iOS permission is granted and registration succeeds."}
+            </p>
+          </div>
+
+          <div className="space-y-2 rounded-lg border border-border/60 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs font-medium text-foreground">Stored FCM token</span>
+              <span className="text-[10px] text-muted-foreground">
+                {storedFcmToken ? "Saved" : "Unavailable"}
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              {storedFcmToken ?? "FCM token is not available yet. It requires Firebase Messaging setup on iOS."}
+            </p>
+          </div>
+
+          <div className="pt-3 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Weekly Email Digest</p>
+                  <p className="text-[10px] text-muted-foreground">Progress summary every Sunday</p>
+                </div>
+              </div>
+              <Switch checked={digestEnabled} onCheckedChange={toggleDigest} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!isSupported) {
     return (
