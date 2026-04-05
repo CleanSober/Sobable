@@ -104,8 +104,6 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
         {
           user_id: user.id,
           notifications_enabled: enabled,
-          ios_apns_token: enabled ? (tokens?.apnsToken ?? storedApnsToken) : null,
-          ios_fcm_token: enabled ? (tokens?.fcmToken ?? storedFcmToken) : null,
         },
         { onConflict: "user_id" },
       );
@@ -114,6 +112,14 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       console.error("Failed to update native notification preference:", error);
       toast.error("Failed to update notification setting");
       return false;
+    }
+
+    // Store tokens locally since the DB doesn't have token columns
+    if (tokens?.apnsToken) localStorage.setItem("ios_apns_token", tokens.apnsToken);
+    if (tokens?.fcmToken) localStorage.setItem("ios_fcm_token", tokens.fcmToken);
+    if (!enabled) {
+      localStorage.removeItem("ios_apns_token");
+      localStorage.removeItem("ios_fcm_token");
     }
 
     return true;
@@ -129,16 +135,16 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           {
             user_id: user.id,
             notifications_enabled: true,
-            ios_apns_token: apnsToken,
           },
           { onConflict: "user_id" },
         );
 
       if (error) {
-        console.error("Failed to store APNs token:", error);
+        console.error("Failed to persist notification setting:", error);
         return;
       }
 
+      localStorage.setItem("ios_apns_token", apnsToken);
       setStoredApnsToken(apnsToken);
     };
 
