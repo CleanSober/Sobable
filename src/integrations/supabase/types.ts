@@ -42,8 +42,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          ios_apns_token: string | null
-          ios_fcm_token: string | null
           notifications_enabled: boolean
           show_ads: boolean
           theme: string
@@ -54,8 +52,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          ios_apns_token?: string | null
-          ios_fcm_token?: string | null
           notifications_enabled?: boolean
           show_ads?: boolean
           theme?: string
@@ -66,8 +62,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          ios_apns_token?: string | null
-          ios_fcm_token?: string | null
           notifications_enabled?: boolean
           show_ads?: boolean
           theme?: string
