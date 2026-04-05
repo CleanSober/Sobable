@@ -20,17 +20,8 @@ export const IAP_PRODUCTS = {
   },
 } as const;
 
-interface NativeProduct {
-  productIdentifier: string;
-  localizedTitle: string;
-  localizedDescription: string;
-  price: string;
-  priceLocale: string;
-  currencyCode: string;
-}
-
 interface IAPState {
-  products: NativeProduct[];
+  products: any[];
   loading: boolean;
   purchasing: boolean;
   restoring: boolean;
@@ -77,7 +68,7 @@ export const useInAppPurchases = () => {
         const productIds = Object.values(IAP_PRODUCTS).map((p) => p.productId);
         const result = await NativePurchases.getProducts({
           productIdentifiers: productIds,
-          type: "subs",
+          productType: "subs" as any,
         });
 
         setState((s) => ({
@@ -141,12 +132,7 @@ export const useInAppPurchases = () => {
         if (data?.success) {
           toast.success("Welcome to Sober Club! 🎉");
 
-          // Finish the transaction after successful validation
-          if (result.transactionId) {
-            await NativePurchases.finishTransaction({
-              transactionIdentifier: result.transactionId,
-            });
-          }
+          // Transaction is auto-finished by StoreKit 2 on iOS
 
           return true;
         } else {
@@ -197,9 +183,9 @@ export const useInAppPurchases = () => {
   const getProductPrice = useCallback(
     (productId: string, fallback: string) => {
       const product = state.products.find(
-        (p) => p.productIdentifier === productId
+        (p: any) => (p.productIdentifier || p.identifier || p.id) === productId
       );
-      return product ? product.price : fallback;
+      return product ? (product.price || product.localizedPrice || fallback) : fallback;
     },
     [state.products]
   );
