@@ -15,6 +15,23 @@ import soberClubLogo from "@/assets/sober-club-logo.png";
 
 type AuthMode = "login" | "signup" | "forgot" | "reset";
 
+const getSocialAuthErrorMessage = (provider: "google" | "apple", error?: { message?: string | null }) => {
+  const message = error?.message?.trim();
+
+  if (!message) {
+    return `Failed to sign in with ${provider}`;
+  }
+
+  if (
+    message.includes("Unsupported provider: missing OAuth secret") ||
+    message.includes("missing OAuth secret")
+  ) {
+    return `${provider[0].toUpperCase()}${provider.slice(1)} sign-in is not configured in Supabase yet. Add the provider client ID and client secret in Supabase Auth settings, then try again.`;
+  }
+
+  return message;
+};
+
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get("mode") === "reset" ? "reset" : "login";
@@ -160,7 +177,7 @@ const Auth = () => {
         });
 
         if (error) {
-          toast.error(error.message || `Failed to sign in with ${provider}`);
+          toast.error(getSocialAuthErrorMessage(provider, error));
           return;
         }
 
@@ -180,7 +197,7 @@ const Auth = () => {
         redirect_uri: `${window.location.origin}/`,
       });
       if (result.error) {
-        toast.error(result.error.message || `Failed to sign in with ${provider}`);
+        toast.error(getSocialAuthErrorMessage(provider, result.error));
       }
     } catch (err) {
       toast.error(`Failed to sign in with ${provider}`);
