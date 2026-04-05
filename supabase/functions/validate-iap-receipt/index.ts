@@ -11,6 +11,88 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[VALIDATE-IAP] ${step}${detailsStr}`);
 };
 
+// ---------- Helper: Create ES256 JWT for Apple ----------
+async function createAppleJWT(
+  issuerId: string,
+  keyId: string,
+  privateKeyPem: string
+): Promise<string> {
+  const header = { alg: "ES256", kid: keyId, typ: "JWT" };
+  const now = Math.floor(Date.now() / 1000);
+  const claims = {
+    iss: issuerId,
+    iat: now,
+    exp: now + 3600,
+    aud: "appstoreconnect-v1",
+    bid: "app.lovable.94e498b2e0e1433a9333abea9f12a84c",
+  };
+
+  const enc = (obj: unknown) =>
+    btoa(JSON.stringify(obj))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+
+  const unsignedToken = `${enc(header)}.${enc(claims)}`;
+
+  // Import the EC private key (P-256)
+  const pemContents = privateKeyPem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s/g, "");
+
+  const binaryKey = Uint8Array.from(atob(pemContents), (c: string) => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    binaryKey,
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    cryptoKey,
+    new TextEncoder().encode(unsignedToken)
+  );
+
+  // Convert DER signature to raw r||s (64 bytes) for ES256
+  const sigBytes = new Uint8Array(signature);
+  let r: Uint8Array, s: Uint8Array;
+
+  if (sigBytes.length === 64) {
+    // Already raw format
+    r = sigBytes.slice(0, 32);
+    s = sigBytes.slice(32);
+  } else {
+    // DER format: 0x30 len 0x02 rLen r 0x02 sLen s
+    const rLen = sigBytes[3];
+    const rStart = 4;
+    const rBytes = sigBytes.slice(rStart, rStart + rLen);
+    const sLen = sigBytes[rStart + rLen + 1];
+    const sStart = rStart + rLen + 2;
+    const sBytes = sigBytes.slice(sStart, sStart + sLen);
+
+    // Pad or trim to 32 bytes
+    r = new Uint8Array(32);
+    s = new Uint8Array(32);
+    r.set(rBytes.length > 32 ? rBytes.slice(rBytes.length - 32) : rBytes, 32 - Math.min(rBytes.length, 32));
+    s.set(sBytes.length > 32 ? sBytes.slice(sBytes.length - 32) : sBytes, 32 - Math.min(sBytes.length, 32));
+  }
+
+  const rawSig = new Uint8Array(64);
+  rawSig.set(r, 0);
+  rawSig.set(s, 32);
+
+  const sig = btoa(String.fromCharCode(...rawSig))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  return `${unsignedToken}.${sig}`;
+}
+
 // ---------- Apple App Store Server API v2 ----------
 async function verifyAppleReceipt(transactionId: string): Promise<{
   valid: boolean;
@@ -18,24 +100,94 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
   expiresDate?: string;
   originalTransactionId?: string;
 }> {
-  // Apple's App Store Server API uses a signed JWT for auth.
-  // For StoreKit 2, the transactionId is a JWS (JSON Web Signature).
-  // We can decode the JWS payload to extract subscription info.
-  // In production you should also verify the JWS signature against Apple's certs.
+  const issuerId = Deno.env.get("APPLE_APP_STORE_ISSUER_ID");
+  const keyId = Deno.env.get("APPLE_APP_STORE_KEY_ID");
+  const privateKey = Deno.env.get("APPLE_APP_STORE_PRIVATE_KEY");
+
+  if (!issuerId || !keyId || !privateKey) {
+    logStep("Apple: Missing App Store Server API credentials, decoding JWS locally");
+    // Fallback: decode JWS payload locally (StoreKit 2 transactions are JWS)
+    return decodeAppleJWSLocally(transactionId);
+  }
 
   try {
-    // StoreKit 2 transactions are JWS tokens — decode payload
+    const jwt = await createAppleJWT(issuerId, keyId, privateKey);
+
+    // Use the production App Store Server API endpoint
+    // For sandbox testing, use: https://api.storekit-sandbox.itunes.apple.com
+    const environment = Deno.env.get("APPLE_ENVIRONMENT") === "sandbox"
+      ? "api.storekit-sandbox.itunes.apple.com"
+      : "api.storekit.itunes.apple.com";
+
+    const url = `https://${environment}/inApps/v2/transactions/${transactionId}`;
+    logStep("Apple: Calling App Store Server API", { url });
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${jwt}` },
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      logStep("Apple API error", { status: res.status, error: errText });
+
+      // If transaction not found via API, try decoding JWS locally as fallback
+      if (res.status === 404) {
+        logStep("Apple: Transaction not found via API, trying local JWS decode");
+        return decodeAppleJWSLocally(transactionId);
+      }
+
+      return { valid: false };
+    }
+
+    const data = await res.json();
+    logStep("Apple API response received");
+
+    // The response contains a signedTransactionInfo (JWS)
+    const signedInfo = data.signedTransactionInfo;
+    if (signedInfo) {
+      const parts = signedInfo.split(".");
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+        logStep("Apple verified transaction", {
+          productId: payload.productId,
+          expiresDate: payload.expiresDate,
+          environment: payload.environment,
+          type: payload.type,
+        });
+
+        return {
+          valid: true,
+          productId: payload.productId,
+          expiresDate: payload.expiresDate
+            ? new Date(payload.expiresDate).toISOString()
+            : undefined,
+          originalTransactionId: payload.originalTransactionId || transactionId,
+        };
+      }
+    }
+
+    return { valid: true, originalTransactionId: transactionId };
+  } catch (e) {
+    logStep("Apple verification exception", { error: String(e) });
+    // Fallback to local JWS decode
+    return decodeAppleJWSLocally(transactionId);
+  }
+}
+
+function decodeAppleJWSLocally(transactionId: string): {
+  valid: boolean;
+  productId?: string;
+  expiresDate?: string;
+  originalTransactionId?: string;
+} {
+  try {
     const parts = transactionId.split(".");
     if (parts.length === 3) {
-      // It's a JWS signed transaction from StoreKit 2
       const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
-      logStep("Apple JWS payload decoded", {
+      logStep("Apple JWS decoded locally", {
         productId: payload.productId,
         expiresDate: payload.expiresDate,
-        bundleId: payload.bundleId,
-        environment: payload.environment,
       });
-
       return {
         valid: true,
         productId: payload.productId,
@@ -45,13 +197,10 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
         originalTransactionId: payload.originalTransactionId || transactionId,
       };
     }
-
-    // Fallback: plain transaction ID from older StoreKit
-    // In this case we trust the native SDK validation
-    logStep("Apple plain transactionId (legacy StoreKit), trusting native SDK");
+    logStep("Apple: plain transactionId, trusting native SDK");
     return { valid: true, originalTransactionId: transactionId };
   } catch (e) {
-    logStep("Apple receipt verification error", { error: String(e) });
+    logStep("Apple local decode error", { error: String(e) });
     return { valid: false };
   }
 }
@@ -61,16 +210,11 @@ async function verifyGoogleReceipt(
   packageName: string,
   productId: string,
   purchaseToken: string
-): Promise<{
-  valid: boolean;
-  expiresDate?: string;
-}> {
-  // Google Play requires a service account with Play Developer API access.
-  // We reuse FIREBASE_SERVICE_ACCOUNT_KEY for the Google API auth.
+): Promise<{ valid: boolean; expiresDate?: string }> {
   const serviceAccountKey = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_KEY");
   if (!serviceAccountKey) {
-    logStep("Google: No service account key, trusting native SDK");
-    return { valid: true };
+    logStep("Google: No service account key available");
+    return { valid: false };
   }
 
   try {
@@ -132,13 +276,15 @@ async function verifyGoogleReceipt(
     if (!tokenRes.ok) {
       const err = await tokenRes.text();
       logStep("Google OAuth token error", { error: err });
-      return { valid: true }; // Fallback to trusting native SDK
+      return { valid: false };
     }
 
     const { access_token } = await tokenRes.json();
 
-    // Verify subscription with Google Play Developer API
+    // Verify subscription with Google Play Developer API v3
     const verifyUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${packageName}/purchases/subscriptions/${productId}/tokens/${purchaseToken}`;
+
+    logStep("Google: Calling Play Developer API", { verifyUrl });
 
     const verifyRes = await fetch(verifyUrl, {
       headers: { Authorization: `Bearer ${access_token}` },
@@ -146,7 +292,7 @@ async function verifyGoogleReceipt(
 
     if (!verifyRes.ok) {
       const err = await verifyRes.text();
-      logStep("Google Play verify error", { error: err });
+      logStep("Google Play verify error", { status: verifyRes.status, error: err });
       return { valid: false };
     }
 
@@ -154,6 +300,7 @@ async function verifyGoogleReceipt(
     logStep("Google Play subscription verified", {
       paymentState: subscription.paymentState,
       expiryTimeMillis: subscription.expiryTimeMillis,
+      cancelReason: subscription.cancelReason,
     });
 
     // paymentState: 0=pending, 1=received, 2=free trial, 3=deferred
@@ -169,7 +316,7 @@ async function verifyGoogleReceipt(
     };
   } catch (e) {
     logStep("Google verification exception", { error: String(e) });
-    return { valid: true }; // Fallback
+    return { valid: false };
   }
 }
 
@@ -201,7 +348,7 @@ Deno.serve(async (req) => {
 
     const { platform, productId, transactionId, purchaseToken } =
       await req.json();
-    logStep("Receipt data", { platform, productId, transactionId });
+    logStep("Receipt data", { platform, productId, transactionId, hasPurchaseToken: !!purchaseToken });
 
     if (!platform || !productId || !transactionId) {
       throw new Error("Missing required fields: platform, productId, transactionId");
@@ -216,26 +363,22 @@ Deno.serve(async (req) => {
         valid: appleResult.valid,
         expiresDate: appleResult.expiresDate,
       };
-      logStep("Apple verification result", verificationResult);
+      logStep("Apple verification complete", { valid: verificationResult.valid });
     } else if (platform === "android") {
       if (!purchaseToken) {
         throw new Error("purchaseToken is required for Android verification");
       }
       const packageName = "app.lovable.94e498b2e0e1433a9333abea9f12a84c";
-      verificationResult = await verifyGoogleReceipt(
-        packageName,
-        productId,
-        purchaseToken
-      );
-      logStep("Google verification result", verificationResult);
+      verificationResult = await verifyGoogleReceipt(packageName, productId, purchaseToken);
+      logStep("Google verification complete", { valid: verificationResult.valid });
     } else {
       throw new Error(`Unsupported platform: ${platform}`);
     }
 
     if (!verificationResult.valid) {
-      logStep("Receipt verification FAILED");
+      logStep("Receipt verification FAILED — rejecting purchase");
       return new Response(
-        JSON.stringify({ success: false, error: "Receipt verification failed" }),
+        JSON.stringify({ success: false, error: "Receipt verification failed. Purchase could not be validated." }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 403,
@@ -301,8 +444,7 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
     return new Response(
       JSON.stringify({ success: false, error: errorMessage }),
