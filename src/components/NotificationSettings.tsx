@@ -51,13 +51,15 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     if (!user) return;
     supabase
       .from("app_settings")
-      .select("weekly_digest_enabled, notifications_enabled")
+      .select("weekly_digest_enabled, notifications_enabled, ios_apns_token, ios_fcm_token")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setDigestEnabled(data.weekly_digest_enabled);
           setNativeNotificationsEnabled(data.notifications_enabled);
+          if (data.ios_apns_token) setStoredApnsToken(data.ios_apns_token);
+          if (data.ios_fcm_token) setStoredFcmToken(data.ios_fcm_token);
         }
       });
   }, [user]);
@@ -104,6 +106,8 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
         {
           user_id: user.id,
           notifications_enabled: enabled,
+          ios_apns_token: tokens?.apnsToken ?? null,
+          ios_fcm_token: tokens?.fcmToken ?? null,
         },
         { onConflict: "user_id" },
       );
@@ -114,12 +118,11 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
       return false;
     }
 
-    // Store tokens locally since the DB doesn't have token columns
-    if (tokens?.apnsToken) localStorage.setItem("ios_apns_token", tokens.apnsToken);
-    if (tokens?.fcmToken) localStorage.setItem("ios_fcm_token", tokens.fcmToken);
+    if (tokens?.apnsToken) setStoredApnsToken(tokens.apnsToken);
+    if (tokens?.fcmToken) setStoredFcmToken(tokens.fcmToken);
     if (!enabled) {
-      localStorage.removeItem("ios_apns_token");
-      localStorage.removeItem("ios_fcm_token");
+      setStoredApnsToken(null);
+      setStoredFcmToken(null);
     }
 
     return true;
@@ -135,6 +138,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           {
             user_id: user.id,
             notifications_enabled: true,
+            ios_apns_token: apnsToken,
           },
           { onConflict: "user_id" },
         );
@@ -144,7 +148,6 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
         return;
       }
 
-      localStorage.setItem("ios_apns_token", apnsToken);
       setStoredApnsToken(apnsToken);
     };
 
