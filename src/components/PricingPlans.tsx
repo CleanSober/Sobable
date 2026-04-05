@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
   Check, Crown, Loader2, Shield, Bot, Users, Brain,
@@ -6,8 +7,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { STRIPE_PLANS } from "@/lib/stripe";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
 import { cn } from "@/lib/utils";
 
 const features = [
@@ -28,13 +29,40 @@ interface PricingPlansProps {
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
   const { startCheckout, checkoutLoading, isPremium, planName, openCustomerPortal } = useSubscription();
+  const {
+    isNative,
+    purchasing,
+    restoring,
+    purchaseProduct,
+    restorePurchases,
+    getProductPrice,
+  } = useInAppPurchases();
 
   const handleSubscribe = async () => {
-    const plan = selectedPlan === "monthly"
-      ? STRIPE_PLANS.premium_monthly
-      : STRIPE_PLANS.premium_yearly;
-    await startCheckout(plan.price_id);
+    if (isNative) {
+      const productId = selectedPlan === "monthly"
+        ? IAP_PRODUCTS.monthly.productId
+        : IAP_PRODUCTS.yearly.productId;
+      const success = await purchaseProduct(productId);
+      if (success && onClose) onClose();
+    } else {
+      const { STRIPE_PLANS } = await import("@/lib/stripe");
+      const plan = selectedPlan === "monthly"
+        ? STRIPE_PLANS.premium_monthly
+        : STRIPE_PLANS.premium_yearly;
+      await startCheckout(plan.price_id);
+    }
   };
+
+  const isLoading = isNative ? purchasing : checkoutLoading;
+
+  // Get display prices - use native store prices if available, fallback to hardcoded
+  const monthlyPrice = isNative
+    ? getProductPrice(IAP_PRODUCTS.monthly.productId, "$7.99")
+    : "$7.99";
+  const yearlyPrice = isNative
+    ? getProductPrice(IAP_PRODUCTS.yearly.productId, "$34.99")
+    : "$34.99";
 
   if (isPremium) {
     return (
@@ -44,7 +72,11 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         </div>
         <h2 className="text-xl font-bold text-foreground">You're in the Sober Club!</h2>
         <p className="text-sm text-muted-foreground">Full access with your {planName} plan.</p>
-        <Button onClick={openCustomerPortal} variant="outline" className="w-full">Manage Subscription</Button>
+        {isNative ? (
+          <p className="text-xs text-muted-foreground">Manage your subscription in your device's Settings app.</p>
+        ) : (
+          <Button onClick={openCustomerPortal} variant="outline" className="w-full">Manage Subscription</Button>
+        )}
         {onClose && <Button onClick={onClose} variant="ghost" className="w-full">Close</Button>}
       </motion.div>
     );
@@ -86,7 +118,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           )}
         >
           <p className="text-xs font-semibold text-foreground">Monthly</p>
-          <p className="text-2xl font-bold text-foreground mt-1">$7.99</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{monthlyPrice}</p>
           <p className="text-[10px] text-muted-foreground">/month</p>
         </button>
 
@@ -103,7 +135,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
             BEST VALUE
           </Badge>
           <p className="text-xs font-semibold text-foreground">Yearly</p>
-          <p className="text-2xl font-bold text-foreground mt-1">$34.99</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{yearlyPrice}</p>
           <p className="text-[10px] text-muted-foreground">/year · $2.92/mo</p>
           <p className="text-[10px] text-green-500 font-medium mt-0.5">Save over 60%</p>
         </button>
@@ -126,10 +158,10 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
       {/* CTA */}
       <Button
         onClick={handleSubscribe}
-        disabled={checkoutLoading}
+        disabled={isLoading}
         className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
       >
-        {checkoutLoading ? (
+        {isLoading ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             Loading...
@@ -137,7 +169,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         ) : (
           <>
             <Crown className="w-4 h-4 mr-1.5" />
-            Subscribe — ${selectedPlan === "monthly" ? "7.99/mo" : "34.99/yr"}
+            Subscribe — {selectedPlan === "monthly" ? `${monthlyPrice}/mo` : `${yearlyPrice}/yr`}
           </>
         )}
       </Button>
@@ -145,9 +177,19 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
       <div className="text-center space-y-1">
         <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
           <Shield className="w-3 h-3" />
-          Secure payment · Cancel anytime
+          {isNative ? "Billed by App Store · Cancel anytime" : "Secure payment · Cancel anytime"}
         </p>
       </div>
+
+      {isNative && (
+        <button
+          onClick={restorePurchases}
+          disabled={restoring}
+          className="w-full text-xs text-primary hover:text-primary/80 transition-colors py-1"
+        >
+          {restoring ? "Restoring..." : "Restore Purchases"}
+        </button>
+      )}
 
       {onClose && (
         <button onClick={onClose} className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-0.5">
