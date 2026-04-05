@@ -11,6 +11,7 @@ import { SplashScreen } from "@/components/SplashScreen";
 // Lazy load non-critical routes to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
+const NativeAuthBridge = lazy(() => import("./pages/NativeAuthBridge"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const BrandAssets = lazy(() => import("./components/BrandAssets"));
 const AppStoreGuide = lazy(() => import("./components/AppStoreGuide"));
@@ -62,6 +63,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth-bridge" element={<NativeAuthBridge />} />
                 <Route path="/brand" element={<BrandAssets />} />
                 <Route path="/app-store-guide" element={<AppStoreGuide />} />
                 <Route path="/admin" element={<Admin />} />
