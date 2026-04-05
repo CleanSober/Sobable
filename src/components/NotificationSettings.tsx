@@ -29,6 +29,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     permission: nativePermission,
     isRegistering: nativePushPending,
     apnsToken,
+    fcmToken,
     enablePush,
     disablePush,
   } = useNativePushNotifications();
@@ -129,30 +130,32 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   };
 
   useEffect(() => {
-    if (!user || !isIosNative || !apnsToken) return;
+    if (!user || !isIosNative || (!apnsToken && !fcmToken)) return;
 
-    const saveApnsToken = async () => {
+    const saveTokens = async () => {
       const { error } = await supabase
         .from("app_settings")
         .upsert(
           {
             user_id: user.id,
             notifications_enabled: true,
-            ios_apns_token: apnsToken,
+            ios_apns_token: apnsToken ?? storedApnsToken,
+            ios_fcm_token: fcmToken ?? storedFcmToken,
           },
           { onConflict: "user_id" },
         );
 
       if (error) {
-        console.error("Failed to persist notification setting:", error);
+        console.error("Failed to persist iOS push tokens:", error);
         return;
       }
 
-      setStoredApnsToken(apnsToken);
+      if (apnsToken) setStoredApnsToken(apnsToken);
+      if (fcmToken) setStoredFcmToken(fcmToken);
     };
 
-    void saveApnsToken();
-  }, [apnsToken, isIosNative, user]);
+    void saveTokens();
+  }, [apnsToken, fcmToken, isIosNative, storedApnsToken, storedFcmToken, user]);
 
   const handleNativeToggle = async (enabled: boolean) => {
     if (!user) return;
@@ -170,7 +173,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
 
         const persisted = await persistNativeNotificationPreference(true, {
           apnsToken: apnsToken ?? storedApnsToken,
-          fcmToken: storedFcmToken,
+          fcmToken: fcmToken ?? storedFcmToken,
         });
         if (persisted) {
           setNativeNotificationsEnabled(true);
@@ -201,10 +204,10 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Bell className="w-5 h-5 text-primary" />
-            iOS Push Notifications
+            Push Notifications
           </CardTitle>
           <CardDescription>
-            Control iPhone push permissions and store the device token for your account.
+            Control device notifications for reminders and recovery updates.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -214,13 +217,13 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
                 <Bell className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">Push Notifications</p>
+                <p className="font-medium text-sm">Enable Notifications</p>
                 <p className="text-xs text-muted-foreground">
                   {nativePermission === "granted"
-                    ? "Device permission granted"
+                    ? "Reminders and updates are enabled"
                     : nativePermission === "denied"
-                      ? "Permission denied in system settings"
-                      : "Permission not requested yet"}
+                      ? "Permission is disabled in system settings"
+                      : "Allow notifications to receive reminders and updates"}
                 </p>
               </div>
             </div>
@@ -237,30 +240,6 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
               <span>Permission is denied at the OS level. Re-enable notifications from system settings.</span>
             </div>
           )}
-
-          <div className="space-y-2 rounded-lg border border-border/60 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-medium text-foreground">Stored APNs token</span>
-              <span className="text-[10px] text-muted-foreground">
-                {storedApnsToken ? "Saved" : "Not saved yet"}
-              </span>
-            </div>
-            <p className="text-[10px] text-muted-foreground break-all">
-              {storedApnsToken ?? "The APNs token will be saved after iOS permission is granted and registration succeeds."}
-            </p>
-          </div>
-
-          <div className="space-y-2 rounded-lg border border-border/60 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-medium text-foreground">Stored FCM token</span>
-              <span className="text-[10px] text-muted-foreground">
-                {storedFcmToken ? "Saved" : "Unavailable"}
-              </span>
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              {storedFcmToken ?? "FCM token is not available yet. It requires Firebase Messaging setup on iOS."}
-            </p>
-          </div>
 
           <div className="pt-3 border-t border-border">
             <div className="flex items-center justify-between">
