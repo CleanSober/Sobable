@@ -135,16 +135,16 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           {
             user_id: user.id,
             notifications_enabled: true,
-            ios_apns_token: apnsToken,
           },
           { onConflict: "user_id" },
         );
 
       if (error) {
-        console.error("Failed to store APNs token:", error);
+        console.error("Failed to persist notification setting:", error);
         return;
       }
 
+      localStorage.setItem("ios_apns_token", apnsToken);
       setStoredApnsToken(apnsToken);
     };
 
