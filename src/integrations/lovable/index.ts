@@ -36,7 +36,7 @@ export const lovable = {
 
         await Browser.open({
           url: brokerUrl,
-          presentationStyle: "fullscreen",
+          presentationStyle: "popover",
         });
 
         return { error: null, redirected: true as const };

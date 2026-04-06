@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { Keyboard } from '@capacitor/keyboard';
 import { App } from '@capacitor/app';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { applyThemePreference } from '@/lib/theme';
 
 export const useCapacitor = () => {
   useEffect(() => {
@@ -16,9 +16,7 @@ export const useCapacitor = () => {
       if (!Capacitor.isNativePlatform()) return;
 
       try {
-        // Configure status bar for dark theme
-        await StatusBar.setStyle({ style: Style.Dark });
-        await StatusBar.setBackgroundColor({ color: '#0a0a0a' });
+        applyThemePreference();
 
         // Hide splash screen after app is ready
         await SplashScreen.hide();
@@ -35,6 +33,9 @@ export const useCapacitor = () => {
         // Handle app state changes
         appStateChangeListener = await App.addListener('appStateChange', ({ isActive }) => {
           console.log('App state changed. Is active:', isActive);
+          if (isActive) {
+            applyThemePreference();
+          }
         });
 
         // Handle back button on Android

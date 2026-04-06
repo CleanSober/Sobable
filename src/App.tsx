@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { useNativeOAuthCallback } from "@/lib/nativeOAuth";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
+import { applyThemePreference } from "@/lib/theme";
 // Lazy load non-critical routes to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -37,6 +38,27 @@ const AppContent = () => {
 };
 
 const App = () => {
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = () => {
+      applyThemePreference();
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === "theme" || event.key === null) {
+        applyThemePreference();
+      }
+    };
+
+    applyThemePreference();
+    mediaQuery.addEventListener("change", handleThemeChange);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleThemeChange);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
   // Only show splash on first load per session (not on in-app navigations)
   const [showSplash, setShowSplash] = useState(() => {
     if (sessionStorage.getItem("sober_club_splash_shown")) return false;

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
+import { NativePurchases } from "@capgo/native-purchases";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -37,33 +38,17 @@ export const useInAppPurchases = () => {
   });
 
   const isNative = Capacitor.isNativePlatform();
-
-  // Dynamically import native purchases only on native platforms
-  const getNativePurchases = useCallback(async () => {
-    if (!isNative) return null;
-    try {
-      const { NativePurchases } = await import("@capgo/native-purchases");
-      return NativePurchases;
-    } catch (e) {
-      console.error("Failed to load NativePurchases:", e);
-      return null;
-    }
-  }, [isNative]);
+  const hasNativePurchases =
+    isNative && Capacitor.isPluginAvailable("NativePurchases");
 
   // Load products on mount
   useEffect(() => {
-    if (!isNative) {
+    if (!hasNativePurchases) {
       setState((s) => ({ ...s, loading: false }));
       return;
     }
 
     const loadProducts = async () => {
-      const NativePurchases = await getNativePurchases();
-      if (!NativePurchases) {
-        setState((s) => ({ ...s, loading: false }));
-        return;
-      }
-
       try {
         const productIds = Object.values(IAP_PRODUCTS).map((p) => p.productId);
         const result = await NativePurchases.getProducts({
@@ -83,18 +68,17 @@ export const useInAppPurchases = () => {
     };
 
     loadProducts();
-  }, [isNative, getNativePurchases]);
+  }, [hasNativePurchases]);
 
   const purchaseProduct = useCallback(
     async (productId: string) => {
-      if (!isNative || !user || !session?.access_token) {
-        toast.error("Please sign in to subscribe");
+      if (!hasNativePurchases) {
+        toast.error("In-app purchases are not available on this device.");
         return false;
       }
 
-      const NativePurchases = await getNativePurchases();
-      if (!NativePurchases) {
-        toast.error("In-app purchases not available");
+      if (!user || !session?.access_token) {
+        toast.error("Please sign in to subscribe");
         return false;
       }
 
@@ -152,14 +136,11 @@ export const useInAppPurchases = () => {
         setState((s) => ({ ...s, purchasing: false }));
       }
     },
-    [isNative, user, session?.access_token, getNativePurchases]
+    [hasNativePurchases, user, session?.access_token]
   );
 
   const restorePurchases = useCallback(async () => {
-    if (!isNative || !session?.access_token) return;
-
-    const NativePurchases = await getNativePurchases();
-    if (!NativePurchases) return;
+    if (!hasNativePurchases || !session?.access_token) return;
 
     setState((s) => ({ ...s, restoring: true }));
 
@@ -177,7 +158,7 @@ export const useInAppPurchases = () => {
     } finally {
       setState((s) => ({ ...s, restoring: false }));
     }
-  }, [isNative, session?.access_token, getNativePurchases]);
+  }, [hasNativePurchases, session?.access_token]);
 
   // Helper to get a display price from loaded products or fallback
   const getProductPrice = useCallback(

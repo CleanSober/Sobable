@@ -36,6 +36,7 @@ import { FeedbackRating } from "@/components/FeedbackRating";
 import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { Switch } from "@/components/ui/switch";
 import { calculateDaysSober } from "@/lib/storage";
+import { applyThemePreference } from "@/lib/theme";
 import cleanAndSoberLogo from "@/assets/clean-and-sober-logo.png";
 
 const Profile = () => {
@@ -473,12 +474,11 @@ const Profile = () => {
                   onCheckedChange={(checked) => {
                     setIsDarkMode(checked);
                     if (checked) {
-                      document.documentElement.classList.remove("light");
                       localStorage.setItem("theme", "dark");
                     } else {
-                      document.documentElement.classList.add("light");
                       localStorage.setItem("theme", "light");
                     }
+                    applyThemePreference(checked ? "dark" : "light");
                   }}
                 />
               </div>

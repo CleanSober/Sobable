@@ -22,8 +22,7 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     StatusBar: {
-      style: 'dark',
-      backgroundColor: '#0a0a0a',
+      overlaysWebView: true,
     },
     Keyboard: {
       resize: 'body',
@@ -31,6 +30,9 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    Browser: {
+      presentationStyle: 'popover',
     },
   },
   ios: {
