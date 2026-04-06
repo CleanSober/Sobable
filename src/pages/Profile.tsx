@@ -669,40 +669,6 @@ const Profile = () => {
               <Settings2 className="w-4 h-4 text-muted-foreground" />
               Account
             </h3>
-            {isPremium && (
-              <>
-                {billingSource === "app_store" || billingSource === "play_store" ? (
-                  <button
-                    onClick={openManageSubscription}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-                  >
-                    <Crown className="w-5 h-5 text-accent" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {planName || "Sober Club"} · Manage in {manageSubscriptionDestination}
-                      </span>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={openManageSubscription}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-                  >
-                    <Crown className="w-5 h-5 text-accent" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {planName || "Sober Club"}{subscriptionEnd ? ` · Renews ${new Date(subscriptionEnd).toLocaleDateString()}` : ""}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                )}
-                <div className="h-px bg-border/30 mx-4" />
-              </>
-            )}
             <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
