@@ -40,7 +40,6 @@ export type Database = {
       }
       app_settings: {
         Row: {
-          android_fcm_token: string | null
           created_at: string
           id: string
           ios_apns_token: string | null
@@ -53,7 +52,6 @@ export type Database = {
           weekly_digest_enabled: boolean
         }
         Insert: {
-          android_fcm_token?: string | null
           created_at?: string
           id?: string
           ios_apns_token?: string | null
@@ -66,7 +64,6 @@ export type Database = {
           weekly_digest_enabled?: boolean
         }
         Update: {
-          android_fcm_token?: string | null
           created_at?: string
           id?: string
           ios_apns_token?: string | null
