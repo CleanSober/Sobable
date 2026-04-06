@@ -576,7 +576,9 @@ const Index = () => {
         </motion.header>
 
         <main
-          className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 md:px-6 py-3 pb-[7rem] relative overflow-x-hidden"
+          className={`container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 md:px-6 py-3 relative overflow-x-hidden ${
+            activeTab === "community" ? "pb-3" : "pb-[7rem]"
+          }`}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >

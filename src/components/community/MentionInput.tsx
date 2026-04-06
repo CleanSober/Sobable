@@ -8,6 +8,7 @@ interface MentionInputProps {
   value: string;
   onChange: (value: string) => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   maxLength?: number;
@@ -22,6 +23,7 @@ export const MentionInput = memo(({
   value,
   onChange,
   onKeyDown,
+  onFocus,
   placeholder,
   disabled,
   maxLength,
@@ -148,6 +150,7 @@ export const MentionInput = memo(({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDownInternal}
+        onFocus={onFocus}
         placeholder={placeholder}
         disabled={disabled}
         maxLength={maxLength}

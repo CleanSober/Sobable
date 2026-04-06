@@ -43,7 +43,9 @@ export const LiveChat = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
 
   // Get current user's display name for typing indicator
   const currentUserDisplayName = user ? getDisplayNameForUser(user.id) : "";
@@ -93,6 +95,25 @@ export const LiveChat = () => {
       }
     }
   }, [messages]);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const updateKeyboardInset = () => {
+      const inset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      setKeyboardInset(inset);
+    };
+
+    updateKeyboardInset();
+    viewport.addEventListener("resize", updateKeyboardInset);
+    viewport.addEventListener("scroll", updateKeyboardInset);
+
+    return () => {
+      viewport.removeEventListener("resize", updateKeyboardInset);
+      viewport.removeEventListener("scroll", updateKeyboardInset);
+    };
+  }, []);
 
   const fetchRoom = async () => {
     try {
@@ -215,6 +236,22 @@ export const LiveChat = () => {
     }
   };
 
+  const scrollToBottom = useCallback(() => {
+    if (!scrollRef.current) return;
+
+    const scrollElement = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+    if (scrollElement) {
+      scrollElement.scrollTop = scrollElement.scrollHeight;
+    }
+  }, []);
+
+  const handleComposerFocus = useCallback(() => {
+    window.setTimeout(() => {
+      scrollToBottom();
+      composerRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 250);
+  }, [scrollToBottom]);
+
   const isOwnMessage = (userId: string) => userId === user?.id;
   const remainingChars = MAX_MESSAGE_LENGTH - newMessage.length;
   const isNearLimit = remainingChars < 100;
@@ -252,7 +289,7 @@ export const LiveChat = () => {
   return (
     <Card
       className="gradient-card border-border/50 overflow-hidden flex flex-col"
-      style={{ height: `calc(100dvh - 11rem - ${BOTTOM_TABS_OFFSET} - env(safe-area-inset-bottom))` }}
+      style={{ height: `calc(100dvh - 11rem - ${BOTTOM_TABS_OFFSET} - env(safe-area-inset-bottom) - var(--keyboard-height))` }}
     >
       <CardHeader className="pb-1.5 pt-2 px-2.5 border-b border-border/30 space-y-1.5 shrink-0">
         <div className="flex items-center justify-between">
@@ -330,13 +367,17 @@ export const LiveChat = () => {
           )}
         </AnimatePresence>
 
-        <div className="p-2 border-t border-border/50 bg-card/50 shrink-0">
+        <div
+          ref={composerRef}
+          className="p-2 border-t border-border/50 bg-card/50 shrink-0"
+        >
           <div className="flex gap-1.5">
             <div className="relative flex-1">
               <MentionInput
                 value={newMessage}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                onFocus={handleComposerFocus}
                 placeholder="Type a message..."
                 disabled={sending}
                 maxLength={MAX_MESSAGE_LENGTH}
