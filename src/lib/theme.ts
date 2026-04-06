@@ -43,15 +43,18 @@ const syncNativeThemePreference = async (theme: ThemePreference, isDark: boolean
   if (!isNativeApp()) return;
 
   try {
+    const backgroundColor = isDark ? DARK_THEME_COLOR : LIGHT_THEME_COLOR;
+    const statusBarStyle = isDark ? Style.Light : Style.Dark;
+
     if (Capacitor.getPlatform() === "android") {
       await AppThemeSystemBars.setTheme({ theme });
+      await StatusBar.setStyle({ style: statusBarStyle });
+      await StatusBar.setBackgroundColor({ color: backgroundColor });
       return;
     }
 
-    await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
-    await StatusBar.setBackgroundColor({
-      color: isDark ? DARK_THEME_COLOR : LIGHT_THEME_COLOR,
-    });
+    await StatusBar.setStyle({ style: statusBarStyle });
+    await StatusBar.setBackgroundColor({ color: backgroundColor });
   } catch (error) {
     console.warn("Failed to sync native theme preference", error);
   }

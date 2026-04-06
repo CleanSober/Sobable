@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { PushNotifications, type PermissionStatus } from "@capacitor/push-notifications";
+import { FirebaseMessaging } from "@capacitor-firebase/messaging";
 
 type NativePushPermission = PermissionStatus["receive"];
 type FirebaseMessagingBridgePlugin = {
@@ -14,63 +15,84 @@ export const useNativePushNotifications = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [apnsToken, setApnsToken] = useState<string | null>(null);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
-  const isIosNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === "ios";
+  const isNativeSupported = Capacitor.isNativePlatform() && ["ios", "android"].includes(Capacitor.getPlatform());
+  const platform = isNativeSupported ? Capacitor.getPlatform() : null;
+  const isIosNative = platform === "ios";
+  const isAndroidNative = platform === "android";
 
   const syncFcmToken = useCallback(async () => {
-    if (!isIosNative) return;
+    if (!isNativeSupported) return;
 
     try {
-      const { token } = await FirebaseMessagingBridge.getToken();
+      const { token } = isIosNative
+        ? await FirebaseMessagingBridge.getToken()
+        : await FirebaseMessaging.getToken();
       setFcmToken(token ?? null);
     } catch (error) {
-      console.error("[ios-push] failed to fetch Firebase messaging token", { error });
+      console.error("[native-push] failed to fetch Firebase messaging token", { error, platform });
     }
-  }, [isIosNative]);
+  }, [isIosNative, isNativeSupported, platform]);
 
   const syncPermission = useCallback(async () => {
-    if (!isIosNative) return;
+    if (!isNativeSupported) return;
 
     const status = await PushNotifications.checkPermissions();
     setPermission(status.receive);
-  }, [isIosNative]);
+  }, [isNativeSupported]);
 
   useEffect(() => {
-    if (!isIosNative) return;
+    if (!isNativeSupported) return;
 
     void syncPermission();
     void syncFcmToken();
 
     const registrationListener = PushNotifications.addListener("registration", (token) => {
-      console.debug("[ios-push] APNs token received", {
+      console.debug("[native-push] registration token received", {
+        platform,
         hasToken: Boolean(token.value),
       });
-      setApnsToken(token.value);
-      void syncFcmToken();
+      if (isIosNative) {
+        setApnsToken(token.value);
+        void syncFcmToken();
+      } else {
+        setFcmToken(token.value);
+      }
     });
 
     const registrationErrorListener = PushNotifications.addListener("registrationError", (error) => {
-      console.error("[ios-push] registration failed", { error });
+      console.error("[native-push] registration failed", { error, platform });
     });
 
     const receivedListener = PushNotifications.addListener("pushNotificationReceived", (notification) => {
-      console.debug("[ios-push] notification received", { notification });
+      console.debug("[native-push] notification received", { platform, notification });
     });
 
     const actionListener = PushNotifications.addListener("pushNotificationActionPerformed", (notification) => {
-      console.debug("[ios-push] notification action performed", { notification });
+      console.debug("[native-push] notification action performed", { platform, notification });
     });
+
+    const firebaseTokenListener = isAndroidNative
+      ? FirebaseMessaging.addListener("tokenReceived", (event) => {
+          console.debug("[native-push] Firebase token received", {
+            platform,
+            hasToken: Boolean(event.token),
+          });
+          setFcmToken(event.token ?? null);
+        })
+      : null;
 
     return () => {
       void registrationListener.then((listener) => listener.remove());
       void registrationErrorListener.then((listener) => listener.remove());
       void receivedListener.then((listener) => listener.remove());
       void actionListener.then((listener) => listener.remove());
+      void firebaseTokenListener?.then((listener) => listener.remove());
     };
-  }, [isIosNative, syncFcmToken, syncPermission]);
+  }, [isAndroidNative, isIosNative, isNativeSupported, platform, syncFcmToken, syncPermission]);
 
   const enablePush = useCallback(async () => {
-    if (!isIosNative) {
-      return { granted: false, error: new Error("Native push notifications are only enabled for iOS in this app.") };
+    if (!isNativeSupported) {
+      return { granted: false, error: new Error("Native push notifications are not available on this platform.") };
     }
 
     setIsRegistering(true);
@@ -99,10 +121,10 @@ export const useNativePushNotifications = () => {
     } finally {
       setIsRegistering(false);
     }
-  }, [isIosNative, syncFcmToken]);
+  }, [isNativeSupported, syncFcmToken]);
 
   const disablePush = useCallback(async () => {
-    if (!isIosNative) return;
+    if (!isNativeSupported) return;
 
     try {
       await PushNotifications.unregister();
@@ -111,11 +133,13 @@ export const useNativePushNotifications = () => {
     } finally {
       await syncPermission();
     }
-  }, [isIosNative, syncPermission]);
+  }, [isNativeSupported, syncPermission]);
 
   return {
+    platform,
+    isAndroidNative,
     isIosNative,
-    isSupported: isIosNative,
+    isSupported: isNativeSupported,
     isRegistering,
     permission,
     apnsToken,

@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     // Get FCM tokens for the target user(s)
     let query = supabase
       .from("app_settings")
-      .select("user_id, ios_fcm_token, ios_apns_token")
+      .select("user_id, android_fcm_token, ios_fcm_token, ios_apns_token")
       .eq("notifications_enabled", true);
 
     if (user_id) {
@@ -132,7 +132,10 @@ Deno.serve(async (req) => {
     let failed = 0;
 
     for (const setting of settings) {
-      const token = setting.ios_fcm_token || setting.ios_apns_token;
+      const token =
+        setting.android_fcm_token ||
+        setting.ios_fcm_token ||
+        setting.ios_apns_token;
       if (!token) continue;
 
       // Build the FCM message
@@ -141,7 +144,9 @@ Deno.serve(async (req) => {
         data: data || {},
       };
 
-      if (setting.ios_fcm_token) {
+      if (setting.android_fcm_token) {
+        message.token = setting.android_fcm_token;
+      } else if (setting.ios_fcm_token) {
         // FCM registration token
         message.token = setting.ios_fcm_token;
       } else if (setting.ios_apns_token) {

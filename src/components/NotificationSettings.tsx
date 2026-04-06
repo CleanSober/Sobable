@@ -25,6 +25,8 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   const { user } = useAuth();
   const { permission, settings, updateSettings, isSupported } = useNotifications(sobrietyStartDate);
   const {
+    platform,
+    isAndroidNative,
     isIosNative,
     permission: nativePermission,
     isRegistering: nativePushPending,
@@ -46,13 +48,14 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
   const [nativeNotificationsEnabled, setNativeNotificationsEnabled] = useState(false);
   const [nativeSettingPending, setNativeSettingPending] = useState(false);
   const [storedApnsToken, setStoredApnsToken] = useState<string | null>(null);
-  const [storedFcmToken, setStoredFcmToken] = useState<string | null>(null);
+  const [storedIosFcmToken, setStoredIosFcmToken] = useState<string | null>(null);
+  const [storedAndroidFcmToken, setStoredAndroidFcmToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("app_settings")
-      .select("weekly_digest_enabled, notifications_enabled, ios_apns_token, ios_fcm_token")
+      .select("weekly_digest_enabled, notifications_enabled, ios_apns_token, ios_fcm_token, android_fcm_token")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -60,7 +63,8 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           setDigestEnabled(data.weekly_digest_enabled);
           setNativeNotificationsEnabled(data.notifications_enabled);
           if (data.ios_apns_token) setStoredApnsToken(data.ios_apns_token);
-          if (data.ios_fcm_token) setStoredFcmToken(data.ios_fcm_token);
+          if (data.ios_fcm_token) setStoredIosFcmToken(data.ios_fcm_token);
+          if (data.android_fcm_token) setStoredAndroidFcmToken(data.android_fcm_token);
         }
       });
   }, [user]);
@@ -96,7 +100,8 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     enabled: boolean,
     tokens?: {
       apnsToken?: string | null;
-      fcmToken?: string | null;
+      iosFcmToken?: string | null;
+      androidFcmToken?: string | null;
     },
   ) => {
     if (!user) return false;
@@ -108,7 +113,8 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           user_id: user.id,
           notifications_enabled: enabled,
           ios_apns_token: tokens?.apnsToken ?? null,
-          ios_fcm_token: tokens?.fcmToken ?? null,
+          ios_fcm_token: tokens?.iosFcmToken ?? null,
+          android_fcm_token: tokens?.androidFcmToken ?? null,
         },
         { onConflict: "user_id" },
       );
@@ -120,17 +126,19 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     }
 
     if (tokens?.apnsToken) setStoredApnsToken(tokens.apnsToken);
-    if (tokens?.fcmToken) setStoredFcmToken(tokens.fcmToken);
+    if (tokens?.iosFcmToken) setStoredIosFcmToken(tokens.iosFcmToken);
+    if (tokens?.androidFcmToken) setStoredAndroidFcmToken(tokens.androidFcmToken);
     if (!enabled) {
       setStoredApnsToken(null);
-      setStoredFcmToken(null);
+      setStoredIosFcmToken(null);
+      setStoredAndroidFcmToken(null);
     }
 
     return true;
   };
 
   useEffect(() => {
-    if (!user || !isIosNative || (!apnsToken && !fcmToken)) return;
+    if (!user || (!isIosNative && !isAndroidNative) || (!apnsToken && !fcmToken)) return;
 
     const saveTokens = async () => {
       const { error } = await supabase
@@ -139,23 +147,34 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
           {
             user_id: user.id,
             notifications_enabled: true,
-            ios_apns_token: apnsToken ?? storedApnsToken,
-            ios_fcm_token: fcmToken ?? storedFcmToken,
+            ios_apns_token: isIosNative ? (apnsToken ?? storedApnsToken) : null,
+            ios_fcm_token: isIosNative ? (fcmToken ?? storedIosFcmToken) : null,
+            android_fcm_token: isAndroidNative ? (fcmToken ?? storedAndroidFcmToken) : null,
           },
           { onConflict: "user_id" },
         );
 
       if (error) {
-        console.error("Failed to persist iOS push tokens:", error);
+        console.error("Failed to persist native push tokens:", error);
         return;
       }
 
       if (apnsToken) setStoredApnsToken(apnsToken);
-      if (fcmToken) setStoredFcmToken(fcmToken);
+      if (fcmToken && isIosNative) setStoredIosFcmToken(fcmToken);
+      if (fcmToken && isAndroidNative) setStoredAndroidFcmToken(fcmToken);
     };
 
     void saveTokens();
-  }, [apnsToken, fcmToken, isIosNative, storedApnsToken, storedFcmToken, user]);
+  }, [
+    apnsToken,
+    fcmToken,
+    isAndroidNative,
+    isIosNative,
+    storedAndroidFcmToken,
+    storedApnsToken,
+    storedIosFcmToken,
+    user,
+  ]);
 
   const handleNativeToggle = async (enabled: boolean) => {
     if (!user) return;
@@ -172,8 +191,9 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
         }
 
         const persisted = await persistNativeNotificationPreference(true, {
-          apnsToken: apnsToken ?? storedApnsToken,
-          fcmToken: fcmToken ?? storedFcmToken,
+          apnsToken: isIosNative ? (apnsToken ?? storedApnsToken) : null,
+          iosFcmToken: isIosNative ? (fcmToken ?? storedIosFcmToken) : null,
+          androidFcmToken: isAndroidNative ? (fcmToken ?? storedAndroidFcmToken) : null,
         });
         if (persisted) {
           setNativeNotificationsEnabled(true);
@@ -184,10 +204,12 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
 
       await disablePush();
       setStoredApnsToken(null);
-      setStoredFcmToken(null);
+      setStoredIosFcmToken(null);
+      setStoredAndroidFcmToken(null);
       const persisted = await persistNativeNotificationPreference(false, {
         apnsToken: null,
-        fcmToken: null,
+        iosFcmToken: null,
+        androidFcmToken: null,
       });
       if (persisted) {
         setNativeNotificationsEnabled(false);
@@ -198,7 +220,7 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
     }
   };
 
-  if (isIosNative) {
+  if (isIosNative || isAndroidNative) {
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -224,6 +246,9 @@ const NotificationSettings = ({ sobrietyStartDate }: NotificationSettingsProps) 
                     : nativePermission === "denied"
                       ? "Permission is disabled in system settings"
                       : "Allow notifications to receive reminders and updates"}
+                </p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  {platform} native push
                 </p>
               </div>
             </div>

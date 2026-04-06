@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
 import { applyThemePreference } from "@/lib/theme";
+import { Capacitor } from "@capacitor/core";
 // Lazy load non-critical routes to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -41,6 +42,8 @@ const AppContent = () => {
 const App = () => {
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const isNative = Capacitor.isNativePlatform();
+    const platform = isNative ? Capacitor.getPlatform() : null;
     const handleThemeChange = () => {
       applyThemePreference();
     };
@@ -51,12 +54,16 @@ const App = () => {
     };
 
     applyThemePreference();
+    document.body.classList.toggle("ios", platform === "ios");
+    document.body.classList.toggle("android", platform === "android");
     mediaQuery.addEventListener("change", handleThemeChange);
     window.addEventListener("storage", handleStorage);
 
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
       window.removeEventListener("storage", handleStorage);
+      document.body.classList.remove("ios");
+      document.body.classList.remove("android");
     };
   }, []);
 

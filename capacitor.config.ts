@@ -22,7 +22,7 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     StatusBar: {
-      overlaysWebView: true,
+      overlaysWebView: false,
     },
     Keyboard: {
       resize: 'body',

@@ -15,12 +15,39 @@ interface UseAdMobReturn {
 }
 
 const IS_TESTING = import.meta.env.DEV;
+const NO_FILL_ERROR_CODE = 3;
 let globalInitialized = false;
 let listenersRegistered = false;
+let globalBannerVisible = false;
+let globalBannerPosition: "top" | "bottom" | null = null;
+let initializationPromise: Promise<void> | null = null;
+let bannerOperationChain: Promise<void> = Promise.resolve();
 const BOTTOM_TABS_HEIGHT = 76;
+
+type AdMobErrorDetail = {
+  code?: number;
+  message?: string;
+  errorMessage?: string;
+};
 
 const setBannerHeight = (height: number) => {
   document.documentElement.style.setProperty("--admob-banner-height", `${Math.max(0, height)}px`);
+};
+
+const queueBannerOperation = (operation: () => Promise<void>) => {
+  const nextOperation = bannerOperationChain.then(operation);
+  bannerOperationChain = nextOperation.catch(() => undefined);
+  return nextOperation;
+};
+
+const getAdMobErrorMessage = (detail?: AdMobErrorDetail, fallback = "Ad failed to load") => {
+  const message = detail?.errorMessage || detail?.message || fallback;
+
+  if (detail?.code === NO_FILL_ERROR_CODE) {
+    return "Ad inventory unavailable right now. Retrying automatically.";
+  }
+
+  return message;
 };
 
 export const useAdMob = (): UseAdMobReturn => {
@@ -68,10 +95,15 @@ export const useAdMob = (): UseAdMobReturn => {
 
       try {
         if (!globalInitialized) {
-          await AdMob.initialize({
-            initializeForTesting: IS_TESTING,
-          });
-          globalInitialized = true;
+          if (!initializationPromise) {
+            initializationPromise = AdMob.initialize({
+              initializeForTesting: IS_TESTING,
+            }).then(() => {
+              globalInitialized = true;
+            });
+          }
+
+          await initializationPromise;
         }
 
         if (!listenersRegistered) {
@@ -79,6 +111,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
           await AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
             console.log("AdMob: Banner loaded");
+            globalBannerVisible = true;
             window.dispatchEvent(new CustomEvent("admob-banner-loaded"));
           });
 
@@ -88,7 +121,13 @@ export const useAdMob = (): UseAdMobReturn => {
           });
 
           await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => {
-            console.error("AdMob: Banner failed to load", error);
+            if (error.code === NO_FILL_ERROR_CODE) {
+              console.warn("AdMob: Banner has no fill yet", error);
+            } else {
+              console.error("AdMob: Banner failed to load", error);
+            }
+            globalBannerVisible = false;
+            globalBannerPosition = null;
             window.dispatchEvent(
               new CustomEvent("admob-banner-failed", { detail: error })
             );
@@ -127,12 +166,19 @@ export const useAdMob = (): UseAdMobReturn => {
           setIsInterstitialLoaded(false);
         };
 
-        const handleBannerFailed = (event: Event) => {
-          const detail = (event as CustomEvent<{ message?: string; errorMessage?: string }>).detail;
-          setBannerHeight(0);
-          setError(detail?.errorMessage || detail?.message || "Banner ad failed to load");
+        const handleBannerLoaded = () => {
+          setIsBannerVisible(true);
+          setError(null);
         };
 
+        const handleBannerFailed = (event: Event) => {
+          const detail = (event as CustomEvent<AdMobErrorDetail>).detail;
+          setBannerHeight(0);
+          setIsBannerVisible(false);
+          setError(getAdMobErrorMessage(detail, "Banner ad failed to load"));
+        };
+
+        window.addEventListener("admob-banner-loaded", handleBannerLoaded);
         window.addEventListener("admob-interstitial-loaded", handleInterstitialLoaded);
         window.addEventListener("admob-interstitial-dismissed", handleInterstitialDismissed);
         window.addEventListener("admob-interstitial-failed", handleInterstitialFailed);
@@ -141,6 +187,7 @@ export const useAdMob = (): UseAdMobReturn => {
         console.log("AdMob: Initialized successfully");
 
         return () => {
+          window.removeEventListener("admob-banner-loaded", handleBannerLoaded);
           window.removeEventListener("admob-interstitial-loaded", handleInterstitialLoaded);
           window.removeEventListener("admob-interstitial-dismissed", handleInterstitialDismissed);
           window.removeEventListener("admob-interstitial-failed", handleInterstitialFailed);
@@ -174,33 +221,47 @@ export const useAdMob = (): UseAdMobReturn => {
 
     const adUnitIds = admobConfig.getUnitIds();
     
-    try {
-      await AdMob.showBanner({
-        adId: adUnitIds.banner!,
-        adSize: BannerAdSize.ADAPTIVE_BANNER,
-        position: position === "top" ? BannerAdPosition.TOP_CENTER : BannerAdPosition.BOTTOM_CENTER,
-        margin: position === "top" ? 0 : BOTTOM_TABS_HEIGHT,
-        isTesting: IS_TESTING,
-      });
-      setIsBannerVisible(true);
-      setError(null);
-    } catch (err) {
-      console.error("AdMob: Failed to show banner", err);
-      setError(err instanceof Error ? err.message : "Failed to show banner");
-    }
+    await queueBannerOperation(async () => {
+      try {
+        if (globalBannerVisible && globalBannerPosition === position) {
+          setIsBannerVisible(true);
+          setError(null);
+          return;
+        }
+
+        await AdMob.showBanner({
+          adId: adUnitIds.banner!,
+          adSize: BannerAdSize.ADAPTIVE_BANNER,
+          position: position === "top" ? BannerAdPosition.TOP_CENTER : BannerAdPosition.BOTTOM_CENTER,
+          margin: position === "top" ? 0 : BOTTOM_TABS_HEIGHT,
+          isTesting: IS_TESTING,
+        });
+        globalBannerVisible = true;
+        globalBannerPosition = position;
+        setIsBannerVisible(true);
+        setError(null);
+      } catch (err) {
+        console.error("AdMob: Failed to show banner", err);
+        setError(err instanceof Error ? err.message : "Failed to show banner");
+      }
+    });
   }, []);
 
   // Hide banner ad
   const hideBanner = useCallback(async () => {
     if (!Capacitor.isNativePlatform()) return;
-    
-    try {
-      await AdMob.hideBanner();
-      setBannerHeight(0);
-      setIsBannerVisible(false);
-    } catch (err) {
-      console.error("AdMob: Failed to hide banner", err);
-    }
+
+    await queueBannerOperation(async () => {
+      try {
+        await AdMob.hideBanner();
+        globalBannerVisible = false;
+        globalBannerPosition = null;
+        setBannerHeight(0);
+        setIsBannerVisible(false);
+      } catch (err) {
+        console.error("AdMob: Failed to hide banner", err);
+      }
+    });
   }, []);
 
   // Load interstitial ad
