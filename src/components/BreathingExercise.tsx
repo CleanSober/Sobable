@@ -152,7 +152,9 @@ export const BreathingExercise = () => {
     }
     
     if (musicEnabled) {
-      await generateAndPlay(technique.id, 60);
+      generateAndPlay(technique.id, 60).catch(() => {
+        // Silently continue without music if generation fails
+      });
     }
   };
 
