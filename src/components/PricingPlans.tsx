@@ -30,7 +30,7 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const { startCheckout, checkoutLoading, isPremium, planName, openCustomerPortal, checkSubscription } = useSubscription();
+  const { startCheckout, checkoutLoading, isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
   const navigate = useNavigate();
   const {
@@ -86,11 +86,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         </div>
         <h2 className="text-xl font-bold text-foreground">You're in the Sober Club!</h2>
         <p className="text-sm text-muted-foreground">Full access with your {planName} plan.</p>
-        {isNative ? (
-          <p className="text-xs text-muted-foreground">Manage your subscription in your device's Settings app.</p>
-        ) : (
-          <Button onClick={openCustomerPortal} variant="outline" className="w-full">Manage Subscription</Button>
-        )}
+        <Button onClick={openManageSubscription} variant="outline" className="w-full">Manage Subscription</Button>
         {onClose && <Button onClick={onClose} variant="ghost" className="w-full">Close</Button>}
       </motion.div>
     );

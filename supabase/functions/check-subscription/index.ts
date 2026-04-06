@@ -12,6 +12,13 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
+const getBillingSource = (subscriptionId: string | null | undefined) => {
+  if (!subscriptionId) return null;
+  if (subscriptionId.startsWith("iap_ios_")) return "app_store";
+  if (subscriptionId.startsWith("iap_android_")) return "play_store";
+  return "stripe";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,10 +33,6 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
-
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
     logStep("Authorization header found");
@@ -38,15 +41,92 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    const { data: localSubscription, error: localSubscriptionError } = await supabaseClient
+      .from("subscriptions")
+      .select("plan_type, status, stripe_customer_id, stripe_subscription_id, current_period_end")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (localSubscriptionError) {
+      logStep("Failed to fetch local subscription", { error: localSubscriptionError.message });
+    }
+
+    const localBillingSource = getBillingSource(localSubscription?.stripe_subscription_id);
+    const hasLocalPremium =
+      !!localSubscription &&
+      ["premium", "pro"].includes(localSubscription.plan_type) &&
+      ["active", "trialing"].includes(localSubscription.status) &&
+      (!localSubscription.current_period_end ||
+        new Date(localSubscription.current_period_end).getTime() > Date.now());
+
+    if (hasLocalPremium && localBillingSource && localBillingSource !== "stripe") {
+      logStep("Returning active native subscription from local DB", {
+        billingSource: localBillingSource,
+        currentPeriodEnd: localSubscription?.current_period_end,
+      });
+      return new Response(JSON.stringify({
+        subscribed: true,
+        product_id: null,
+        price_id: null,
+        subscription_end: localSubscription?.current_period_end ?? null,
+        plan_name: "Sober Club",
+        billing_source: localBillingSource,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      logStep("No Stripe key available, returning local state", {
+        hasLocalPremium,
+        billingSource: localBillingSource,
+      });
+      return new Response(JSON.stringify({
+        subscribed: hasLocalPremium,
+        product_id: null,
+        price_id: null,
+        subscription_end: localSubscription?.current_period_end ?? null,
+        plan_name: hasLocalPremium ? "Sober Club" : null,
+        billing_source: hasLocalPremium ? localBillingSource : null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+    logStep("Stripe key verified");
+
+    if (!user?.email) {
+      logStep("User has no email, returning local subscription state");
+      return new Response(JSON.stringify({
+        subscribed: hasLocalPremium,
+        product_id: null,
+        price_id: null,
+        subscription_end: localSubscription?.current_period_end ?? null,
+        plan_name: hasLocalPremium ? "Sober Club" : null,
+        billing_source: hasLocalPremium ? localBillingSource : null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No customer found, user is not subscribed");
-      return new Response(JSON.stringify({ subscribed: false }), {
+      logStep("No Stripe customer found, returning local subscription state", { hasLocalPremium });
+      return new Response(JSON.stringify({
+        subscribed: hasLocalPremium,
+        product_id: null,
+        price_id: null,
+        subscription_end: localSubscription?.current_period_end ?? null,
+        plan_name: hasLocalPremium ? "Sober Club" : null,
+        billing_source: hasLocalPremium ? localBillingSource : null,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -69,6 +149,7 @@ serve(async (req) => {
     let productId: string | null = null;
     let priceId: string | null = null;
     let subscriptionEnd: string | null = null;
+    let planName: string | null = null;
 
     if (hasActiveSub && activeSub) {
       if (activeSub.current_period_end) {
@@ -76,6 +157,7 @@ serve(async (req) => {
       }
       productId = activeSub.items.data[0]?.price?.product as string || null;
       priceId = activeSub.items.data[0]?.price?.id || null;
+      planName = activeSub.items.data[0]?.price?.nickname || null;
       logStep("Active subscription found", { 
         subscriptionId: activeSub.id, 
         status: activeSub.status,
@@ -116,7 +198,9 @@ serve(async (req) => {
       subscribed: hasActiveSub,
       product_id: productId,
       price_id: priceId,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      plan_name: planName,
+      billing_source: hasActiveSub ? "stripe" : null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

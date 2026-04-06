@@ -28,7 +28,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useGamification, getLevelTitle } from "@/hooks/useGamification";
-import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationSettings from "@/components/NotificationSettings";
@@ -44,8 +43,13 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const { profile, updateProfile, refetch, loading: profileLoading } = useUserData();
   const { userXP } = useGamification();
-  const { isPremium } = usePremiumStatus();
-  const { openCustomerPortal, subscriptionEnd, planName } = useSubscription();
+  const {
+    isPremium,
+    openManageSubscription,
+    billingSource,
+    subscriptionEnd,
+    planName,
+  } = useSubscription();
   const isNative = Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
   const navigate = useNavigate();
@@ -95,6 +99,12 @@ const Profile = () => {
   const currentLevel = userXP?.current_level || 1;
   const totalXP = userXP?.total_xp || 0;
   const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
+  const manageSubscriptionDestination =
+    billingSource === "app_store"
+      ? "App Store"
+      : billingSource === "play_store"
+        ? "Google Play"
+        : "Billing Portal";
 
   const handleSignOut = async () => {
     await signOut();
@@ -595,29 +605,23 @@ const Profile = () => {
             </h3>
             {isPremium && (
               <>
-                {isNative ? (
+                {billingSource === "app_store" || billingSource === "play_store" ? (
                   <button
-                    onClick={() => {
-                      if (platform === "ios") {
-                        window.open("https://apps.apple.com/account/subscriptions", "_blank");
-                      } else {
-                        window.open("https://play.google.com/store/account/subscriptions", "_blank");
-                      }
-                    }}
+                    onClick={openManageSubscription}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
                   >
                     <Crown className="w-5 h-5 text-accent" />
                     <div className="flex-1">
                       <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
                       <span className="text-[10px] text-muted-foreground">
-                        {planName || "Sober Club"} · Manage in {platform === "ios" ? "App Store" : "Google Play"}
+                        {planName || "Sober Club"} · Manage in {manageSubscriptionDestination}
                       </span>
                     </div>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </button>
                 ) : (
                   <button
-                    onClick={openCustomerPortal}
+                    onClick={openManageSubscription}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
                   >
                     <Crown className="w-5 h-5 text-accent" />

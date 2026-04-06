@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Capacitor } from "@capacitor/core";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlanByPriceId, STRIPE_PLANS } from "@/lib/stripe";
@@ -11,6 +12,7 @@ interface SubscriptionState {
   priceId: string | null;
   subscriptionEnd: string | null;
   planName: string | null;
+  billingSource: "stripe" | "app_store" | "play_store" | null;
 }
 
 export const useSubscription = () => {
@@ -21,6 +23,7 @@ export const useSubscription = () => {
     priceId: null,
     subscriptionEnd: null,
     planName: null,
+    billingSource: null,
   });
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -33,6 +36,7 @@ export const useSubscription = () => {
         priceId: null,
         subscriptionEnd: null,
         planName: null,
+        billingSource: null,
       });
       setLoading(false);
       return;
@@ -54,7 +58,8 @@ export const useSubscription = () => {
         productId: data.product_id,
         priceId: data.price_id,
         subscriptionEnd: data.subscription_end,
-        planName: plan?.name || null,
+        planName: data.plan_name || plan?.name || (data.subscribed ? "Sober Club" : null),
+        billingSource: data.billing_source || null,
       });
     } catch (error) {
       console.error("Error checking subscription:", error);
@@ -135,6 +140,25 @@ export const useSubscription = () => {
     }
   };
 
+  const openNativeSubscriptionManagement = useCallback(() => {
+    const platform = Capacitor.getPlatform();
+    if (platform === "ios") {
+      window.open("https://apps.apple.com/account/subscriptions", "_blank");
+      return;
+    }
+    if (platform === "android") {
+      window.open("https://play.google.com/store/account/subscriptions", "_blank");
+    }
+  }, []);
+
+  const openManageSubscription = useCallback(async () => {
+    if (subscription.billingSource === "app_store" || subscription.billingSource === "play_store") {
+      openNativeSubscriptionManagement();
+      return;
+    }
+    await openCustomerPortal();
+  }, [openCustomerPortal, openNativeSubscriptionManagement, subscription.billingSource]);
+
   return {
     ...subscription,
     isPremium: subscription.subscribed,
@@ -143,5 +167,6 @@ export const useSubscription = () => {
     checkSubscription,
     startCheckout,
     openCustomerPortal,
+    openManageSubscription,
   };
 };
