@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   { icon: Bot, text: "AI Recovery Coach" },
@@ -28,7 +30,9 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const { startCheckout, checkoutLoading, isPremium, planName, openCustomerPortal } = useSubscription();
+  const { startCheckout, checkoutLoading, isPremium, planName, openCustomerPortal, checkSubscription } = useSubscription();
+  const { refreshPremiumStatus } = usePremiumStatus();
+  const navigate = useNavigate();
   const {
     isNative,
     purchasing,
@@ -45,7 +49,13 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         ? IAP_PRODUCTS.monthly.productId
         : IAP_PRODUCTS.yearly.productId;
       const success = await purchaseProduct(productId);
-      if (success && onClose) onClose();
+      if (success) {
+        // Refresh premium status so the app recognizes the purchase
+        await checkSubscription();
+        refreshPremiumStatus();
+        if (onClose) onClose();
+        navigate("/profile");
+      }
     } else {
       const { STRIPE_PLANS } = await import("@/lib/stripe");
       const plan = selectedPlan === "monthly"

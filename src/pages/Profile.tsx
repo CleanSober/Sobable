@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
-  User, Calendar as CalendarIcon, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle, Eye, Save
+  User, Calendar as CalendarIcon, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle, Eye, Save, ExternalLink
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,9 @@ const Profile = () => {
   const { profile, updateProfile, refetch, loading: profileLoading } = useUserData();
   const { userXP } = useGamification();
   const { isPremium } = usePremiumStatus();
-  const { openCustomerPortal } = useSubscription();
+  const { openCustomerPortal, subscriptionEnd, planName } = useSubscription();
+  const isNative = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -592,14 +595,41 @@ const Profile = () => {
             </h3>
             {isPremium && (
               <>
-                <button
-                  onClick={openCustomerPortal}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-                >
-                  <Crown className="w-5 h-5 text-accent" />
-                  <span className="text-sm font-medium text-foreground flex-1">Manage Subscription</span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+                {isNative ? (
+                  <button
+                    onClick={() => {
+                      if (platform === "ios") {
+                        window.open("https://apps.apple.com/account/subscriptions", "_blank");
+                      } else {
+                        window.open("https://play.google.com/store/account/subscriptions", "_blank");
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
+                  >
+                    <Crown className="w-5 h-5 text-accent" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {planName || "Sober Club"} · Manage in {platform === "ios" ? "App Store" : "Google Play"}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={openCustomerPortal}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
+                  >
+                    <Crown className="w-5 h-5 text-accent" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {planName || "Sober Club"}{subscriptionEnd ? ` · Renews ${new Date(subscriptionEnd).toLocaleDateString()}` : ""}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
                 <div className="h-px bg-border/30 mx-4" />
               </>
             )}
