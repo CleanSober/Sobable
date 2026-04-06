@@ -6,6 +6,20 @@ const trimEnv = (value: string | undefined): string | null => {
 };
 
 const enabled = import.meta.env.VITE_ADMOB_ENABLED === "true";
+const forceTestIds = import.meta.env.VITE_ADMOB_FORCE_TEST_IDS === "true";
+
+const TEST_IDS = {
+  ios: {
+    appId: "ca-app-pub-3940256099942544~1458002511",
+    bannerId: "ca-app-pub-3940256099942544/2435281174",
+    interstitialId: "ca-app-pub-3940256099942544/4411468910",
+  },
+  android: {
+    appId: "ca-app-pub-3940256099942544~3347511713",
+    bannerId: "ca-app-pub-3940256099942544/6300978111",
+    interstitialId: "ca-app-pub-3940256099942544/1033173712",
+  },
+} as const;
 
 const iosConfig = {
   appId: trimEnv(import.meta.env.VITE_ADMOB_IOS_APP_ID),
@@ -20,11 +34,16 @@ const androidConfig = {
 };
 
 const platformConfig = () => {
+  if (forceTestIds) {
+    return Capacitor.getPlatform() === "ios" ? TEST_IDS.ios : TEST_IDS.android;
+  }
+
   return Capacitor.getPlatform() === "ios" ? iosConfig : androidConfig;
 };
 
 export const admobConfig = {
   enabled,
+  forceTestIds,
   ios: iosConfig,
   android: androidConfig,
   isPlatformEnabled() {

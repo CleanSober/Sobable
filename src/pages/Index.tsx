@@ -579,6 +579,12 @@ const Index = () => {
           className={`container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 md:px-6 py-3 relative overflow-x-hidden ${
             activeTab === "community" ? "pb-3" : "pb-[7rem]"
           }`}
+          style={{
+            paddingBottom:
+              activeTab === "community"
+                ? "calc(0.75rem + var(--admob-banner-height, 0px))"
+                : "calc(7rem + var(--admob-banner-height, 0px))",
+          }}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >

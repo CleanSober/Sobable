@@ -289,7 +289,7 @@ export const LiveChat = () => {
   return (
     <Card
       className="gradient-card border-border/50 overflow-hidden flex flex-col"
-      style={{ height: `calc(100dvh - 11rem - ${BOTTOM_TABS_OFFSET} - env(safe-area-inset-bottom) - var(--keyboard-height))` }}
+      style={{ height: `calc(100dvh - 11rem - ${BOTTOM_TABS_OFFSET} - var(--admob-banner-height, 0px) - env(safe-area-inset-bottom) - var(--keyboard-height))` }}
     >
       <CardHeader className="pb-1.5 pt-2 px-2.5 border-b border-border/30 space-y-1.5 shrink-0">
         <div className="flex items-center justify-between">

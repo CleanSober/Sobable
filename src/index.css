@@ -207,6 +207,7 @@
   /* Keyboard height adjustment */
   :root {
     --keyboard-height: 0px;
+    --admob-banner-height: 0px;
   }
 
   .keyboard-aware {
