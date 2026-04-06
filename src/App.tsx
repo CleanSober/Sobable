@@ -18,6 +18,7 @@ const AppStoreGuide = lazy(() => import("./components/AppStoreGuide"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
+const Support = lazy(() => import("./pages/Support"));
 const Profile = lazy(() => import("./pages/Profile"));
 
 const queryClient = new QueryClient();
