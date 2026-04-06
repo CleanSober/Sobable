@@ -1,9 +1,10 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crown, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 
 interface MilestoneUpgradePromptProps {
   prompt: { title: string; message: string; emoji: string } | null;
@@ -80,9 +81,15 @@ export const MilestoneUpgradePrompt = memo(({
         )}
       </AnimatePresence>
 
-      <Dialog open={showPricing} onOpenChange={onPricingChange}>
+      <Dialog open={showPricing} onOpenChange={(open) => {
+        onPricingChange(open);
+        setPaywallVisibility(open);
+      }}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => onPricingChange(false)} featureContext="Sober Club" />
+          <PricingPlans onClose={() => {
+            onPricingChange(false);
+            setPaywallVisibility(false);
+          }} featureContext="Sober Club" />
         </DialogContent>
       </Dialog>
     </>

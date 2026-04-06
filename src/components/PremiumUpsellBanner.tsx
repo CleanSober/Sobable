@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 
 interface PremiumUpsellBannerProps {
   message?: string;
@@ -47,7 +48,10 @@ export const PremiumUpsellBanner = memo(({
             </div>
             <Button
               size="sm"
-              onClick={() => setShowPricing(true)}
+              onClick={() => {
+                setPaywallVisibility(true);
+                setShowPricing(true);
+              }}
               className="h-7 px-3 text-[11px] font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white flex-shrink-0"
             >
               <Sparkles className="w-3 h-3 mr-1" />
@@ -57,9 +61,15 @@ export const PremiumUpsellBanner = memo(({
         </motion.div>
       </AnimatePresence>
 
-      <Dialog open={showPricing} onOpenChange={setShowPricing}>
+      <Dialog open={showPricing} onOpenChange={(open) => {
+        setShowPricing(open);
+        setPaywallVisibility(open);
+      }}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => setShowPricing(false)} featureContext="Sober Club" />
+          <PricingPlans onClose={() => {
+            setShowPricing(false);
+            setPaywallVisibility(false);
+          }} featureContext="Sober Club" />
         </DialogContent>
       </Dialog>
     </>

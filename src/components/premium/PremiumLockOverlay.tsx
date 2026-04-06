@@ -4,6 +4,7 @@ import { Lock, Crown, Sparkles, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 
 interface PremiumLockOverlayProps {
   children: React.ReactNode;
@@ -25,7 +26,10 @@ export const PremiumLockOverlay = ({ children, featureName = "this feature", ico
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        onClick={() => setShowPricing(true)}
+        onClick={() => {
+          setPaywallVisibility(true);
+          setShowPricing(true);
+        }}
         className="w-full rounded-2xl border border-amber-500/15 bg-gradient-to-br from-amber-500/[0.06] to-orange-500/[0.04] p-4 text-left group hover:border-amber-500/30 transition-all duration-200 active:scale-[0.98]"
       >
         <div className="flex items-center gap-3">
@@ -50,9 +54,15 @@ export const PremiumLockOverlay = ({ children, featureName = "this feature", ico
         </div>
       </motion.button>
 
-      <Dialog open={showPricing} onOpenChange={setShowPricing}>
+      <Dialog open={showPricing} onOpenChange={(open) => {
+        setShowPricing(open);
+        setPaywallVisibility(open);
+      }}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => setShowPricing(false)} featureContext={featureName} />
+          <PricingPlans onClose={() => {
+            setShowPricing(false);
+            setPaywallVisibility(false);
+          }} featureContext={featureName} />
         </DialogContent>
       </Dialog>
     </>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 
 interface PremiumGateProps {
   onUpgrade?: () => void;
@@ -26,6 +27,7 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
     if (onUpgrade) {
       onUpgrade();
     } else {
+      setPaywallVisibility(true);
       setShowPricing(true);
     }
   };
@@ -95,9 +97,15 @@ export const PremiumGate = memo(({ onUpgrade }: PremiumGateProps) => {
         </Card>
       </motion.div>
 
-      <Dialog open={showPricing} onOpenChange={setShowPricing}>
+      <Dialog open={showPricing} onOpenChange={(open) => {
+        setShowPricing(open);
+        setPaywallVisibility(open);
+      }}>
         <DialogContent className="max-w-md p-0 overflow-hidden max-h-[85vh] overflow-y-auto">
-          <PricingPlans onClose={() => setShowPricing(false)} featureContext="Community" />
+          <PricingPlans onClose={() => {
+            setShowPricing(false);
+            setPaywallVisibility(false);
+          }} featureContext="Community" />
         </DialogContent>
       </Dialog>
     </>

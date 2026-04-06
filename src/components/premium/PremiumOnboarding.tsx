@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 
 interface PremiumOnboardingProps {
   open: boolean;
@@ -65,6 +66,7 @@ export const PremiumOnboarding = ({ open, onClose }: PremiumOnboardingProps) => 
 
   const handleNext = useCallback(() => {
     if (isLastSlide) {
+      setPaywallVisibility(true);
       setShowPricing(true);
     } else {
       setCurrentSlide(prev => prev + 1);
@@ -72,12 +74,14 @@ export const PremiumOnboarding = ({ open, onClose }: PremiumOnboardingProps) => 
   }, [isLastSlide]);
 
   const handleSkip = useCallback(() => {
+    setPaywallVisibility(false);
     onClose();
     setCurrentSlide(0);
     setShowPricing(false);
   }, [onClose]);
 
   const handlePricingClose = useCallback(() => {
+    setPaywallVisibility(false);
     setShowPricing(false);
     onClose();
     setCurrentSlide(0);

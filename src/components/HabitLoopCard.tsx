@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { PricingPlans } from "@/components/PricingPlans";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 import { toast } from "sonner";
 
 interface HabitLoopCardProps {
@@ -382,9 +383,15 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       </Dialog>
 
       {/* Premium Upsell Dialog */}
-      <Dialog open={showPricingDialog} onOpenChange={setShowPricingDialog}>
+      <Dialog open={showPricingDialog} onOpenChange={(open) => {
+        setShowPricingDialog(open);
+        setPaywallVisibility(open);
+      }}>
         <DialogContent className="max-w-lg p-0 overflow-hidden">
-          <PricingPlans onClose={() => setShowPricingDialog(false)} />
+          <PricingPlans onClose={() => {
+            setShowPricingDialog(false);
+            setPaywallVisibility(false);
+          }} />
         </DialogContent>
       </Dialog>
     </>

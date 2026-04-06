@@ -4,6 +4,7 @@ import { Crown, Sparkles, ChevronRight, Lock, Shield, Star } from "lucide-react"
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/PricingPlans";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { setPaywallVisibility } from "@/lib/paywallVisibility";
 
 interface PremiumFeature {
   name: string;
@@ -69,7 +70,10 @@ export const PremiumFeatureSection = ({
 
         {/* CTA */}
         <button
-          onClick={() => setShowPricing(true)}
+          onClick={() => {
+            setPaywallVisibility(true);
+            setShowPricing(true);
+          }}
           className="w-full px-4 py-3 border-t border-amber-500/10 flex items-center justify-between group hover:bg-amber-500/[0.04] transition-colors active:scale-[0.99]"
         >
           <div className="flex items-center gap-1.5">
@@ -80,9 +84,15 @@ export const PremiumFeatureSection = ({
         </button>
       </motion.div>
 
-      <Dialog open={showPricing} onOpenChange={setShowPricing}>
+      <Dialog open={showPricing} onOpenChange={(open) => {
+        setShowPricing(open);
+        setPaywallVisibility(open);
+      }}>
         <DialogContent className="max-w-lg p-0 overflow-hidden">
-          <PricingPlans onClose={() => setShowPricing(false)} />
+          <PricingPlans onClose={() => {
+            setShowPricing(false);
+            setPaywallVisibility(false);
+          }} />
         </DialogContent>
       </Dialog>
     </>

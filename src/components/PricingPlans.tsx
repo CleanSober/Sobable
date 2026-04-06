@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
@@ -30,7 +30,6 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const rootRef = useRef<HTMLDivElement | null>(null);
   const { startCheckout, checkoutLoading, isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
   const navigate = useNavigate();
@@ -79,42 +78,9 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
     ? getMonthlyEquivalentPrice(IAP_PRODUCTS.yearly.productId, 12, "$2.92")
     : "$2.92";
 
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) {
-      return;
-    }
-
-    const dialogContent = root.closest("[data-state]");
-
-    const publishVisibility = () => {
-      const visible = dialogContent instanceof HTMLElement
-        ? dialogContent.dataset.state !== "closed"
-        : true;
-
-      window.dispatchEvent(new CustomEvent("pricing-plans-visibility", { detail: { visible } }));
-    };
-
-    publishVisibility();
-
-    if (!(dialogContent instanceof HTMLElement)) {
-      return () => {
-        window.dispatchEvent(new CustomEvent("pricing-plans-visibility", { detail: { visible: false } }));
-      };
-    }
-
-    const observer = new MutationObserver(publishVisibility);
-    observer.observe(dialogContent, { attributes: true, attributeFilter: ["data-state"] });
-
-    return () => {
-      observer.disconnect();
-      window.dispatchEvent(new CustomEvent("pricing-plans-visibility", { detail: { visible: false } }));
-    };
-  }, []);
-
   if (isPremium) {
     return (
-      <motion.div ref={rootRef} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 text-center space-y-4">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 text-center space-y-4">
         <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
           <Crown className="w-8 h-8 text-white" />
         </div>
@@ -127,7 +93,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
   }
 
   return (
-    <div ref={rootRef} className="px-5 py-5 space-y-4">
+    <div className="px-5 py-5 space-y-4">
       {/* Header */}
       <div className="text-center space-y-2">
         <motion.div

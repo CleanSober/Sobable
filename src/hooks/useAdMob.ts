@@ -9,6 +9,7 @@ interface UseAdMobReturn {
   isInterstitialLoaded: boolean;
   showBanner: (position?: "top" | "bottom") => Promise<void>;
   hideBanner: () => Promise<void>;
+  refreshBanner: (position?: "top" | "bottom") => Promise<void>;
   loadInterstitial: () => Promise<void>;
   showInterstitial: () => Promise<boolean>;
   error: string | null;
@@ -223,10 +224,17 @@ export const useAdMob = (): UseAdMobReturn => {
     
     await queueBannerOperation(async () => {
       try {
-        if (globalBannerVisible && globalBannerPosition === position) {
-          setIsBannerVisible(true);
-          setError(null);
-          return;
+        if (globalBannerVisible) {
+          try {
+            await AdMob.hideBanner();
+          } catch {
+            // Ignore stale native banner state and continue with a fresh show.
+          }
+
+          globalBannerVisible = false;
+          globalBannerPosition = null;
+          setBannerHeight(0);
+          setIsBannerVisible(false);
         }
 
         await AdMob.showBanner({
@@ -260,6 +268,48 @@ export const useAdMob = (): UseAdMobReturn => {
         setIsBannerVisible(false);
       } catch (err) {
         console.error("AdMob: Failed to hide banner", err);
+      }
+    });
+  }, []);
+
+  const refreshBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const unitIdError = admobConfig.getUnitIdError("banner");
+    if (unitIdError) {
+      setError(unitIdError);
+      return;
+    }
+
+    const adUnitIds = admobConfig.getUnitIds();
+
+    await queueBannerOperation(async () => {
+      try {
+        try {
+          await AdMob.hideBanner();
+        } catch {
+          // Ignore stale native banner state and force a clean show below.
+        }
+
+        globalBannerVisible = false;
+        globalBannerPosition = null;
+        setBannerHeight(0);
+        setIsBannerVisible(false);
+
+        await AdMob.showBanner({
+          adId: adUnitIds.banner!,
+          adSize: BannerAdSize.ADAPTIVE_BANNER,
+          position: position === "top" ? BannerAdPosition.TOP_CENTER : BannerAdPosition.BOTTOM_CENTER,
+          margin: position === "top" ? 0 : BOTTOM_TABS_HEIGHT,
+          isTesting: IS_TESTING,
+        });
+        globalBannerVisible = true;
+        globalBannerPosition = position;
+        setIsBannerVisible(true);
+        setError(null);
+      } catch (err) {
+        console.error("AdMob: Failed to refresh banner", err);
+        setError(err instanceof Error ? err.message : "Failed to refresh banner");
       }
     });
   }, []);
@@ -323,6 +373,7 @@ export const useAdMob = (): UseAdMobReturn => {
     isInterstitialLoaded,
     showBanner,
     hideBanner,
+    refreshBanner,
     loadInterstitial,
     showInterstitial,
     error,
