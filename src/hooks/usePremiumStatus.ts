@@ -9,7 +9,7 @@ export const usePremiumStatus = () => {
   const [isPremium, setIsPremium] = useState<boolean | null>(BYPASS_PAYWALL ? true : null);
   const [loading, setLoading] = useState(!BYPASS_PAYWALL);
 
-  const checkPremiumStatus = useCallback(async () => {
+  const checkPremiumStatus = useCallback(async (forceRefresh = false) => {
     if (BYPASS_PAYWALL) {
       setIsPremium(true);
       setLoading(false);
