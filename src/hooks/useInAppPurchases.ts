@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
-import { NativePurchases } from "@capgo/native-purchases";
+import { NativePurchases, PURCHASE_TYPE } from "@capgo/native-purchases";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -28,6 +28,48 @@ interface IAPState {
   restoring: boolean;
 }
 
+const formatProductPrice = (product: any, fallback: string) => {
+  if (!product) return fallback;
+
+  const formattedPrice = product.priceString || product.localizedPrice;
+  if (typeof formattedPrice === "string" && formattedPrice.trim().length > 0) {
+    return formattedPrice;
+  }
+
+  const amount =
+    typeof product.price === "number" ? product.price : Number(product.price);
+  if (!Number.isFinite(amount)) return fallback;
+
+  if (typeof product.currencyCode === "string" && product.currencyCode) {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: product.currencyCode,
+        currencyDisplay: "narrowSymbol",
+      }).format(amount);
+    } catch {
+      // Fall back to symbol/code formatting below.
+    }
+  }
+
+  const currencyPrefix =
+    typeof product.currencySymbol === "string" && product.currencySymbol.trim()
+      ? product.currencySymbol
+      : typeof product.currencyCode === "string"
+        ? `${product.currencyCode} `
+        : "";
+
+  return `${currencyPrefix}${amount.toFixed(2)}`.trim();
+};
+
+const matchesProductId = (product: any, productId: string) =>
+  [
+    product?.productIdentifier,
+    product?.planIdentifier,
+    product?.identifier,
+    product?.id,
+  ].includes(productId);
+
 export const useInAppPurchases = () => {
   const { user, session } = useAuth();
   const [state, setState] = useState<IAPState>({
@@ -53,7 +95,7 @@ export const useInAppPurchases = () => {
         const productIds = Object.values(IAP_PRODUCTS).map((p) => p.productId);
         const result = await NativePurchases.getProducts({
           productIdentifiers: productIds,
-          productType: "subs" as any,
+          productType: PURCHASE_TYPE.SUBS,
         });
 
         setState((s) => ({
@@ -85,9 +127,29 @@ export const useInAppPurchases = () => {
       setState((s) => ({ ...s, purchasing: true }));
 
       try {
-        const result = await NativePurchases.purchaseProduct({
+        const product = state.products.find((p: any) => matchesProductId(p, productId));
+        const purchaseOptions: {
+          productIdentifier: string;
+          appAccountToken: string;
+          productType?: PURCHASE_TYPE;
+          planIdentifier?: string;
+        } = {
           productIdentifier: productId,
           appAccountToken: user.id,
+        };
+
+        if (Capacitor.getPlatform() === "android") {
+          purchaseOptions.productType = PURCHASE_TYPE.SUBS;
+
+          if (typeof product?.identifier === "string" && product.identifier.trim()) {
+            purchaseOptions.planIdentifier = product.identifier;
+          } else {
+            throw new Error(`Missing Android base plan for product ${productId}`);
+          }
+        }
+
+        const result = await NativePurchases.purchaseProduct({
+          ...purchaseOptions,
         });
 
         // Validate receipt on server
@@ -164,9 +226,28 @@ export const useInAppPurchases = () => {
   const getProductPrice = useCallback(
     (productId: string, fallback: string) => {
       const product = state.products.find(
-        (p: any) => (p.productIdentifier || p.identifier || p.id) === productId
+        (p: any) => matchesProductId(p, productId)
       );
-      return product ? (product.price || product.localizedPrice || fallback) : fallback;
+      return formatProductPrice(product, fallback);
+    },
+    [state.products]
+  );
+
+  const getMonthlyEquivalentPrice = useCallback(
+    (productId: string, months: number, fallback: string) => {
+      const product = state.products.find(
+        (p: any) => matchesProductId(p, productId)
+      );
+      if (!product) return fallback;
+
+      const amount =
+        typeof product.price === "number" ? product.price : Number(product.price);
+      if (!Number.isFinite(amount) || months <= 0) return fallback;
+
+      return formatProductPrice(
+        { ...product, price: amount / months, priceString: undefined, localizedPrice: undefined },
+        fallback
+      );
     },
     [state.products]
   );
@@ -180,5 +261,6 @@ export const useInAppPurchases = () => {
     purchaseProduct,
     restorePurchases,
     getProductPrice,
+    getMonthlyEquivalentPrice,
   };
 };

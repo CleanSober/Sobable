@@ -18,7 +18,7 @@ import { Capacitor } from "@capacitor/core";
 
 const APP_STORE_URL = "https://apps.apple.com/app/sober-club/id0000000000"; // Replace with real App Store ID
 const PLAY_STORE_URL =
-  "https://play.google.com/store/apps/details?id=app.lovable.94e498b2e0e1433a9333abea9f12a84c";
+  "https://play.google.com/store/apps/details?id=com.sober.club";
 
 const FEEDBACK_CATEGORIES = [
   { value: "bug", label: "Bug Report" },

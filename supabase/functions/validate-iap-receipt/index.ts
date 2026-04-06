@@ -6,6 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const APP_BUNDLE_ID = "com.sober.club";
+
 const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[VALIDATE-IAP] ${step}${detailsStr}`);
@@ -24,7 +26,7 @@ async function createAppleJWT(
     iat: now,
     exp: now + 3600,
     aud: "appstoreconnect-v1",
-    bid: "app.lovable.94e498b2e0e1433a9333abea9f12a84c",
+    bid: APP_BUNDLE_ID,
   };
 
   const enc = (obj: unknown) =>
@@ -368,7 +370,7 @@ Deno.serve(async (req) => {
       if (!purchaseToken) {
         throw new Error("purchaseToken is required for Android verification");
       }
-      const packageName = "app.lovable.94e498b2e0e1433a9333abea9f12a84c";
+      const packageName = APP_BUNDLE_ID;
       verificationResult = await verifyGoogleReceipt(packageName, productId, purchaseToken);
       logStep("Google verification complete", { valid: verificationResult.valid });
     } else {

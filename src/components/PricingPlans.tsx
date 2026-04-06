@@ -36,6 +36,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
     purchaseProduct,
     restorePurchases,
     getProductPrice,
+    getMonthlyEquivalentPrice,
   } = useInAppPurchases();
 
   const handleSubscribe = async () => {
@@ -63,6 +64,9 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
   const yearlyPrice = isNative
     ? getProductPrice(IAP_PRODUCTS.yearly.productId, "$34.99")
     : "$34.99";
+  const yearlyMonthlyEquivalent = isNative
+    ? getMonthlyEquivalentPrice(IAP_PRODUCTS.yearly.productId, 12, "$2.92")
+    : "$2.92";
 
   if (isPremium) {
     return (
@@ -136,7 +140,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           </Badge>
           <p className="text-xs font-semibold text-foreground">Yearly</p>
           <p className="text-2xl font-bold text-foreground mt-1">{yearlyPrice}</p>
-          <p className="text-[10px] text-muted-foreground">/year · $2.92/mo</p>
+          <p className="text-[10px] text-muted-foreground">/year · {yearlyMonthlyEquivalent}/mo</p>
           <p className="text-[10px] text-green-500 font-medium mt-0.5">Save over 60%</p>
         </button>
       </div>
