@@ -45,8 +45,9 @@ const Profile = () => {
   const { profile, updateProfile, refetch, loading: profileLoading } = useUserData();
   const { userXP } = useGamification();
   const { isPremium } = usePremiumStatus();
-  const { openCustomerPortal } = useSubscription();
-  const navigate = useNavigate();
+  const { openCustomerPortal, subscriptionEnd, planName } = useSubscription();
+  const isNative = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
