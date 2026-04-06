@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   { icon: Bot, text: "AI Recovery Coach" },
