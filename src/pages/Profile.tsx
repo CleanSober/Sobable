@@ -48,6 +48,7 @@ const Profile = () => {
   const { openCustomerPortal, subscriptionEnd, planName } = useSubscription();
   const isNative = Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
