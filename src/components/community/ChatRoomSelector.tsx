@@ -105,7 +105,7 @@ export const ChatRoomSelector = memo(({ currentRoom, onSelectRoom }: ChatRoomSel
     <div className="space-y-3">
       {/* Room tabs */}
       <ScrollArea className="w-full">
-        <div className="flex items-center gap-2 pb-2">
+        <div className="flex items-start gap-2 pb-2 overflow-x-auto">
           {rooms.map((room) => {
             const isActive = currentRoom?.id === room.id;
             return (

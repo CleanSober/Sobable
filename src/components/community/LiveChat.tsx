@@ -31,6 +31,7 @@ import { OnlineUsers } from "./OnlineUsers";
 import { CommunityNotifyButton } from "./CommunityNotifyButton";
 
 const MAX_MESSAGE_LENGTH = 2000;
+const BOTTOM_TABS_OFFSET = "8.5rem";
 
 export const LiveChat = () => {
   const { user } = useAuth();
@@ -249,7 +250,10 @@ export const LiveChat = () => {
   }
 
   return (
-    <Card className="gradient-card border-border/50 overflow-hidden flex flex-col" style={{ height: 'calc(100dvh - 11rem)' }}>
+    <Card
+      className="gradient-card border-border/50 overflow-hidden flex flex-col"
+      style={{ height: `calc(100dvh - 11rem - ${BOTTOM_TABS_OFFSET} - env(safe-area-inset-bottom))` }}
+    >
       <CardHeader className="pb-1.5 pt-2 px-2.5 border-b border-border/30 space-y-1.5 shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-1.5 text-sm">
@@ -326,7 +330,7 @@ export const LiveChat = () => {
           )}
         </AnimatePresence>
 
-        <div className="p-2 border-t border-border/50 bg-card/50 shrink-0 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+        <div className="p-2 border-t border-border/50 bg-card/50 shrink-0">
           <div className="flex gap-1.5">
             <div className="relative flex-1">
               <MentionInput
