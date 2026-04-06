@@ -460,11 +460,77 @@ const Profile = () => {
             </div>
           </motion.div>
 
+          {/* Subscription */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="card-enhanced p-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Crown className="w-4 h-4 text-accent" />
+              Subscription
+            </h3>
+            {isPremium ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{planName || "Sober Club"}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {billingSource === "app_store"
+                        ? "Billed via App Store"
+                        : billingSource === "play_store"
+                          ? "Billed via Google Play"
+                          : "Billed via Stripe"}
+                      {subscriptionEnd
+                        ? ` · Renews ${new Date(subscriptionEnd).toLocaleDateString()}`
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={openManageSubscription}
+                  variant="outline"
+                  className="w-full gap-2"
+                >
+                  {billingSource === "app_store" || billingSource === "play_store" ? (
+                    <ExternalLink className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                  Manage in {manageSubscriptionDestination}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50 border border-border/30">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Free Plan</p>
+                    <p className="text-[10px] text-muted-foreground">Upgrade to unlock all recovery tools</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate("/?upgrade=true")}
+                  className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                >
+                  <Crown className="w-4 h-4" />
+                  Upgrade to Sober Club
+                </Button>
+              </div>
+            )}
+          </motion.div>
+
           {/* Appearance */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.22 }}
             className="card-enhanced p-4"
           >
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -603,40 +669,6 @@ const Profile = () => {
               <Settings2 className="w-4 h-4 text-muted-foreground" />
               Account
             </h3>
-            {isPremium && (
-              <>
-                {billingSource === "app_store" || billingSource === "play_store" ? (
-                  <button
-                    onClick={openManageSubscription}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-                  >
-                    <Crown className="w-5 h-5 text-accent" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {planName || "Sober Club"} · Manage in {manageSubscriptionDestination}
-                      </span>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={openManageSubscription}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-                  >
-                    <Crown className="w-5 h-5 text-accent" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-foreground block">Manage Subscription</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {planName || "Sober Club"}{subscriptionEnd ? ` · Renews ${new Date(subscriptionEnd).toLocaleDateString()}` : ""}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                )}
-                <div className="h-px bg-border/30 mx-4" />
-              </>
-            )}
             <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
