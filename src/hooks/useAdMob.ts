@@ -9,6 +9,7 @@ interface UseAdMobReturn {
   isInterstitialLoaded: boolean;
   showBanner: (position?: "top" | "bottom") => Promise<void>;
   hideBanner: () => Promise<void>;
+  resumeBanner: (position?: "top" | "bottom") => Promise<void>;
   refreshBanner: (position?: "top" | "bottom") => Promise<void>;
   loadInterstitial: () => Promise<void>;
   showInterstitial: () => Promise<boolean>;
@@ -118,6 +119,14 @@ export const useAdMob = (): UseAdMobReturn => {
 
           await AdMob.addListener(BannerAdPluginEvents.SizeChanged, (info) => {
             console.log("AdMob: Banner size changed", info);
+            if ((info.height ?? 0) <= 0) {
+              globalBannerVisible = false;
+              globalBannerPosition = null;
+              window.dispatchEvent(new CustomEvent("admob-banner-hidden"));
+            } else {
+              globalBannerVisible = true;
+              window.dispatchEvent(new CustomEvent("admob-banner-loaded"));
+            }
             setBannerHeight(info.height ?? 0);
           });
 
@@ -172,6 +181,11 @@ export const useAdMob = (): UseAdMobReturn => {
           setError(null);
         };
 
+        const handleBannerHidden = () => {
+          setBannerHeight(0);
+          setIsBannerVisible(false);
+        };
+
         const handleBannerFailed = (event: Event) => {
           const detail = (event as CustomEvent<AdMobErrorDetail>).detail;
           setBannerHeight(0);
@@ -180,6 +194,7 @@ export const useAdMob = (): UseAdMobReturn => {
         };
 
         window.addEventListener("admob-banner-loaded", handleBannerLoaded);
+        window.addEventListener("admob-banner-hidden", handleBannerHidden);
         window.addEventListener("admob-interstitial-loaded", handleInterstitialLoaded);
         window.addEventListener("admob-interstitial-dismissed", handleInterstitialDismissed);
         window.addEventListener("admob-interstitial-failed", handleInterstitialFailed);
@@ -189,6 +204,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
         return () => {
           window.removeEventListener("admob-banner-loaded", handleBannerLoaded);
+          window.removeEventListener("admob-banner-hidden", handleBannerHidden);
           window.removeEventListener("admob-interstitial-loaded", handleInterstitialLoaded);
           window.removeEventListener("admob-interstitial-dismissed", handleInterstitialDismissed);
           window.removeEventListener("admob-interstitial-failed", handleInterstitialFailed);
@@ -268,6 +284,38 @@ export const useAdMob = (): UseAdMobReturn => {
         setIsBannerVisible(false);
       } catch (err) {
         console.error("AdMob: Failed to hide banner", err);
+      }
+    });
+  }, []);
+
+  const resumeBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    await queueBannerOperation(async () => {
+      try {
+        await AdMob.resumeBanner();
+        globalBannerVisible = true;
+        globalBannerPosition = position;
+        setIsBannerVisible(true);
+        setError(null);
+      } catch (err) {
+        console.warn("AdMob: Failed to resume banner, refreshing instead", err);
+        try {
+          await AdMob.showBanner({
+            adId: admobConfig.getUnitIds().banner!,
+            adSize: BannerAdSize.ADAPTIVE_BANNER,
+            position: position === "top" ? BannerAdPosition.TOP_CENTER : BannerAdPosition.BOTTOM_CENTER,
+            margin: position === "top" ? 0 : BOTTOM_TABS_HEIGHT,
+            isTesting: IS_TESTING,
+          });
+          globalBannerVisible = true;
+          globalBannerPosition = position;
+          setIsBannerVisible(true);
+          setError(null);
+        } catch (showErr) {
+          console.error("AdMob: Failed to resume or re-show banner", showErr);
+          setError(showErr instanceof Error ? showErr.message : "Failed to resume banner");
+        }
       }
     });
   }, []);
@@ -373,6 +421,7 @@ export const useAdMob = (): UseAdMobReturn => {
     isInterstitialLoaded,
     showBanner,
     hideBanner,
+    resumeBanner,
     refreshBanner,
     loadInterstitial,
     showInterstitial,

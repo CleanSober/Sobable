@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App as CapacitorApp } from "@capacitor/app";
 import { useAdMob } from "@/hooks/useAdMob";
@@ -20,17 +20,15 @@ export const AdBanner = ({
   refreshKey,
 }: AdBannerProps) => {
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
-  const { showBanner, hideBanner, refreshBanner, isInitialized, isBannerVisible, error } = useAdMob();
+  const { hideBanner, resumeBanner, refreshBanner, isInitialized, isBannerVisible, error } = useAdMob();
   const retryDelayRef = useRef(15000);
-  const [isPaywallVisible, setIsPaywallVisible] = useState(false);
-  const shouldShowBanner = enabled && !isPaywallVisible;
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || premiumLoading) {
       return;
     }
 
-    if (isPremium || !shouldShowBanner) {
+    if (isPremium || !enabled) {
       hideBanner();
       return;
     }
@@ -38,15 +36,15 @@ export const AdBanner = ({
     if (isInitialized) {
       refreshBanner(position);
     }
-  }, [isInitialized, isPremium, premiumLoading, position, refreshKey, shouldShowBanner, refreshBanner, hideBanner]);
+  }, [enabled, isInitialized, isPremium, premiumLoading, position, refreshKey, refreshBanner, hideBanner]);
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !shouldShowBanner || !isInitialized) {
+    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !enabled || !isInitialized) {
       return;
     }
 
     const restoreBanner = () => {
-      void refreshBanner(position);
+      void resumeBanner(position);
     };
 
     const handleVisibilityChange = () => {
@@ -75,10 +73,10 @@ export const AdBanner = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       cleanupNative?.();
     };
-  }, [isInitialized, isPremium, premiumLoading, position, shouldShowBanner, refreshBanner]);
+  }, [enabled, isInitialized, isPremium, premiumLoading, position, resumeBanner]);
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !shouldShowBanner || !isInitialized || isBannerVisible) {
+    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !enabled || !isInitialized || isBannerVisible) {
       return;
     }
 
@@ -113,7 +111,7 @@ export const AdBanner = ({
     isPremium,
     premiumLoading,
     position,
-    shouldShowBanner,
+    enabled,
     refreshBanner,
   ]);
 
@@ -122,25 +120,6 @@ export const AdBanner = ({
       retryDelayRef.current = 15000;
     }
   }, [isBannerVisible]);
-
-  useEffect(() => {
-    const handlePricingVisibility = (event: Event) => {
-      const detail = (event as CustomEvent<{ visible?: boolean }>).detail;
-      const isVisible = Boolean(detail?.visible);
-      setIsPaywallVisible(isVisible);
-
-      if (!isVisible && Capacitor.isNativePlatform() && !premiumLoading && !isPremium && enabled && isInitialized) {
-        retryDelayRef.current = 15000;
-        void refreshBanner(position);
-      }
-    };
-
-    window.addEventListener("pricing-plans-visibility", handlePricingVisibility);
-
-    return () => {
-      window.removeEventListener("pricing-plans-visibility", handlePricingVisibility);
-    };
-  }, [enabled, isInitialized, isPremium, position, premiumLoading, refreshBanner]);
 
   // This component doesn't render anything visible
   // The AdMob plugin renders the native banner ad

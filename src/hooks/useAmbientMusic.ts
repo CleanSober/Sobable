@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { Capacitor } from "@capacitor/core";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -7,10 +8,72 @@ export const useAmbientMusic = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
+  const audioUnlockedRef = useRef(false);
+
+  const createNativeAudioUrl = useCallback((base64Audio: string) => {
+    const binary = atob(base64Audio);
+    const bytes = new Uint8Array(binary.length);
+
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+
+    const blob = new Blob([bytes], { type: "audio/mpeg" });
+    return URL.createObjectURL(blob);
+  }, []);
+
+  const waitForAudioReady = useCallback((audio: HTMLAudioElement) => {
+    return new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        audio.removeEventListener("canplaythrough", handleReady);
+        audio.removeEventListener("loadeddata", handleReady);
+        audio.removeEventListener("error", handleError);
+      };
+
+      const handleReady = () => {
+        cleanup();
+        resolve();
+      };
+
+      const handleError = () => {
+        cleanup();
+        reject(audio.error ?? new Error("Audio failed to load"));
+      };
+
+      audio.addEventListener("canplaythrough", handleReady, { once: true });
+      audio.addEventListener("loadeddata", handleReady, { once: true });
+      audio.addEventListener("error", handleError, { once: true });
+      audio.load();
+    });
+  }, []);
+
+  const unlockNativeAudioPlayback = useCallback(async () => {
+    if (!Capacitor.isNativePlatform() || audioUnlockedRef.current) {
+      return;
+    }
+
+    const unlockAudio = new Audio(
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="
+    );
+
+    unlockAudio.volume = 0;
+    unlockAudio.playsInline = true;
+
+    try {
+      await unlockAudio.play();
+      unlockAudio.pause();
+      unlockAudio.currentTime = 0;
+      audioUnlockedRef.current = true;
+    } catch (error) {
+      console.warn("Ambient music unlock failed", error);
+    }
+  }, []);
 
   const generateAndPlay = useCallback(async (type: string, duration: number = 30) => {
     setIsLoading(true);
     try {
+      await unlockNativeAudioPlayback();
+
       // Get the user's session token for authentication
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
@@ -46,14 +109,22 @@ export const useAmbientMusic = () => {
         URL.revokeObjectURL(audioUrlRef.current);
       }
 
-      const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
+      const audioUrl = Capacitor.isNativePlatform()
+        ? createNativeAudioUrl(data.audioContent)
+        : `data:audio/mpeg;base64,${data.audioContent}`;
       audioUrlRef.current = audioUrl;
       
       const audio = new Audio(audioUrl);
       audio.loop = true;
       audio.volume = 0.4;
+      audio.preload = "auto";
+      audio.playsInline = true;
       audioRef.current = audio;
-      
+
+      if (Capacitor.isNativePlatform()) {
+        await waitForAudioReady(audio);
+      }
+
       await audio.play();
       setIsPlaying(true);
       
@@ -65,7 +136,7 @@ export const useAmbientMusic = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [createNativeAudioUrl, unlockNativeAudioPlayback, waitForAudioReady]);
 
   const play = useCallback(() => {
     if (audioRef.current) {
