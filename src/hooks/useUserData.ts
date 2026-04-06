@@ -231,7 +231,7 @@ export const usePreventionPlan = () => {
       .from("prevention_plans")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
     return data;
   };
 
