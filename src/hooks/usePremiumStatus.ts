@@ -60,5 +60,5 @@ export const usePremiumStatus = () => {
     checkPremiumStatus();
   }, [checkPremiumStatus]);
 
-  return { isPremium: isPremium ?? false, loading };
+  return { isPremium: isPremium ?? false, loading, refreshPremiumStatus: () => checkPremiumStatus(true) };
 };
