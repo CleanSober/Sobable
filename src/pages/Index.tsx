@@ -320,8 +320,19 @@ const Index = () => {
   };
 
   if (showOnboarding) {
-    const socialName = user?.user_metadata?.full_name || user?.user_metadata?.name || "";
-    return <Onboarding onComplete={handleOnboardingComplete} initialName={socialName} />;
+    // Extract name from social providers - check multiple metadata locations
+    const meta = user?.user_metadata;
+    const identityData = user?.identities?.[0]?.identity_data;
+    const socialName =
+      meta?.full_name ||
+      meta?.name ||
+      (meta?.first_name ? `${meta.first_name}${meta.last_name ? ` ${meta.last_name}` : ''}` : '') ||
+      identityData?.full_name ||
+      identityData?.name ||
+      (identityData?.first_name ? `${identityData.first_name}${identityData.last_name ? ` ${identityData.last_name}` : ''}` : '') ||
+      "";
+    const isSocialLogin = !!(user?.app_metadata?.provider && user.app_metadata.provider !== 'email');
+    return <Onboarding onComplete={handleOnboardingComplete} initialName={socialName} isSocialLogin={isSocialLogin} />;
   }
 
   const daysSober = effectiveProfile?.sobriety_start_date
