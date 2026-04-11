@@ -320,7 +320,8 @@ const Index = () => {
   };
 
   if (showOnboarding) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
+    const socialName = user?.user_metadata?.full_name || user?.user_metadata?.name || "";
+    return <Onboarding onComplete={handleOnboardingComplete} initialName={socialName} />;
   }
 
   const daysSober = effectiveProfile?.sobriety_start_date

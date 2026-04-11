@@ -57,7 +57,7 @@ export const useAmbientMusic = () => {
     );
 
     unlockAudio.volume = 0;
-    unlockAudio.playsInline = true;
+    (unlockAudio as any).playsInline = true;
 
     try {
       await unlockAudio.play();
@@ -118,7 +118,7 @@ export const useAmbientMusic = () => {
       audio.loop = true;
       audio.volume = 0.4;
       audio.preload = "auto";
-      audio.playsInline = true;
+      (audio as any).playsInline = true;
       audioRef.current = audio;
 
       if (Capacitor.isNativePlatform()) {
