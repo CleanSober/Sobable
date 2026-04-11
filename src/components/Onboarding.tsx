@@ -153,7 +153,7 @@ export const Onboarding = ({ onComplete, initialName }: OnboardingProps) => {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col p-5 relative overflow-hidden">
+    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col p-5 top-safe relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/8 blur-[100px] rounded-full" />
