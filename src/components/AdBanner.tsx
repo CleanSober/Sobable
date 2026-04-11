@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App as CapacitorApp } from "@capacitor/app";
 import { useAdMob } from "@/hooks/useAdMob";
@@ -22,13 +22,27 @@ export const AdBanner = ({
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const { hideBanner, resumeBanner, refreshBanner, isInitialized, isBannerVisible, error } = useAdMob();
   const retryDelayRef = useRef(15000);
+  const [isPaywallVisible, setIsPaywallVisible] = useState(false);
+
+  useEffect(() => {
+    const handlePricingVisibility = (event: Event) => {
+      const visible = (event as CustomEvent<{ visible?: boolean }>).detail?.visible;
+      setIsPaywallVisible(Boolean(visible));
+    };
+
+    window.addEventListener("pricing-plans-visibility", handlePricingVisibility);
+
+    return () => {
+      window.removeEventListener("pricing-plans-visibility", handlePricingVisibility);
+    };
+  }, []);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || premiumLoading) {
       return;
     }
 
-    if (isPremium || !enabled) {
+    if (isPremium || !enabled || isPaywallVisible) {
       hideBanner();
       return;
     }
@@ -36,10 +50,10 @@ export const AdBanner = ({
     if (isInitialized) {
       refreshBanner(position);
     }
-  }, [enabled, isInitialized, isPremium, premiumLoading, position, refreshKey, refreshBanner, hideBanner]);
+  }, [enabled, isInitialized, isPremium, premiumLoading, position, refreshKey, refreshBanner, hideBanner, isPaywallVisible]);
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !enabled || !isInitialized) {
+    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !enabled || !isInitialized || isPaywallVisible) {
       return;
     }
 
@@ -73,10 +87,10 @@ export const AdBanner = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       cleanupNative?.();
     };
-  }, [enabled, isInitialized, isPremium, premiumLoading, position, resumeBanner]);
+  }, [enabled, isInitialized, isPremium, premiumLoading, position, resumeBanner, isPaywallVisible]);
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !enabled || !isInitialized || isBannerVisible) {
+    if (!Capacitor.isNativePlatform() || premiumLoading || isPremium || !enabled || !isInitialized || isBannerVisible || isPaywallVisible) {
       return;
     }
 
@@ -113,6 +127,7 @@ export const AdBanner = ({
     position,
     enabled,
     refreshBanner,
+    isPaywallVisible,
   ]);
 
   useEffect(() => {
