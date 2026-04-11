@@ -331,7 +331,8 @@ const Index = () => {
       identityData?.name ||
       (identityData?.first_name ? `${identityData.first_name}${identityData.last_name ? ` ${identityData.last_name}` : ''}` : '') ||
       "";
-    return <Onboarding onComplete={handleOnboardingComplete} initialName={socialName} />;
+    const isSocialLogin = !!(user?.app_metadata?.provider && user.app_metadata.provider !== 'email');
+    return <Onboarding onComplete={handleOnboardingComplete} initialName={socialName} isSocialLogin={isSocialLogin} />;
   }
 
   const daysSober = effectiveProfile?.sobriety_start_date
