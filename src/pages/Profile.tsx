@@ -33,6 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import NotificationSettings from "@/components/NotificationSettings";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { FeedbackRating } from "@/components/FeedbackRating";
+import { AdBanner } from "@/components/AdBanner";
 import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { Switch } from "@/components/ui/switch";
 import { calculateDaysSober } from "@/lib/storage";
@@ -248,7 +249,12 @@ const Profile = () => {
         </div>
       </motion.header>
 
-      <main className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 md:px-6 py-4 pb-24 relative">
+      <main
+        className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 md:px-6 py-4 relative"
+        style={{
+          paddingBottom: "calc(7rem + var(--admob-banner-height, 0px) + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <div className="space-y-4">
           {/* Profile Hero */}
           <motion.div
@@ -746,6 +752,7 @@ const Profile = () => {
         setActiveTab(tab);
         navigate("/");
       }} />
+      <AdBanner position="bottom" />
     </div>
   );
 };

@@ -583,8 +583,8 @@ const Index = () => {
           style={{
             paddingBottom:
               activeTab === "community"
-                ? "calc(0.75rem + var(--admob-banner-height, 0px))"
-                : "calc(7rem + var(--admob-banner-height, 0px))",
+                ? "calc(0.75rem + var(--admob-banner-height, 0px) + env(safe-area-inset-bottom, 0px))"
+                : "calc(7rem + var(--admob-banner-height, 0px) + env(safe-area-inset-bottom, 0px))",
           }}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}

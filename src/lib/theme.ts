@@ -44,7 +44,9 @@ const syncNativeThemePreference = async (theme: ThemePreference, isDark: boolean
 
   try {
     const backgroundColor = isDark ? DARK_THEME_COLOR : LIGHT_THEME_COLOR;
-    const statusBarStyle = isDark ? Style.Light : Style.Dark;
+    // Capacitor's enum names are inverted relative to the icon color:
+    // Style.Dark = light text/icons for dark backgrounds.
+    const statusBarStyle = isDark ? Style.Dark : Style.Light;
 
     if (Capacitor.getPlatform() === "android") {
       await AppThemeSystemBars.setTheme({ theme });
