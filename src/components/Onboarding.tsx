@@ -24,6 +24,7 @@ interface OnboardingData {
 
 interface OnboardingProps {
   onComplete: (data: OnboardingData) => void;
+  initialName?: string;
 }
 
 const TOTAL_STEPS = 4;
