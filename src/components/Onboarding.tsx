@@ -30,10 +30,11 @@ interface OnboardingProps {
 const TOTAL_STEPS = 4;
 const CELEBRATION_DURATION = 3500;
 
-export const Onboarding = ({ onComplete }: OnboardingProps) => {
-  const [step, setStep] = useState(1);
+export const Onboarding = ({ onComplete, initialName }: OnboardingProps) => {
+  const hasInitialName = !!(initialName && initialName.trim());
+  const [step, setStep] = useState(hasInitialName ? 2 : 1);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName?.trim() || "");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
