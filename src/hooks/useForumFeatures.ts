@@ -93,7 +93,7 @@ export interface PollVote {
 export const usePolls = (postId?: string) => {
   const { user } = useAuth();
   const [poll, setPoll] = useState<Poll | null>(null);
-  const [votes, setVotes] = useState<PollVote[]>([]);
+  const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
   const [userVotes, setUserVotes] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -116,18 +116,27 @@ export const usePolls = (postId?: string) => {
           options: pollData.options as string[]
         });
 
-        const { data: votesData } = await supabase
-          .from("poll_votes")
-          .select("*")
-          .eq("poll_id", pollData.id);
+        // Fetch aggregate vote counts via RPC (no user_id exposure)
+        const { data: countsData } = await supabase
+          .rpc("get_poll_vote_counts", { p_poll_id: pollData.id });
 
-        if (votesData) {
-          setVotes(votesData);
-          setUserVotes(
-            votesData
-              .filter((v) => v.user_id === user?.id)
-              .map((v) => v.option_index)
-          );
+        const counts: Record<number, number> = {};
+        if (Array.isArray(countsData)) {
+          for (const item of countsData as { option_index: number; count: number }[]) {
+            counts[item.option_index] = item.count;
+          }
+        }
+        setVoteCounts(counts);
+
+        // Fetch only the current user's own votes
+        if (user) {
+          const { data: myVotes } = await supabase
+            .from("poll_votes")
+            .select("option_index")
+            .eq("poll_id", pollData.id)
+            .eq("user_id", user.id);
+
+          setUserVotes(myVotes?.map((v) => v.option_index) || []);
         }
       }
     } catch {
@@ -157,7 +166,6 @@ export const usePolls = (postId?: string) => {
         if (error) throw error;
       } else {
         if (!poll.allows_multiple && userVotes.length > 0) {
-          // Remove previous vote
           await supabase
             .from("poll_votes")
             .delete()
@@ -177,15 +185,12 @@ export const usePolls = (postId?: string) => {
     }
   };
 
-  const getVoteCount = (optionIndex: number) => 
-    votes.filter((v) => v.option_index === optionIndex).length;
+  const getVoteCount = (optionIndex: number) => voteCounts[optionIndex] || 0;
 
-  const getTotalVotes = () => {
-    const uniqueUsers = new Set(votes.map(v => v.user_id));
-    return uniqueUsers.size;
-  };
+  const getTotalVotes = () =>
+    Object.values(voteCounts).reduce((sum, c) => sum + c, 0);
 
-  return { poll, votes, userVotes, loading, vote, getVoteCount, getTotalVotes };
+  return { poll, votes: [], userVotes, loading, vote, getVoteCount, getTotalVotes };
 };
 
 // ========================================
