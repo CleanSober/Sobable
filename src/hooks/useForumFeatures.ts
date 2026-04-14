@@ -444,16 +444,18 @@ export const useKarma = (userId?: string) => {
       newBadges.push(mapBadge("karma_1000"));
     }
 
-    // Award new badges
+    // Award new badges via secure RPC
     for (const badge of newBadges) {
       try {
-        await supabase.from("user_badges").insert({
-          user_id: user.id,
-          ...badge,
+        await supabase.rpc("award_badge", {
+          p_user_id: user.id,
+          p_badge_type: badge.badge_type,
+          p_badge_name: badge.badge_name,
+          p_badge_description: badge.badge_description,
         });
         toast.success(`🏆 Badge earned: ${badge.badge_name}!`);
       } catch {
-        // Badge already exists
+        // Badge already exists or invalid type
       }
     }
 
