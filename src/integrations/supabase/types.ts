@@ -1541,6 +1541,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_poll_vote_counts: { Args: { p_poll_id: string }; Returns: Json }
       get_public_profile: {
         Args: { profile_user_id: string }
         Returns: {
