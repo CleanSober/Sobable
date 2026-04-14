@@ -90,15 +90,21 @@ export const useGamification = () => {
       if (data) {
         setUserXP(data);
       } else {
-        // Create initial XP record
-        const { data: newData, error: insertError } = await supabase
-          .from("user_xp")
-          .insert({ user_id: user.id })
-          .select()
-          .single();
+        // Create initial XP record via secure RPC
+        const { data: initResult, error: initError } = await supabase.rpc("initialize_user_xp", {
+          p_user_id: user.id,
+        });
 
-        if (insertError) throw insertError;
-        setUserXP(newData);
+        if (initError) throw initError;
+
+        // Re-fetch the record after initialization
+        const { data: newData } = await supabase
+          .from("user_xp")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (newData) setUserXP(newData);
       }
     } catch (error) {
       console.error("Error fetching user XP:", error);
