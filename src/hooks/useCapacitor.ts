@@ -16,6 +16,10 @@ export const useCapacitor = () => {
       if (!Capacitor.isNativePlatform()) return;
 
       try {
+        // Add platform class to body for platform-specific CSS
+        const platform = Capacitor.getPlatform();
+        document.body.classList.add(platform); // 'ios' or 'android'
+
         applyThemePreference();
 
         // Hide splash screen after app is ready
