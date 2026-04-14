@@ -1522,6 +1522,15 @@ export type Database = {
         Returns: Json
       }
       admin_count_users: { Args: never; Returns: number }
+      award_badge: {
+        Args: {
+          p_badge_description?: string
+          p_badge_name: string
+          p_badge_type: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       calculate_level_from_xp: { Args: { xp_amount: number }; Returns: number }
       can_use_streak_freeze: {
         Args: { check_streak_type?: string; check_user_id: string }
