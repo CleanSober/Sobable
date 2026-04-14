@@ -1512,6 +1512,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_user_karma: {
+        Args: { p_points: number; p_type: string; p_user_id: string }
+        Returns: Json
+      }
       add_user_xp: {
         Args: {
           p_description?: string
@@ -1584,11 +1588,17 @@ export type Database = {
         Args: { p_increment?: number; p_post_id: string }
         Returns: undefined
       }
+      initialize_user_karma: { Args: { p_user_id: string }; Returns: Json }
+      initialize_user_xp: { Args: { p_user_id: string }; Returns: Json }
       is_admin: { Args: { check_user_id: string }; Returns: boolean }
       is_premium_user: { Args: { check_user_id: string }; Returns: boolean }
       is_user_blocked: {
         Args: { blocked_uuid: string; blocker_uuid: string }
         Returns: boolean
+      }
+      toggle_leaderboard_visibility: {
+        Args: { p_user_id: string; p_visible: boolean }
+        Returns: Json
       }
       use_streak_freeze: {
         Args: {

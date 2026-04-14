@@ -355,16 +355,9 @@ export const useKarma = (userId?: string) => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from("user_karma")
-        .upsert({ 
-          user_id: user.id, 
-          total_karma: 0,
-          posts_count: 0,
-          replies_count: 0,
-          reactions_received: 0,
-          helpful_votes: 0
-        }, { onConflict: "user_id" });
+      const { error } = await supabase.rpc("initialize_user_karma", {
+        p_user_id: user.id,
+      });
       
       if (error) throw error;
       await fetchKarma();
@@ -377,19 +370,11 @@ export const useKarma = (userId?: string) => {
     if (!user || !karma) return;
 
     try {
-      const updates: Partial<UserKarma> = {
-        total_karma: karma.total_karma + points,
-      };
-
-      if (type === "post") updates.posts_count = karma.posts_count + 1;
-      if (type === "reply") updates.replies_count = karma.replies_count + 1;
-      if (type === "reaction") updates.reactions_received = karma.reactions_received + 1;
-      if (type === "helpful") updates.helpful_votes = karma.helpful_votes + 1;
-
-      const { error } = await supabase
-        .from("user_karma")
-        .update(updates)
-        .eq("user_id", user.id);
+      const { error } = await supabase.rpc("add_user_karma", {
+        p_user_id: user.id,
+        p_points: Math.min(points, 10),
+        p_type: type,
+      });
 
       if (error) throw error;
       await fetchKarma();
