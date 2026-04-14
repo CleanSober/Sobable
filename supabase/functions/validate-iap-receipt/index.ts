@@ -107,9 +107,8 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
   const privateKey = Deno.env.get("APPLE_APP_STORE_PRIVATE_KEY");
 
   if (!issuerId || !keyId || !privateKey) {
-    logStep("Apple: Missing App Store Server API credentials, decoding JWS locally");
-    // Fallback: decode JWS payload locally (StoreKit 2 transactions are JWS)
-    return decodeAppleJWSLocally(transactionId);
+    logStep("Apple: Missing App Store Server API credentials — rejecting");
+    return { valid: false };
   }
 
   try {
@@ -132,10 +131,8 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
       const errText = await res.text();
       logStep("Apple API error", { status: res.status, error: errText });
 
-      // If transaction not found via API, try decoding JWS locally as fallback
       if (res.status === 404) {
-        logStep("Apple: Transaction not found via API, trying local JWS decode");
-        return decodeAppleJWSLocally(transactionId);
+        logStep("Apple: Transaction not found via API — rejecting");
       }
 
       return { valid: false };
@@ -171,41 +168,12 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
     return { valid: true, originalTransactionId: transactionId };
   } catch (e) {
     logStep("Apple verification exception", { error: String(e) });
-    // Fallback to local JWS decode
-    return decodeAppleJWSLocally(transactionId);
-  }
-}
-
-function decodeAppleJWSLocally(transactionId: string): {
-  valid: boolean;
-  productId?: string;
-  expiresDate?: string;
-  originalTransactionId?: string;
-} {
-  try {
-    const parts = transactionId.split(".");
-    if (parts.length === 3) {
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
-      logStep("Apple JWS decoded locally", {
-        productId: payload.productId,
-        expiresDate: payload.expiresDate,
-      });
-      return {
-        valid: true,
-        productId: payload.productId,
-        expiresDate: payload.expiresDate
-          ? new Date(payload.expiresDate).toISOString()
-          : undefined,
-        originalTransactionId: payload.originalTransactionId || transactionId,
-      };
-    }
-    logStep("Apple: plain transactionId, trusting native SDK");
-    return { valid: true, originalTransactionId: transactionId };
-  } catch (e) {
-    logStep("Apple local decode error", { error: String(e) });
     return { valid: false };
   }
 }
+
+// decodeAppleJWSLocally removed — unsigned local decoding is a security risk.
+// All Apple receipt verification must go through the App Store Server API.
 
 // ---------- Google Play Developer API ----------
 async function verifyGoogleReceipt(
