@@ -1596,6 +1596,7 @@ export type Database = {
         Args: { blocked_uuid: string; blocker_uuid: string }
         Returns: boolean
       }
+      redeem_invite_code: { Args: { p_invite_code: string }; Returns: Json }
       toggle_leaderboard_visibility: {
         Args: { p_user_id: string; p_visible: boolean }
         Returns: Json
