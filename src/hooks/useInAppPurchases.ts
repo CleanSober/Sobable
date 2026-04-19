@@ -1,9 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { NativePurchases, PURCHASE_TYPE } from "@capgo/native-purchases";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+// Safety timeouts — Apple specifically rejected the app for an "unresponsive"
+// purchase flow. These guarantee the UI can never get stuck in a loading state.
+const PRODUCT_LOAD_TIMEOUT_MS = 8000;
+const PURCHASE_TIMEOUT_MS = 60_000;
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
+  Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
 
 // Native IAP product IDs - must match App Store Connect / Google Play Console
 export const IAP_PRODUCTS = {
@@ -90,14 +103,21 @@ export const useInAppPurchases = () => {
       return;
     }
 
+    let cancelled = false;
+
     const loadProducts = async () => {
       try {
         const productIds = Object.values(IAP_PRODUCTS).map((p) => p.productId);
-        const result = await NativePurchases.getProducts({
-          productIdentifiers: productIds,
-          productType: PURCHASE_TYPE.SUBS,
-        });
+        const result = await withTimeout(
+          NativePurchases.getProducts({
+            productIdentifiers: productIds,
+            productType: PURCHASE_TYPE.SUBS,
+          }),
+          PRODUCT_LOAD_TIMEOUT_MS,
+          "Product load"
+        );
 
+        if (cancelled) return;
         setState((s) => ({
           ...s,
           products: result.products || [],
@@ -105,11 +125,14 @@ export const useInAppPurchases = () => {
         }));
       } catch (error) {
         console.error("Failed to load IAP products:", error);
-        setState((s) => ({ ...s, loading: false }));
+        if (!cancelled) setState((s) => ({ ...s, loading: false }));
       }
     };
 
     loadProducts();
+    return () => {
+      cancelled = true;
+    };
   }, [hasNativePurchases]);
 
   const purchaseProduct = useCallback(
@@ -126,6 +149,12 @@ export const useInAppPurchases = () => {
 
       setState((s) => ({ ...s, purchasing: true }));
 
+      // Hard safety net — if anything below hangs, force the button back to active state.
+      const safetyTimer = setTimeout(() => {
+        setState((s) => (s.purchasing ? { ...s, purchasing: false } : s));
+        toast.error("Purchase is taking too long. Please try again.");
+      }, PURCHASE_TIMEOUT_MS);
+
       try {
         let product = state.products.find((p: any) => matchesProductId(p, productId));
 
@@ -134,16 +163,28 @@ export const useInAppPurchases = () => {
         if (!product) {
           try {
             const productIds = Object.values(IAP_PRODUCTS).map((p) => p.productId);
-            const refetch = await NativePurchases.getProducts({
-              productIdentifiers: productIds,
-              productType: PURCHASE_TYPE.SUBS,
-            });
+            const refetch = await withTimeout(
+              NativePurchases.getProducts({
+                productIdentifiers: productIds,
+                productType: PURCHASE_TYPE.SUBS,
+              }),
+              PRODUCT_LOAD_TIMEOUT_MS,
+              "Product refetch"
+            );
             const refreshed = refetch.products || [];
             setState((s) => ({ ...s, products: refreshed }));
             product = refreshed.find((p: any) => matchesProductId(p, productId));
           } catch (e) {
             console.warn("Product refetch failed before purchase:", e);
           }
+        }
+
+        // On iOS, if we still have no product after retry, the StoreKit call would
+        // hang silently — exactly what Apple flagged. Fail fast with a clear message.
+        if (!product && Capacitor.getPlatform() === "ios") {
+          throw new Error(
+            "Subscription products are unavailable right now. Please check your connection and try again."
+          );
         }
 
         const purchaseOptions: {
@@ -213,6 +254,7 @@ export const useInAppPurchases = () => {
         }
         return false;
       } finally {
+        clearTimeout(safetyTimer);
         setState((s) => ({ ...s, purchasing: false }));
       }
     },
