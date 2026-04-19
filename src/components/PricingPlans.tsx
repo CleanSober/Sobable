@@ -165,6 +165,39 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         </div>
       </div>
 
+      {/* Subscription terms summary - required by Apple */}
+      <div className="rounded-lg bg-secondary/30 p-2.5 text-[10px] text-muted-foreground leading-relaxed space-y-1">
+        <p>
+          <span className="font-semibold text-foreground">
+            {selectedPlan === "monthly" ? "Sober Club Monthly" : "Sober Club Yearly"}
+          </span>{" "}
+          — auto-renewing subscription
+        </p>
+        <p>
+          Length: {selectedPlan === "monthly" ? "1 month" : "12 months"} · Price:{" "}
+          {selectedPlan === "monthly" ? `${monthlyPrice}/month` : `${yearlyPrice}/year (${yearlyMonthlyEquivalent}/month)`}
+        </p>
+        <p className="flex items-center justify-center gap-2 pt-1">
+          <a
+            href="https://soberclub.app/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground transition-colors"
+          >
+            Terms of Use (EULA)
+          </a>
+          <span className="text-muted-foreground/40">·</span>
+          <a
+            href="https://soberclub.app/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground transition-colors"
+          >
+            Privacy Policy
+          </a>
+        </p>
+      </div>
+
       {/* CTA */}
       <Button
         onClick={handleSubscribe}

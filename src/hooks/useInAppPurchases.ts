@@ -127,7 +127,25 @@ export const useInAppPurchases = () => {
       setState((s) => ({ ...s, purchasing: true }));
 
       try {
-        const product = state.products.find((p: any) => matchesProductId(p, productId));
+        let product = state.products.find((p: any) => matchesProductId(p, productId));
+
+        // Re-fetch products if missing (e.g., first load failed) before purchasing.
+        // This prevents an unresponsive purchase button when products didn't load initially.
+        if (!product) {
+          try {
+            const productIds = Object.values(IAP_PRODUCTS).map((p) => p.productId);
+            const refetch = await NativePurchases.getProducts({
+              productIdentifiers: productIds,
+              productType: PURCHASE_TYPE.SUBS,
+            });
+            const refreshed = refetch.products || [];
+            setState((s) => ({ ...s, products: refreshed }));
+            product = refreshed.find((p: any) => matchesProductId(p, productId));
+          } catch (e) {
+            console.warn("Product refetch failed before purchase:", e);
+          }
+        }
+
         const purchaseOptions: {
           productIdentifier: string;
           appAccountToken: string;
@@ -187,18 +205,18 @@ export const useInAppPurchases = () => {
       } catch (error: any) {
         console.error("Purchase failed:", error);
         // Don't show error for user cancellation
+        const msg = String(error?.message || "");
         if (
-          !error?.message?.includes("cancel") &&
-          !error?.message?.includes("Cancel")
+          !msg.toLowerCase().includes("cancel")
         ) {
-          toast.error("Purchase failed. Please try again.");
+          toast.error(msg || "Purchase failed. Please try again.");
         }
         return false;
       } finally {
         setState((s) => ({ ...s, purchasing: false }));
       }
     },
-    [hasNativePurchases, user, session?.access_token]
+    [hasNativePurchases, user, session?.access_token, state.products]
   );
 
   const restorePurchases = useCallback(async () => {
