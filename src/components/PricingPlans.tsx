@@ -11,7 +11,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const features = [
   { icon: Bot, text: "AI Recovery Coach" },
@@ -165,8 +165,8 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         </div>
       </div>
 
-      {/* Subscription terms summary - required by Apple */}
-      <div className="rounded-lg bg-secondary/30 p-2.5 text-[10px] text-muted-foreground leading-relaxed space-y-1">
+      {/* Subscription terms summary — required by Apple Guideline 3.1.2 */}
+      <div className="rounded-lg border border-border/50 bg-secondary/40 p-3 text-[11px] text-muted-foreground leading-relaxed space-y-1.5">
         <p>
           <span className="font-semibold text-foreground">
             {selectedPlan === "monthly" ? "Sober Club Monthly" : "Sober Club Yearly"}
@@ -174,27 +174,30 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           — auto-renewing subscription
         </p>
         <p>
-          Length: {selectedPlan === "monthly" ? "1 month" : "12 months"} · Price:{" "}
-          {selectedPlan === "monthly" ? `${monthlyPrice}/month` : `${yearlyPrice}/year (${yearlyMonthlyEquivalent}/month)`}
+          <span className="text-foreground font-medium">Length:</span>{" "}
+          {selectedPlan === "monthly" ? "1 month" : "12 months"}
+          {" · "}
+          <span className="text-foreground font-medium">Price:</span>{" "}
+          {selectedPlan === "monthly"
+            ? `${monthlyPrice} per month`
+            : `${yearlyPrice} per year (${yearlyMonthlyEquivalent} per month)`}
         </p>
         <p className="flex items-center justify-center gap-2 pt-1">
-          <a
-            href="https://soberclub.app/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-foreground transition-colors"
+          <Link
+            to="/terms"
+            onClick={onClose}
+            className="underline font-medium text-foreground hover:text-primary transition-colors"
           >
             Terms of Use (EULA)
-          </a>
+          </Link>
           <span className="text-muted-foreground/40">·</span>
-          <a
-            href="https://soberclub.app/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-foreground transition-colors"
+          <Link
+            to="/privacy"
+            onClick={onClose}
+            className="underline font-medium text-foreground hover:text-primary transition-colors"
           >
             Privacy Policy
-          </a>
+          </Link>
         </p>
       </div>
 
@@ -242,23 +245,21 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           </button>
 
           <div className="flex items-center justify-center gap-3 pb-1">
-            <a
-              href="https://soberclub.app/terms"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/terms"
+              onClick={onClose}
               className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
             >
               Terms of Service
-            </a>
+            </Link>
             <span className="text-[10px] text-muted-foreground/40">·</span>
-            <a
-              href="https://soberclub.app/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/privacy"
+              onClick={onClose}
               className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
             >
               Privacy Policy
-            </a>
+            </Link>
           </div>
         </>
       )}
