@@ -360,17 +360,22 @@ async function verifyApplePurchase({
   transactionId,
   productId,
   receipt,
+  jwsRepresentation,
+  environment,
 }: {
   transactionId: string;
   productId: string;
   receipt?: string;
+  jwsRepresentation?: string;
+  environment?: string;
 }): Promise<{
   valid: boolean;
   productId?: string;
   expiresDate?: string;
   originalTransactionId?: string;
 }> {
-  const transactionResult = await verifyAppleReceipt(transactionId);
+  const candidateTransactionIds = collectAppleTransactionCandidates(transactionId, jwsRepresentation);
+  const transactionResult = await verifyAppleReceipt(candidateTransactionIds, environment);
   if (transactionResult.valid) {
     return transactionResult;
   }
@@ -413,10 +418,13 @@ async function verifyApplePurchase({
       continue;
     }
 
-    const parsed = chooseReceiptTransaction(result.data, productId, transactionId);
+    const parsed = candidateTransactionIds
+      .map((candidateTransactionId) => chooseReceiptTransaction(result.data, productId, candidateTransactionId))
+      .find((item) => item.valid) ?? { valid: false };
+
     if (parsed.valid) {
       logStep("Apple: Receipt fallback validated purchase", {
-        transactionId,
+        candidateTransactionIds,
         productId: parsed.productId,
         expiresDate: parsed.expiresDate,
       });
