@@ -84,7 +84,11 @@ export const CommunityGuidelines = ({ onAccepted }: CommunityGuidelinesProps) =>
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="max-w-md mx-auto px-1"
+      className="max-w-md mx-auto px-1 pb-[7rem]"
+      style={{
+        paddingBottom:
+          "calc(7rem + var(--admob-banner-height, 0px) + env(safe-area-inset-bottom, 0px))",
+      }}
     >
       {/* Header */}
       <div className="text-center mb-4">
