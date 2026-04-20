@@ -96,6 +96,24 @@ async function createAppleJWT(
 }
 
 // ---------- Apple App Store Server API v2 ----------
+async function callAppleApi(
+  host: string,
+  transactionId: string,
+  jwt: string
+): Promise<{ status: number; data?: any; errText?: string }> {
+  const url = `https://${host}/inApps/v2/transactions/${transactionId}`;
+  logStep("Apple: Calling App Store Server API", { url });
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    return { status: res.status, errText };
+  }
+  const data = await res.json();
+  return { status: res.status, data };
+}
+
 async function verifyAppleReceipt(transactionId: string): Promise<{
   valid: boolean;
   productId?: string;
@@ -114,35 +132,36 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
   try {
     const jwt = await createAppleJWT(issuerId, keyId, privateKey);
 
-    // Use the production App Store Server API endpoint
-    // For sandbox testing, use: https://api.storekit-sandbox.itunes.apple.com
-    const environment = Deno.env.get("APPLE_ENVIRONMENT") === "sandbox"
-      ? "api.storekit-sandbox.itunes.apple.com"
-      : "api.storekit.itunes.apple.com";
+    const PROD = "api.storekit.itunes.apple.com";
+    const SANDBOX = "api.storekit-sandbox.itunes.apple.com";
 
-    const url = `https://${environment}/inApps/v2/transactions/${transactionId}`;
-    logStep("Apple: Calling App Store Server API", { url });
+    // Apple's recommended flow: try production first, fall back to sandbox on 404.
+    // This handles TestFlight, sandbox testers, and Xcode-installed builds.
+    const forced = Deno.env.get("APPLE_ENVIRONMENT");
+    const order =
+      forced === "sandbox" ? [SANDBOX, PROD] :
+      forced === "production" ? [PROD] :
+      [PROD, SANDBOX];
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${jwt}` },
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      logStep("Apple API error", { status: res.status, error: errText });
-
-      if (res.status === 404) {
-        logStep("Apple: Transaction not found via API — rejecting");
+    let result: { status: number; data?: any; errText?: string } | null = null;
+    for (const host of order) {
+      result = await callAppleApi(host, transactionId, jwt);
+      if (result.status === 200) {
+        logStep("Apple: API hit", { host });
+        break;
       }
+      logStep("Apple API non-200", { host, status: result.status, error: result.errText });
+      // Only fall through to sandbox on 404 (transaction not in this environment)
+      if (result.status !== 404) break;
+    }
 
+    if (!result || result.status !== 200 || !result.data) {
+      logStep("Apple: Transaction not found in any environment — rejecting");
       return { valid: false };
     }
 
-    const data = await res.json();
-    logStep("Apple API response received");
-
     // The response contains a signedTransactionInfo (JWS)
-    const signedInfo = data.signedTransactionInfo;
+    const signedInfo = result.data.signedTransactionInfo;
     if (signedInfo) {
       const parts = signedInfo.split(".");
       if (parts.length === 3) {
