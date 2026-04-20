@@ -261,6 +261,101 @@ function safeDecodeAppleJWS(jwsRepresentation?: string): Record<string, unknown>
   }
 }
 
+function verifyAppleJwsFallback(
+  jwsRepresentation: string | undefined,
+  productId: string,
+  transactionId: string,
+  environment?: string,
+): VerificationResult {
+  const decodedPayload = safeDecodeAppleJWS(jwsRepresentation);
+  if (!decodedPayload) {
+    return {
+      valid: false,
+      reason: "invalid_ios_jws_representation",
+      details: { productId, transactionId },
+    };
+  }
+
+  const payloadProductId =
+    typeof decodedPayload.productId === "string" ? decodedPayload.productId : undefined;
+  const payloadBundleId =
+    typeof decodedPayload.bundleId === "string" ? decodedPayload.bundleId : undefined;
+  const payloadEnvironment =
+    typeof decodedPayload.environment === "string" ? decodedPayload.environment : undefined;
+  const payloadTransactionId =
+    typeof decodedPayload.transactionId === "string" ? decodedPayload.transactionId : undefined;
+  const payloadOriginalTransactionId =
+    typeof decodedPayload.originalTransactionId === "string"
+      ? decodedPayload.originalTransactionId
+      : undefined;
+  const expiresDate = normalizeAppleDate(decodedPayload.expiresDate);
+  const revocationDate = normalizeAppleDate(decodedPayload.revocationDate);
+
+  if (payloadProductId !== productId) {
+    return {
+      valid: false,
+      reason: "ios_jws_product_mismatch",
+      details: { productId, payloadProductId, transactionId },
+    };
+  }
+
+  if (payloadBundleId && payloadBundleId !== APP_BUNDLE_ID) {
+    return {
+      valid: false,
+      reason: "ios_jws_bundle_mismatch",
+      details: { payloadBundleId, expectedBundleId: APP_BUNDLE_ID, transactionId },
+    };
+  }
+
+  if (
+    payloadTransactionId &&
+    payloadTransactionId !== transactionId &&
+    payloadOriginalTransactionId !== transactionId
+  ) {
+    return {
+      valid: false,
+      reason: "ios_jws_transaction_mismatch",
+      details: { transactionId, payloadTransactionId, payloadOriginalTransactionId },
+    };
+  }
+
+  if (revocationDate) {
+    return {
+      valid: false,
+      reason: "ios_jws_revoked",
+      details: { transactionId, revocationDate },
+    };
+  }
+
+  if (expiresDate && new Date(expiresDate).getTime() <= Date.now()) {
+    return {
+      valid: false,
+      reason: "ios_jws_expired",
+      details: { transactionId, expiresDate },
+    };
+  }
+
+  logStep("Apple: Accepting StoreKit JWS fallback", {
+    transactionId,
+    payloadTransactionId,
+    payloadOriginalTransactionId,
+    payloadEnvironment: payloadEnvironment ?? null,
+    clientEnvironment: environment ?? null,
+    productId,
+  });
+
+  return {
+    valid: true,
+    productId,
+    expiresDate,
+    originalTransactionId: payloadOriginalTransactionId || payloadTransactionId || transactionId,
+    details: {
+      source: "storekit_jws_fallback",
+      payloadEnvironment: payloadEnvironment ?? null,
+    },
+  };
+}
+
 function collectAppleTransactionCandidates(
   transactionId: string,
   jwsRepresentation?: string,
@@ -419,12 +514,41 @@ async function verifyApplePurchase({
 
   if (!receipt) {
     logStep("Apple: No receipt provided for fallback validation", { transactionId, productId });
+    const normalizedEnvironment = environment?.toLowerCase();
+    if (
+      jwsRepresentation &&
+      (normalizedEnvironment === "sandbox" || normalizedEnvironment === "xcode")
+    ) {
+      const jwsResult = verifyAppleJwsFallback(
+        jwsRepresentation,
+        productId,
+        transactionId,
+        environment,
+      );
+      if (jwsResult.valid) {
+        return jwsResult;
+      }
+
+      return {
+        valid: false,
+        reason: jwsResult.reason ?? "invalid_ios_jws_representation",
+        details: {
+          ...jwsResult.details,
+          transactionId,
+          productId,
+          appStoreApiReason: transactionResult.reason ?? null,
+        },
+      };
+    }
+
     return {
       valid: false,
       reason: "missing_ios_receipt_for_fallback",
       details: {
         transactionId,
         productId,
+        hasJwsRepresentation: Boolean(jwsRepresentation),
+        clientEnvironment: environment ?? null,
         appStoreApiReason: transactionResult.reason ?? null,
       },
     };
