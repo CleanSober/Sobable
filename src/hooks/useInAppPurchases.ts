@@ -89,6 +89,12 @@ const pickIosReceiptPayload = async (
   appAccountToken: string,
 ) => {
   if (purchaseResult?.receipt || purchaseResult?.jwsRepresentation) {
+    console.log("[IAP] iOS receipt payload available directly from purchase result", {
+      transactionId: purchaseResult.transactionId,
+      hasReceipt: Boolean(purchaseResult.receipt),
+      hasJwsRepresentation: Boolean(purchaseResult.jwsRepresentation),
+      environment: purchaseResult.environment ?? null,
+    });
     return {
       receipt: purchaseResult.receipt,
       jwsRepresentation: purchaseResult.jwsRepresentation,
@@ -107,6 +113,19 @@ const pickIosReceiptPayload = async (
     for (const options of purchaseLookups) {
       try {
         const { purchases } = await NativePurchases.getPurchases(options);
+        console.log("[IAP] iOS getPurchases lookup", {
+          options,
+          purchaseCount: Array.isArray(purchases) ? purchases.length : 0,
+          purchases: Array.isArray(purchases)
+            ? purchases.map((purchase: any) => ({
+                transactionId: purchase?.transactionId ?? null,
+                productIdentifier: purchase?.productIdentifier ?? purchase?.id ?? null,
+                hasReceipt: Boolean(purchase?.receipt),
+                hasJwsRepresentation: Boolean(purchase?.jwsRepresentation),
+                environment: purchase?.environment ?? null,
+              }))
+            : [],
+        });
         const matchingPurchase = (purchases || []).find(
           (purchase: any) =>
             purchase?.transactionId === purchaseResult?.transactionId ||
@@ -135,6 +154,7 @@ const pickIosReceiptPayload = async (
 
   try {
     await NativePurchases.restorePurchases();
+    console.log("[IAP] restorePurchases completed while recovering iOS receipt");
   } catch (error) {
     console.warn("Failed to refresh App Store receipt via restorePurchases:", error);
   }
@@ -279,13 +299,30 @@ export const useInAppPurchases = () => {
           ...purchaseOptions,
         });
         const platform = Capacitor.getPlatform();
+        console.log("[IAP] purchaseProduct result", {
+          platform,
+          productId,
+          transactionId: result?.transactionId ?? null,
+          hasReceipt: Boolean((result as any)?.receipt),
+          hasJwsRepresentation: Boolean((result as any)?.jwsRepresentation),
+          environment: (result as any)?.environment ?? null,
+          rawResult: result,
+        });
         const iosReceiptPayload =
           platform === "ios"
             ? await pickIosReceiptPayload(result, productId, user.id)
             : null;
+        console.log("[IAP] payload prepared for validate-iap-receipt", {
+          platform,
+          productId,
+          transactionId: result.transactionId,
+          hasReceipt: Boolean(iosReceiptPayload?.receipt),
+          hasJwsRepresentation: Boolean(iosReceiptPayload?.jwsRepresentation),
+          environment: iosReceiptPayload?.environment ?? null,
+        });
 
         // Validate receipt on server
-        const { data, error } = await supabase.functions.invoke(
+        const { data, error, response } = await supabase.functions.invoke(
           "validate-iap-receipt",
           {
             body: {
@@ -309,7 +346,35 @@ export const useInAppPurchases = () => {
           }
         );
 
-        if (error) throw error;
+        if (error) {
+          let functionErrorBody: unknown = null;
+          if (response) {
+            try {
+              functionErrorBody = await response.clone().json();
+            } catch {
+              try {
+                functionErrorBody = await response.clone().text();
+              } catch {
+                functionErrorBody = null;
+              }
+            }
+          }
+
+          console.error("[IAP] validate-iap-receipt failed", {
+            error,
+            status: response?.status ?? null,
+            body: functionErrorBody,
+          });
+
+          const errorMessage =
+            typeof functionErrorBody === "object" &&
+            functionErrorBody !== null &&
+            "error" in functionErrorBody
+              ? String((functionErrorBody as { error?: unknown }).error ?? error.message)
+              : error.message;
+
+          throw new Error(errorMessage);
+        }
 
         if (data?.success) {
           toast.success("Welcome to Sober Club! 🎉");
