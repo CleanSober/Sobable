@@ -83,6 +83,52 @@ const matchesProductId = (product: any, productId: string) =>
     product?.id,
   ].includes(productId);
 
+const pickIosReceiptPayload = async (
+  purchaseResult: any,
+  productId: string,
+  appAccountToken: string,
+) => {
+  if (purchaseResult?.receipt || purchaseResult?.jwsRepresentation) {
+    return {
+      receipt: purchaseResult.receipt,
+      jwsRepresentation: purchaseResult.jwsRepresentation,
+      environment: purchaseResult.environment,
+    };
+  }
+
+  const purchaseLookups = [
+    { productType: PURCHASE_TYPE.SUBS, appAccountToken, onlyCurrentEntitlements: true },
+    { productType: PURCHASE_TYPE.SUBS, appAccountToken },
+  ];
+
+  for (const options of purchaseLookups) {
+    try {
+      const { purchases } = await NativePurchases.getPurchases(options);
+      const matchingPurchase = (purchases || []).find(
+        (purchase: any) =>
+          purchase?.transactionId === purchaseResult?.transactionId ||
+          matchesProductId(purchase, productId),
+      );
+
+      if (matchingPurchase?.receipt || matchingPurchase?.jwsRepresentation) {
+        return {
+          receipt: matchingPurchase.receipt,
+          jwsRepresentation: matchingPurchase.jwsRepresentation,
+          environment: matchingPurchase.environment,
+        };
+      }
+    } catch (error) {
+      console.warn("Failed to recover iOS receipt from getPurchases:", error);
+    }
+  }
+
+  return {
+    receipt: undefined,
+    jwsRepresentation: undefined,
+    environment: purchaseResult?.environment,
+  };
+};
+
 export const useInAppPurchases = () => {
   const { user, session } = useAuth();
   const [state, setState] = useState<IAPState>({
@@ -210,9 +256,13 @@ export const useInAppPurchases = () => {
         const result = await NativePurchases.purchaseProduct({
           ...purchaseOptions,
         });
+        const platform = Capacitor.getPlatform();
+        const iosReceiptPayload =
+          platform === "ios"
+            ? await pickIosReceiptPayload(result, productId, user.id)
+            : null;
 
         // Validate receipt on server
-        const platform = Capacitor.getPlatform();
         const { data, error } = await supabase.functions.invoke(
           "validate-iap-receipt",
           {
@@ -221,9 +271,9 @@ export const useInAppPurchases = () => {
               productId,
               transactionId: result.transactionId,
               ...(platform === "ios" && {
-                receipt: (result as any).receipt,
-                jwsRepresentation: (result as any).jwsRepresentation,
-                environment: (result as any).environment,
+                receipt: iosReceiptPayload?.receipt,
+                jwsRepresentation: iosReceiptPayload?.jwsRepresentation,
+                environment: iosReceiptPayload?.environment,
               }),
               // iOS provides receipt data automatically via StoreKit 2
               // Android provides purchaseToken
