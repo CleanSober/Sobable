@@ -607,7 +607,13 @@ Deno.serve(async (req) => {
     let verificationResult: { valid: boolean; expiresDate?: string };
 
     if (platform === "ios") {
-      const appleResult = await verifyApplePurchase({ transactionId, productId, receipt });
+      const appleResult = await verifyApplePurchase({
+        transactionId,
+        productId,
+        receipt,
+        jwsRepresentation,
+        environment,
+      });
       verificationResult = {
         valid: appleResult.valid,
         expiresDate: appleResult.expiresDate,
