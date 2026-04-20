@@ -96,30 +96,52 @@ const pickIosReceiptPayload = async (
     };
   }
 
-  const purchaseLookups = [
-    { productType: PURCHASE_TYPE.SUBS, appAccountToken, onlyCurrentEntitlements: true },
-    { productType: PURCHASE_TYPE.SUBS, appAccountToken },
-  ];
+  const findReceiptFromPurchases = async () => {
+    const purchaseLookups = [
+      { productType: PURCHASE_TYPE.SUBS, appAccountToken, onlyCurrentEntitlements: true },
+      { productType: PURCHASE_TYPE.SUBS, appAccountToken },
+      { productType: PURCHASE_TYPE.SUBS, onlyCurrentEntitlements: true },
+      { productType: PURCHASE_TYPE.SUBS },
+    ];
 
-  for (const options of purchaseLookups) {
-    try {
-      const { purchases } = await NativePurchases.getPurchases(options);
-      const matchingPurchase = (purchases || []).find(
-        (purchase: any) =>
-          purchase?.transactionId === purchaseResult?.transactionId ||
-          matchesProductId(purchase, productId),
-      );
+    for (const options of purchaseLookups) {
+      try {
+        const { purchases } = await NativePurchases.getPurchases(options);
+        const matchingPurchase = (purchases || []).find(
+          (purchase: any) =>
+            purchase?.transactionId === purchaseResult?.transactionId ||
+            matchesProductId(purchase, productId),
+        );
 
-      if (matchingPurchase?.receipt || matchingPurchase?.jwsRepresentation) {
-        return {
-          receipt: matchingPurchase.receipt,
-          jwsRepresentation: matchingPurchase.jwsRepresentation,
-          environment: matchingPurchase.environment,
-        };
+        if (matchingPurchase?.receipt || matchingPurchase?.jwsRepresentation) {
+          return {
+            receipt: matchingPurchase.receipt,
+            jwsRepresentation: matchingPurchase.jwsRepresentation,
+            environment: matchingPurchase.environment,
+          };
+        }
+      } catch (error) {
+        console.warn("Failed to recover iOS receipt from getPurchases:", error);
       }
-    } catch (error) {
-      console.warn("Failed to recover iOS receipt from getPurchases:", error);
     }
+
+    return null;
+  };
+
+  const purchaseMatch = await findReceiptFromPurchases();
+  if (purchaseMatch) {
+    return purchaseMatch;
+  }
+
+  try {
+    await NativePurchases.restorePurchases();
+  } catch (error) {
+    console.warn("Failed to refresh App Store receipt via restorePurchases:", error);
+  }
+
+  const syncedPurchaseMatch = await findReceiptFromPurchases();
+  if (syncedPurchaseMatch) {
+    return syncedPurchaseMatch;
   }
 
   return {
