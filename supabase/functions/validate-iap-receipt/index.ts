@@ -13,6 +13,15 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[VALIDATE-IAP] ${step}${detailsStr}`);
 };
 
+type VerificationResult = {
+  valid: boolean;
+  productId?: string;
+  expiresDate?: string;
+  originalTransactionId?: string;
+  reason?: string;
+  details?: Record<string, unknown>;
+};
+
 // ---------- Helper: Create ES256 JWT for Apple ----------
 async function createAppleJWT(
   issuerId: string,
@@ -176,14 +185,15 @@ function chooseReceiptTransaction(
   payload: any,
   productId: string,
   transactionId: string,
-): {
-  valid: boolean;
-  productId?: string;
-  expiresDate?: string;
-  originalTransactionId?: string;
-} {
+): VerificationResult {
   const allItems = extractReceiptItems(payload).filter((item) => item?.product_id === productId);
-  if (allItems.length === 0) return { valid: false };
+  if (allItems.length === 0) {
+    return {
+      valid: false,
+      reason: "receipt_product_not_found",
+      details: { productId, transactionId },
+    };
+  }
 
   const exactMatch = allItems.find((item) =>
     item?.transaction_id === transactionId || item?.original_transaction_id === transactionId
@@ -196,7 +206,13 @@ function chooseReceiptTransaction(
   });
 
   const selected = exactMatch || sortedItems[0];
-  if (!selected) return { valid: false };
+  if (!selected) {
+    return {
+      valid: false,
+      reason: "receipt_transaction_selection_failed",
+      details: { productId, transactionId },
+    };
+  }
 
   const expiresDate = normalizeAppleDate(
     selected.expires_date_ms ?? selected.expires_date ?? selected.expires_date_pst,
@@ -206,7 +222,16 @@ function chooseReceiptTransaction(
     selected.cancellation_date ||
     (expiresDate && new Date(expiresDate).getTime() <= Date.now())
   ) {
-    return { valid: false };
+    return {
+      valid: false,
+      reason: selected.cancellation_date ? "receipt_cancelled" : "receipt_expired",
+      details: {
+        productId,
+        transactionId,
+        expiresDate,
+        cancellationDate: selected.cancellation_date ?? null,
+      },
+    };
   }
 
   return {
@@ -217,19 +242,17 @@ function chooseReceiptTransaction(
   };
 }
 
-async function verifyAppleReceipt(transactionId: string): Promise<{
-  valid: boolean;
-  productId?: string;
-  expiresDate?: string;
-  originalTransactionId?: string;
-}> {
+async function verifyAppleReceipt(transactionId: string): Promise<VerificationResult> {
   const issuerId = Deno.env.get("APPLE_APP_STORE_ISSUER_ID");
   const keyId = Deno.env.get("APPLE_APP_STORE_KEY_ID");
   const privateKey = Deno.env.get("APPLE_APP_STORE_PRIVATE_KEY");
 
   if (!issuerId || !keyId || !privateKey) {
     logStep("Apple: Missing App Store Server API credentials — rejecting");
-    return { valid: false };
+    return {
+      valid: false,
+      reason: "missing_app_store_api_credentials",
+    };
   }
 
   try {
@@ -259,7 +282,11 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
       // 401 = bad JWT/credentials. 404 = not in this env, try the other one.
       if (result.status === 401) {
         logStep("Apple: 401 Unauthorized — JWT rejected. Check ISSUER_ID / KEY_ID / PRIVATE_KEY / bundle id.");
-        return { valid: false };
+        return {
+          valid: false,
+          reason: "app_store_api_unauthorized",
+          details: { host },
+        };
       }
       if (result.status !== 404) break;
     }
@@ -269,7 +296,11 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
         transactionIdSent: transactionId,
         hint: "If you tested with an Xcode StoreKit Configuration file, those transactions never reach Apple's servers. Use a real Sandbox tester via TestFlight or Settings > App Store > Sandbox Account.",
       });
-      return { valid: false };
+      return {
+        valid: false,
+        reason: "transaction_not_found_in_app_store_api",
+        details: { transactionId },
+      };
     }
     logStep("Apple: Verified via", { host: hitHost });
 
@@ -300,7 +331,11 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
     return { valid: true, originalTransactionId: transactionId };
   } catch (e) {
     logStep("Apple verification exception", { error: String(e) });
-    return { valid: false };
+    return {
+      valid: false,
+      reason: "app_store_api_exception",
+      details: { error: String(e) },
+    };
   }
 }
 
@@ -312,12 +347,7 @@ async function verifyApplePurchase({
   transactionId: string;
   productId: string;
   receipt?: string;
-}): Promise<{
-  valid: boolean;
-  productId?: string;
-  expiresDate?: string;
-  originalTransactionId?: string;
-}> {
+}): Promise<VerificationResult> {
   const transactionResult = await verifyAppleReceipt(transactionId);
   if (transactionResult.valid) {
     return transactionResult;
@@ -325,7 +355,15 @@ async function verifyApplePurchase({
 
   if (!receipt) {
     logStep("Apple: No receipt provided for fallback validation", { transactionId, productId });
-    return { valid: false };
+    return {
+      valid: false,
+      reason: "missing_ios_receipt_for_fallback",
+      details: {
+        transactionId,
+        productId,
+        appStoreApiReason: transactionResult.reason ?? null,
+      },
+    };
   }
 
   const sharedSecret = Deno.env.get("APPLE_SHARED_SECRET")
@@ -354,7 +392,11 @@ async function verifyApplePurchase({
       logStep("Apple verifyReceipt rejected shared secret", {
         hint: "Set APPLE_SHARED_SECRET or APPLE_APP_SPECIFIC_SHARED_SECRET to your App Store Connect app-specific shared secret.",
       });
-      return { valid: false };
+      return {
+        valid: false,
+        reason: "invalid_or_missing_apple_shared_secret",
+        details: { host, status },
+      };
     }
 
     if (status !== 0) {
@@ -372,7 +414,15 @@ async function verifyApplePurchase({
     }
   }
 
-  return { valid: false };
+  return {
+    valid: false,
+    reason: "verify_receipt_failed",
+    details: {
+      transactionId,
+      productId,
+      appStoreApiReason: transactionResult.reason ?? null,
+    },
+  };
 }
 
 // decodeAppleJWSLocally removed — unsigned local decoding is a security risk.
@@ -544,13 +594,15 @@ Deno.serve(async (req) => {
     }
 
     // ---------- Verify receipt with the appropriate store ----------
-    let verificationResult: { valid: boolean; expiresDate?: string };
+    let verificationResult: VerificationResult | { valid: boolean; expiresDate?: string; reason?: string; details?: Record<string, unknown> };
 
     if (platform === "ios") {
       const appleResult = await verifyApplePurchase({ transactionId, productId, receipt });
       verificationResult = {
         valid: appleResult.valid,
         expiresDate: appleResult.expiresDate,
+        reason: appleResult.reason,
+        details: appleResult.details,
       };
       logStep("Apple verification complete", { valid: verificationResult.valid });
     } else if (platform === "android") {
@@ -567,7 +619,12 @@ Deno.serve(async (req) => {
     if (!verificationResult.valid) {
       logStep("Receipt verification FAILED — rejecting purchase");
       return new Response(
-        JSON.stringify({ success: false, error: "Receipt verification failed. Purchase could not be validated." }),
+        JSON.stringify({
+          success: false,
+          error: "Receipt verification failed. Purchase could not be validated.",
+          reason: verificationResult.reason ?? "unknown_validation_failure",
+          details: verificationResult.details ?? null,
+        }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 403,
