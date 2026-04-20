@@ -3,7 +3,7 @@ import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
   Check, Crown, Loader2, Shield, Bot, Users, Brain,
-  Compass, Zap, Heart, BarChart3
+  Compass, Zap, Heart, BarChart3, ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { cn } from "@/lib/utils";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   { icon: Bot, text: "AI Recovery Coach" },
@@ -183,21 +183,27 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
             : `${yearlyPrice} per year (${yearlyMonthlyEquivalent} per month)`}
         </p>
         <p className="flex items-center justify-center gap-2 pt-1">
-          <Link
-            to="/terms"
+          <a
+            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={onClose}
-            className="underline font-medium text-foreground hover:text-primary transition-colors"
+            className="underline font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-0.5"
           >
             Terms of Use (EULA)
-          </Link>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
           <span className="text-muted-foreground/40">·</span>
-          <Link
-            to="/privacy"
+          <a
+            href="https://sobable.lovable.app/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={onClose}
-            className="underline font-medium text-foreground hover:text-primary transition-colors"
+            className="underline font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-0.5"
           >
             Privacy Policy
-          </Link>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
         </p>
       </div>
 
@@ -245,21 +251,27 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           </button>
 
           <div className="flex items-center justify-center gap-3 pb-1">
-            <Link
-              to="/terms"
+            <a
+              href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={onClose}
-              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
+              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors inline-flex items-center gap-0.5"
             >
               Terms of Service
-            </Link>
+              <ExternalLink className="w-2 h-2" />
+            </a>
             <span className="text-[10px] text-muted-foreground/40">·</span>
-            <Link
-              to="/privacy"
+            <a
+              href="https://sobable.lovable.app/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={onClose}
-              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
+              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors inline-flex items-center gap-0.5"
             >
               Privacy Policy
-            </Link>
+              <ExternalLink className="w-2 h-2" />
+            </a>
           </div>
         </>
       )}
