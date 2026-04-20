@@ -282,12 +282,7 @@ function collectAppleTransactionCandidates(
 async function verifyAppleReceipt(
   candidateTransactionIds: string[],
   preferredEnvironment?: string,
-): Promise<{
-  valid: boolean;
-  productId?: string;
-  expiresDate?: string;
-  originalTransactionId?: string;
-}> {
+): Promise<VerificationResult> {
   const issuerId = Deno.env.get("APPLE_APP_STORE_ISSUER_ID");
   const keyId = Deno.env.get("APPLE_APP_STORE_KEY_ID");
   const privateKey = Deno.env.get("APPLE_APP_STORE_PRIVATE_KEY");
@@ -337,7 +332,11 @@ async function verifyAppleReceipt(
         });
         if (result.status === 401) {
           logStep("Apple: 401 Unauthorized — JWT rejected. Check ISSUER_ID / KEY_ID / PRIVATE_KEY / bundle id.");
-          return { valid: false };
+          return {
+            valid: false,
+            reason: "app_store_api_unauthorized",
+            details: { host, candidateTransactionId },
+          };
         }
         if (result.status !== 404) break;
       }
@@ -352,7 +351,7 @@ async function verifyAppleReceipt(
       return {
         valid: false,
         reason: "transaction_not_found_in_app_store_api",
-        details: { transactionId },
+        details: { candidateTransactionIds, preferredEnvironment: preferredEnvironment ?? null },
       };
     }
     logStep("Apple: Verified via", { host: hitHost, matchedTransactionId });
@@ -409,6 +408,8 @@ async function verifyApplePurchase({
   productId?: string;
   expiresDate?: string;
   originalTransactionId?: string;
+  reason?: string;
+  details?: Record<string, unknown>;
 }> {
   const candidateTransactionIds = collectAppleTransactionCandidates(transactionId, jwsRepresentation);
   const transactionResult = await verifyAppleReceipt(candidateTransactionIds, environment);
@@ -468,7 +469,11 @@ async function verifyApplePurchase({
 
     const parsed = candidateTransactionIds
       .map((candidateTransactionId) => chooseReceiptTransaction(result.data, productId, candidateTransactionId))
-      .find((item) => item.valid) ?? { valid: false };
+      .find((item) => item.valid) ?? {
+        valid: false,
+        reason: "receipt_candidate_match_failed",
+        details: { candidateTransactionIds, productId },
+      };
 
     if (parsed.valid) {
       logStep("Apple: Receipt fallback validated purchase", {
