@@ -144,21 +144,31 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
       [PROD, SANDBOX];
 
     let result: { status: number; data?: any; errText?: string } | null = null;
+    let hitHost: string | null = null;
     for (const host of order) {
       result = await callAppleApi(host, transactionId, jwt);
       if (result.status === 200) {
+        hitHost = host;
         logStep("Apple: API hit", { host });
         break;
       }
       logStep("Apple API non-200", { host, status: result.status, error: result.errText });
-      // Only fall through to sandbox on 404 (transaction not in this environment)
+      // 401 = bad JWT/credentials. 404 = not in this env, try the other one.
+      if (result.status === 401) {
+        logStep("Apple: 401 Unauthorized — JWT rejected. Check ISSUER_ID / KEY_ID / PRIVATE_KEY / bundle id.");
+        return { valid: false };
+      }
       if (result.status !== 404) break;
     }
 
     if (!result || result.status !== 200 || !result.data) {
-      logStep("Apple: Transaction not found in any environment — rejecting");
+      logStep("Apple: Transaction not found in any environment", {
+        transactionIdSent: transactionId,
+        hint: "If you tested with an Xcode StoreKit Configuration file, those transactions never reach Apple's servers. Use a real Sandbox tester via TestFlight or Settings > App Store > Sandbox Account.",
+      });
       return { valid: false };
     }
+    logStep("Apple: Verified via", { host: hitHost });
 
     // The response contains a signedTransactionInfo (JWS)
     const signedInfo = result.data.signedTransactionInfo;
