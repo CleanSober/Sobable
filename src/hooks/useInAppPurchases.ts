@@ -220,6 +220,11 @@ export const useInAppPurchases = () => {
               platform,
               productId,
               transactionId: result.transactionId,
+              ...(platform === "ios" && {
+                receipt: (result as any).receipt,
+                jwsRepresentation: (result as any).jwsRepresentation,
+                environment: (result as any).environment,
+              }),
               // iOS provides receipt data automatically via StoreKit 2
               // Android provides purchaseToken
               ...(platform === "android" && {

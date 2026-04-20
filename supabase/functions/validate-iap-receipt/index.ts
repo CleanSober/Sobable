@@ -114,6 +114,109 @@ async function callAppleApi(
   return { status: res.status, data };
 }
 
+async function callAppleReceiptApi(
+  host: string,
+  receipt: string,
+  sharedSecret?: string,
+): Promise<{ status: number; data?: any; errText?: string }> {
+  const url = `https://${host}/verifyReceipt`;
+  logStep("Apple: Calling verifyReceipt", { host });
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      "receipt-data": receipt,
+      ...(sharedSecret ? { password: sharedSecret } : {}),
+      "exclude-old-transactions": true,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    return { status: res.status, errText };
+  }
+
+  const data = await res.json();
+  return { status: res.status, data };
+}
+
+function normalizeAppleDate(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return new Date(value).toISOString();
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric)) {
+      return new Date(numeric).toISOString();
+    }
+
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString();
+    }
+  }
+
+  return undefined;
+}
+
+function extractReceiptItems(payload: any): any[] {
+  const latestReceiptInfo = Array.isArray(payload?.latest_receipt_info)
+    ? payload.latest_receipt_info
+    : [];
+  const receiptInApp = Array.isArray(payload?.receipt?.in_app)
+    ? payload.receipt.in_app
+    : [];
+
+  return [...latestReceiptInfo, ...receiptInApp];
+}
+
+function chooseReceiptTransaction(
+  payload: any,
+  productId: string,
+  transactionId: string,
+): {
+  valid: boolean;
+  productId?: string;
+  expiresDate?: string;
+  originalTransactionId?: string;
+} {
+  const allItems = extractReceiptItems(payload).filter((item) => item?.product_id === productId);
+  if (allItems.length === 0) return { valid: false };
+
+  const exactMatch = allItems.find((item) =>
+    item?.transaction_id === transactionId || item?.original_transaction_id === transactionId
+  );
+
+  const sortedItems = [...allItems].sort((a, b) => {
+    const aExpiry = Number(a?.expires_date_ms || 0);
+    const bExpiry = Number(b?.expires_date_ms || 0);
+    return bExpiry - aExpiry;
+  });
+
+  const selected = exactMatch || sortedItems[0];
+  if (!selected) return { valid: false };
+
+  const expiresDate = normalizeAppleDate(
+    selected.expires_date_ms ?? selected.expires_date ?? selected.expires_date_pst,
+  );
+
+  if (
+    selected.cancellation_date ||
+    (expiresDate && new Date(expiresDate).getTime() <= Date.now())
+  ) {
+    return { valid: false };
+  }
+
+  return {
+    valid: true,
+    productId: selected.product_id,
+    expiresDate,
+    originalTransactionId: selected.original_transaction_id || selected.transaction_id || transactionId,
+  };
+}
+
 async function verifyAppleReceipt(transactionId: string): Promise<{
   valid: boolean;
   productId?: string;
@@ -199,6 +302,77 @@ async function verifyAppleReceipt(transactionId: string): Promise<{
     logStep("Apple verification exception", { error: String(e) });
     return { valid: false };
   }
+}
+
+async function verifyApplePurchase({
+  transactionId,
+  productId,
+  receipt,
+}: {
+  transactionId: string;
+  productId: string;
+  receipt?: string;
+}): Promise<{
+  valid: boolean;
+  productId?: string;
+  expiresDate?: string;
+  originalTransactionId?: string;
+}> {
+  const transactionResult = await verifyAppleReceipt(transactionId);
+  if (transactionResult.valid) {
+    return transactionResult;
+  }
+
+  if (!receipt) {
+    logStep("Apple: No receipt provided for fallback validation", { transactionId, productId });
+    return { valid: false };
+  }
+
+  const sharedSecret = Deno.env.get("APPLE_SHARED_SECRET")
+    ?? Deno.env.get("APPLE_APP_SPECIFIC_SHARED_SECRET")
+    ?? undefined;
+
+  const PROD = "buy.itunes.apple.com";
+  const SANDBOX = "sandbox.itunes.apple.com";
+  const order = [PROD, SANDBOX];
+
+  for (const host of order) {
+    const result = await callAppleReceiptApi(host, receipt, sharedSecret);
+    if (result.status !== 200 || !result.data) {
+      logStep("Apple verifyReceipt non-200", { host, status: result.status, error: result.errText });
+      continue;
+    }
+
+    const status = Number(result.data.status);
+    logStep("Apple verifyReceipt result", { host, status });
+
+    if (status === 21007 && host === PROD) {
+      continue;
+    }
+
+    if (status === 21004) {
+      logStep("Apple verifyReceipt rejected shared secret", {
+        hint: "Set APPLE_SHARED_SECRET or APPLE_APP_SPECIFIC_SHARED_SECRET to your App Store Connect app-specific shared secret.",
+      });
+      return { valid: false };
+    }
+
+    if (status !== 0) {
+      continue;
+    }
+
+    const parsed = chooseReceiptTransaction(result.data, productId, transactionId);
+    if (parsed.valid) {
+      logStep("Apple: Receipt fallback validated purchase", {
+        transactionId,
+        productId: parsed.productId,
+        expiresDate: parsed.expiresDate,
+      });
+      return parsed;
+    }
+  }
+
+  return { valid: false };
 }
 
 // decodeAppleJWSLocally removed — unsigned local decoding is a security risk.
@@ -345,9 +519,25 @@ Deno.serve(async (req) => {
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
 
-    const { platform, productId, transactionId, purchaseToken } =
+    const {
+      platform,
+      productId,
+      transactionId,
+      purchaseToken,
+      receipt,
+      jwsRepresentation,
+      environment,
+    } =
       await req.json();
-    logStep("Receipt data", { platform, productId, transactionId, hasPurchaseToken: !!purchaseToken });
+    logStep("Receipt data", {
+      platform,
+      productId,
+      transactionId,
+      hasPurchaseToken: !!purchaseToken,
+      hasReceipt: !!receipt,
+      hasJwsRepresentation: !!jwsRepresentation,
+      clientEnvironment: environment,
+    });
 
     if (!platform || !productId || !transactionId) {
       throw new Error("Missing required fields: platform, productId, transactionId");
@@ -357,7 +547,7 @@ Deno.serve(async (req) => {
     let verificationResult: { valid: boolean; expiresDate?: string };
 
     if (platform === "ios") {
-      const appleResult = await verifyAppleReceipt(transactionId);
+      const appleResult = await verifyApplePurchase({ transactionId, productId, receipt });
       verificationResult = {
         valid: appleResult.valid,
         expiresDate: appleResult.expiresDate,
