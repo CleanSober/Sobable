@@ -242,7 +242,52 @@ function chooseReceiptTransaction(
   };
 }
 
-async function verifyAppleReceipt(transactionId: string): Promise<VerificationResult> {
+function decodeBase64Url(value: string): string {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
+  return atob(padded);
+}
+
+function safeDecodeAppleJWS(jwsRepresentation?: string): Record<string, unknown> | null {
+  if (!jwsRepresentation) return null;
+
+  try {
+    const parts = jwsRepresentation.split(".");
+    if (parts.length !== 3) return null;
+    return JSON.parse(decodeBase64Url(parts[1]));
+  } catch (error) {
+    logStep("Apple: Failed to decode client JWS payload", { error: String(error) });
+    return null;
+  }
+}
+
+function collectAppleTransactionCandidates(
+  transactionId: string,
+  jwsRepresentation?: string,
+): string[] {
+  const decodedPayload = safeDecodeAppleJWS(jwsRepresentation);
+  const candidates = [
+    transactionId,
+    decodedPayload?.transactionId,
+    decodedPayload?.originalTransactionId,
+    decodedPayload?.transactionIdentifier,
+    decodedPayload?.originalTransactionIdentifier,
+  ].filter((value): value is string => typeof value === "string" && value.trim().length > 0);
+
+  const uniqueCandidates = [...new Set(candidates)];
+  logStep("Apple: Candidate transaction IDs", { uniqueCandidates });
+  return uniqueCandidates;
+}
+
+async function verifyAppleReceipt(
+  candidateTransactionIds: string[],
+  preferredEnvironment?: string,
+): Promise<{
+  valid: boolean;
+  productId?: string;
+  expiresDate?: string;
+  originalTransactionId?: string;
+}> {
   const issuerId = Deno.env.get("APPLE_APP_STORE_ISSUER_ID");
   const keyId = Deno.env.get("APPLE_APP_STORE_KEY_ID");
   const privateKey = Deno.env.get("APPLE_APP_STORE_PRIVATE_KEY");
@@ -263,37 +308,45 @@ async function verifyAppleReceipt(transactionId: string): Promise<VerificationRe
 
     // Apple's recommended flow: try production first, fall back to sandbox on 404.
     // This handles TestFlight, sandbox testers, and Xcode-installed builds.
-    const forced = Deno.env.get("APPLE_ENVIRONMENT");
+    const forced = Deno.env.get("APPLE_ENVIRONMENT")?.toLowerCase();
+    const preferred = preferredEnvironment?.toLowerCase();
     const order =
       forced === "sandbox" ? [SANDBOX, PROD] :
       forced === "production" ? [PROD] :
+      preferred === "sandbox" ? [SANDBOX, PROD] :
+      preferred === "production" ? [PROD, SANDBOX] :
       [PROD, SANDBOX];
 
     let result: { status: number; data?: any; errText?: string } | null = null;
     let hitHost: string | null = null;
-    for (const host of order) {
-      result = await callAppleApi(host, transactionId, jwt);
-      if (result.status === 200) {
-        hitHost = host;
-        logStep("Apple: API hit", { host });
-        break;
+    let matchedTransactionId: string | null = null;
+    for (const candidateTransactionId of candidateTransactionIds) {
+      for (const host of order) {
+        result = await callAppleApi(host, candidateTransactionId, jwt);
+        if (result.status === 200) {
+          hitHost = host;
+          matchedTransactionId = candidateTransactionId;
+          logStep("Apple: API hit", { host, candidateTransactionId });
+          break;
+        }
+        logStep("Apple API non-200", {
+          host,
+          candidateTransactionId,
+          status: result.status,
+          error: result.errText,
+        });
+        if (result.status === 401) {
+          logStep("Apple: 401 Unauthorized — JWT rejected. Check ISSUER_ID / KEY_ID / PRIVATE_KEY / bundle id.");
+          return { valid: false };
+        }
+        if (result.status !== 404) break;
       }
-      logStep("Apple API non-200", { host, status: result.status, error: result.errText });
-      // 401 = bad JWT/credentials. 404 = not in this env, try the other one.
-      if (result.status === 401) {
-        logStep("Apple: 401 Unauthorized — JWT rejected. Check ISSUER_ID / KEY_ID / PRIVATE_KEY / bundle id.");
-        return {
-          valid: false,
-          reason: "app_store_api_unauthorized",
-          details: { host },
-        };
-      }
-      if (result.status !== 404) break;
+      if (matchedTransactionId) break;
     }
 
     if (!result || result.status !== 200 || !result.data) {
       logStep("Apple: Transaction not found in any environment", {
-        transactionIdSent: transactionId,
+        candidateTransactionIds,
         hint: "If you tested with an Xcode StoreKit Configuration file, those transactions never reach Apple's servers. Use a real Sandbox tester via TestFlight or Settings > App Store > Sandbox Account.",
       });
       return {
@@ -302,7 +355,7 @@ async function verifyAppleReceipt(transactionId: string): Promise<VerificationRe
         details: { transactionId },
       };
     }
-    logStep("Apple: Verified via", { host: hitHost });
+    logStep("Apple: Verified via", { host: hitHost, matchedTransactionId });
 
     // The response contains a signedTransactionInfo (JWS)
     const signedInfo = result.data.signedTransactionInfo;
@@ -323,12 +376,12 @@ async function verifyAppleReceipt(transactionId: string): Promise<VerificationRe
           expiresDate: payload.expiresDate
             ? new Date(payload.expiresDate).toISOString()
             : undefined,
-          originalTransactionId: payload.originalTransactionId || transactionId,
+          originalTransactionId: payload.originalTransactionId || matchedTransactionId || candidateTransactionIds[0],
         };
       }
     }
 
-    return { valid: true, originalTransactionId: transactionId };
+    return { valid: true, originalTransactionId: matchedTransactionId || candidateTransactionIds[0] };
   } catch (e) {
     logStep("Apple verification exception", { error: String(e) });
     return {
@@ -343,12 +396,22 @@ async function verifyApplePurchase({
   transactionId,
   productId,
   receipt,
+  jwsRepresentation,
+  environment,
 }: {
   transactionId: string;
   productId: string;
   receipt?: string;
-}): Promise<VerificationResult> {
-  const transactionResult = await verifyAppleReceipt(transactionId);
+  jwsRepresentation?: string;
+  environment?: string;
+}): Promise<{
+  valid: boolean;
+  productId?: string;
+  expiresDate?: string;
+  originalTransactionId?: string;
+}> {
+  const candidateTransactionIds = collectAppleTransactionCandidates(transactionId, jwsRepresentation);
+  const transactionResult = await verifyAppleReceipt(candidateTransactionIds, environment);
   if (transactionResult.valid) {
     return transactionResult;
   }
@@ -403,10 +466,13 @@ async function verifyApplePurchase({
       continue;
     }
 
-    const parsed = chooseReceiptTransaction(result.data, productId, transactionId);
+    const parsed = candidateTransactionIds
+      .map((candidateTransactionId) => chooseReceiptTransaction(result.data, productId, candidateTransactionId))
+      .find((item) => item.valid) ?? { valid: false };
+
     if (parsed.valid) {
       logStep("Apple: Receipt fallback validated purchase", {
-        transactionId,
+        candidateTransactionIds,
         productId: parsed.productId,
         expiresDate: parsed.expiresDate,
       });
@@ -597,7 +663,13 @@ Deno.serve(async (req) => {
     let verificationResult: VerificationResult | { valid: boolean; expiresDate?: string; reason?: string; details?: Record<string, unknown> };
 
     if (platform === "ios") {
-      const appleResult = await verifyApplePurchase({ transactionId, productId, receipt });
+      const appleResult = await verifyApplePurchase({
+        transactionId,
+        productId,
+        receipt,
+        jwsRepresentation,
+        environment,
+      });
       verificationResult = {
         valid: appleResult.valid,
         expiresDate: appleResult.expiresDate,
