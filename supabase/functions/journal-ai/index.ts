@@ -50,7 +50,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { action, content, context } = await req.json();
+    const body = await req.json();
+    const allowedActions = ['generate_prompt', 'analyze_mood', 'suggest_tags'] as const;
+    const action = typeof body?.action === 'string' ? body.action : '';
+    if (!allowedActions.includes(action as typeof allowedActions[number])) {
+      return new Response(JSON.stringify({ error: 'Invalid action' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const rawContent = typeof body?.content === 'string' ? body.content.trim() : '';
+    const MAX_CONTENT_LENGTH = 5000;
+    if (rawContent.length > MAX_CONTENT_LENGTH) {
+      return new Response(JSON.stringify({ error: 'Content too long. Maximum 5000 characters allowed.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if ((action === 'analyze_mood' || action === 'suggest_tags') && !rawContent) {
+      return new Response(JSON.stringify({ error: 'Content is required for this action.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // Strip control chars that could be used for prompt injection formatting
+    const content = rawContent.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    const context = body?.context && typeof body.context === 'object' ? body.context : {};
 
     let userPrompt = '';
     let responseFormat = 'text';
