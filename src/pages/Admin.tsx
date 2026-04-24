@@ -5,18 +5,26 @@ import { Leaf, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminRole } from "@/hooks/useAdmin";
 
 const Admin = () => {
   const { user, loading } = useAuth();
+  const { data: role, isLoading: roleLoading } = useAdminRole();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
+      return;
     }
-  }, [user, loading, navigate]);
+    // Server-validated role check (queries user_roles table via RLS).
+    // Redirect non-moderators away from the admin route entirely.
+    if (!loading && !roleLoading && user && role && !role.isModerator) {
+      navigate("/");
+    }
+  }, [user, loading, role, roleLoading, navigate]);
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -24,7 +32,7 @@ const Admin = () => {
     );
   }
 
-  if (!user) return null;
+  if (!user || !role?.isModerator) return null;
 
   return (
     <div className="min-h-screen bg-background">
