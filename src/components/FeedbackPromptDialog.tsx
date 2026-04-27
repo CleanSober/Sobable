@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Send, ExternalLink, Loader2, X, MessageSquare } from "lucide-react";
+import { Star, Send, ExternalLink, Loader2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Capacitor } from "@capacitor/core";
 
-const APP_STORE_URL = "https://apps.apple.com/app/sober-club/id0000000000";
+const APP_STORE_URL =
+  "https://apps.apple.com/app/sober-club/id0000000000?action=write-review";
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=com.sober.club";
 
@@ -50,39 +51,19 @@ interface FeedbackPromptDialogProps {
 
 export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackPromptDialogProps) => {
   const { user } = useAuth();
+  const [step, setStep] = useState<"choose" | "form">("choose");
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [step, setStep] = useState<"rate" | "form" | "store">("rate");
   const [category, setCategory] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const platform = getDetectedPlatform();
 
-  const handleRatingSelect = (star: number) => {
-    setRating(star);
-    if (star === 5) {
-      setStep("store");
-    } else {
-      setStep("form");
-    }
-  };
-
-  const handleOpenStore = async () => {
+  const handleLeaveReview = () => {
     const url = platform === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
     window.open(url, "_blank");
-
-    if (user) {
-      await (supabase.from("feedback_submissions" as any) as any).insert({
-        user_id: user.id,
-        rating: 5,
-        platform,
-        category: "app_store_review",
-        message: "Redirected to app store",
-      });
-    }
     onSubmitted();
-    toast.success("Thank you for your support! 🎉");
   };
 
   const handleSubmitFeedback = async () => {
@@ -91,7 +72,7 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
     setSubmitting(true);
     const { error } = await (supabase.from("feedback_submissions" as any) as any).insert({
       user_id: user.id,
-      rating,
+      rating: rating > 0 ? rating : null,
       platform,
       category: category || null,
       message: message.trim().slice(0, 2000),
@@ -104,10 +85,8 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
     }
 
     onSubmitted();
-    toast.success("Thank you for your feedback! ❤️");
+    toast.success("Thank you for your feedback!");
   };
-
-  const storeName = platform === "ios" ? "App Store" : "Google Play Store";
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onDismiss(); }}>
@@ -115,71 +94,33 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <MessageSquare className="w-5 h-5 text-primary" />
-            How's your experience?
+            Rate Your Experience
           </DialogTitle>
         </DialogHeader>
 
         <AnimatePresence mode="wait">
-          {step === "rate" && (
+          {step === "choose" && (
             <motion.div
-              key="rate"
+              key="choose"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4 py-2"
+              className="flex flex-col gap-3 py-2"
             >
               <p className="text-sm text-muted-foreground text-center">
-                You've been making great progress! How would you rate Sober Club?
+                Leave a review on the store, or send feedback directly to our team.
               </p>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRatingSelect(star)}
-                    onMouseEnter={() => setHoveredStar(star)}
-                    onMouseLeave={() => setHoveredStar(0)}
-                    className="transition-transform hover:scale-110 active:scale-95"
-                  >
-                    <Star
-                      className={`w-9 h-9 transition-colors ${
-                        star <= (hoveredStar || rating)
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-muted-foreground/30"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-              <Button variant="ghost" size="sm" onClick={onDismiss} className="text-xs text-muted-foreground">
-                Not now
-              </Button>
-            </motion.div>
-          )}
-
-          {step === "store" && (
-            <motion.div
-              key="store"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4 py-2 text-center"
-            >
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className="w-6 h-6 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="text-sm font-medium">We're so glad you love Sober Club! 🎉</p>
-              <p className="text-xs text-muted-foreground">
-                Would you mind leaving a review on the {storeName}? It helps others find us!
-              </p>
-              <div className="flex gap-2 w-full">
-                <Button onClick={handleOpenStore} className="flex-1 gap-2" size="sm">
+              <div className="flex flex-col gap-2">
+                <Button onClick={handleLeaveReview} className="gap-2" size="sm">
                   <ExternalLink className="w-4 h-4" />
                   Leave a Review
                 </Button>
-                <Button onClick={() => { onSubmitted(); toast.success("Thank you! ❤️"); }} variant="outline" size="sm">
-                  Maybe Later
+                <Button onClick={() => setStep("form")} variant="outline" className="gap-2" size="sm">
+                  <MessageSquare className="w-4 h-4" />
+                  Send Feedback
+                </Button>
+                <Button variant="ghost" size="sm" onClick={onDismiss} className="text-xs text-muted-foreground">
+                  Not now
                 </Button>
               </div>
             </motion.div>
@@ -193,18 +134,30 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
               exit={{ opacity: 0 }}
               className="space-y-3"
             >
-              <div className="flex items-center gap-2">
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className={`w-4 h-4 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+              <div className="space-y-1.5">
+                <Label className="text-xs">Rating (optional)</Label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star === rating ? 0 : star)}
+                      onMouseEnter={() => setHoveredStar(star)}
+                      onMouseLeave={() => setHoveredStar(0)}
+                      className="transition-transform hover:scale-110 active:scale-95"
+                      aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                    >
+                      <Star
+                        className={`w-5 h-5 transition-colors ${
+                          star <= (hoveredStar || rating)
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
-                <button onClick={() => { setRating(0); setStep("rate"); }} className="text-xs text-primary hover:underline">Change</button>
               </div>
-
-              <p className="text-xs text-muted-foreground">
-                We'd love to hear how we can improve. Your feedback goes directly to our team.
-              </p>
 
               <div className="space-y-1.5">
                 <Label className="text-xs">Category (optional)</Label>
@@ -225,7 +178,7 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Tell us what we can do better..."
+                  placeholder="Tell us what you think..."
                   maxLength={2000}
                   rows={3}
                   className="text-sm resize-none"
@@ -246,7 +199,7 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   Submit
                 </Button>
-                <Button onClick={onDismiss} variant="outline" size="sm">Cancel</Button>
+                <Button onClick={() => setStep("choose")} variant="outline" size="sm">Back</Button>
               </div>
             </motion.div>
           )}
