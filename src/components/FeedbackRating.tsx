@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Capacitor } from "@capacitor/core";
+import { InAppReview } from "@capacitor-community/in-app-review";
 
 const APP_STORE_URL =
   "https://apps.apple.com/app/sober-club/id0000000000?action=write-review";
@@ -82,8 +83,19 @@ export const FeedbackRating = () => {
     if (isInCooldown()) setMode("cooldown");
   }, []);
 
-  // Always opens the store. No filtering by rating. Apple 5.6.1 compliant.
-  const handleLeaveReview = () => {
+  // Always available. No filtering by rating. Apple 5.6.1 compliant.
+  // On native iOS, uses Apple's SKStoreReviewController (the system-managed prompt).
+  // On native Android, uses Google Play In-App Review API.
+  // On web, opens the store URL directly.
+  const handleLeaveReview = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await InAppReview.requestReview();
+        return;
+      } catch (e) {
+        console.warn("In-app review unavailable, falling back to store URL", e);
+      }
+    }
     window.open(getStoreUrl(platform), "_blank");
   };
 
@@ -173,23 +185,23 @@ export const FeedbackRating = () => {
             exit={{ opacity: 0 }}
             className="flex flex-col gap-3"
           >
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
               <Button
                 onClick={handleLeaveReview}
-                className="flex-1 gap-2"
+                className="w-full gap-2"
                 size="sm"
               >
-                <ExternalLink className="w-4 h-4" />
-                Leave a Review
+                <ExternalLink className="w-4 h-4 shrink-0" />
+                <span className="truncate">Leave a Review</span>
               </Button>
               <Button
                 onClick={() => setMode("form")}
                 variant="outline"
-                className="flex-1 gap-2"
+                className="w-full gap-2"
                 size="sm"
               >
-                <MessageSquare className="w-4 h-4" />
-                Send Feedback
+                <MessageSquare className="w-4 h-4 shrink-0" />
+                <span className="truncate">Send Feedback</span>
               </Button>
             </div>
           </motion.div>
