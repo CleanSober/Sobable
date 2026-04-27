@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Capacitor } from "@capacitor/core";
+import { InAppReview } from "@capacitor-community/in-app-review";
 
 const APP_STORE_URL =
   "https://apps.apple.com/app/sober-club/id0000000000?action=write-review";
@@ -60,7 +61,16 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
 
   const platform = getDetectedPlatform();
 
-  const handleLeaveReview = () => {
+  const handleLeaveReview = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await InAppReview.requestReview();
+        onSubmitted();
+        return;
+      } catch (e) {
+        console.warn("In-app review unavailable, falling back to store URL", e);
+      }
+    }
     const url = platform === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
     window.open(url, "_blank");
     onSubmitted();
@@ -110,14 +120,14 @@ export const FeedbackPromptDialog = ({ open, onDismiss, onSubmitted }: FeedbackP
               <p className="text-sm text-muted-foreground text-center">
                 Leave a review on the store, or send feedback directly to our team.
               </p>
-              <div className="flex flex-col gap-2">
-                <Button onClick={handleLeaveReview} className="gap-2" size="sm">
-                  <ExternalLink className="w-4 h-4" />
-                  Leave a Review
+              <div className="flex flex-col gap-2 w-full">
+                <Button onClick={handleLeaveReview} className="w-full gap-2" size="sm">
+                  <ExternalLink className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Leave a Review</span>
                 </Button>
-                <Button onClick={() => setStep("form")} variant="outline" className="gap-2" size="sm">
-                  <MessageSquare className="w-4 h-4" />
-                  Send Feedback
+                <Button onClick={() => setStep("form")} variant="outline" className="w-full gap-2" size="sm">
+                  <MessageSquare className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Send Feedback</span>
                 </Button>
                 <Button variant="ghost" size="sm" onClick={onDismiss} className="text-xs text-muted-foreground">
                   Not now
