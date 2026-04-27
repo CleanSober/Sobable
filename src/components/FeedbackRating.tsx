@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Send, MessageSquare, ExternalLink, Loader2 } from "lucide-react";
+import { Send, MessageSquare, Star, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Capacitor } from "@capacitor/core";
 
-const APP_STORE_URL = "https://apps.apple.com/app/sober-club/id0000000000"; // Replace with real App Store ID
+const APP_STORE_URL =
+  "https://apps.apple.com/app/sober-club/id0000000000?action=write-review";
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=com.sober.club";
 
@@ -43,10 +44,6 @@ function getStoreUrl(platform: string) {
   return platform === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
 }
 
-function getStoreName(platform: string) {
-  return platform === "ios" ? "App Store" : "Google Play Store";
-}
-
 function isInCooldown(): boolean {
   const last = localStorage.getItem(COOLDOWN_KEY);
   if (!last) return false;
@@ -60,12 +57,11 @@ function setCooldown() {
 
 async function insertFeedback(data: {
   user_id: string;
-  rating: number;
+  rating: number | null;
   platform: string;
   category: string | null;
   message: string | null;
 }) {
-  // Use the Supabase client with type assertion for the new table
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase.from("feedback_submissions" as any) as any).insert(data);
   return { error };
@@ -73,46 +69,22 @@ async function insertFeedback(data: {
 
 export const FeedbackRating = () => {
   const { user } = useAuth();
+  const [mode, setMode] = useState<"idle" | "form" | "done" | "cooldown">("idle");
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [step, setStep] = useState<"rate" | "form" | "store" | "done" | "cooldown">("rate");
   const [category, setCategory] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const platform = getDetectedPlatform();
 
-  // Check cooldown on mount
   useEffect(() => {
-    if (isInCooldown()) {
-      setStep("cooldown");
-    }
+    if (isInCooldown()) setMode("cooldown");
   }, []);
 
-  const handleRatingSelect = (star: number) => {
-    setRating(star);
-    if (star === 5) {
-      setStep("store");
-    } else {
-      setStep("form");
-    }
-  };
-
-  const handleOpenStore = async () => {
+  // Always opens the store. No filtering by rating. Apple 5.6.1 compliant.
+  const handleLeaveReview = () => {
     window.open(getStoreUrl(platform), "_blank");
-
-    if (user) {
-      await insertFeedback({
-        user_id: user.id,
-        rating: 5,
-        platform,
-        category: "app_store_review",
-        message: "Redirected to app store",
-      });
-    }
-    setCooldown();
-    setStep("done");
-    toast.success("Thank you for your support! 🎉");
   };
 
   const handleSubmitFeedback = async () => {
@@ -120,11 +92,7 @@ export const FeedbackRating = () => {
       toast.error("Please sign in to submit feedback");
       return;
     }
-    if (!message.trim()) {
-      toast.error("Please write some feedback");
-      return;
-    }
-    if (message.trim().length < 10) {
+    if (!message.trim() || message.trim().length < 10) {
       toast.error("Please provide at least 10 characters of feedback");
       return;
     }
@@ -132,7 +100,7 @@ export const FeedbackRating = () => {
     setSubmitting(true);
     const { error } = await insertFeedback({
       user_id: user.id,
-      rating,
+      rating: rating > 0 ? rating : null,
       platform,
       category: category || null,
       message: message.trim().slice(0, 2000),
@@ -146,15 +114,15 @@ export const FeedbackRating = () => {
     }
 
     setCooldown();
-    setStep("done");
-    toast.success("Thank you for your feedback! We'll use it to improve.");
+    setMode("done");
+    toast.success("Thank you for your feedback!");
   };
 
   const handleReset = () => {
     setRating(0);
-    setStep("rate");
     setCategory("");
     setMessage("");
+    setMode("idle");
   };
 
   return (
@@ -168,12 +136,11 @@ export const FeedbackRating = () => {
         Rate Your Experience
       </h3>
       <p className="text-xs text-muted-foreground mb-4">
-        Your feedback helps us improve Sober Club
+        Leave a review on the store, or send feedback directly to our team.
       </p>
 
       <AnimatePresence mode="wait">
-        {/* Cooldown state */}
-        {step === "cooldown" && (
+        {mode === "cooldown" && (
           <motion.div
             key="cooldown"
             initial={{ opacity: 0 }}
@@ -186,86 +153,49 @@ export const FeedbackRating = () => {
             <p className="text-xs text-muted-foreground">
               You can submit again in 24 hours
             </p>
+            <Button
+              onClick={handleLeaveReview}
+              variant="outline"
+              size="sm"
+              className="gap-2 mt-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Leave a Review
+            </Button>
           </motion.div>
         )}
 
-        {/* Step 1: Star Rating */}
-        {step === "rate" && (
+        {mode === "idle" && (
           <motion.div
-            key="rate"
+            key="idle"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col items-center gap-3"
+            className="flex flex-col gap-3"
           >
-            <p className="text-xs text-muted-foreground">How would you rate Sober Club?</p>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => handleRatingSelect(star)}
-                  onMouseEnter={() => setHoveredStar(star)}
-                  onMouseLeave={() => setHoveredStar(0)}
-                  className="transition-transform hover:scale-110 active:scale-95"
-                  aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                >
-                  <Star
-                    className={`w-8 h-8 transition-colors ${
-                      star <= (hoveredStar || rating)
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            <p className="text-[10px] text-muted-foreground">Tap a star to rate</p>
-          </motion.div>
-        )}
-
-        {/* Step 2a: 5 Stars → App Store redirect */}
-        {step === "store" && (
-          <motion.div
-            key="store"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center gap-4 text-center"
-          >
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className="w-6 h-6 fill-amber-400 text-amber-400" />
-              ))}
-            </div>
-            <p className="text-sm font-medium text-foreground">
-              We're so glad you love Sober Club! 🎉
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Would you mind leaving a review on the {getStoreName(platform)}?
-              It really helps others find us!
-            </p>
-            <div className="flex gap-2 w-full">
-              <Button onClick={handleOpenStore} className="flex-1 gap-2" size="sm">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                onClick={handleLeaveReview}
+                className="flex-1 gap-2"
+                size="sm"
+              >
                 <ExternalLink className="w-4 h-4" />
                 Leave a Review
               </Button>
               <Button
-                onClick={() => {
-                  setCooldown();
-                  setStep("done");
-                  toast.success("Thank you! ❤️");
-                }}
+                onClick={() => setMode("form")}
                 variant="outline"
+                className="flex-1 gap-2"
                 size="sm"
               >
-                Maybe Later
+                <MessageSquare className="w-4 h-4" />
+                Send Feedback
               </Button>
             </div>
           </motion.div>
         )}
 
-        {/* Step 2b: Below 5 Stars → Feedback form */}
-        {step === "form" && (
+        {mode === "form" && (
           <motion.div
             key="form"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -273,33 +203,30 @@ export const FeedbackRating = () => {
             exit={{ opacity: 0 }}
             className="space-y-3"
           >
-            <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Rating (optional)</Label>
               <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star
-                    key={s}
-                    className={`w-5 h-5 ${
-                      s <= rating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star === rating ? 0 : star)}
+                    onMouseEnter={() => setHoveredStar(star)}
+                    onMouseLeave={() => setHoveredStar(0)}
+                    className="transition-transform hover:scale-110 active:scale-95"
+                    aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                  >
+                    <Star
+                      className={`w-6 h-6 transition-colors ${
+                        star <= (hoveredStar || rating)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-muted-foreground/30"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
-              <button
-                onClick={() => {
-                  setRating(0);
-                  setStep("rate");
-                }}
-                className="text-xs text-primary hover:underline"
-              >
-                Change
-              </button>
             </div>
-
-            <p className="text-xs text-muted-foreground">
-              We'd love to hear how we can improve. Your feedback goes directly to our team.
-            </p>
 
             <div className="space-y-1.5">
               <Label className="text-xs">Category (optional)</Label>
@@ -324,7 +251,7 @@ export const FeedbackRating = () => {
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Tell us what we can do better..."
+                placeholder="Tell us what you think..."
                 maxLength={2000}
                 rows={4}
                 className="text-sm resize-none"
@@ -353,22 +280,14 @@ export const FeedbackRating = () => {
                 )}
                 Submit Feedback
               </Button>
-              <Button
-                onClick={() => {
-                  setRating(0);
-                  setStep("rate");
-                }}
-                variant="outline"
-                size="sm"
-              >
+              <Button onClick={handleReset} variant="outline" size="sm">
                 Cancel
               </Button>
             </div>
           </motion.div>
         )}
 
-        {/* Step 3: Done */}
-        {step === "done" && (
+        {mode === "done" && (
           <motion.div
             key="done"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -381,9 +300,6 @@ export const FeedbackRating = () => {
             <p className="text-xs text-muted-foreground">
               Your feedback means the world to us
             </p>
-            <Button onClick={handleReset} variant="ghost" size="sm" className="text-xs">
-              Rate again
-            </Button>
           </motion.div>
         )}
       </AnimatePresence>
