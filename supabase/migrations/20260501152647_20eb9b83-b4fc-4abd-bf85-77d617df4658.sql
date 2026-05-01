@@ -1,0 +1,43 @@
+
+REVOKE EXECUTE ON FUNCTION public.update_updated_at_column() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user_subscription() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.validate_content_length() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.calculate_level_from_xp(integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.add_user_xp(uuid, integer, text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.add_user_karma(uuid, integer, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.award_badge(uuid, text, text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.increment_forum_reply_count(uuid, integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.increment_forum_post_likes(uuid, integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.count_recent_actions(uuid, text, integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.admin_count_users() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.is_admin(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.is_premium_user(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_public_profile(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_public_profiles(uuid[]) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_poll_vote_counts(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.is_user_blocked(uuid, uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.find_partner_candidates(uuid, uuid[], integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.initialize_user_xp(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.initialize_user_karma(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.toggle_leaderboard_visibility(uuid, boolean) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.claim_daily_login_reward(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.redeem_invite_code(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.can_use_streak_freeze(uuid, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.use_streak_freeze(uuid, text, date) FROM PUBLIC;
+
+-- Re-grant to authenticated for user-facing functions
+GRANT EXECUTE ON FUNCTION public.is_premium_user(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_public_profile(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_public_profiles(uuid[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_poll_vote_counts(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_user_blocked(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.find_partner_candidates(uuid, uuid[], integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.initialize_user_xp(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.initialize_user_karma(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.toggle_leaderboard_visibility(uuid, boolean) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_daily_login_reward(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.redeem_invite_code(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_use_streak_freeze(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.use_streak_freeze(uuid, text, date) TO authenticated;
