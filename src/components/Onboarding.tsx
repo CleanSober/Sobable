@@ -321,6 +321,10 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                           selected={startDate}
                           onSelect={setStartDate}
                           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          captionLayout="dropdown-buttons"
+                          fromYear={1950}
+                          toYear={new Date().getFullYear()}
+                          defaultMonth={startDate || new Date()}
                           initialFocus
                           className={cn("p-3 pointer-events-auto")}
                         />

@@ -76,18 +76,67 @@ export const useSubscription = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkoutStatus = params.get("checkout");
-    
+
     if (checkoutStatus === "success") {
-      toast.success("Welcome to Sober Club! Your subscription is now active.");
-      // Remove query params
+      // Remove query params immediately so reloads don't re-trigger
       window.history.replaceState({}, "", window.location.pathname);
-      // Refresh subscription status
-      setTimeout(checkSubscription, 2000);
+
+      // Poll Stripe → DB sync up to ~30s, then surface result
+      let cancelled = false;
+      let attempts = 0;
+      const maxAttempts = 15;
+      const poll = async () => {
+        while (!cancelled && attempts < maxAttempts) {
+          attempts++;
+          try {
+            const { data } = await supabase.functions.invoke("check-subscription", {
+              headers: session?.access_token
+                ? { Authorization: `Bearer ${session.access_token}` }
+                : undefined,
+            });
+            if (data?.subscribed) {
+              const plan = data.price_id ? getPlanByPriceId(data.price_id) : null;
+              setSubscription({
+                subscribed: true,
+                productId: data.product_id,
+                priceId: data.price_id,
+                subscriptionEnd: data.subscription_end,
+                planName: data.plan_name || plan?.name || "Sober Club",
+                billingSource: data.billing_source || "stripe",
+              });
+              toast.success("Welcome to Sober Club! Your subscription is now active.");
+              return;
+            }
+          } catch (err) {
+            console.warn("[subscription] poll attempt failed", err);
+          }
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+        if (!cancelled) {
+          toast.info(
+            "Your payment is processing. Premium will activate shortly — pull to refresh in a moment."
+          );
+          checkSubscription();
+        }
+      };
+      poll();
+      return () => {
+        cancelled = true;
+      };
     } else if (checkoutStatus === "cancelled") {
       toast.info("Checkout cancelled. No charges were made.");
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [checkSubscription]);
+  }, [checkSubscription, session?.access_token]);
+
+  // Refresh subscription when the tab regains focus (covers Stripe checkout opened in new tab)
+  useEffect(() => {
+    const onFocus = () => {
+      if (session?.access_token) checkSubscription();
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [checkSubscription, session?.access_token]);
 
   const startCheckout = async (priceId: string) => {
     if (!session?.access_token) {

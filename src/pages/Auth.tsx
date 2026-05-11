@@ -41,6 +41,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+  const [signupPendingEmail, setSignupPendingEmail] = useState<string | null>(null);
   const { signIn, signUp, user, resetPassword, updatePassword, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
@@ -149,8 +150,7 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else if (needsConfirmation) {
-          toast.success("Check your email to confirm your account before signing in.", { duration: 6000 });
-          switchMode("login");
+          setSignupPendingEmail(email.trim());
         } else {
           toast.success("Account created! Welcome to your recovery journey.");
           navigate("/");
@@ -204,6 +204,7 @@ const Auth = () => {
     setConfirmPassword("");
     setShowPassword(false);
     setResetSent(false);
+    setSignupPendingEmail(null);
   };
 
   const getHeaderText = () => {
@@ -278,14 +279,49 @@ const Auth = () => {
         <div className="glass-card rounded-2xl p-6">
           <AnimatePresence mode="wait">
             <motion.div
-              key={mode + (resetSent ? "-sent" : "")}
+              key={mode + (resetSent ? "-sent" : "") + (signupPendingEmail ? "-pending" : "")}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Forgot Password - Success State */}
-              {mode === "forgot" && resetSent ? (
+              {/* Signup pending - check your email */}
+              {mode === "signup" && signupPendingEmail ? (
+                <div className="text-center py-4">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                    className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-4"
+                  >
+                    <Mail className="w-7 h-7 text-primary" />
+                  </motion.div>
+                  <h2 className="text-lg font-semibold text-foreground mb-2">Check your email</h2>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    We sent a confirmation link to
+                  </p>
+                  <p className="text-sm font-medium text-foreground mb-5">{signupPendingEmail}</p>
+                  <p className="text-xs text-muted-foreground mb-5">
+                    Click the link in the email to activate your account, then sign in.
+                    Don't see it? Check your spam folder.
+                  </p>
+                  <div className="space-y-2">
+                    <Button
+                      className="w-full h-10 text-sm gradient-primary text-primary-foreground"
+                      onClick={() => switchMode("login")}
+                    >
+                      Go to sign in
+                    </Button>
+                    <button
+                      onClick={() => setSignupPendingEmail(null)}
+                      className="w-full text-xs text-muted-foreground py-2 hover:text-foreground"
+                    >
+                      Use a different email
+                    </button>
+                  </div>
+                </div>
+              ) : /* Forgot Password - Success State */
+              mode === "forgot" && resetSent ? (
                 <div className="text-center py-4">
                   <motion.div
                     initial={{ scale: 0 }}
