@@ -50,23 +50,88 @@ const tryAsyncClipboard = async (text: string): Promise<CopyResult | null> => {
   return null;
 };
 
+const isIOS = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  // Covers iPhone, iPad, iPod, plus iPadOS 13+ which reports as Mac with touch.
+  return /iPad|iPhone|iPod/.test(ua) || (ua.includes("Mac") && "ontouchend" in document);
+};
+
+/**
+ * iOS Safari refuses execCommand('copy') on a hidden/readonly <textarea>.
+ * The reliable workaround: use a contentEditable element + Range/Selection,
+ * which Safari treats as a user-driven selection and allows the copy.
+ */
+const tryIOSCopy = (text: string): boolean => {
+  try {
+    const el = document.createElement("div");
+    el.contentEditable = "true";
+    // Must be visible to Safari but invisible to the user.
+    el.style.position = "fixed";
+    el.style.top = "0";
+    el.style.left = "0";
+    el.style.width = "1px";
+    el.style.height = "1px";
+    el.style.opacity = "0";
+    el.style.userSelect = "text";
+    el.style.webkitUserSelect = "text" as unknown as string;
+    el.innerText = text;
+    document.body.appendChild(el);
+
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    el.setAttribute("contenteditable", "true");
+    (el as HTMLElement).focus();
+    // Safari needs an explicit selection on the element itself.
+    (el as unknown as { setSelectionRange?: (s: number, e: number) => void }).setSelectionRange?.(
+      0,
+      text.length
+    );
+
+    const ok = document.execCommand("copy");
+    selection?.removeAllRanges();
+    document.body.removeChild(el);
+    return ok;
+  } catch {
+    return false;
+  }
+};
+
 const tryExecCommand = (text: string): CopyResult => {
   if (typeof document === "undefined") {
     return { ok: false, outcome: "unsupported", message: "Clipboard not available in this environment." };
   }
+
+  // iOS Safari path first — the textarea route is unreliable there.
+  if (isIOS() && tryIOSCopy(text)) {
+    return { ok: true, outcome: "fallback", message: "Copied to clipboard!" };
+  }
+
   try {
     const ta = document.createElement("textarea");
     ta.value = text;
-    ta.setAttribute("readonly", "");
+    // NOTE: do NOT set readonly on iOS — Safari blocks copy from readonly fields.
+    ta.contentEditable = "true";
     ta.style.position = "fixed";
     ta.style.top = "0";
     ta.style.left = "0";
     ta.style.opacity = "0";
+    ta.style.fontSize = "16px"; // prevent iOS auto-zoom on focus
     document.body.appendChild(ta);
+
+    const range = document.createRange();
+    range.selectNodeContents(ta);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
     ta.focus();
-    ta.select();
     ta.setSelectionRange(0, text.length);
+
     const ok = document.execCommand("copy");
+    selection?.removeAllRanges();
     document.body.removeChild(ta);
     if (ok) return { ok: true, outcome: "fallback", message: "Copied to clipboard!" };
     return {
