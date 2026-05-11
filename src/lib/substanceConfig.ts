@@ -85,9 +85,36 @@ export function getPersonalizedWording(substances: string[] | null | undefined):
 
   const primary = substances[0];
   const config = SUBSTANCE_WORDING[primary];
-  if (!config) return DEFAULTS;
+  const base = config ? { ...DEFAULTS, ...config } : { ...DEFAULTS };
 
-  return { ...DEFAULTS, ...config };
+  // Append substance names: "Days Clean from Cocaine & Alcohol"
+  const names = formatSubstanceList(substances);
+  if (names) {
+    base.counterLabel = `Days ${capitalize(base.statusWord)} from ${names}`;
+    base.sinceLabel = `${capitalize(base.statusWord)} from ${names} Since`;
+    base.substanceRef = names.toLowerCase();
+  }
+
+  return base;
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * Formats selected substance IDs into a readable list,
+ * e.g. ["cocaine", "alcohol"] -> "Cocaine & Alcohol"
+ */
+export function formatSubstanceList(substances: string[] | null | undefined): string {
+  if (!substances || substances.length === 0) return "";
+  const labels = substances
+    .map(id => SUBSTANCE_OPTIONS.find(o => o.id === id)?.label)
+    .filter((x): x is string => Boolean(x) && x !== "Other");
+  if (labels.length === 0) return "";
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2) return `${labels[0]} & ${labels[1]}`;
+  return `${labels.slice(0, -1).join(", ")} & ${labels[labels.length - 1]}`;
 }
 
 /**
