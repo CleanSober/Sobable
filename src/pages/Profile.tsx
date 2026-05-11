@@ -64,6 +64,7 @@ const Profile = () => {
   const [name, setName] = useState("");
   const [sobrietyDate, setSobrietyDate] = useState("");
   const [dailySpending, setDailySpending] = useState("0");
+  const [spendingBreakdown, setSpendingBreakdown] = useState<Array<{ name: string; amount: number }>>([]);
   const [sponsorPhone, setSponsorPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
   const [personalReminder, setPersonalReminder] = useState("");
