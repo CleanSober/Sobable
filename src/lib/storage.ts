@@ -131,9 +131,19 @@ export const analyzePatterns = (): PatternAnalysis => {
 };
 
 export const calculateDaysSober = (startDate: string): number => {
-  const start = new Date(startDate);
+  if (!startDate) return 0;
+  // Parse YYYY-MM-DD as a LOCAL date (not UTC) to prevent timezone-shift
+  // off-by-one errors. `new Date("2024-01-15")` parses as UTC midnight,
+  // which displays as the previous day in negative-UTC timezones.
+  const match = startDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const start = match
+    ? new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]))
+    : new Date(startDate);
   const now = new Date();
-  const diffTime = Math.abs(now.getTime() - start.getTime());
+  // Compare at day granularity in local time
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const diffTime = Math.max(0, nowDay - startDay);
   return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 };
 
