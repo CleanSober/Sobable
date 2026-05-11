@@ -199,6 +199,11 @@ const Profile = () => {
       return;
     }
 
+    const cleanedBreakdown = spendingBreakdown
+      .map((c) => ({ name: c.name.trim().slice(0, 40), amount: Math.max(0, Number(c.amount) || 0) }))
+      .filter((c) => c.name.length > 0)
+      .slice(0, 12);
+
     setSaving(true);
     const { error } = await updateProfile({
       display_name: name.trim().slice(0, 50) || null,
@@ -207,7 +212,8 @@ const Profile = () => {
       sponsor_phone: sponsorPhone.slice(0, 20) || null,
       emergency_contact: emergencyContact.slice(0, 20) || null,
       personal_reminder: personalReminder.slice(0, 500) || null,
-    });
+      spending_breakdown: cleanedBreakdown,
+    } as any);
 
     setSaving(false);
     if (error) {
