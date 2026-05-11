@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share2, Copy, Check, Twitter, Facebook, Linkedin, Instagram, Music2, MessageCircle, Award } from "lucide-react";
+import { Share2, Copy, Check, Twitter, Facebook, Linkedin, Instagram, Music2, MessageCircle, Award, Download, ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
