@@ -125,7 +125,7 @@ THE COMPANY EXPRESSLY DISCLAIMS ALL LIABILITY ARISING FROM YOUR RELIANCE ON AI-G
 
 AUTO-RENEWAL: Subscriptions automatically renew at the end of each billing period unless cancelled at least 24 hours before the end of the current period. Cancellation of auto-renewal takes effect at the end of the current billing period.
 
-PAYMENT: Payment is charged to your Apple App Store, Google Play Store, or Stripe account at confirmation of purchase. The applicable platform's terms and conditions govern all payment processing.
+PAYMENT: Payment is charged to your Apple App Store or Google Play Store account at confirmation of purchase. The applicable platform's terms and conditions govern all payment processing.
 
 CANCELLATION: You can manage and cancel your subscription through your device's account settings (Apple/Google) or through the App's account management features. Cancellation does not entitle you to a refund for the current billing period.
 
