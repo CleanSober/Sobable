@@ -72,7 +72,7 @@ export const ChatRoomSelector = memo(({ currentRoom, onSelectRoom }: ChatRoomSel
           created_by: user.id,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

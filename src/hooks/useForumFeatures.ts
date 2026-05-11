@@ -108,7 +108,7 @@ export const usePolls = (postId?: string) => {
         .from("polls")
         .select("*")
         .eq("post_id", postId)
-        .single();
+        .maybeSingle();
 
       if (pollData) {
         setPoll({
@@ -330,7 +330,7 @@ export const useKarma = (userId?: string) => {
         .from("user_karma")
         .select("*")
         .eq("user_id", targetUserId)
-        .single();
+        .maybeSingle();
 
       const { data: badgesData } = await supabase
         .from("user_badges")

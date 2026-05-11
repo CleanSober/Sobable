@@ -71,10 +71,14 @@ export const useJournal = () => {
           is_favorite: entry.is_favorite || false,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      
+      if (!data) {
+        toast.error('Could not save journal entry');
+        return null;
+      }
+
       setEntries(prev => [data, ...prev]);
       toast.success('Journal entry saved');
       return data;
@@ -92,10 +96,14 @@ export const useJournal = () => {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      
+      if (!data) {
+        toast.error('Journal entry not found');
+        return null;
+      }
+
       setEntries(prev => prev.map(e => e.id === id ? data : e));
       toast.success('Journal entry updated');
       return data;

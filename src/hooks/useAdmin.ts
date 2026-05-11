@@ -197,9 +197,10 @@ export const useUnbanUser = () => {
         .from("user_bans" as never)
         .select("user_id")
         .eq("id", banId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) throw fetchError;
+      if (!ban) throw new Error("Ban record not found");
 
       const { error } = await supabase
         .from("user_bans" as never)

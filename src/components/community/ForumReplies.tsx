@@ -128,9 +128,10 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
           content: trimmedReply,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Reply not created");
       recordAction();
 
       // Update reply count on post

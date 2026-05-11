@@ -191,9 +191,10 @@ export const LiveChat = () => {
           message: trimmedMessage,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Message not delivered");
       recordAction();
       
       // Create mention notifications
