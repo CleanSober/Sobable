@@ -67,14 +67,11 @@ export const DailyAffirmation = () => {
     setShowShareMenu(false);
   };
 
-  const shareText = `"${currentAffirmation}" — Sober Club 🌱`;
+  const shareText = `"${currentAffirmation}" — Sobable 🌱`;
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (silent = false) => {
     try {
       await navigator.clipboard.writeText(shareText);
-      setJustCopied(true);
-      toast.success("Copied to clipboard!");
-      setTimeout(() => setJustCopied(false), 2000);
     } catch {
       const textarea = document.createElement("textarea");
       textarea.value = shareText;
@@ -82,35 +79,49 @@ export const DailyAffirmation = () => {
       textarea.style.opacity = "0";
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand("copy");
+      try { document.execCommand("copy"); } catch { /* noop */ }
       document.body.removeChild(textarea);
+    }
+    if (!silent) {
       setJustCopied(true);
       toast.success("Copied to clipboard!");
       setTimeout(() => setJustCopied(false), 2000);
     }
   };
 
-  const shareToWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+  const openExternal = async (url: string, platform: string) => {
+    await copyToClipboard(true);
+    toast.success(`${platform} opened — caption copied!`);
+    window.open(url, "_blank", "noopener,noreferrer");
     setShowShareMenu(false);
   };
 
-  const shareToTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, "_blank");
-    setShowShareMenu(false);
-  };
+  const shareToWhatsApp = () =>
+    openExternal(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "WhatsApp");
+
+  const shareToTwitter = () =>
+    openExternal(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, "X");
+
+  const shareToFacebook = () =>
+    openExternal(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        typeof window !== "undefined" ? window.location.origin : "https://sobable.lovable.app"
+      )}&quote=${encodeURIComponent(shareText)}`,
+      "Facebook"
+    );
 
   const shareNative = async () => {
-    if (navigator.share) {
+    // Try native share if available; on failure or unavailable, fall back to menu.
+    if (typeof navigator !== "undefined" && (navigator as Navigator).share) {
       try {
-        await navigator.share({ text: shareText });
-        setShowShareMenu(false);
-      } catch {
-        // User cancelled
+        await (navigator as Navigator).share({ text: shareText });
+        return;
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
+        // fallthrough to menu
       }
-    } else {
-      setShowShareMenu(true);
     }
+    setShowShareMenu(true);
   };
 
   return (
