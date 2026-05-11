@@ -335,7 +335,7 @@ async function sendDigestToUser(
     );
 
     const { error } = await resend.emails.send({
-      from: "Sober Club <digest@sobable.com>",
+      from: "Sobable <digest@sobable.com>",
       to: [user.email],
       subject: `📊 Week ${Math.ceil(daysSober / 7)} — ${daysSober} Days Strong!`,
       html,
