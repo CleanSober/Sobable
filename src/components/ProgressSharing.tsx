@@ -484,6 +484,7 @@ export const ProgressSharing = () => {
                   )}
                 </div>
                 <textarea
+                  id="share-caption-textarea"
                   value={shareText}
                   onChange={(e) => setEditedCaption(e.target.value)}
                   rows={4}
