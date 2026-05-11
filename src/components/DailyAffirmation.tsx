@@ -33,6 +33,7 @@ export const DailyAffirmation = () => {
   const [savedList, setSavedList] = useState<string[]>(getSavedAffirmations);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [justCopied, setJustCopied] = useState(false);
+  const [editedCaption, setEditedCaption] = useState<string | null>(null);
 
   // Reset to today's pick when the personalized pool changes (e.g. after onboarding).
   useEffect(() => {
