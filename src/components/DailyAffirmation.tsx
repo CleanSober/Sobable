@@ -3,29 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, RefreshCw, Share2, Heart, Copy, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-const affirmations = [
-  "I am stronger than my cravings.",
-  "Every sober day is a victory worth celebrating.",
-  "I deserve the peace that comes with recovery.",
-  "My past does not define my future.",
-  "I choose health, clarity, and freedom today.",
-  "I am worthy of love, including my own.",
-  "Progress, not perfection, is my goal.",
-  "I have the courage to face today without substances.",
-  "My sobriety is a gift I give myself every day.",
-  "I am building a life I don't need to escape from.",
-  "Each moment of discomfort is temporary; my growth is permanent.",
-  "I am surrounded by people who believe in me.",
-  "I trust myself to handle whatever comes my way.",
-  "I am proud of how far I've come.",
-  "Today I choose to be present and grateful.",
-  "My healing inspires others, even when I don't see it.",
-  "I release what I cannot control and focus on what I can.",
-  "I am more than my addiction — I am resilient.",
-  "Every challenge I overcome makes me stronger.",
-  "I am creating a life filled with purpose and meaning.",
-];
+import { useUserData } from "@/hooks/useUserData";
+import { getPersonalizedAffirmations } from "@/lib/substanceConfig";
 
 const SAVED_KEY = "sober_club_saved_affirmations";
 
@@ -38,17 +17,29 @@ const getSavedAffirmations = (): string[] => {
 };
 
 export const DailyAffirmation = () => {
+  const { profile } = useUserData();
+
+  const affirmations = useMemo(
+    () => getPersonalizedAffirmations(profile?.substances),
+    [profile?.substances]
+  );
+
   const todayIndex = useMemo(() => {
     const d = new Date();
     return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % affirmations.length;
-  }, []);
+  }, [affirmations.length]);
 
   const [index, setIndex] = useState(todayIndex);
   const [savedList, setSavedList] = useState<string[]>(getSavedAffirmations);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [justCopied, setJustCopied] = useState(false);
 
-  const currentAffirmation = affirmations[index];
+  // Reset to today's pick when the personalized pool changes (e.g. after onboarding).
+  useEffect(() => {
+    setIndex(todayIndex);
+  }, [todayIndex]);
+
+  const currentAffirmation = affirmations[index] ?? affirmations[0];
   const isSaved = savedList.includes(currentAffirmation);
 
   useEffect(() => {
