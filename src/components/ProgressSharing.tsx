@@ -100,27 +100,52 @@ export const ProgressSharing = () => {
   const { reached } = getMilestones(daysSober);
   const latestMilestone = reached.length > 0 ? reached[reached.length - 1] : undefined;
 
-  const shareText = `🎉 I've been sober for ${daysSober} days! ${latestMilestone ? `Just hit my ${latestMilestone} milestone! ` : ''}Every day is a victory. #SobrietyJourney #Recovery`;
+  const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://sobable.lovable.app";
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (silent = false) => {
     try {
       await navigator.clipboard.writeText(shareText);
-      setCopied(true);
-      toast.success("Copied to clipboard!");
-      setTimeout(() => setCopied(false), 2000);
+      if (!silent) {
+        setCopied(true);
+        toast.success("Copied to clipboard!");
+        setTimeout(() => setCopied(false), 2000);
+      }
+      return true;
     } catch {
-      toast.error("Failed to copy");
+      if (!silent) toast.error("Failed to copy");
+      return false;
     }
   };
 
+  const openWith = async (url: string, platform: string, instruction = "Caption copied — paste it into your post!") => {
+    const ok = await copyToClipboard(true);
+    if (ok) toast.success(`${platform} opened. ${instruction}`);
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const shareToTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
-    window.open(url, "_blank", "width=550,height=420");
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    openWith(url, "X (Twitter)", "Text is pre-filled and also copied as backup.");
   };
 
   const shareToFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(shareText)}`;
-    window.open(url, "_blank", "width=550,height=420");
+    // Facebook ignores `quote` unless the URL has OG tags, so we always copy first.
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    openWith(url, "Facebook");
+  };
+
+  const shareToLinkedIn = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+    openWith(url, "LinkedIn");
+  };
+
+  const shareToInstagram = () => {
+    // Instagram has no web share intent; copy caption and open the app/site.
+    openWith("https://www.instagram.com/", "Instagram", "Caption copied — paste it into your Story or post!");
+  };
+
+  const shareToTikTok = () => {
+    openWith("https://www.tiktok.com/upload", "TikTok", "Caption copied — paste it into your video description!");
   };
 
   const shareViaWebAPI = async () => {
@@ -129,6 +154,7 @@ export const ProgressSharing = () => {
         await navigator.share({
           title: "My Sobriety Progress",
           text: shareText,
+          url: shareUrl,
         });
         toast.success("Shared successfully!");
       } catch (err) {
@@ -158,7 +184,7 @@ export const ProgressSharing = () => {
               Create Share Card
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Share Your Achievement</DialogTitle>
             </DialogHeader>
@@ -171,48 +197,48 @@ export const ProgressSharing = () => {
                 milestone={latestMilestone} 
               />
 
+              <p className="text-xs text-muted-foreground text-center">
+                We'll copy your caption automatically — just paste it into the post.
+              </p>
+
               {/* Share buttons */}
               <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  onClick={shareToTwitter}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" onClick={shareToTwitter} className="flex items-center gap-2">
                   <Twitter className="w-4 h-4" />
-                  Twitter/X
+                  X (Twitter)
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={shareToFacebook}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" onClick={shareToFacebook} className="flex items-center gap-2">
                   <Facebook className="w-4 h-4" />
                   Facebook
                 </Button>
+                <Button variant="outline" onClick={shareToLinkedIn} className="flex items-center gap-2">
+                  <Linkedin className="w-4 h-4" />
+                  LinkedIn
+                </Button>
+                <Button variant="outline" onClick={shareToInstagram} className="flex items-center gap-2">
+                  <Instagram className="w-4 h-4" />
+                  Instagram
+                </Button>
+                <Button variant="outline" onClick={shareToTikTok} className="flex items-center gap-2">
+                  <Music2 className="w-4 h-4" />
+                  TikTok
+                </Button>
+                <Button variant="outline" onClick={shareViaWebAPI} className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  More
+                </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  onClick={shareViaWebAPI}
-                  className="flex items-center gap-2"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  More Options
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={copyToClipboard}
-                  className="flex items-center gap-2"
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-primary" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                  Copy Text
-                </Button>
+              <Button variant="secondary" onClick={() => copyToClipboard()} className="w-full flex items-center gap-2">
+                {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+                {copied ? "Copied!" : "Copy Caption"}
+              </Button>
+
+              {/* Preview text */}
+              <div className="p-3 rounded-lg bg-secondary/50 text-sm text-muted-foreground">
+                {shareText}
               </div>
+            </div>
 
               {/* Preview text */}
               <div className="p-3 rounded-lg bg-secondary/50 text-sm text-muted-foreground">
