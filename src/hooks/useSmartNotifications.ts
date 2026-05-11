@@ -377,18 +377,40 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
   }, [settings.quietHoursEnabled, settings.quietHoursStart, settings.quietHoursEnd]);
 
   const sendNotification = useCallback((title: string, options?: NotificationOptions) => {
-    if (permission !== "granted" || !settings.enabled) return;
+    if (!settings.enabled) return;
     if (isInQuietHours()) return;
-    try {
-      new Notification(title, {
-        icon: "/icons/icon-192x192.png",
-        badge: "/icons/icon-96x96.png",
-        ...options,
-      });
-    } catch (error) {
-      console.error("Failed to send notification:", error);
+
+    // Try OS-level notification (only if permission granted)
+    if (permission === "granted" && "Notification" in window) {
+      try {
+        new Notification(title, {
+          icon: "/icons/icon-192x192.png",
+          badge: "/icons/icon-96x96.png",
+          ...options,
+        });
+      } catch (error) {
+        console.error("Failed to send OS notification:", error);
+      }
     }
-  }, [permission, settings.enabled, isInQuietHours]);
+
+    // Always persist as in-app notification so the bell + toast shows it
+    if (user) {
+      const tag = (options?.tag as string) || "smart";
+      // De-dupe via localStorage (one per tag per day)
+      const dedupeKey = `inapp_notif_${tag}_${new Date().toISOString().split("T")[0]}`;
+      if (localStorage.getItem(dedupeKey)) return;
+      localStorage.setItem(dedupeKey, "1");
+
+      void supabase.from("notifications").insert({
+        user_id: user.id,
+        from_user_id: user.id,
+        notification_type: "smart_reminder",
+        target_type: "smart",
+        target_id: tag,
+        content_preview: `${title}${options?.body ? " — " + options.body : ""}`.slice(0, 200),
+      });
+    }
+  }, [permission, settings.enabled, isInQuietHours, user]);
 
   // ── Missed check-in (after 2 PM) ──
   const checkMissedCheckInReminder = useCallback(() => {
