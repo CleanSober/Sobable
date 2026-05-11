@@ -581,18 +581,15 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     const lastReminder = settings.lastDailyMotivation;
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 20) return;
 
-    const currentHour = now.getHours();
-    if (currentHour >= 8 && currentHour < 9) {
-      const sobrietyDays = sobrietyStartDate
-        ? differenceInDays(now, parseISO(sobrietyStartDate))
-        : undefined;
+    const sobrietyDays = sobrietyStartDate
+      ? differenceInDays(now, parseISO(sobrietyStartDate))
+      : undefined;
 
-      sendNotification(pickRandom(dailyMotivationMessages.titles), {
-        body: pickRandom(dailyMotivationMessages.bodies(sobrietyDays, currentStreak)),
-        tag: "daily-motivation",
-      });
-      updateSettings({ lastDailyMotivation: now.toISOString() });
-    }
+    sendNotification(pickRandom(dailyMotivationMessages.titles), {
+      body: pickRandom(dailyMotivationMessages.bodies(sobrietyDays, currentStreak)),
+      tag: "daily-motivation",
+    });
+    updateSettings({ lastDailyMotivation: now.toISOString() });
   }, [settings, sobrietyStartDate, currentStreak, sendNotification, updateSettings]);
 
   // ── NEW: Progress celebrations (sobriety + streak milestones) ──
