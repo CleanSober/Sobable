@@ -193,6 +193,9 @@ export const DailyAffirmation = () => {
                 <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={shareToTwitter}>
                   𝕏 Post
                 </Button>
+                <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={shareToFacebook}>
+                  📘 FB
+                </Button>
               </div>
             </motion.div>
           )}
