@@ -33,6 +33,7 @@ const NOTIFICATION_ICONS: Record<string, typeof Bell> = {
   follow: UserPlus,
   chat_message: MessageSquare,
   forum_post: MessageSquare,
+  smart_reminder: Bell,
   default: Bell,
 };
 
@@ -44,6 +45,7 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   follow: "text-purple-500 bg-purple-500/10",
   chat_message: "text-teal-500 bg-teal-500/10",
   forum_post: "text-amber-500 bg-amber-500/10",
+  smart_reminder: "text-primary bg-primary/10",
   default: "text-primary bg-primary/10",
 };
 
