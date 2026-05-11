@@ -173,7 +173,7 @@ function generateEmailHtml(
     
     <!-- Header -->
     <tr><td style="text-align: center; padding: 32px 0 16px;">
-      <p style="font-size: 28px; font-weight: bold; color: #22c55e; margin: 0;">🌿 Sober Club</p>
+      <p style="font-size: 28px; font-weight: bold; color: #22c55e; margin: 0;">🌿 Sobable</p>
       <p style="font-size: 12px; color: #6b7280; margin: 8px 0 0; text-transform: uppercase; letter-spacing: 1.5px;">Weekly Progress Report</p>
     </td></tr>
 
