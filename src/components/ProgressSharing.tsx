@@ -239,12 +239,6 @@ export const ProgressSharing = () => {
                 {shareText}
               </div>
             </div>
-
-              {/* Preview text */}
-              <div className="p-3 rounded-lg bg-secondary/50 text-sm text-muted-foreground">
-                {shareText}
-              </div>
-            </div>
           </DialogContent>
         </Dialog>
 
