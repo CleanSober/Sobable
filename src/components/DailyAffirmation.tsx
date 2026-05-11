@@ -184,6 +184,25 @@ export const DailyAffirmation = () => {
                   <X className="w-3 h-3 text-muted-foreground" />
                 </button>
               </div>
+              <textarea
+                value={shareText}
+                onChange={(e) => setEditedCaption(e.target.value)}
+                rows={3}
+                maxLength={500}
+                className="w-full text-[11px] p-2 mb-1 rounded-md border border-border/60 bg-background/60 text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-accent"
+                placeholder="Edit your caption..."
+              />
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] text-muted-foreground">{shareText.length}/500</span>
+                {editedCaption !== null && editedCaption !== defaultShareText && (
+                  <button
+                    onClick={() => setEditedCaption(null)}
+                    className="text-[9px] text-accent hover:underline"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={() => copyToClipboard()}>
                   {justCopied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
