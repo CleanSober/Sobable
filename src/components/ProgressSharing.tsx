@@ -109,23 +109,38 @@ export const ProgressSharing = () => {
   const shareText = editedCaption ?? defaultShareText;
 
   const copyToClipboard = async (silent = false) => {
-    try {
-      await navigator.clipboard.writeText(shareText);
+    const result = await copyText(shareText);
+    if (result.ok) {
       if (!silent) {
         setCopied(true);
-        toast.success("Copied to clipboard!");
+        toast.success(result.message);
         setTimeout(() => setCopied(false), 2000);
       }
       return true;
-    } catch {
-      if (!silent) toast.error("Failed to copy");
-      return false;
     }
+    if (!silent) {
+      toast.error(result.message, {
+        duration: 6000,
+        action: {
+          label: "Show text",
+          onClick: () => {
+            const ta = document.getElementById("share-caption-textarea") as HTMLTextAreaElement | null;
+            ta?.focus();
+            ta?.select();
+          },
+        },
+      });
+    }
+    return false;
   };
 
   const openWith = async (url: string, platform: string, instruction = "Caption copied — paste it into your post!") => {
     const ok = await copyToClipboard(true);
-    if (ok) toast.success(`${platform} opened. ${instruction}`);
+    if (ok) {
+      toast.success(`${platform} opened. ${instruction}`);
+    } else {
+      toast.warning(`${platform} opened, but couldn't copy the caption — copy it manually from the editor.`, { duration: 6000 });
+    }
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
