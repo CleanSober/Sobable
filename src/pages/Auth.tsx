@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import soberClubLogo from "@/assets/sober-club-logo.png";
 
@@ -42,6 +43,8 @@ const Auth = () => {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
   const [signupPendingEmail, setSignupPendingEmail] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { signIn, signUp, user, resetPassword, updatePassword, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
@@ -55,6 +58,38 @@ const Auth = () => {
       setMode("reset");
     }
   }, [initialMode]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async (targetEmail?: string) => {
+    const addr = (targetEmail ?? signupPendingEmail ?? email).trim();
+    if (!addr.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: addr,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) {
+        toast.error(error.message || "Couldn't resend verification email");
+      } else {
+        toast.success(`Verification email sent to ${addr}`);
+        setResendCooldown(30);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't resend verification email");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const validateEmail = () => {
     const trimmedEmail = email.trim();
@@ -132,10 +167,21 @@ const Auth = () => {
       if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes("Invalid login")) {
+          const msg = error.message || "";
+          if (msg.toLowerCase().includes("email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
+            toast.error("Email not verified yet", {
+              description: "Check your inbox or resend the verification link.",
+              action: {
+                label: "Resend",
+                onClick: () => handleResendVerification(email),
+              },
+            });
+            setSignupPendingEmail(email.trim());
+            setMode("signup");
+          } else if (msg.includes("Invalid login")) {
             toast.error("Invalid email or password");
           } else {
-            toast.error(error.message);
+            toast.error(msg);
           }
         } else {
           toast.success("Welcome back!");
@@ -306,6 +352,21 @@ const Auth = () => {
                     Don't see it? Check your spam folder.
                   </p>
                   <div className="space-y-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-10 text-sm"
+                      onClick={() => handleResendVerification()}
+                      disabled={resendLoading || resendCooldown > 0}
+                    >
+                      {resendLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : resendCooldown > 0 ? (
+                        `Resend in ${resendCooldown}s`
+                      ) : (
+                        "Resend verification email"
+                      )}
+                    </Button>
                     <Button
                       className="w-full h-10 text-sm gradient-primary text-primary-foreground"
                       onClick={() => switchMode("login")}
