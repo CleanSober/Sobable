@@ -253,8 +253,14 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   const investmentGain = Math.round(investedValue - totalSaved);
 
 
-
+  const growthData = generateGrowthData(daysSober, dailySpending, effectiveReturnRate);
+  const milestones = getSavingsMilestones(totalSaved);
+  const allMilestones = [
+    ...milestones,
+    ...customMilestones.map(m => ({ ...m, unlocked: totalSaved >= m.target })),
+  ].sort((a, b) => a.target - b.target);
   const affordableItems = alternatives.filter((item) => totalSaved >= item.cost);
+
 
   const nextMilestone = allMilestones.find((m) => !m.unlocked);
   const unlockedCount = allMilestones.filter((m) => m.unlocked).length;
