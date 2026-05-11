@@ -252,23 +252,8 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   }
   const investmentGain = Math.round(investedValue - totalSaved);
 
-  // Custom spending categories for Pro
-  const defaultCategories = getSpendingCategories(dailySpending);
-  const proCustomCategories = isPremium && proSettings.customCategories
-    ? (proSettings.customCategories as { name: string; desc: string; pct: number; icon: string }[]).map(c => ({
-        ...c,
-        amount: dailySpending * (c.pct / 100),
-        color: c.pct >= 50 ? "hsl(0 75% 55%)" : c.pct >= 20 ? "hsl(42 100% 55%)" : c.pct >= 10 ? "hsl(168 84% 45%)" : "hsl(215 18% 58%)",
-      }))
-    : null;
 
-  const growthData = generateGrowthData(daysSober, dailySpending, effectiveReturnRate);
-  const milestones = getSavingsMilestones(totalSaved);
-  const allMilestones = [
-    ...milestones,
-    ...customMilestones.map(m => ({ ...m, unlocked: totalSaved >= m.target })),
-  ].sort((a, b) => a.target - b.target);
-  const categories = proCustomCategories || defaultCategories;
+
   const affordableItems = alternatives.filter((item) => totalSaved >= item.cost);
 
   const nextMilestone = allMilestones.find((m) => !m.unlocked);
