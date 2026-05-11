@@ -89,8 +89,12 @@ export const DailyAffirmation = () => {
   };
 
   const openExternal = async (url: string, platform: string) => {
-    await copyToClipboard(true);
-    toast.success(`${platform} opened — caption copied!`);
+    const ok = await copyToClipboard(true);
+    if (ok) {
+      toast.success(`${platform} opened — caption copied!`);
+    } else {
+      toast.warning(`${platform} opened — copy the caption manually from above.`, { duration: 6000 });
+    }
     window.open(url, "_blank", "noopener,noreferrer");
     setShowShareMenu(false);
   };
