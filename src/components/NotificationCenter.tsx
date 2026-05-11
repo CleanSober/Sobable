@@ -147,7 +147,7 @@ export const NotificationCenter = () => {
     toast.success("All notifications cleared");
   };
 
-  const getNotificationTitle = (type: string): string => {
+  const getNotificationTitle = (type: string, preview?: string | null): string => {
     switch (type) {
       case "mention": return "You were mentioned";
       case "reply": return "New reply";
@@ -156,6 +156,12 @@ export const NotificationCenter = () => {
       case "follow": return "New follower";
       case "chat_message": return "New chat message";
       case "forum_post": return "New forum activity";
+      case "smart_reminder": {
+        // Smart reminders pack "Title — body" into content_preview
+        const dash = preview?.indexOf(" — ") ?? -1;
+        if (preview && dash > 0) return preview.slice(0, dash);
+        return preview || "Reminder";
+      }
       default: return "Notification";
     }
   };
