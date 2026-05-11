@@ -514,11 +514,12 @@ async function verifyApplePurchase({
 
   if (!receipt) {
     logStep("Apple: No receipt provided for fallback validation", { transactionId, productId });
-    const normalizedEnvironment = environment?.toLowerCase();
-    if (
-      jwsRepresentation &&
-      (normalizedEnvironment === "sandbox" || normalizedEnvironment === "xcode")
-    ) {
+
+    // Unsigned-JWS fallback is only allowed when the SERVER is explicitly
+    // configured for sandbox (APPLE_ENVIRONMENT=sandbox). The client-supplied
+    // `environment` field is NEVER trusted to bypass cryptographic verification.
+    const serverEnvironment = Deno.env.get("APPLE_ENVIRONMENT")?.toLowerCase();
+    if (jwsRepresentation && serverEnvironment === "sandbox") {
       const jwsResult = verifyAppleJwsFallback(
         jwsRepresentation,
         productId,
