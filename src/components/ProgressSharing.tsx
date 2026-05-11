@@ -238,9 +238,28 @@ export const ProgressSharing = () => {
                 {copied ? "Copied!" : "Copy Caption"}
               </Button>
 
-              {/* Preview text */}
-              <div className="p-3 rounded-lg bg-secondary/50 text-sm text-muted-foreground">
-                {shareText}
+              {/* Editable caption */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">Edit caption</label>
+                  {editedCaption !== null && editedCaption !== defaultShareText && (
+                    <button
+                      onClick={() => setEditedCaption(null)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={shareText}
+                  onChange={(e) => setEditedCaption(e.target.value)}
+                  rows={4}
+                  maxLength={500}
+                  className="w-full p-3 rounded-lg bg-secondary/50 text-sm text-foreground border border-border/60 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Write your caption..."
+                />
+                <p className="text-[10px] text-muted-foreground text-right">{shareText.length}/500</p>
               </div>
             </div>
           </DialogContent>
