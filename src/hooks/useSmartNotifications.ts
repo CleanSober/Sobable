@@ -486,7 +486,6 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
       tag: "streak-risk",
     });
     updateSettings({ lastStreakRiskReminder: now.toISOString() });
-    }
   }, [settings, streakAtRisk, currentStreak, sendNotification, updateSettings]);
 
   // ── Weekly report (Sundays) ──
