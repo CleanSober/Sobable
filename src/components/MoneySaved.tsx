@@ -252,15 +252,6 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
   }
   const investmentGain = Math.round(investedValue - totalSaved);
 
-  // Custom spending categories for Pro
-  const defaultCategories = getSpendingCategories(dailySpending);
-  const proCustomCategories = isPremium && proSettings.customCategories
-    ? (proSettings.customCategories as { name: string; desc: string; pct: number; icon: string }[]).map(c => ({
-        ...c,
-        amount: dailySpending * (c.pct / 100),
-        color: c.pct >= 50 ? "hsl(0 75% 55%)" : c.pct >= 20 ? "hsl(42 100% 55%)" : c.pct >= 10 ? "hsl(168 84% 45%)" : "hsl(215 18% 58%)",
-      }))
-    : null;
 
   const growthData = generateGrowthData(daysSober, dailySpending, effectiveReturnRate);
   const milestones = getSavingsMilestones(totalSaved);
@@ -268,8 +259,8 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
     ...milestones,
     ...customMilestones.map(m => ({ ...m, unlocked: totalSaved >= m.target })),
   ].sort((a, b) => a.target - b.target);
-  const categories = proCustomCategories || defaultCategories;
   const affordableItems = alternatives.filter((item) => totalSaved >= item.cost);
+
 
   const nextMilestone = allMilestones.find((m) => !m.unlocked);
   const unlockedCount = allMilestones.filter((m) => m.unlocked).length;
@@ -466,46 +457,6 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
                   <p className="text-[10px] text-muted-foreground">{item.label}</p>
                 </motion.div>
               ))}
-            </div>
-
-            {/* Spending breakdown */}
-            <div className="glass-card rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Wallet className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium text-foreground">Daily spending breakdown</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mb-3">
-                Estimated based on your ${dailySpending}/day addiction-related costs
-              </p>
-              <div className="space-y-2.5">
-                {categories.map((cat, index) => (
-                  <motion.div
-                    key={cat.name}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.05 * index }}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="text-sm">{cat.icon}</span>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <span className="text-xs text-foreground font-medium">{cat.name}</span>
-                        <span className="text-xs font-medium text-foreground">${cat.amount.toFixed(2)}</span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mb-1">{cat.desc}</p>
-                      <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${cat.pct}%` }}
-                          transition={{ duration: 0.8, delay: 0.1 * index }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
             </div>
 
             {/* What you could buy */}
@@ -887,79 +838,6 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
                         </div>
                       </div>
 
-                      {/* Custom spending categories */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Receipt className="w-3.5 h-3.5 text-muted-foreground" />
-                            <span className="text-xs font-medium text-foreground">Spending Categories</span>
-                          </div>
-                          {proSettings.customCategories && (
-                            <button
-                              onClick={() => updateProSetting("customCategories", null)}
-                              className="text-[10px] text-primary hover:underline"
-                            >
-                              Reset to defaults
-                            </button>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          {(proSettings.customCategories || [
-                            { name: "Substance costs", desc: "Alcohol, drugs, or tobacco", pct: 60, icon: "🚫" },
-                            { name: "Related expenses", desc: "Rides, delivery, cover charges", pct: 20, icon: "🚕" },
-                            { name: "Impulse spending", desc: "Late-night orders, unplanned buys", pct: 12, icon: "🛒" },
-                            { name: "Hidden costs", desc: "Health, missed work, repairs", pct: 8, icon: "📦" },
-                          ]).map((cat: any, idx: number) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <span className="text-sm w-6">{cat.icon}</span>
-                              <Input
-                                value={cat.name}
-                                onChange={(e) => {
-                                  const cats = proSettings.customCategories || [
-                                    { name: "Substance costs", desc: "Alcohol, drugs, or tobacco", pct: 60, icon: "🚫" },
-                                    { name: "Related expenses", desc: "Rides, delivery, cover charges", pct: 20, icon: "🚕" },
-                                    { name: "Impulse spending", desc: "Late-night orders, unplanned buys", pct: 12, icon: "🛒" },
-                                    { name: "Hidden costs", desc: "Health, missed work, repairs", pct: 8, icon: "📦" },
-                                  ];
-                                  const updated = [...cats];
-                                  updated[idx] = { ...updated[idx], name: e.target.value.slice(0, 30) };
-                                  updateProSetting("customCategories", updated);
-                                }}
-                                className="h-7 text-[11px] bg-secondary/50 border-border/50 flex-1"
-                                maxLength={30}
-                              />
-                              <div className="flex items-center gap-1 min-w-[50px]">
-                                <Input
-                                  type="number"
-                                  value={cat.pct}
-                                  onChange={(e) => {
-                                    const cats = proSettings.customCategories || [
-                                      { name: "Substance costs", desc: "Alcohol, drugs, or tobacco", pct: 60, icon: "🚫" },
-                                      { name: "Related expenses", desc: "Rides, delivery, cover charges", pct: 20, icon: "🚕" },
-                                      { name: "Impulse spending", desc: "Late-night orders, unplanned buys", pct: 12, icon: "🛒" },
-                                      { name: "Hidden costs", desc: "Health, missed work, repairs", pct: 8, icon: "📦" },
-                                    ];
-                                    const updated = [...cats];
-                                    updated[idx] = { ...updated[idx], pct: Math.min(Math.max(parseInt(e.target.value) || 0, 0), 100) };
-                                    updateProSetting("customCategories", updated);
-                                  }}
-                                  className="h-7 text-[11px] bg-secondary/50 border-border/50 w-12 text-center"
-                                />
-                                <span className="text-[10px] text-muted-foreground">%</span>
-                              </div>
-                            </div>
-                          ))}
-                          {(() => {
-                            const cats = proSettings.customCategories || [{ pct: 60 }, { pct: 20 }, { pct: 12 }, { pct: 8 }];
-                            const totalPct = cats.reduce((s: number, c: any) => s + (c.pct || 0), 0);
-                            return totalPct !== 100 ? (
-                              <p className="text-[10px] text-destructive">Total: {totalPct}% — should equal 100%</p>
-                            ) : (
-                              <p className="text-[10px] text-primary">Total: 100% ✓</p>
-                            );
-                          })()}
-                        </div>
-                      </div>
                     </div>
                   </motion.div>
                 )}
