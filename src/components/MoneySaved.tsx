@@ -468,46 +468,6 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
               ))}
             </div>
 
-            {/* Spending breakdown */}
-            <div className="glass-card rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Wallet className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium text-foreground">Daily spending breakdown</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mb-3">
-                Estimated based on your ${dailySpending}/day addiction-related costs
-              </p>
-              <div className="space-y-2.5">
-                {categories.map((cat, index) => (
-                  <motion.div
-                    key={cat.name}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.05 * index }}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="text-sm">{cat.icon}</span>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <span className="text-xs text-foreground font-medium">{cat.name}</span>
-                        <span className="text-xs font-medium text-foreground">${cat.amount.toFixed(2)}</span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mb-1">{cat.desc}</p>
-                      <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${cat.pct}%` }}
-                          transition={{ duration: 0.8, delay: 0.1 * index }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
             {/* What you could buy */}
             {affordableItems.length > 0 && (
               <div className="glass-card rounded-xl p-4">
