@@ -396,6 +396,64 @@ export const ProgressSharing = () => {
                 {copied ? "Copied!" : "Copy Caption"}
               </Button>
 
+              {/* Branded share image */}
+              <div className="rounded-xl border border-border/60 p-3 space-y-3 bg-secondary/30">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Branded share image</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Generate a 1080×1350 image with your stats — perfect for Instagram, TikTok, or Facebook posts/stories.
+                </p>
+
+                {generatedImage ? (
+                  <img
+                    src={generatedImage.url}
+                    alt="Your branded share image"
+                    className="w-full rounded-lg border border-border/40"
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => generateShareImage()}
+                    disabled={isGenerating}
+                    className="w-full"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    {isGenerating ? "Generating…" : "Generate Image"}
+                  </Button>
+                )}
+
+                {generatedImage && (
+                  <>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button variant="outline" size="sm" onClick={() => shareImageTo("instagram")} className="gap-1">
+                        <Instagram className="w-3.5 h-3.5" />
+                        Instagram
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => shareImageTo("tiktok")} className="gap-1">
+                        <Music2 className="w-3.5 h-3.5" />
+                        TikTok
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => shareImageTo("facebook")} className="gap-1">
+                        <Facebook className="w-3.5 h-3.5" />
+                        Facebook
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="ghost" size="sm" onClick={downloadImage} className="gap-1">
+                        <Download className="w-3.5 h-3.5" />
+                        Download
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => generateShareImage()} className="gap-1">
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        Regenerate
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* Editable caption */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
