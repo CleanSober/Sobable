@@ -40,6 +40,15 @@ serve(async (req) => {
     const userId = user.id;
     console.log("Generating ambient music for user:", userId);
 
+    // Premium gate
+    const { data: isPremium, error: premErr } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
+    if (premErr || !isPremium) {
+      return new Response(JSON.stringify({ error: "Premium subscription required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { type, duration } = await req.json();
 
     // Validate input

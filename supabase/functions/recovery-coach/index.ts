@@ -87,6 +87,15 @@ serve(async (req) => {
     const userId = claimsData.claims.sub;
     console.log("Recovery coach — user:", userId);
 
+    // Premium gate
+    const { data: isPremium, error: premErr } = await supabase.rpc("is_premium_user", { check_user_id: userId });
+    if (premErr || !isPremium) {
+      return new Response(JSON.stringify({ error: "Premium subscription required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");

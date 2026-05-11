@@ -131,6 +131,15 @@ function getMotivationalMessage(daysSober: number, stats: WeeklyStats): string {
   return "Every single day counts. You're choosing a better life! 💚";
 }
 
+function escapeHtml(str: string): string {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function generateEmailHtml(
   displayName: string,
   daysSober: number,
@@ -147,17 +156,18 @@ function generateEmailHtml(
     : null;
 
   const motivationalMessage = getMotivationalMessage(daysSober, stats);
+  const safeDisplayName = escapeHtml(displayName);
 
   const achievementsHtml = stats.achievements.length > 0
     ? `<tr><td style="padding: 0 30px;">
         <h2 style="color: #374151; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">🏆 New Achievements</h2>
-        ${stats.achievements.map(a => `<div style="background: #fef3c7; border-radius: 8px; padding: 10px 14px; margin: 6px 0; color: #92400e; font-size: 14px;">✨ ${a}</div>`).join("")}
+        ${stats.achievements.map(a => `<div style="background: #fef3c7; border-radius: 8px; padding: 10px 14px; margin: 6px 0; color: #92400e; font-size: 14px;">✨ ${escapeHtml(a)}</div>`).join("")}
       </td></tr>`
     : "";
 
   const discussionsHtml = communityStats.activeDiscussions.length > 0
     ? communityStats.activeDiscussions.slice(0, 3).map(t =>
-        `<div style="color: #4b5563; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f3f4f6;">💬 ${t}</div>`
+        `<div style="color: #4b5563; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f3f4f6;">💬 ${escapeHtml(t)}</div>`
       ).join("")
     : '<p style="color: #9ca3af; font-size: 13px; margin: 0;">No new discussions this week</p>';
 
@@ -184,7 +194,7 @@ function generateEmailHtml(
         <!-- Greeting -->
         <tr><td style="padding: 28px 30px 12px;">
           <h1 style="color: #f9fafb; font-size: 22px; font-weight: bold; margin: 0;">
-            Hey ${displayName}! 👋
+            Hey ${safeDisplayName}! 👋
           </h1>
           <p style="color: #9ca3af; font-size: 14px; line-height: 22px; margin: 8px 0 0;">
             Here's your weekly recovery snapshot.
