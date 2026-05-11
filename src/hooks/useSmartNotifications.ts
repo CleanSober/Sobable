@@ -251,10 +251,13 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setSettings({ ...getDefaultSettings(), ...parsed });
+        // Force-enable so in-app notifications always work even without browser permission
+        setSettings({ ...getDefaultSettings(), ...parsed, enabled: true });
       } catch {
-        setSettings(getDefaultSettings());
+        setSettings({ ...getDefaultSettings(), enabled: true });
       }
+    } else {
+      setSettings({ ...getDefaultSettings(), enabled: true });
     }
   }, []);
 
