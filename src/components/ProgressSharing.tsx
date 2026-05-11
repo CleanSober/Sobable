@@ -103,7 +103,8 @@ export const ProgressSharing = () => {
 
   const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://sobable.lovable.app";
 
-  const shareText = `🎉 I've been sober for ${daysSober} days! ${latestMilestone ? `Just hit my ${latestMilestone} milestone! ` : ''}Every day is a victory with @Sobable. #SobrietyJourney #Recovery`;
+  const defaultShareText = `🎉 I've been sober for ${daysSober} days! ${latestMilestone ? `Just hit my ${latestMilestone} milestone! ` : ''}Every day is a victory with @Sobable. #SobrietyJourney #Recovery`;
+  const shareText = editedCaption ?? defaultShareText;
 
   const copyToClipboard = async (silent = false) => {
     try {
