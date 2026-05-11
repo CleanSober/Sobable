@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { useUserData } from "@/hooks/useUserData";
 import { calculateDaysSober, calculateMoneySaved, getMilestones } from "@/lib/storage";
+import { copyText } from "@/lib/clipboard";
 
 interface ShareCardProps {
   daysSober: number;
