@@ -30,7 +30,7 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const { startCheckout, checkoutLoading, isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
+  const { isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
   const navigate = useNavigate();
   const {
@@ -44,28 +44,23 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
   } = useInAppPurchases();
 
   const handleSubscribe = async () => {
-    if (isNative) {
-      const productId = selectedPlan === "monthly"
-        ? IAP_PRODUCTS.monthly.productId
-        : IAP_PRODUCTS.yearly.productId;
-      const success = await purchaseProduct(productId);
-      if (success) {
-        // Refresh premium status so the app recognizes the purchase
-        await checkSubscription();
-        refreshPremiumStatus();
-        if (onClose) onClose();
-        navigate("/profile");
-      }
-    } else {
-      const { STRIPE_PLANS } = await import("@/lib/stripe");
-      const plan = selectedPlan === "monthly"
-        ? STRIPE_PLANS.premium_monthly
-        : STRIPE_PLANS.premium_yearly;
-      await startCheckout(plan.price_id);
+    if (!isNative) {
+      // Subscriptions are only sold through Apple App Store / Google Play.
+      return;
+    }
+    const productId = selectedPlan === "monthly"
+      ? IAP_PRODUCTS.monthly.productId
+      : IAP_PRODUCTS.yearly.productId;
+    const success = await purchaseProduct(productId);
+    if (success) {
+      await checkSubscription();
+      refreshPremiumStatus();
+      if (onClose) onClose();
+      navigate("/profile");
     }
   };
 
-  const isLoading = isNative ? purchasing : checkoutLoading;
+  const isLoading = purchasing;
 
   // Get display prices - use native store prices if available, fallback to hardcoded
   const monthlyPrice = isNative
@@ -208,28 +203,37 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
       </div>
 
       {/* CTA */}
-      <Button
-        onClick={handleSubscribe}
-        disabled={isLoading}
-        className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Loading...
-          </>
-        ) : (
-          <>
-            <Crown className="w-4 h-4 mr-1.5" />
-            Subscribe — {selectedPlan === "monthly" ? `${monthlyPrice}/mo` : `${yearlyPrice}/yr`}
-          </>
-        )}
-      </Button>
+      {isNative ? (
+        <Button
+          onClick={handleSubscribe}
+          disabled={isLoading}
+          className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
+              <Crown className="w-4 h-4 mr-1.5" />
+              Subscribe — {selectedPlan === "monthly" ? `${monthlyPrice}/mo` : `${yearlyPrice}/yr`}
+            </>
+          )}
+        </Button>
+      ) : (
+        <div className="rounded-xl border border-border/50 bg-secondary/40 p-3 text-center space-y-1">
+          <p className="text-xs font-semibold text-foreground">Available on iOS and Android</p>
+          <p className="text-[11px] text-muted-foreground">
+            Sober Club subscriptions are sold through the App Store and Google Play. Open the Sober Club app on your phone to subscribe.
+          </p>
+        </div>
+      )}
 
       <div className="text-center space-y-1">
         <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
           <Shield className="w-3 h-3" />
-          {isNative ? "Billed by App Store · Cancel anytime" : "Secure payment · Cancel anytime"}
+          {isNative ? "Billed by App Store · Cancel anytime" : "Billed by App Store / Google Play · Cancel anytime"}
         </p>
       </div>
 

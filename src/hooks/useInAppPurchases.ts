@@ -410,12 +410,7 @@ export const useInAppPurchases = () => {
 
     try {
       await NativePurchases.restorePurchases();
-      toast.success("Purchases restored! Checking status...");
-
-      // Re-check subscription via the server
-      await supabase.functions.invoke("check-subscription", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
+      toast.success("Purchases restored! Reopen the app if your premium status doesn't update.");
     } catch (error) {
       console.error("Restore failed:", error);
       toast.error("Failed to restore purchases.");
