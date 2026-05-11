@@ -927,6 +927,7 @@ export type Database = {
           personal_reminder: string | null
           savings_start_date: string | null
           sobriety_start_date: string | null
+          spending_breakdown: Json | null
           sponsor_phone: string | null
           substances: string[] | null
           updated_at: string | null
@@ -943,6 +944,7 @@ export type Database = {
           personal_reminder?: string | null
           savings_start_date?: string | null
           sobriety_start_date?: string | null
+          spending_breakdown?: Json | null
           sponsor_phone?: string | null
           substances?: string[] | null
           updated_at?: string | null
@@ -959,6 +961,7 @@ export type Database = {
           personal_reminder?: string | null
           savings_start_date?: string | null
           sobriety_start_date?: string | null
+          spending_breakdown?: Json | null
           sponsor_phone?: string | null
           substances?: string[] | null
           updated_at?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS spending_breakdown jsonb DEFAULT '[]'::jsonb;

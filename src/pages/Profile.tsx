@@ -64,6 +64,7 @@ const Profile = () => {
   const [name, setName] = useState("");
   const [sobrietyDate, setSobrietyDate] = useState("");
   const [dailySpending, setDailySpending] = useState("0");
+  const [spendingBreakdown, setSpendingBreakdown] = useState<Array<{ name: string; amount: number }>>([]);
   const [sponsorPhone, setSponsorPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
   const [personalReminder, setPersonalReminder] = useState("");
@@ -86,6 +87,14 @@ const Profile = () => {
       setName(profile.display_name || "");
       setSobrietyDate(profile.sobriety_start_date || "");
       setDailySpending(profile.daily_spending?.toString() || "0");
+      const rawBreakdown = (profile as any).spending_breakdown;
+      if (Array.isArray(rawBreakdown)) {
+        setSpendingBreakdown(
+          rawBreakdown
+            .filter((c: any) => c && typeof c.name === "string")
+            .map((c: any) => ({ name: String(c.name), amount: Number(c.amount) || 0 }))
+        );
+      }
       setSponsorPhone(profile.sponsor_phone || "");
       setEmergencyContact(profile.emergency_contact || "");
       setPersonalReminder(profile.personal_reminder || "");
@@ -190,6 +199,11 @@ const Profile = () => {
       return;
     }
 
+    const cleanedBreakdown = spendingBreakdown
+      .map((c) => ({ name: c.name.trim().slice(0, 40), amount: Math.max(0, Number(c.amount) || 0) }))
+      .filter((c) => c.name.length > 0)
+      .slice(0, 12);
+
     setSaving(true);
     const { error } = await updateProfile({
       display_name: name.trim().slice(0, 50) || null,
@@ -198,7 +212,8 @@ const Profile = () => {
       sponsor_phone: sponsorPhone.slice(0, 20) || null,
       emergency_contact: emergencyContact.slice(0, 20) || null,
       personal_reminder: personalReminder.slice(0, 500) || null,
-    });
+      spending_breakdown: cleanedBreakdown,
+    } as any);
 
     setSaving(false);
     if (error) {
@@ -475,6 +490,78 @@ const Profile = () => {
                   onChange={(e) => setDailySpending(e.target.value)}
                   placeholder="e.g., 15"
                 />
+              </div>
+
+              {/* Spending Breakdown */}
+              <div className="space-y-2 rounded-lg border border-border/50 bg-muted/20 p-3">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2 text-xs">
+                    <DollarSign className="w-3.5 h-3.5 text-primary" />
+                    Spending Breakdown
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground">
+                    Total: ${spendingBreakdown.reduce((s, c) => s + (Number(c.amount) || 0), 0).toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Break your daily spending into your own categories (e.g., Beer, Cigarettes, Uber).
+                </p>
+
+                {spendingBreakdown.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground italic">No categories yet — add one below.</p>
+                )}
+
+                <div className="space-y-2">
+                  {spendingBreakdown.map((cat, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={cat.name}
+                        placeholder="Category"
+                        maxLength={40}
+                        onChange={(e) => {
+                          const next = [...spendingBreakdown];
+                          next[idx] = { ...next[idx], name: e.target.value };
+                          setSpendingBreakdown(next);
+                        }}
+                        className="flex-1 h-9 text-sm"
+                      />
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={cat.amount}
+                        placeholder="$"
+                        onChange={(e) => {
+                          const next = [...spendingBreakdown];
+                          next[idx] = { ...next[idx], amount: parseFloat(e.target.value) || 0 };
+                          setSpendingBreakdown(next);
+                        }}
+                        className="w-24 h-9 text-sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                        onClick={() => setSpendingBreakdown(spendingBreakdown.filter((_, i) => i !== idx))}
+                        aria-label="Remove category"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-8 text-xs"
+                  disabled={spendingBreakdown.length >= 12}
+                  onClick={() => setSpendingBreakdown([...spendingBreakdown, { name: "", amount: 0 }])}
+                >
+                  + Add category
+                </Button>
               </div>
 
               <div className="space-y-1.5">
