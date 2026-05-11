@@ -463,7 +463,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 12) return;
 
     const currentHour = now.getHours();
-    if (currentHour >= 18 && currentHour < 22) {
+    if (currentHour >= 12) {
       sendNotification(pickRandom(meditationMessages.titles), {
         body: pickRandom(meditationMessages.bodies),
         tag: "missed-meditation",
