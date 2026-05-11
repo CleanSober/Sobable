@@ -565,14 +565,11 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
         ? differenceInDays(now, parseISO(sobrietyStartDate))
         : undefined;
 
-      const currentHour = now.getHours();
-      if (currentHour >= 10 && currentHour < 20) {
-        sendNotification(pickRandom(comebackMessages.titles), {
-          body: pickRandom(comebackMessages.bodies(daysAway, sobrietyDays)),
-          tag: "comeback-nudge",
-        });
-        updateSettings({ lastComebackNudge: now.toISOString() });
-      }
+      sendNotification(pickRandom(comebackMessages.titles), {
+        body: pickRandom(comebackMessages.bodies(daysAway, sobrietyDays)),
+        tag: "comeback-nudge",
+      });
+      updateSettings({ lastComebackNudge: now.toISOString() });
     }
   }, [settings, user, sobrietyStartDate, sendNotification, updateSettings]);
 
