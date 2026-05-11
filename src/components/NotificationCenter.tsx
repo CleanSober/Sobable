@@ -98,7 +98,7 @@ export const NotificationCenter = () => {
           setNotifications(prev => [newNotification, ...prev]);
           
           // Show toast for new notification
-          toast.info(getNotificationTitle(newNotification.notification_type), {
+          toast.info(getNotificationTitle(newNotification.notification_type, newNotification.content_preview), {
             description: newNotification.content_preview || "New notification",
           });
         }
