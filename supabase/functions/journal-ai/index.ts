@@ -50,6 +50,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Premium gate
+    const { data: isPremium, error: premErr } = await supabase.rpc('is_premium_user', { check_user_id: user.id });
+    if (premErr || !isPremium) {
+      return new Response(JSON.stringify({ error: 'Premium subscription required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json();
     const allowedActions = ['generate_prompt', 'analyze_mood', 'suggest_tags'] as const;
     const action = typeof body?.action === 'string' ? body.action : '';
