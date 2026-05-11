@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share2, Copy, Check, Twitter, Facebook, Linkedin, Instagram, Music2, MessageCircle, Award } from "lucide-react";
+import { Share2, Copy, Check, Twitter, Facebook, Linkedin, Instagram, Music2, MessageCircle, Award, Download, ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -89,6 +89,8 @@ export const ProgressSharing = () => {
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [editedCaption, setEditedCaption] = useState<string | null>(null);
+  const [generatedImage, setGeneratedImage] = useState<{ url: string; blob: Blob } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const daysSober = profile?.sobriety_start_date
     ? calculateDaysSober(profile.sobriety_start_date)
@@ -171,6 +173,162 @@ export const ProgressSharing = () => {
     }
   };
 
+  // ---- Branded share image (1080x1350) generated via Canvas ----
+  const generateShareImage = async (): Promise<{ url: string; blob: Blob } | null> => {
+    setIsGenerating(true);
+    try {
+      const W = 1080;
+      const H = 1350;
+      const canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas not supported");
+
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, "#0f766e");
+      grad.addColorStop(0.55, "#0d9488");
+      grad.addColorStop(1, "#059669");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      const glow = (x: number, y: number, r: number, alpha: number) => {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, `rgba(255,255,255,${alpha})`);
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      glow(W * 0.85, H * 0.15, 380, 0.18);
+      glow(W * 0.1, H * 0.9, 420, 0.12);
+
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.font = "600 44px system-ui, -apple-system, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("✦  SOBABLE  ✦", W / 2, 130);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 320px system-ui, -apple-system, 'Segoe UI', sans-serif";
+      ctx.fillText(String(daysSober), W / 2, H / 2 + 30);
+
+      ctx.font = "500 56px system-ui, -apple-system, 'Segoe UI', sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.fillText(daysSober === 1 ? "Day Sober" : "Days Sober", W / 2, H / 2 + 110);
+
+      const weeks = Math.floor(daysSober / 7);
+      const months = Math.floor(daysSober / 30);
+      const stats: Array<[string, string]> = [
+        [String(weeks), "Weeks"],
+        [String(months), "Months"],
+        [`$${moneySaved}`, "Saved"],
+      ];
+      const pillW = 280, pillH = 150, gap = 30;
+      const totalW = pillW * 3 + gap * 2;
+      let startX = (W - totalW) / 2;
+      const pillY = H - 380;
+      stats.forEach(([val, label]) => {
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+        const r = 28;
+        ctx.beginPath();
+        ctx.moveTo(startX + r, pillY);
+        ctx.arcTo(startX + pillW, pillY, startX + pillW, pillY + pillH, r);
+        ctx.arcTo(startX + pillW, pillY + pillH, startX, pillY + pillH, r);
+        ctx.arcTo(startX, pillY + pillH, startX, pillY, r);
+        ctx.arcTo(startX, pillY, startX + pillW, pillY, r);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "700 64px system-ui, -apple-system, 'Segoe UI', sans-serif";
+        ctx.fillText(val, startX + pillW / 2, pillY + 75);
+        ctx.font = "500 30px system-ui, -apple-system, 'Segoe UI', sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillText(label, startX + pillW / 2, pillY + 120);
+        startX += pillW + gap;
+      });
+
+      if (latestMilestone) {
+        ctx.font = "600 36px system-ui, -apple-system, 'Segoe UI', sans-serif";
+        ctx.fillStyle = "#fde68a";
+        ctx.fillText(`🏆  ${latestMilestone}`, W / 2, H - 170);
+      }
+
+      ctx.font = "500 30px system-ui, -apple-system, 'Segoe UI', sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.fillText("Every day is a victory.", W / 2, H - 100);
+      ctx.font = "400 26px system-ui, -apple-system, 'Segoe UI', sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.fillText("sobable.lovable.app", W / 2, H - 55);
+
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Failed to render"))), "image/png")
+      );
+      const url = URL.createObjectURL(blob);
+      const result = { url, blob };
+      setGeneratedImage(result);
+      return result;
+    } catch {
+      toast.error("Couldn't generate image");
+      return null;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const ensureImage = async () => generatedImage ?? (await generateShareImage());
+
+  const downloadImage = async () => {
+    const img = await ensureImage();
+    if (!img) return;
+    const a = document.createElement("a");
+    a.href = img.url;
+    a.download = `sobable-${daysSober}-days.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast.success("Image downloaded!");
+  };
+
+  const shareImageTo = async (platform: "instagram" | "tiktok" | "facebook") => {
+    const img = await ensureImage();
+    if (!img) return;
+    await copyToClipboard(true);
+
+    const file = new File([img.blob], `sobable-${daysSober}-days.png`, { type: "image/png" });
+    const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
+    if (nav.canShare && nav.canShare({ files: [file] })) {
+      try {
+        await nav.share({ files: [file], text: shareText, title: "My Sobriety Progress" });
+        toast.success("Shared!");
+        return;
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
+      }
+    }
+
+    const a = document.createElement("a");
+    a.href = img.url;
+    a.download = `sobable-${daysSober}-days.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    const urls: Record<string, string> = {
+      instagram: "https://www.instagram.com/",
+      tiktok: "https://www.tiktok.com/upload",
+      facebook: "https://www.facebook.com/",
+    };
+    const labels: Record<string, string> = {
+      instagram: "Instagram",
+      tiktok: "TikTok",
+      facebook: "Facebook",
+    };
+    toast.success(`Image saved & caption copied. Upload it on ${labels[platform]}!`);
+    window.open(urls[platform], "_blank", "noopener,noreferrer");
+  };
+
   return (
     <Card className="gradient-card border-border/50">
       <CardHeader className="pb-3">
@@ -237,6 +395,64 @@ export const ProgressSharing = () => {
                 {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                 {copied ? "Copied!" : "Copy Caption"}
               </Button>
+
+              {/* Branded share image */}
+              <div className="rounded-xl border border-border/60 p-3 space-y-3 bg-secondary/30">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Branded share image</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Generate a 1080×1350 image with your stats — perfect for Instagram, TikTok, or Facebook posts/stories.
+                </p>
+
+                {generatedImage ? (
+                  <img
+                    src={generatedImage.url}
+                    alt="Your branded share image"
+                    className="w-full rounded-lg border border-border/40"
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => generateShareImage()}
+                    disabled={isGenerating}
+                    className="w-full"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    {isGenerating ? "Generating…" : "Generate Image"}
+                  </Button>
+                )}
+
+                {generatedImage && (
+                  <>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button variant="outline" size="sm" onClick={() => shareImageTo("instagram")} className="gap-1">
+                        <Instagram className="w-3.5 h-3.5" />
+                        Instagram
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => shareImageTo("tiktok")} className="gap-1">
+                        <Music2 className="w-3.5 h-3.5" />
+                        TikTok
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => shareImageTo("facebook")} className="gap-1">
+                        <Facebook className="w-3.5 h-3.5" />
+                        Facebook
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="ghost" size="sm" onClick={downloadImage} className="gap-1">
+                        <Download className="w-3.5 h-3.5" />
+                        Download
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => generateShareImage()} className="gap-1">
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        Regenerate
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
 
               {/* Editable caption */}
               <div className="space-y-1">
