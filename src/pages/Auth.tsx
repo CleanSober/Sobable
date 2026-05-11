@@ -353,6 +353,21 @@ const Auth = () => {
                   </p>
                   <div className="space-y-2">
                     <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-10 text-sm"
+                      onClick={() => handleResendVerification()}
+                      disabled={resendLoading || resendCooldown > 0}
+                    >
+                      {resendLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : resendCooldown > 0 ? (
+                        `Resend in ${resendCooldown}s`
+                      ) : (
+                        "Resend verification email"
+                      )}
+                    </Button>
+                    <Button
                       className="w-full h-10 text-sm gradient-primary text-primary-foreground"
                       onClick={() => switchMode("login")}
                     >
