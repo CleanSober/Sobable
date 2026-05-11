@@ -302,7 +302,7 @@ function generateEmailHtml(
         <!-- Footer -->
         <tr><td style="background: #12141c; border-radius: 0 0 16px 16px; padding: 20px 30px;">
           <p style="color: #6b7280; font-size: 12px; text-align: center; margin: 0 0 6px;">
-            Sober Club · Your recovery companion
+            Sobable · Your recovery companion
           </p>
           <p style="color: #4b5563; font-size: 11px; text-align: center; margin: 0;">
             You're receiving this because you have weekly digests enabled. Manage in app settings.
