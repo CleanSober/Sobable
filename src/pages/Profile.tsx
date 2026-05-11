@@ -347,7 +347,7 @@ const Profile = () => {
                         ? "Billed via App Store"
                         : billingSource === "play_store"
                           ? "Billed via Google Play"
-                          : "Billed via Stripe"}
+                          : "Active"}
                       {subscriptionEnd
                         ? ` · Renews ${new Date(subscriptionEnd).toLocaleDateString()}`
                         : ""}
