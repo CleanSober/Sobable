@@ -183,7 +183,7 @@ export const DailyAffirmation = () => {
                 </button>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={copyToClipboard}>
+                <Button variant="outline" size="sm" className="h-8 flex-1 text-[10px] gap-1" onClick={() => copyToClipboard()}>
                   {justCopied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
                   {justCopied ? "Copied!" : "Copy"}
                 </Button>
