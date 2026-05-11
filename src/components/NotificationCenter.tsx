@@ -273,11 +273,18 @@ export const NotificationCenter = () => {
                         <p className="font-medium text-sm">
                           {getNotificationTitle(notification.notification_type, notification.content_preview)}
                         </p>
-                        {notification.content_preview && (
-                          <p className="text-sm text-muted-foreground truncate mt-0.5">
-                            "{notification.content_preview}"
-                          </p>
-                        )}
+                        {notification.content_preview && (() => {
+                          const isSmart = notification.notification_type === "smart_reminder";
+                          const dash = notification.content_preview.indexOf(" — ");
+                          const body = isSmart && dash > 0
+                            ? notification.content_preview.slice(dash + 3)
+                            : notification.content_preview;
+                          return (
+                            <p className="text-sm text-muted-foreground truncate mt-0.5">
+                              {isSmart ? body : `"${body}"`}
+                            </p>
+                          );
+                        })()}
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatDistanceToNow(parseISO(notification.created_at), { addSuffix: true })}
                         </p>
