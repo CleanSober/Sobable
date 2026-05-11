@@ -167,10 +167,21 @@ const Auth = () => {
       if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes("Invalid login")) {
+          const msg = error.message || "";
+          if (msg.toLowerCase().includes("email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
+            toast.error("Email not verified yet", {
+              description: "Check your inbox or resend the verification link.",
+              action: {
+                label: "Resend",
+                onClick: () => handleResendVerification(email),
+              },
+            });
+            setSignupPendingEmail(email.trim());
+            setMode("signup");
+          } else if (msg.includes("Invalid login")) {
             toast.error("Invalid email or password");
           } else {
-            toast.error(error.message);
+            toast.error(msg);
           }
         } else {
           toast.success("Welcome back!");
