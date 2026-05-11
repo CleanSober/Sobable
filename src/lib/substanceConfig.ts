@@ -100,3 +100,138 @@ export function isBehavioralOnly(substances: string[] | null | undefined): boole
     return opt?.category === "behavioral";
   });
 }
+
+// ---------------------------------------------------------------------------
+// Personalized affirmations by substance/behavior
+// ---------------------------------------------------------------------------
+
+const GENERAL_AFFIRMATIONS = [
+  "I am stronger than my cravings.",
+  "Every day I choose recovery, I choose myself.",
+  "My past does not define my future.",
+  "Progress, not perfection, is my goal.",
+  "I am worthy of love, including my own.",
+  "I am building a life I don't need to escape from.",
+  "Each moment of discomfort is temporary; my growth is permanent.",
+  "I trust myself to handle whatever comes my way.",
+  "I am proud of how far I've come.",
+  "Today I choose to be present and grateful.",
+  "I release what I cannot control and focus on what I can.",
+  "I am more than my addiction — I am resilient.",
+  "Every challenge I overcome makes me stronger.",
+];
+
+const SUBSTANCE_AFFIRMATIONS: Record<string, string[]> = {
+  alcohol: [
+    "I don't need a drink to enjoy this moment.",
+    "My clarity is more valuable than any buzz.",
+    "Every sober morning is a gift I gave myself.",
+    "I am rewriting my story without alcohol.",
+    "Cravings pass. My sobriety stays.",
+  ],
+  nicotine: [
+    "Each breath I take is mine — clean and free.",
+    "I don't need a cigarette to handle this feeling.",
+    "My lungs are healing with every smoke-free hour.",
+    "I am stronger than the urge to light up.",
+    "Freedom from nicotine is freedom for my future.",
+  ],
+  vaping: [
+    "I don't need a vape to feel calm.",
+    "My breath belongs to me, not a device.",
+    "Every vape-free hour is a victory.",
+    "I am breaking the loop, one urge at a time.",
+  ],
+  cannabis: [
+    "I can face today clearly and capably.",
+    "My motivation returns a little more each clean day.",
+    "I don't need to numb out to get through this.",
+    "Sober me is the real me.",
+  ],
+  cocaine: [
+    "I don't need a high to feel alive.",
+    "My energy comes from within, not a substance.",
+    "Each clean day rebuilds my brain and my life.",
+    "I choose long-term peace over short-term escape.",
+  ],
+  opioids: [
+    "I am healing, one clean day at a time.",
+    "My pain is real, and so is my strength to face it.",
+    "I don't need pills to be okay.",
+    "Recovery is the bravest thing I'll ever do.",
+  ],
+  meth: [
+    "I am reclaiming my body, my mind, and my future.",
+    "Each clean day is rewiring me back to myself.",
+    "I don't need a high to be worthy.",
+    "My recovery is a comeback story in progress.",
+  ],
+  prescription: [
+    "I am learning healthier ways to cope.",
+    "I don't need a pill to face this moment.",
+    "My healing is happening, even when it's slow.",
+    "I trust my body and mind to find balance again.",
+  ],
+  benzos: [
+    "I can sit with discomfort and survive it.",
+    "My calm is being rebuilt naturally.",
+    "I don't need a pill to feel safe.",
+    "Each clean day my nervous system grows stronger.",
+  ],
+  caffeine: [
+    "My energy is steady, not borrowed.",
+    "I don't need caffeine to start my day.",
+    "I am learning to listen to my body's real signals.",
+  ],
+  gambling: [
+    "The only sure win is not playing today.",
+    "I don't need a bet to feel excitement.",
+    "My money, my time, and my peace are mine again.",
+    "Each gamble-free day rebuilds my life.",
+  ],
+  porn: [
+    "I deserve real connection, not a screen.",
+    "I am taking back my attention and my desire.",
+    "Each free day reshapes my brain for the better.",
+    "I don't need to escape — I need to be present.",
+  ],
+  social_media: [
+    "My real life is more interesting than any feed.",
+    "I don't need to scroll to feel okay.",
+    "My attention is precious — I choose where it goes.",
+    "Quiet moments are not boring; they are mine.",
+  ],
+  gaming: [
+    "I can put it down and live this moment fully.",
+    "My time is the most valuable resource I have.",
+    "I don't need a screen to feel achievement.",
+    "Real life has the best storyline.",
+  ],
+  shopping: [
+    "I am enough without buying anything new.",
+    "I don't need to spend to feel better.",
+    "My worth is not in my cart.",
+    "Every urge I resist is money in my future.",
+  ],
+  sugar: [
+    "I am feeding my body what it truly needs.",
+    "I don't need sugar to soothe this feeling.",
+    "Each balanced day rebuilds my energy.",
+    "My cravings are loud, but I am louder.",
+  ],
+};
+
+/**
+ * Returns a personalized list of affirmations based on the user's selected substances/behaviors.
+ * Always includes general affirmations so the pool stays varied.
+ */
+export function getPersonalizedAffirmations(substances: string[] | null | undefined): string[] {
+  if (!substances || substances.length === 0) return GENERAL_AFFIRMATIONS;
+  const personalized = substances
+    .flatMap(s => SUBSTANCE_AFFIRMATIONS[s] || [])
+    .filter(Boolean);
+  if (personalized.length === 0) return GENERAL_AFFIRMATIONS;
+  // De-dupe and put personalized first so the daily pick is more likely to be relevant.
+  return Array.from(new Set([...personalized, ...GENERAL_AFFIRMATIONS]));
+}
+
