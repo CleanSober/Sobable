@@ -422,7 +422,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 6) return;
 
     const currentHour = now.getHours();
-    if (currentHour >= 14 && currentHour < 20) {
+    if (currentHour >= 10) {
       const checkIn = missedActions.find(m => m.type === 'checkIn');
       const daysAgo = checkIn?.daysAgo || 0;
       sendNotification(pickRandom(checkInMessages.titles), {
@@ -433,7 +433,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     }
   }, [settings, missedActions, sendNotification, updateSettings]);
 
-  // ── Missed journal (after 4 PM, 2+ days) ──
+  // ── Missed journal (2+ days) ──
   const checkMissedJournalReminder = useCallback(() => {
     if (!settings.enabled || !settings.missedJournal) return;
     const journalMissed = missedActions.find(m => m.type === 'journal');
