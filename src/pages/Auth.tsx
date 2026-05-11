@@ -43,6 +43,8 @@ const Auth = () => {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
   const [signupPendingEmail, setSignupPendingEmail] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { signIn, signUp, user, resetPassword, updatePassword, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
