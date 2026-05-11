@@ -75,7 +75,9 @@ export const useJournal = () => {
 
       if (error) throw error;
       if (!data) {
-        toast.error('Could not save journal entry');
+        toast.error("We couldn't save your entry", {
+          description: "Your text is still in the editor. Tap Save again, or copy it somewhere safe before retrying.",
+        });
         return null;
       }
 
@@ -100,7 +102,9 @@ export const useJournal = () => {
 
       if (error) throw error;
       if (!data) {
-        toast.error('Journal entry not found');
+        toast.error("This entry no longer exists", {
+          description: "It may have been deleted from another device. Refresh your journal to see the latest list.",
+        });
         return null;
       }
 

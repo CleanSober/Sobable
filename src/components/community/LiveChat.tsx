@@ -214,8 +214,13 @@ export const LiveChat = () => {
       });
       
       setNewMessage("");
-    } catch {
-      toast.error("Failed to send message. Please try again.");
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "";
+      toast.error("Message didn't send", {
+        description: reason === "Message not delivered"
+          ? "It didn't reach the server. Your text is still in the box — tap send again."
+          : "Check your connection and try once more. Your text is still in the box.",
+      });
     } finally {
       setSending(false);
     }

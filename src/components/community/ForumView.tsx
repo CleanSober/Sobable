@@ -147,8 +147,13 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
       setTagInput("");
       setShowNewPost(false);
       await fetchPosts();
-    } catch {
-      toast.error("Failed to create post. Please try again.");
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "";
+      toast.error("Couldn't publish your post", {
+        description: reason === "Post not created"
+          ? "The server didn't confirm. Your draft is still in the form — tap Post again."
+          : "Check your connection and try again. Your draft is still in the form.",
+      });
     } finally {
       setSubmitting(false);
     }

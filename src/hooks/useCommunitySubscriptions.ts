@@ -84,7 +84,9 @@ export const useCommunitySubscriptions = () => {
           .maybeSingle();
 
         if (error || !data) {
-          toast.error("Failed to subscribe");
+          toast.error("Couldn't turn on notifications", {
+            description: "Check your connection and try again. If it keeps failing, sign out and back in.",
+          });
           return;
         }
 

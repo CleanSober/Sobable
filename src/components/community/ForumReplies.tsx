@@ -162,8 +162,13 @@ export const ForumReplies = memo(({ postId, replyCount, onReplyAdded }: ForumRep
       
       // Refresh replies
       await fetchReplies();
-    } catch {
-      toast.error("Failed to post reply");
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "";
+      toast.error("Reply didn't post", {
+        description: reason === "Reply not created"
+          ? "The server didn't confirm it was saved. Your text is still here — tap Reply again."
+          : "Check your connection and retry. Your text is still in the box.",
+      });
     } finally {
       setSubmitting(false);
     }
