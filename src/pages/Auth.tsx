@@ -41,6 +41,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+  const [signupPendingEmail, setSignupPendingEmail] = useState<string | null>(null);
   const { signIn, signUp, user, resetPassword, updatePassword, continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
@@ -149,8 +150,7 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else if (needsConfirmation) {
-          toast.success("Check your email to confirm your account before signing in.", { duration: 6000 });
-          switchMode("login");
+          setSignupPendingEmail(email.trim());
         } else {
           toast.success("Account created! Welcome to your recovery journey.");
           navigate("/");
@@ -204,6 +204,7 @@ const Auth = () => {
     setConfirmPassword("");
     setShowPassword(false);
     setResetSent(false);
+    setSignupPendingEmail(null);
   };
 
   const getHeaderText = () => {
