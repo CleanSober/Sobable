@@ -119,7 +119,7 @@ const Privacy = () => {
         { subtitle: "Third-Party Service Providers", points: [
           "Cloud hosting & database infrastructure (data storage and processing)",
           "Authentication services (secure account management)",
-          "Payment processors: Stripe, Apple App Store, Google Play (subscription billing)",
+          "Payment processors: Apple App Store, Google Play (subscription billing)",
           "AI/ML model providers (for generating insights — data is sent only as needed and not retained by providers for training)",
           "Analytics services (anonymized usage data only)",
         ]},
