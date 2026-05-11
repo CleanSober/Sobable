@@ -87,6 +87,14 @@ const Profile = () => {
       setName(profile.display_name || "");
       setSobrietyDate(profile.sobriety_start_date || "");
       setDailySpending(profile.daily_spending?.toString() || "0");
+      const rawBreakdown = (profile as any).spending_breakdown;
+      if (Array.isArray(rawBreakdown)) {
+        setSpendingBreakdown(
+          rawBreakdown
+            .filter((c: any) => c && typeof c.name === "string")
+            .map((c: any) => ({ name: String(c.name), amount: Number(c.amount) || 0 }))
+        );
+      }
       setSponsorPhone(profile.sponsor_phone || "");
       setEmergencyContact(profile.emergency_contact || "");
       setPersonalReminder(profile.personal_reminder || "");
