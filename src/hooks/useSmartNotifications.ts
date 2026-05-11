@@ -251,10 +251,13 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setSettings({ ...getDefaultSettings(), ...parsed });
+        // Force-enable so in-app notifications always work even without browser permission
+        setSettings({ ...getDefaultSettings(), ...parsed, enabled: true });
       } catch {
-        setSettings(getDefaultSettings());
+        setSettings({ ...getDefaultSettings(), enabled: true });
       }
+    } else {
+      setSettings({ ...getDefaultSettings(), enabled: true });
     }
   }, []);
 
@@ -374,18 +377,40 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
   }, [settings.quietHoursEnabled, settings.quietHoursStart, settings.quietHoursEnd]);
 
   const sendNotification = useCallback((title: string, options?: NotificationOptions) => {
-    if (permission !== "granted" || !settings.enabled) return;
+    if (!settings.enabled) return;
     if (isInQuietHours()) return;
-    try {
-      new Notification(title, {
-        icon: "/icons/icon-192x192.png",
-        badge: "/icons/icon-96x96.png",
-        ...options,
-      });
-    } catch (error) {
-      console.error("Failed to send notification:", error);
+
+    // Try OS-level notification (only if permission granted)
+    if (permission === "granted" && "Notification" in window) {
+      try {
+        new Notification(title, {
+          icon: "/icons/icon-192x192.png",
+          badge: "/icons/icon-96x96.png",
+          ...options,
+        });
+      } catch (error) {
+        console.error("Failed to send OS notification:", error);
+      }
     }
-  }, [permission, settings.enabled, isInQuietHours]);
+
+    // Always persist as in-app notification so the bell + toast shows it
+    if (user) {
+      const tag = (options?.tag as string) || "smart";
+      // De-dupe via localStorage (one per tag per day)
+      const dedupeKey = `inapp_notif_${tag}_${new Date().toISOString().split("T")[0]}`;
+      if (localStorage.getItem(dedupeKey)) return;
+      localStorage.setItem(dedupeKey, "1");
+
+      void supabase.from("notifications").insert({
+        user_id: user.id,
+        from_user_id: user.id,
+        notification_type: "smart_reminder",
+        target_type: "smart",
+        target_id: tag,
+        content_preview: `${title}${options?.body ? " — " + options.body : ""}`.slice(0, 200),
+      });
+    }
+  }, [permission, settings.enabled, isInQuietHours, user]);
 
   // ── Missed check-in (after 2 PM) ──
   const checkMissedCheckInReminder = useCallback(() => {
@@ -397,7 +422,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 6) return;
 
     const currentHour = now.getHours();
-    if (currentHour >= 14 && currentHour < 20) {
+    if (currentHour >= 10) {
       const checkIn = missedActions.find(m => m.type === 'checkIn');
       const daysAgo = checkIn?.daysAgo || 0;
       sendNotification(pickRandom(checkInMessages.titles), {
@@ -408,7 +433,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     }
   }, [settings, missedActions, sendNotification, updateSettings]);
 
-  // ── Missed journal (after 4 PM, 2+ days) ──
+  // ── Missed journal (2+ days) ──
   const checkMissedJournalReminder = useCallback(() => {
     if (!settings.enabled || !settings.missedJournal) return;
     const journalMissed = missedActions.find(m => m.type === 'journal');
@@ -419,7 +444,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 24) return;
 
     const currentHour = now.getHours();
-    if (currentHour >= 16 && currentHour < 21) {
+    if (currentHour >= 10) {
       sendNotification(pickRandom(journalMessages.titles), {
         body: pickRandom(journalMessages.bodies(journalMissed.daysAgo)),
         tag: "missed-journal",
@@ -438,7 +463,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 12) return;
 
     const currentHour = now.getHours();
-    if (currentHour >= 18 && currentHour < 22) {
+    if (currentHour >= 12) {
       sendNotification(pickRandom(meditationMessages.titles), {
         body: pickRandom(meditationMessages.bodies),
         tag: "missed-meditation",
@@ -455,15 +480,12 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     const lastReminder = settings.lastStreakRiskReminder;
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 4) return;
 
-    const currentHour = now.getHours();
-    if (currentHour >= 18 && currentHour < 22) {
-      const title = pickRandom(streakRiskMessages.titles).replace("{streak}", String(currentStreak));
-      sendNotification(title, {
-        body: pickRandom(streakRiskMessages.bodies(currentStreak)),
-        tag: "streak-risk",
-      });
-      updateSettings({ lastStreakRiskReminder: now.toISOString() });
-    }
+    const title = pickRandom(streakRiskMessages.titles).replace("{streak}", String(currentStreak));
+    sendNotification(title, {
+      body: pickRandom(streakRiskMessages.bodies(currentStreak)),
+      tag: "streak-risk",
+    });
+    updateSettings({ lastStreakRiskReminder: now.toISOString() });
   }, [settings, streakAtRisk, currentStreak, sendNotification, updateSettings]);
 
   // ── Weekly report (Sundays) ──
@@ -543,14 +565,11 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
         ? differenceInDays(now, parseISO(sobrietyStartDate))
         : undefined;
 
-      const currentHour = now.getHours();
-      if (currentHour >= 10 && currentHour < 20) {
-        sendNotification(pickRandom(comebackMessages.titles), {
-          body: pickRandom(comebackMessages.bodies(daysAway, sobrietyDays)),
-          tag: "comeback-nudge",
-        });
-        updateSettings({ lastComebackNudge: now.toISOString() });
-      }
+      sendNotification(pickRandom(comebackMessages.titles), {
+        body: pickRandom(comebackMessages.bodies(daysAway, sobrietyDays)),
+        tag: "comeback-nudge",
+      });
+      updateSettings({ lastComebackNudge: now.toISOString() });
     }
   }, [settings, user, sobrietyStartDate, sendNotification, updateSettings]);
 
@@ -562,18 +581,15 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     const lastReminder = settings.lastDailyMotivation;
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 20) return;
 
-    const currentHour = now.getHours();
-    if (currentHour >= 8 && currentHour < 9) {
-      const sobrietyDays = sobrietyStartDate
-        ? differenceInDays(now, parseISO(sobrietyStartDate))
-        : undefined;
+    const sobrietyDays = sobrietyStartDate
+      ? differenceInDays(now, parseISO(sobrietyStartDate))
+      : undefined;
 
-      sendNotification(pickRandom(dailyMotivationMessages.titles), {
-        body: pickRandom(dailyMotivationMessages.bodies(sobrietyDays, currentStreak)),
-        tag: "daily-motivation",
-      });
-      updateSettings({ lastDailyMotivation: now.toISOString() });
-    }
+    sendNotification(pickRandom(dailyMotivationMessages.titles), {
+      body: pickRandom(dailyMotivationMessages.bodies(sobrietyDays, currentStreak)),
+      tag: "daily-motivation",
+    });
+    updateSettings({ lastDailyMotivation: now.toISOString() });
   }, [settings, sobrietyStartDate, currentStreak, sendNotification, updateSettings]);
 
   // ── NEW: Progress celebrations (sobriety + streak milestones) ──

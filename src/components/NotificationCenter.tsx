@@ -33,6 +33,7 @@ const NOTIFICATION_ICONS: Record<string, typeof Bell> = {
   follow: UserPlus,
   chat_message: MessageSquare,
   forum_post: MessageSquare,
+  smart_reminder: Bell,
   default: Bell,
 };
 
@@ -44,6 +45,7 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   follow: "text-purple-500 bg-purple-500/10",
   chat_message: "text-teal-500 bg-teal-500/10",
   forum_post: "text-amber-500 bg-amber-500/10",
+  smart_reminder: "text-primary bg-primary/10",
   default: "text-primary bg-primary/10",
 };
 
@@ -96,7 +98,7 @@ export const NotificationCenter = () => {
           setNotifications(prev => [newNotification, ...prev]);
           
           // Show toast for new notification
-          toast.info(getNotificationTitle(newNotification.notification_type), {
+          toast.info(getNotificationTitle(newNotification.notification_type, newNotification.content_preview), {
             description: newNotification.content_preview || "New notification",
           });
         }
@@ -145,7 +147,7 @@ export const NotificationCenter = () => {
     toast.success("All notifications cleared");
   };
 
-  const getNotificationTitle = (type: string): string => {
+  const getNotificationTitle = (type: string, preview?: string | null): string => {
     switch (type) {
       case "mention": return "You were mentioned";
       case "reply": return "New reply";
@@ -154,6 +156,12 @@ export const NotificationCenter = () => {
       case "follow": return "New follower";
       case "chat_message": return "New chat message";
       case "forum_post": return "New forum activity";
+      case "smart_reminder": {
+        // Smart reminders pack "Title — body" into content_preview
+        const dash = preview?.indexOf(" — ") ?? -1;
+        if (preview && dash > 0) return preview.slice(0, dash);
+        return preview || "Reminder";
+      }
       default: return "Notification";
     }
   };
@@ -263,13 +271,20 @@ export const NotificationCenter = () => {
 
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">
-                          {getNotificationTitle(notification.notification_type)}
+                          {getNotificationTitle(notification.notification_type, notification.content_preview)}
                         </p>
-                        {notification.content_preview && (
-                          <p className="text-sm text-muted-foreground truncate mt-0.5">
-                            "{notification.content_preview}"
-                          </p>
-                        )}
+                        {notification.content_preview && (() => {
+                          const isSmart = notification.notification_type === "smart_reminder";
+                          const dash = notification.content_preview.indexOf(" — ");
+                          const body = isSmart && dash > 0
+                            ? notification.content_preview.slice(dash + 3)
+                            : notification.content_preview;
+                          return (
+                            <p className="text-sm text-muted-foreground truncate mt-0.5">
+                              {isSmart ? body : `"${body}"`}
+                            </p>
+                          );
+                        })()}
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatDistanceToNow(parseISO(notification.created_at), { addSuffix: true })}
                         </p>
