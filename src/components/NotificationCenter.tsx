@@ -271,7 +271,7 @@ export const NotificationCenter = () => {
 
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">
-                          {getNotificationTitle(notification.notification_type)}
+                          {getNotificationTitle(notification.notification_type, notification.content_preview)}
                         </p>
                         {notification.content_preview && (
                           <p className="text-sm text-muted-foreground truncate mt-0.5">
