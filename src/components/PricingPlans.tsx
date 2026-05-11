@@ -30,7 +30,7 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const { startCheckout, checkoutLoading, isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
+  const { isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
   const navigate = useNavigate();
   const {
@@ -44,28 +44,23 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
   } = useInAppPurchases();
 
   const handleSubscribe = async () => {
-    if (isNative) {
-      const productId = selectedPlan === "monthly"
-        ? IAP_PRODUCTS.monthly.productId
-        : IAP_PRODUCTS.yearly.productId;
-      const success = await purchaseProduct(productId);
-      if (success) {
-        // Refresh premium status so the app recognizes the purchase
-        await checkSubscription();
-        refreshPremiumStatus();
-        if (onClose) onClose();
-        navigate("/profile");
-      }
-    } else {
-      const { STRIPE_PLANS } = await import("@/lib/stripe");
-      const plan = selectedPlan === "monthly"
-        ? STRIPE_PLANS.premium_monthly
-        : STRIPE_PLANS.premium_yearly;
-      await startCheckout(plan.price_id);
+    if (!isNative) {
+      // Subscriptions are only sold through Apple App Store / Google Play.
+      return;
+    }
+    const productId = selectedPlan === "monthly"
+      ? IAP_PRODUCTS.monthly.productId
+      : IAP_PRODUCTS.yearly.productId;
+    const success = await purchaseProduct(productId);
+    if (success) {
+      await checkSubscription();
+      refreshPremiumStatus();
+      if (onClose) onClose();
+      navigate("/profile");
     }
   };
 
-  const isLoading = isNative ? purchasing : checkoutLoading;
+  const isLoading = purchasing;
 
   // Get display prices - use native store prices if available, fallback to hardcoded
   const monthlyPrice = isNative
