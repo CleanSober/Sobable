@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserData } from "@/hooks/useUserData";
 import { getPersonalizedAffirmations } from "@/lib/substanceConfig";
+import { copyText } from "@/lib/clipboard";
 
 const SAVED_KEY = "sober_club_saved_affirmations";
 
@@ -72,28 +73,28 @@ export const DailyAffirmation = () => {
   const shareText = editedCaption ?? defaultShareText;
 
   const copyToClipboard = async (silent = false) => {
-    try {
-      await navigator.clipboard.writeText(shareText);
-    } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = shareText;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      try { document.execCommand("copy"); } catch { /* noop */ }
-      document.body.removeChild(textarea);
+    const result = await copyText(shareText);
+    if (result.ok) {
+      if (!silent) {
+        setJustCopied(true);
+        toast.success(result.message);
+        setTimeout(() => setJustCopied(false), 2000);
+      }
+      return true;
     }
     if (!silent) {
-      setJustCopied(true);
-      toast.success("Copied to clipboard!");
-      setTimeout(() => setJustCopied(false), 2000);
+      toast.error(result.message, { duration: 6000 });
     }
+    return false;
   };
 
   const openExternal = async (url: string, platform: string) => {
-    await copyToClipboard(true);
-    toast.success(`${platform} opened — caption copied!`);
+    const ok = await copyToClipboard(true);
+    if (ok) {
+      toast.success(`${platform} opened — caption copied!`);
+    } else {
+      toast.warning(`${platform} opened — copy the caption manually from above.`, { duration: 6000 });
+    }
     window.open(url, "_blank", "noopener,noreferrer");
     setShowShareMenu(false);
   };
