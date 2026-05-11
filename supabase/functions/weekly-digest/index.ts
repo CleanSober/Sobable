@@ -194,7 +194,7 @@ function generateEmailHtml(
         <!-- Greeting -->
         <tr><td style="padding: 28px 30px 12px;">
           <h1 style="color: #f9fafb; font-size: 22px; font-weight: bold; margin: 0;">
-            Hey ${displayName}! 👋
+            Hey ${safeDisplayName}! 👋
           </h1>
           <p style="color: #9ca3af; font-size: 14px; line-height: 22px; margin: 8px 0 0;">
             Here's your weekly recovery snapshot.
