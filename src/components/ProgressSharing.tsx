@@ -88,6 +88,7 @@ export const ProgressSharing = () => {
   const { profile } = useUserData();
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [editedCaption, setEditedCaption] = useState<string | null>(null);
 
   const daysSober = profile?.sobriety_start_date
     ? calculateDaysSober(profile.sobriety_start_date)
