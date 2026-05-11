@@ -94,8 +94,40 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // --- Auth guard: require valid JWT ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const jwt = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(jwt);
+    if (authErr || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const payload: PushPayload = await req.json();
     const { user_id, title, body, data } = payload;
+
+    // --- Authorization: only admins can broadcast or target other users ---
+    const isSelfTargeted = user_id && user_id === user.id;
+    if (!isSelfTargeted) {
+      const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      if (roleErr || !isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: admin role required to send to other users or broadcast" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     if (!title || !body) {
       return new Response(
