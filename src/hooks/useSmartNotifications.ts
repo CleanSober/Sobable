@@ -480,14 +480,12 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     const lastReminder = settings.lastStreakRiskReminder;
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 4) return;
 
-    const currentHour = now.getHours();
-    if (currentHour >= 18 && currentHour < 22) {
-      const title = pickRandom(streakRiskMessages.titles).replace("{streak}", String(currentStreak));
-      sendNotification(title, {
-        body: pickRandom(streakRiskMessages.bodies(currentStreak)),
-        tag: "streak-risk",
-      });
-      updateSettings({ lastStreakRiskReminder: now.toISOString() });
+    const title = pickRandom(streakRiskMessages.titles).replace("{streak}", String(currentStreak));
+    sendNotification(title, {
+      body: pickRandom(streakRiskMessages.bodies(currentStreak)),
+      tag: "streak-risk",
+    });
+    updateSettings({ lastStreakRiskReminder: now.toISOString() });
     }
   }, [settings, streakAtRisk, currentStreak, sendNotification, updateSettings]);
 
