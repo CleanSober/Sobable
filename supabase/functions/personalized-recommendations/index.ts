@@ -65,6 +65,15 @@ serve(async (req) => {
     const userId = userData.user.id;
     console.log("Generating recommendations for user:", userId);
 
+    // Premium gate
+    const { data: isPremium, error: premErr } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
+    if (premErr || !isPremium) {
+      return new Response(JSON.stringify({ error: "Premium subscription required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Fetch user data for analysis
     const [profileResult, moodResult, triggerResult, sleepResult, goalsResult] = await Promise.all([
       supabaseClient.from("profiles").select("*").eq("user_id", userId).single(),
