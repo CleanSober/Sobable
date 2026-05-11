@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { getPlanByPriceId, STRIPE_PLANS } from "@/lib/stripe";
 import { toast } from "sonner";
-import { getStoredReferralCode } from "@/hooks/useReferralTracking";
 
 interface SubscriptionState {
   subscribed: boolean;
@@ -12,182 +10,80 @@ interface SubscriptionState {
   priceId: string | null;
   subscriptionEnd: string | null;
   planName: string | null;
-  billingSource: "stripe" | "app_store" | "play_store" | null;
+  billingSource: "app_store" | "play_store" | null;
 }
 
+const EMPTY_STATE: SubscriptionState = {
+  subscribed: false,
+  productId: null,
+  priceId: null,
+  subscriptionEnd: null,
+  planName: null,
+  billingSource: null,
+};
+
+const inferBillingSource = (
+  subscriptionId: string | null | undefined
+): SubscriptionState["billingSource"] => {
+  if (!subscriptionId) return null;
+  if (subscriptionId.startsWith("iap_ios")) return "app_store";
+  if (subscriptionId.startsWith("iap_android")) return "play_store";
+  return null;
+};
+
 export const useSubscription = () => {
-  const { user, session } = useAuth();
-  const [subscription, setSubscription] = useState<SubscriptionState>({
-    subscribed: false,
-    productId: null,
-    priceId: null,
-    subscriptionEnd: null,
-    planName: null,
-    billingSource: null,
-  });
+  const { user } = useAuth();
+  const [subscription, setSubscription] = useState<SubscriptionState>(EMPTY_STATE);
   const [loading, setLoading] = useState(true);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const checkSubscription = useCallback(async () => {
-    if (!session?.access_token) {
-      setSubscription({
-        subscribed: false,
-        productId: null,
-        priceId: null,
-        subscriptionEnd: null,
-        planName: null,
-        billingSource: null,
-      });
+    if (!user) {
+      setSubscription(EMPTY_STATE);
       setLoading(false);
       return;
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke("check-subscription", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("plan_type, status, current_period_end, stripe_subscription_id")
+        .eq("user_id", user.id)
+        .in("status", ["active", "trialing"])
+        .in("plan_type", ["premium", "pro"])
+        .maybeSingle();
 
-      if (error) throw error;
-
-      const plan = data.price_id ? getPlanByPriceId(data.price_id) : null;
-
-      setSubscription({
-        subscribed: data.subscribed,
-        productId: data.product_id,
-        priceId: data.price_id,
-        subscriptionEnd: data.subscription_end,
-        planName: data.plan_name || plan?.name || (data.subscribed ? "Sober Club" : null),
-        billingSource: data.billing_source || null,
-      });
+      if (data) {
+        setSubscription({
+          subscribed: true,
+          productId: null,
+          priceId: null,
+          subscriptionEnd: data.current_period_end ?? null,
+          planName: "Sober Club",
+          billingSource: inferBillingSource(data.stripe_subscription_id),
+        });
+      } else {
+        setSubscription(EMPTY_STATE);
+      }
     } catch (error) {
       console.error("Error checking subscription:", error);
+      setSubscription(EMPTY_STATE);
     } finally {
       setLoading(false);
     }
-  }, [session?.access_token]);
+  }, [user?.id]);
 
   useEffect(() => {
     checkSubscription();
   }, [checkSubscription]);
 
-  // Check on URL params for checkout success/cancel
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const checkoutStatus = params.get("checkout");
-
-    if (checkoutStatus === "success") {
-      // Remove query params immediately so reloads don't re-trigger
-      window.history.replaceState({}, "", window.location.pathname);
-
-      // Poll Stripe → DB sync up to ~30s, then surface result
-      let cancelled = false;
-      let attempts = 0;
-      const maxAttempts = 15;
-      const poll = async () => {
-        while (!cancelled && attempts < maxAttempts) {
-          attempts++;
-          try {
-            const { data } = await supabase.functions.invoke("check-subscription", {
-              headers: session?.access_token
-                ? { Authorization: `Bearer ${session.access_token}` }
-                : undefined,
-            });
-            if (data?.subscribed) {
-              const plan = data.price_id ? getPlanByPriceId(data.price_id) : null;
-              setSubscription({
-                subscribed: true,
-                productId: data.product_id,
-                priceId: data.price_id,
-                subscriptionEnd: data.subscription_end,
-                planName: data.plan_name || plan?.name || "Sober Club",
-                billingSource: data.billing_source || "stripe",
-              });
-              toast.success("Welcome to Sober Club! Your subscription is now active.");
-              return;
-            }
-          } catch (err) {
-            console.warn("[subscription] poll attempt failed", err);
-          }
-          await new Promise((r) => setTimeout(r, 2000));
-        }
-        if (!cancelled) {
-          toast.info(
-            "Your payment is processing. Premium will activate shortly — pull to refresh in a moment."
-          );
-          checkSubscription();
-        }
-      };
-      poll();
-      return () => {
-        cancelled = true;
-      };
-    } else if (checkoutStatus === "cancelled") {
-      toast.info("Checkout cancelled. No charges were made.");
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  }, [checkSubscription, session?.access_token]);
-
-  // Refresh subscription when the tab regains focus (covers Stripe checkout opened in new tab)
+  // Refresh subscription when the tab regains focus (covers IAP flows)
   useEffect(() => {
     const onFocus = () => {
-      if (session?.access_token) checkSubscription();
+      if (user) checkSubscription();
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [checkSubscription, session?.access_token]);
-
-  const startCheckout = async (priceId: string) => {
-    if (!session?.access_token) {
-      toast.error("Please sign in to subscribe");
-      return;
-    }
-
-    setCheckoutLoading(true);
-    try {
-      const referralCode = getStoredReferralCode();
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId, referralCode },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
-    } catch (error) {
-      console.error("Error starting checkout:", error);
-      toast.error("Failed to start checkout. Please try again.");
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  const openCustomerPortal = async () => {
-    if (!session?.access_token) {
-      toast.error("Please sign in to manage your subscription");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.functions.invoke("customer-portal", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
-    } catch (error) {
-      console.error("Error opening customer portal:", error);
-      toast.error("Failed to open billing portal. Please try again.");
-    }
-  };
+  }, [checkSubscription, user]);
 
   const openNativeSubscriptionManagement = useCallback(() => {
     const platform = Capacitor.getPlatform();
@@ -197,25 +93,21 @@ export const useSubscription = () => {
     }
     if (platform === "android") {
       window.open("https://play.google.com/store/account/subscriptions", "_blank");
+      return;
     }
+    toast.info("Manage your subscription from the App Store or Google Play app.");
   }, []);
 
   const openManageSubscription = useCallback(async () => {
-    if (subscription.billingSource === "app_store" || subscription.billingSource === "play_store") {
-      openNativeSubscriptionManagement();
-      return;
-    }
-    await openCustomerPortal();
-  }, [openCustomerPortal, openNativeSubscriptionManagement, subscription.billingSource]);
+    openNativeSubscriptionManagement();
+  }, [openNativeSubscriptionManagement]);
 
   return {
     ...subscription,
     isPremium: subscription.subscribed,
     loading,
-    checkoutLoading,
+    checkoutLoading: false,
     checkSubscription,
-    startCheckout,
-    openCustomerPortal,
     openManageSubscription,
   };
 };
