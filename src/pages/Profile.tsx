@@ -449,6 +449,10 @@ const Profile = () => {
                         }
                       }}
                       disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                      captionLayout="dropdown-buttons"
+                      fromYear={1950}
+                      toYear={new Date().getFullYear()}
+                      defaultMonth={sobrietyDate ? new Date(sobrietyDate + "T00:00:00") : new Date()}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
                     />
