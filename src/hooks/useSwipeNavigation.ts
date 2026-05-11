@@ -1,56 +1,25 @@
-import { useRef, useCallback } from "react";
+import { useCallback } from "react";
 
 interface SwipeConfig {
   threshold?: number;
   maxVerticalRatio?: number;
 }
 
+/**
+ * App-wide swipe navigation has been disabled to prevent accidental
+ * page changes (especially on screens with sliders, scroll areas, and
+ * touch-sensitive controls). Users navigate via the bottom tab bar.
+ *
+ * The hook signature is preserved so existing call sites still compile,
+ * but the returned handlers are no-ops.
+ */
 export const useSwipeNavigation = <T extends string>(
-  tabs: T[],
-  activeTab: T,
-  onTabChange: (tab: T) => void,
-  config: SwipeConfig = {}
+  _tabs: T[],
+  _activeTab: T,
+  _onTabChange: (tab: T) => void,
+  _config: SwipeConfig = {}
 ) => {
-  const { threshold = 50, maxVerticalRatio = 0.75 } = config;
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const swiping = useRef(false);
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStart.current = { x: touch.clientX, y: touch.clientY };
-    swiping.current = false;
-  }, []);
-
-  const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (!touchStart.current) return;
-
-      const touch = e.changedTouches[0];
-      const deltaX = touch.clientX - touchStart.current.x;
-      const deltaY = touch.clientY - touchStart.current.y;
-
-      // Ignore if vertical movement dominates (user is scrolling)
-      if (Math.abs(deltaY) > Math.abs(deltaX) * maxVerticalRatio) {
-        touchStart.current = null;
-        return;
-      }
-
-      if (Math.abs(deltaX) > threshold) {
-        const currentIndex = tabs.indexOf(activeTab);
-
-        if (deltaX < 0 && currentIndex < tabs.length - 1) {
-          // Swipe left → next tab
-          onTabChange(tabs[currentIndex + 1]);
-        } else if (deltaX > 0 && currentIndex > 0) {
-          // Swipe right → previous tab
-          onTabChange(tabs[currentIndex - 1]);
-        }
-      }
-
-      touchStart.current = null;
-    },
-    [tabs, activeTab, onTabChange, threshold, maxVerticalRatio]
-  );
-
+  const onTouchStart = useCallback(() => {}, []);
+  const onTouchEnd = useCallback(() => {}, []);
   return { onTouchStart, onTouchEnd };
 };
