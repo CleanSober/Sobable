@@ -477,6 +477,64 @@ export const ProgressSharing = () => {
                 />
                 <p className="text-[10px] text-muted-foreground text-right">{shareText.length}/500</p>
               </div>
+
+              {/* Per-platform share preview */}
+              <div className="rounded-xl border border-border/60 bg-secondary/30 p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Share2 className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Share preview</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Exactly what will be sent to each platform. Caption is auto-copied; URL is opened in a new tab.
+                </p>
+
+                {([
+                  {
+                    name: "X (Twitter)",
+                    icon: Twitter,
+                    note: "Caption pre-filled in the tweet composer.",
+                    caption: shareText,
+                    url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+                  },
+                  {
+                    name: "Facebook",
+                    icon: Facebook,
+                    note: "FB ignores pre-filled text — paste the caption when the dialog opens.",
+                    caption: shareText,
+                    url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
+                  },
+                  {
+                    name: "LinkedIn",
+                    icon: Linkedin,
+                    note: "LinkedIn only accepts a URL — paste the caption into your post.",
+                    caption: shareText,
+                    url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+                  },
+                  {
+                    name: "Instagram",
+                    icon: Instagram,
+                    note: "No web intent — opens Instagram so you can paste the caption.",
+                    caption: shareText,
+                    url: "https://www.instagram.com/",
+                  },
+                ] as const).map(({ name, icon: Icon, note, caption, url }) => (
+                  <div key={name} className="rounded-lg border border-border/40 bg-background/50 p-2 space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Icon className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-xs font-semibold">{name}</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Caption</p>
+                      <p className="text-[11px] text-foreground/90 whitespace-pre-wrap break-words">{caption}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">URL opened</p>
+                      <p className="text-[10px] text-muted-foreground break-all font-mono">{url}</p>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground italic">{note}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </DialogContent>
         </Dialog>
