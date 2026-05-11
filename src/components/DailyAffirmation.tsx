@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUserData } from "@/hooks/useUserData";
 import { getPersonalizedAffirmations } from "@/lib/substanceConfig";
+import { copyText } from "@/lib/clipboard";
 
 const SAVED_KEY = "sober_club_saved_affirmations";
 
