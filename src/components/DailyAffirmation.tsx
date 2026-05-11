@@ -68,7 +68,8 @@ export const DailyAffirmation = () => {
     setShowShareMenu(false);
   };
 
-  const shareText = `"${currentAffirmation}" — Sobable 🌱`;
+  const defaultShareText = `"${currentAffirmation}" — Sobable 🌱`;
+  const shareText = editedCaption ?? defaultShareText;
 
   const copyToClipboard = async (silent = false) => {
     try {
