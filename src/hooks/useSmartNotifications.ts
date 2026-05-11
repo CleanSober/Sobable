@@ -444,7 +444,7 @@ export const useSmartNotifications = (sobrietyStartDate?: string) => {
     if (lastReminder && differenceInHours(now, new Date(lastReminder)) < 24) return;
 
     const currentHour = now.getHours();
-    if (currentHour >= 16 && currentHour < 21) {
+    if (currentHour >= 10) {
       sendNotification(pickRandom(journalMessages.titles), {
         body: pickRandom(journalMessages.bodies(journalMissed.daysAgo)),
         tag: "missed-journal",
