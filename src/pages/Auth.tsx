@@ -59,6 +59,38 @@ const Auth = () => {
     }
   }, [initialMode]);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async (targetEmail?: string) => {
+    const addr = (targetEmail ?? signupPendingEmail ?? email).trim();
+    if (!addr.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: addr,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) {
+        toast.error(error.message || "Couldn't resend verification email");
+      } else {
+        toast.success(`Verification email sent to ${addr}`);
+        setResendCooldown(30);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't resend verification email");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   const validateEmail = () => {
     const trimmedEmail = email.trim();
     if (trimmedEmail.length > 255) {
