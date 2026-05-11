@@ -81,9 +81,9 @@ export const useCommunitySubscriptions = () => {
             target_id: targetId,
           })
           .select("id, target_type, target_id")
-          .single();
+          .maybeSingle();
 
-        if (error) {
+        if (error || !data) {
           toast.error("Failed to subscribe");
           return;
         }

@@ -34,10 +34,10 @@ export const useUserData = () => {
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
-      setProfile(data);
+      if (error) throw error;
+      setProfile(data ?? null);
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -101,8 +101,8 @@ export const useMoodEntries = () => {
       .select("*")
       .eq("user_id", user.id)
       .eq("date", today)
-      .single();
-    return data;
+      .maybeSingle();
+    return data ?? null;
   };
 
   return { getMoodEntries, saveMoodEntry, getTodaysMoodEntry };
@@ -248,7 +248,7 @@ export const usePreventionPlan = () => {
       .from("prevention_plans")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       const { error } = await supabase
@@ -277,8 +277,8 @@ export const useChallengeProgress = () => {
       .select("*")
       .eq("user_id", user.id)
       .eq("challenge_id", challengeId)
-      .single();
-    return data;
+      .maybeSingle();
+    return data ?? null;
   };
 
   const saveChallengeProgress = async (challengeId: string, completedTasks: string[]) => {
@@ -289,7 +289,7 @@ export const useChallengeProgress = () => {
       .select("id")
       .eq("user_id", user.id)
       .eq("challenge_id", challengeId)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       const { error } = await supabase

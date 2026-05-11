@@ -122,9 +122,10 @@ export const ForumView = ({ forum, onBack }: ForumViewProps) => {
         title: trimmedTitle,
         content: trimmedContent,
         tags: newTags.length > 0 ? newTags : null,
-      }).select().single();
+      }).select().maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Post not created");
       recordAction();
       
       // Trigger bot auto-reply after random delay (1-5 min)

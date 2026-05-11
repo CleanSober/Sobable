@@ -69,9 +69,9 @@ export const CommunityFeed = () => {
       content: newPost.trim(),
       post_type: postType,
       user_id: user.id,
-    }).select().single();
+    }).select().maybeSingle();
 
-    if (error) {
+    if (error || !data) {
       toast.error("Failed to post. Please try again.");
     } else {
       recordAction();
