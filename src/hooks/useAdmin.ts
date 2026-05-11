@@ -200,7 +200,7 @@ export const useUnbanUser = () => {
         .maybeSingle();
 
       if (fetchError) throw fetchError;
-      if (!ban) throw new Error("Ban record not found");
+      if (!ban) throw new Error("This ban no longer exists — it may have already been lifted. Refresh the ban list to confirm.");
 
       const { error } = await supabase
         .from("user_bans" as never)
@@ -224,7 +224,9 @@ export const useUnbanUser = () => {
       toast.success("User unbanned");
     },
     onError: (error) => {
-      toast.error("Failed to unban user: " + error.message);
+      toast.error("Couldn't unban user", {
+        description: error.message || "Try refreshing the ban list and attempting again.",
+      });
     },
   });
 };
