@@ -15,7 +15,7 @@ import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { UserProfile } from "@/components/UserProfile";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
-import { HomeSkeleton } from "@/components/skeletons/HomeSkeleton";
+import { HomeSkeleton, CheckInSkeleton, TriggersSkeleton, ProgressSkeleton } from "@/components/skeletons/HomeSkeleton";
 
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
