@@ -179,7 +179,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
                   // or being announced as separate slide groups.
                   {...(!isActive ? { inert: "" as unknown as undefined } : {})}
                 >
-                  <div className="px-5 pt-7 pb-2 text-center sm:px-6 sm:pt-8" aria-live={isActive ? "polite" : "off"}>
+                  <div className="px-5 pt-[max(1.75rem,env(safe-area-inset-top))] pb-2 text-center sm:px-6 sm:pt-8" aria-live={isActive ? "polite" : "off"}>
                     <div
                       className={`mx-auto mb-4 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${slide.accent} text-white shadow-xl`}
                     >
