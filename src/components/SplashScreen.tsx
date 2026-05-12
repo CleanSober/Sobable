@@ -50,56 +50,28 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
 
           {/* Logo container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, y: 30 }}
+            initial={{ opacity: 0, scale: 0.85, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.2,
-              type: "spring",
-              stiffness: 180,
-              damping: 18
+            transition={{
+              duration: 0.6,
+              delay: 0.1,
+              ease: [0.22, 1, 0.36, 1],
             }}
+            style={{ willChange: "transform, opacity" }}
             className="relative z-10 flex flex-col items-center"
           >
             {/* Icon with premium glow effect */}
-            <motion.div
-              initial={{ rotate: -10 }}
-              animate={{ rotate: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="relative mb-8"
-            >
-              {/* Outer glow ring */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.2, delay: 0.4 }}
-                className="absolute inset-0 rounded-3xl"
-                style={{ 
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--accent) / 0.4))",
-                  transform: "scale(1.4)",
-                  filter: "blur(30px)"
+            <div className="relative mb-8">
+              {/* Soft static glow (cheap) */}
+              <div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(var(--primary) / 0.45), hsl(var(--accent) / 0.35))",
+                  transform: "scale(1.25)",
+                  filter: "blur(24px)",
                 }}
               />
-              
-              {/* Inner glow ring */}
-              <motion.div
-                animate={{ 
-                  opacity: [0.5, 0.8, 0.5],
-                  scale: [1, 1.05, 1]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute inset-0 rounded-3xl"
-                style={{ 
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3))",
-                  transform: "scale(1.2)",
-                  filter: "blur(15px)"
-                }}
-              />
-              
               {/* Main icon container with tech border */}
               <div className="relative w-32 h-32 rounded-3xl overflow-hidden shadow-elevated tech-border">
                 <img 
