@@ -103,7 +103,13 @@ const App = () => {
   const handleSplashComplete = () => {
     sessionStorage.setItem("sober_club_splash_shown", "true");
     setShowSplash(false);
+    prefetchHotRoutes();
   };
+
+  // Also prefetch on mount when the splash was already shown this session
+  useEffect(() => {
+    if (!showSplash) prefetchHotRoutes();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
