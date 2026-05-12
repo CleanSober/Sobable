@@ -321,8 +321,33 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
               {/* Step 3: Date + Spending combined */}
               {step === 3 && (
                 <div className="space-y-5">
-                   <div>
+                  <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">Sobriety start date</label>
+                    {/* Quick presets — most users pick one of these */}
+                    <div className="grid grid-cols-4 gap-1.5 mb-2">
+                      {[
+                        { label: "Today", date: new Date() },
+                        { label: "Yesterday", date: subDays(new Date(), 1) },
+                        { label: "1 wk ago", date: subDays(new Date(), 7) },
+                        { label: "1 mo ago", date: subMonths(new Date(), 1) },
+                      ].map((preset) => {
+                        const active = !!startDate && format(startDate, "yyyy-MM-dd") === format(preset.date, "yyyy-MM-dd");
+                        return (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => setStartDate(preset.date)}
+                            className={`py-2 rounded-lg text-xs font-medium border transition-all active:scale-95 ${
+                              active
+                                ? "border-primary bg-primary/10 text-foreground"
+                                : "border-border/50 bg-secondary/40 text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -333,7 +358,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                          {startDate ? format(startDate, "PPP") : <span>Or pick a specific date</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -359,6 +384,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">$</span>
                       <Input
                         type="number"
+                        inputMode="decimal"
                         value={dailySpending}
                         onChange={(e) => setDailySpending(e.target.value)}
                         placeholder="0"
@@ -367,7 +393,27 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                         className="text-lg pl-8 h-12 bg-secondary/50 border-border/50"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">We'll track how much money you're saving</p>
+                    {/* Quick spending presets */}
+                    <div className="grid grid-cols-4 gap-1.5 mt-2">
+                      {["5", "10", "20", "50"].map((amt) => {
+                        const active = dailySpending === amt;
+                        return (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => setDailySpending(amt)}
+                            className={`py-1.5 rounded-lg text-xs font-medium border transition-all active:scale-95 ${
+                              active
+                                ? "border-primary bg-primary/10 text-foreground"
+                                : "border-border/50 bg-secondary/40 text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            ${amt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">We'll track how much money you're saving</p>
                   </div>
 
                   <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">
