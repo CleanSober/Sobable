@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import soberClubLogo from "@/assets/sober-club-logo.png";
+import soberClubLogo from "@/assets/sober-club-logo.webp";
 
 interface SplashScreenProps {
   onComplete: () => void;
