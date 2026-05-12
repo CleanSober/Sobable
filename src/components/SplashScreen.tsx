@@ -109,16 +109,16 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               >
                 <Sparkles className="w-4 h-4 text-primary drop-shadow-lg" />
               </motion.div>
-            </motion.div>
+            </div>
 
             {/* App name with gradient */}
             <motion.h1
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.7 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
               className="text-4xl font-bold tracking-tight mb-3 text-gradient"
             >
-              Sober Club
+              Sobable
             </motion.h1>
 
             {/* Tagline */}
