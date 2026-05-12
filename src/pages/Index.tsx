@@ -37,6 +37,7 @@ const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default
 const PremiumOnboarding = lazy(() => import("@/components/premium/PremiumOnboarding").then(m => ({ default: m.PremiumOnboarding })));
 const FeedbackPromptDialog = lazy(() => import("@/components/FeedbackPromptDialog").then(m => ({ default: m.FeedbackPromptDialog })));
 const MilestoneUpgradePrompt = lazy(() => import("@/components/MilestoneUpgradePrompt").then(m => ({ default: m.MilestoneUpgradePrompt })));
+const WelcomeTour = lazy(() => import("@/components/WelcomeTour").then(m => ({ default: m.WelcomeTour })));
 
 // Lazy load heavy tab content
 const ProgressView = lazy(() => import("@/components/ProgressView").then(m => ({ default: m.ProgressView })));
@@ -82,6 +83,7 @@ const Index = () => {
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
+  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
   const navigate = useNavigate();
 
   const handleTabChange = useCallback((tab: TabId) => {
@@ -121,6 +123,24 @@ const Index = () => {
     }, 5000);
     return () => clearTimeout(timer);
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
+
+  // Show one-time welcome feature tour after onboarding completes
+  useEffect(() => {
+    const onboardingDone = user
+      ? profile?.onboarding_complete
+      : isGuest && !!localStorage.getItem("sober_club_guest_profile");
+    if (!onboardingDone) return;
+    const key = user ? `sober_club_welcome_tour_${user.id}` : "sober_club_welcome_tour_guest";
+    if (localStorage.getItem(key)) return;
+    const timer = setTimeout(() => setShowWelcomeTour(true), 800);
+    return () => clearTimeout(timer);
+  }, [user, isGuest, profile?.onboarding_complete]);
+
+  const completeWelcomeTour = useCallback(() => {
+    const key = user ? `sober_club_welcome_tour_${user.id}` : "sober_club_welcome_tour_guest";
+    localStorage.setItem(key, "true");
+    setShowWelcomeTour(false);
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && !user && !isGuest) {
@@ -627,6 +647,7 @@ const Index = () => {
             showPricing={milestoneShowPricing}
             onPricingChange={setMilestoneShowPricing}
           />
+          {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} />}
         </Suspense>
       </div>
     </XPNotificationProvider>
