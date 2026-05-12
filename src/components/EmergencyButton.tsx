@@ -1,16 +1,37 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Heart, MessageCircle, X, Shield, AlertTriangle } from "lucide-react";
+import { Phone, Heart, MessageCircle, X, Shield, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useUserData } from "@/hooks/useUserData";
 import { makePhoneCall, sendSMS, hapticWarning, hapticImpact } from "@/lib/nativeActions";
 
 const POSITION_STORAGE_KEY = 'emergency-button-position';
+const LAST_CONTACT_STORAGE_KEY = 'emergency-last-contact';
+
+type ContactKind = "call" | "text";
+type LastContact = {
+  name: string;
+  description: string;
+  value: string; // phone number or "BODY to NUMBER" for SMS
+  kind: ContactKind;
+};
 
 export const EmergencyButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [lastContact, setLastContact] = useState<LastContact | null>(null);
+  const [pendingContact, setPendingContact] = useState<LastContact | null>(null);
   const { profile } = useUserData();
 
   useEffect(() => {
@@ -20,6 +41,14 @@ export const EmergencyButton = () => {
         setPosition(JSON.parse(savedPosition));
       } catch (e) {
         console.error('Failed to parse saved position');
+      }
+    }
+    const savedLast = localStorage.getItem(LAST_CONTACT_STORAGE_KEY);
+    if (savedLast) {
+      try {
+        setLastContact(JSON.parse(savedLast));
+      } catch (e) {
+        console.error('Failed to parse last contact');
       }
     }
   }, []);
@@ -46,30 +75,62 @@ export const EmergencyButton = () => {
     setIsDragging(true);
   };
 
-  const handleResourceCall = async (phone: string) => {
-    await makePhoneCall(phone);
+  const requestContact = (contact: LastContact) => {
+    setPendingContact(contact);
   };
 
-  const handleResourceText = async (text: string) => {
-    const number = text.includes("to") ? text.split(" to ")[1] : text;
-    const body = text.includes("to") ? text.split(" to ")[0] : undefined;
-    await sendSMS(number, body);
+  const confirmContact = async () => {
+    if (!pendingContact) return;
+    const contact = pendingContact;
+    setPendingContact(null);
+
+    if (contact.kind === "call") {
+      await makePhoneCall(contact.value);
+    } else {
+      const number = contact.value.includes(" to ")
+        ? contact.value.split(" to ")[1]
+        : contact.value;
+      const body = contact.value.includes(" to ")
+        ? contact.value.split(" to ")[0]
+        : undefined;
+      await sendSMS(number, body);
+    }
+
+    setLastContact(contact);
+    localStorage.setItem(LAST_CONTACT_STORAGE_KEY, JSON.stringify(contact));
   };
 
-  const resources = [
+  const resources: LastContact[] = [
     {
-      name: "SAMHSA Helpline",
-      description: "Free, confidential, 24/7 support",
-      phone: "1-800-662-4357",
-      icon: Phone,
+      name: "SAMHSA National Helpline",
+      description: "Free, confidential substance use support · 24/7",
+      value: "1-800-662-4357",
+      kind: "call",
     },
     {
       name: "Crisis Text Line",
-      description: "Text HOME to 741741",
-      phone: "741741",
-      icon: MessageCircle,
+      description: "Mental-health crisis counselor by text · 24/7",
+      value: "HOME to 741741",
+      kind: "text",
     },
   ];
+
+  if (profile?.sponsor_phone) {
+    resources.push({
+      name: "Your Sponsor",
+      description: "Personal recovery sponsor",
+      value: profile.sponsor_phone,
+      kind: "call",
+    });
+  }
+  if (profile?.emergency_contact) {
+    resources.push({
+      name: "Emergency Contact",
+      description: "Trusted personal contact",
+      value: profile.emergency_contact,
+      kind: "call",
+    });
+  }
 
   return (
     <>
@@ -100,7 +161,7 @@ export const EmergencyButton = () => {
         whileHover={{ scale: 1.05 }}
       >
         <Shield className="w-5 h-5 text-white" />
-        
+
         {/* Pulse ring */}
         <motion.div
           animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
@@ -129,10 +190,10 @@ export const EmergencyButton = () => {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed inset-x-4 bottom-4 z-50 md:inset-x-auto md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md"
             >
-              <div className="card-enhanced p-6 relative overflow-hidden">
+              <div className="card-enhanced p-6 relative overflow-hidden max-h-[85vh] overflow-y-auto">
                 {/* Background glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-destructive/20 blur-[50px] rounded-full pointer-events-none" />
-                
+
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 relative">
                   <div className="flex items-center gap-3">
@@ -146,6 +207,7 @@ export const EmergencyButton = () => {
                   <button
                     onClick={() => setIsOpen(false)}
                     className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+                    aria-label="Close emergency support"
                   >
                     <X className="w-5 h-5 text-muted-foreground" />
                   </button>
@@ -153,7 +215,7 @@ export const EmergencyButton = () => {
 
                 {/* Personal Reminder */}
                 {profile?.personal_reminder && (
-                  <div className="mb-6 p-4 rounded-xl glass-card">
+                  <div className="mb-5 p-4 rounded-xl glass-card">
                     <div className="flex items-center gap-2 mb-2">
                       <Heart className="w-4 h-4 text-accent" />
                       <span className="text-sm font-semibold text-accent">Your Reason</span>
@@ -162,57 +224,99 @@ export const EmergencyButton = () => {
                   </div>
                 )}
 
-                {/* Resources */}
-                <div className="space-y-3 mb-6">
-                  {resources.map((resource, index) => (
-                    <motion.button
-                      key={resource.name}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      onClick={() => handleResourceCall(resource.phone)}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 hover:border-primary/30 transition-all duration-300 group text-left"
+                {/* Last used contact quick access */}
+                {lastContact && (
+                  <div className="mb-5">
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                      <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Last used
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => requestContact(lastContact)}
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/30 hover:bg-primary/15 transition-all duration-300 text-left"
                     >
-                      <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 group-hover:bg-primary/20 transition-colors">
-                        <resource.icon className="w-5 h-5 text-primary" />
+                      <div className="p-2.5 rounded-xl bg-primary/20 border border-primary/30">
+                        {lastContact.kind === "call" ? (
+                          <Phone className="w-5 h-5 text-primary" />
+                        ) : (
+                          <MessageCircle className="w-5 h-5 text-primary" />
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-foreground">{resource.name}</p>
-                        <p className="text-sm text-muted-foreground">{resource.description}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground truncate">{lastContact.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {lastContact.kind === "call" ? "Tap to call again" : "Tap to text again"}
+                        </p>
                       </div>
-                      <span className="text-sm font-bold text-primary">{resource.phone}</span>
-                    </motion.button>
-                  ))}
-                </div>
+                      <span className="text-sm font-bold text-primary shrink-0">
+                        {lastContact.value}
+                      </span>
+                    </button>
+                  </div>
+                )}
 
-                {/* Contact buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  {profile?.sponsor_phone && (
-                    <Button
-                      variant="outline"
-                      className="border-primary/30 text-primary hover:bg-primary/10 h-12"
-                      onClick={() => handleResourceCall(profile.sponsor_phone!)}
-                    >
-                      <Phone className="w-4 h-4 mr-2" />
-                      Call Sponsor
-                    </Button>
-                  )}
-                  {profile?.emergency_contact && (
-                    <Button
-                      variant="outline"
-                      className="border-accent/30 text-accent hover:bg-accent/10 h-12"
-                      onClick={() => handleResourceCall(profile.emergency_contact!)}
-                    >
-                      <Phone className="w-4 h-4 mr-2" />
-                      Emergency
-                    </Button>
-                  )}
+                {/* Resources */}
+                <div className="space-y-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1">
+                    Support resources
+                  </span>
+                  {resources.map((resource, index) => {
+                    const Icon = resource.kind === "call" ? Phone : MessageCircle;
+                    return (
+                      <motion.button
+                        key={resource.name}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => requestContact(resource)}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 hover:border-primary/30 transition-all duration-300 group text-left"
+                      >
+                        <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/25 group-hover:bg-primary/20 transition-colors">
+                          <Icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground truncate">{resource.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{resource.description}</p>
+                        </div>
+                        <span className="text-sm font-bold text-primary shrink-0">
+                          {resource.value}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      {/* Confirmation dialog */}
+      <AlertDialog
+        open={!!pendingContact}
+        onOpenChange={(open) => !open && setPendingContact(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingContact?.kind === "call" ? "Call" : "Text"} {pendingContact?.name}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingContact?.kind === "call"
+                ? `This will open your phone app and dial ${pendingContact?.value}.`
+                : `This will open your messaging app to send "${pendingContact?.value}".`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmContact}>
+              {pendingContact?.kind === "call" ? "Call now" : "Send text"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
