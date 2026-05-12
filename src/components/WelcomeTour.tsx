@@ -34,7 +34,7 @@ const SLIDES = [
   { id: "community", icon: Users, title: "Community", body: "Connect with others on the same path. Forums, live chat and accountability partners — judgment-free.", accent: "from-amber-500 to-yellow-500" },
 ];
 
-export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
+export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const total = SLIDES.length;
