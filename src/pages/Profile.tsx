@@ -766,21 +766,22 @@ const Profile = () => {
             </div>
           </motion.div>
 
-          {/* Notifications */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="card-enhanced p-4"
-          >
-            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-primary" />
-              Notifications
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">Daily reminders, milestones, and quiet hours.</p>
-            <NotificationSettings sobrietyStartDate={sobrietyDate} />
-          </motion.div>
-
+          {/* Notifications — auth required (push token, server prefs) */}
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="card-enhanced p-4"
+            >
+              <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Notifications
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">Daily reminders, milestones, and quiet hours.</p>
+              <NotificationSettings sobrietyStartDate={sobrietyDate} />
+            </motion.div>
+          )}
           {/* Follow Us */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
