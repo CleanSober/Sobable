@@ -720,8 +720,8 @@ const Index = () => {
       <div className="min-h-screen min-h-[100dvh] bg-background noise-overlay">
         {/* Ambient background effects */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 blur-[120px] rounded-full" />
-          <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-accent/5 blur-[100px] rounded-full" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 blur-[60px] rounded-full" />
+          <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-accent/5 blur-[60px] rounded-full" />
         </div>
         
         <motion.header

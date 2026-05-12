@@ -23,7 +23,19 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Support = lazy(() => import("./pages/Support"));
 const Profile = lazy(() => import("./pages/Profile"));
 
-const queryClient = new QueryClient();
+// Tuned defaults: avoid hammering the network on every focus/mount,
+// keep cached data warm so tab switches feel instant.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000, // 1 min — cached data is considered fresh
+      gcTime: 5 * 60_000, // 5 min — keep cache around for back-nav
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 // Simple loading fallback
 const PageLoader = () => (

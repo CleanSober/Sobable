@@ -155,8 +155,8 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
 
         {/* Background glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full" />
-          <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-accent/10 blur-[100px] rounded-full" />
+          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/10 blur-[60px] rounded-full" />
+          <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-accent/10 blur-[60px] rounded-full" />
         </div>
 
         <motion.div
@@ -210,8 +210,8 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col p-5 safe-area-top relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/8 blur-[100px] rounded-full" />
-        <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-accent/8 blur-[80px] rounded-full" />
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/8 blur-[60px] rounded-full" />
+        <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-accent/8 blur-[50px] rounded-full" />
       </div>
 
       <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10">

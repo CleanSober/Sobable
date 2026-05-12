@@ -272,14 +272,14 @@ const Auth = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.2, scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-[100px]"
+          className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-[60px]"
           style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" }}
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.15, scale: 1 }}
           transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
-          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-[100px]"
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-[60px]"
           style={{ background: "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)))" }}
         />
       </div>

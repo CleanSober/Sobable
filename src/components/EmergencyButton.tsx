@@ -131,7 +131,7 @@ export const EmergencyButton = () => {
             >
               <div className="card-enhanced p-6 relative overflow-hidden">
                 {/* Background glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-destructive/20 blur-[80px] rounded-full pointer-events-none" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-destructive/20 blur-[50px] rounded-full pointer-events-none" />
                 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 relative">

@@ -210,7 +210,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
       }`}>
         {/* Ambient glow based on status */}
         {streak.current > 0 && (
-          <div className="absolute top-0 left-1/3 w-48 h-48 bg-orange-500/10 blur-[80px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 left-1/3 w-48 h-48 bg-orange-500/10 blur-[50px] rounded-full pointer-events-none" />
         )}
         
         <div className="relative p-5">
