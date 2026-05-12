@@ -98,6 +98,7 @@ const Index = () => {
     | { status: "error"; message: string }
     | null
   >(null);
+  const [migrationConflict, setMigrationConflict] = useState<{ guest: GuestProfile } | null>(null);
   const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
     user: user ? { id: user.id } : null,
     isGuest,
