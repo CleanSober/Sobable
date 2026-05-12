@@ -192,7 +192,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
           </CarouselContent>
         </Carousel>
 
-        <div className="px-6 pb-6">
+        <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6">
           {/* Slide indicators (also act as jump controls) */}
           <div
             className="flex items-center justify-center gap-1.5 mt-2 mb-5"
