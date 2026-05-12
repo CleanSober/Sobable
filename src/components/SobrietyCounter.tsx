@@ -41,7 +41,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
     >
       {/* Ambient glow effects */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/15 blur-[100px] rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/15 blur-[60px] rounded-full" />
         <div className="absolute bottom-0 right-0 w-40 h-40 bg-accent/10 blur-[60px] rounded-full" />
       </div>
 

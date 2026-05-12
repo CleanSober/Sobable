@@ -607,7 +607,7 @@ export const MoodCheckIn = () => {
       transition={{ duration: 0.6, delay: 0.3 }}
       className="card-enhanced relative overflow-hidden"
     >
-      <div className="absolute top-0 left-1/3 w-40 h-40 bg-primary/10 blur-[80px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/3 w-40 h-40 bg-primary/10 blur-[50px] rounded-full pointer-events-none" />
 
       <div className="relative p-3">
         {/* Header */}
