@@ -202,7 +202,6 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
             </Button>
           </nav>
         </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
