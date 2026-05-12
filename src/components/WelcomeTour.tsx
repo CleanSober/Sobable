@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +8,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { Home, Heart, Brain, TrendingUp, Users, ChevronRight, Sparkles } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 interface WelcomeTourProps {
   open: boolean;
@@ -15,42 +16,12 @@ interface WelcomeTourProps {
 }
 
 const SLIDES = [
-  {
-    icon: Sparkles,
-    title: "Welcome to Sober Club",
-    body: "A quick swipe-through of what lives inside the app — so you know exactly where to look when you need it.",
-    accent: "from-primary to-primary/60",
-  },
-  {
-    icon: Home,
-    title: "Home",
-    body: "Your sobriety counter, money saved, daily affirmation, and quick actions — your morning anchor each day.",
-    accent: "from-orange-500 to-rose-500",
-  },
-  {
-    icon: Heart,
-    title: "Check-In",
-    body: "Log your mood, energy, sleep and cravings in under a minute. It powers your streaks and personalized insights.",
-    accent: "from-pink-500 to-rose-500",
-  },
-  {
-    icon: Brain,
-    title: "Triggers & Tools",
-    body: "Spot what sets you off, then reach for breathing exercises, the craving timer, or emergency support — anytime.",
-    accent: "from-sky-500 to-indigo-500",
-  },
-  {
-    icon: TrendingUp,
-    title: "Progress",
-    body: "See your streaks, badges, calendar heatmap and analytics. Watch the wins stack up week after week.",
-    accent: "from-emerald-500 to-teal-500",
-  },
-  {
-    icon: Users,
-    title: "Community",
-    body: "Connect with others on the same path. Forums, live chat and accountability partners — judgment-free.",
-    accent: "from-amber-500 to-yellow-500",
-  },
+  { id: "intro", icon: Sparkles, title: "Welcome to Sober Club", body: "A quick swipe-through of what lives inside the app — so you know exactly where to look when you need it.", accent: "from-primary to-primary/60" },
+  { id: "home", icon: Home, title: "Home", body: "Your sobriety counter, money saved, daily affirmation, and quick actions — your morning anchor each day.", accent: "from-orange-500 to-rose-500" },
+  { id: "checkin", icon: Heart, title: "Check-In", body: "Log your mood, energy, sleep and cravings in under a minute. It powers your streaks and personalized insights.", accent: "from-pink-500 to-rose-500" },
+  { id: "triggers", icon: Brain, title: "Triggers & Tools", body: "Spot what sets you off, then reach for breathing exercises, the craving timer, or emergency support — anytime.", accent: "from-sky-500 to-indigo-500" },
+  { id: "progress", icon: TrendingUp, title: "Progress", body: "See your streaks, badges, calendar heatmap and analytics. Watch the wins stack up week after week.", accent: "from-emerald-500 to-teal-500" },
+  { id: "community", icon: Users, title: "Community", body: "Connect with others on the same path. Forums, live chat and accountability partners — judgment-free.", accent: "from-amber-500 to-yellow-500" },
 ];
 
 export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
@@ -58,24 +29,78 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
   const [current, setCurrent] = useState(0);
   const total = SLIDES.length;
   const isLast = current === total - 1;
+  // Track which slides have been viewed to dedupe slide_viewed events
+  const viewedRef = useRef<Set<number>>(new Set());
+  // Whether the tour completed naturally (Get started on final slide).
+  // Used to distinguish completion vs. skip on dismiss.
+  const completedRef = useRef(false);
+  const startedAtRef = useRef<number>(0);
+
+  const logSlideView = (index: number) => {
+    if (viewedRef.current.has(index)) return;
+    viewedRef.current.add(index);
+    const slide = SLIDES[index];
+    trackEvent("welcome_tour_slide_viewed", {
+      slide_index: index,
+      slide_id: slide?.id,
+      total_slides: total,
+    });
+  };
+
+  // Fire "started" + first slide view when the dialog opens
+  useEffect(() => {
+    if (!open) return;
+    startedAtRef.current = Date.now();
+    completedRef.current = false;
+    viewedRef.current = new Set();
+    trackEvent("welcome_tour_started", { total_slides: total });
+    logSlideView(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     if (!api) return;
-    const handler = () => setCurrent(api.selectedScrollSnap());
+    const handler = () => {
+      const idx = api.selectedScrollSnap();
+      setCurrent(idx);
+      logSlideView(idx);
+    };
     handler();
     api.on("select", handler);
     return () => {
       api.off("select", handler);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api]);
 
+  const finish = (completed: boolean) => {
+    const duration_ms = startedAtRef.current ? Date.now() - startedAtRef.current : null;
+    if (completed) {
+      completedRef.current = true;
+      trackEvent("welcome_tour_completed", {
+        total_slides: total,
+        slides_viewed: viewedRef.current.size,
+        duration_ms,
+      });
+    } else {
+      trackEvent("welcome_tour_skipped", {
+        slide_index_at_skip: current,
+        slide_id_at_skip: SLIDES[current]?.id,
+        slides_viewed: viewedRef.current.size,
+        total_slides: total,
+        duration_ms,
+      });
+    }
+    onComplete();
+  };
+
   const next = () => {
-    if (isLast) onComplete();
+    if (isLast) finish(true);
     else api?.scrollNext();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onComplete(); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
         <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: false }}>
           <CarouselContent>
@@ -126,7 +151,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={onComplete}
+              onClick={() => finish(false)}
               className="text-muted-foreground"
             >
               Skip
