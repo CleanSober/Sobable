@@ -461,15 +461,19 @@ const Profile = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">Free Plan</p>
-                    <p className="text-[10px] text-muted-foreground">Upgrade to unlock all recovery tools</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {isGuest && !user
+                        ? "Create an account to subscribe to Sober Club"
+                        : "Upgrade to unlock all recovery tools"}
+                    </p>
                   </div>
                 </div>
                 <Button
-                  onClick={() => navigate("/?upgrade=true")}
+                  onClick={() => navigate(isGuest && !user ? "/auth" : "/?upgrade=true")}
                   className="w-full gap-2 gradient-premium text-primary-foreground hover:opacity-90 transition-opacity"
                 >
                   <Crown className="w-4 h-4" />
-                  Upgrade to Sober Club
+                  {isGuest && !user ? "Create account to upgrade" : "Upgrade to Sober Club"}
                 </Button>
               </div>
             )}
