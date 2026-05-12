@@ -38,33 +38,15 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden"
         >
-          {/* Background gradient mesh */}
-          <div className="absolute inset-0 overflow-hidden">
-            {/* Teal primary orb */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.35, scale: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-[150px]"
-              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--success)))" }}
-            />
-            {/* Amber accent orb */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.25, scale: 1 }}
-              transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-              className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px]"
-              style={{ background: "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--warning)))" }}
-            />
-            {/* Subtle center glow */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.15 }}
-              transition={{ duration: 2, delay: 0.5 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[200px]"
-              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 70%)" }}
-            />
-          </div>
+          {/* Background gradient mesh - static for smooth performance */}
+          <div
+            className="absolute inset-0 opacity-90 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at 30% 35%, hsl(var(--primary) / 0.28), transparent 60%), radial-gradient(ellipse at 75% 70%, hsl(var(--accent) / 0.22), transparent 60%)",
+              willChange: "opacity",
+            }}
+          />
 
           {/* Logo container */}
           <motion.div
