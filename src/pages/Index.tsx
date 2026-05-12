@@ -830,7 +830,7 @@ const Index = () => {
             showPricing={milestoneShowPricing}
             onPricingChange={setMilestoneShowPricing}
           />
-          {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} />}
+          {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} context={tourContext} />}
         </Suspense>
         {migrationConflict && (
           <GuestMigrationConflictDialog
