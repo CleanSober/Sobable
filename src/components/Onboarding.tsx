@@ -104,6 +104,8 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
   const { notification, impact } = useHaptics();
 
   const handleComplete = useCallback(() => {
+    completedRef.current = true;
+    try { localStorage.removeItem(ONBOARDING_DRAFT_KEY); } catch { /* noop */ }
     setShowCelebration(true);
 
     // Haptic celebration burst: success notification + heavy impact combo
