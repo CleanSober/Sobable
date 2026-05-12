@@ -7,7 +7,6 @@
  * src/docs/VISUAL_REGRESSION_CHECKLIST.md
  */
 import { useEffect, useRef, useState } from "react";
-import { Helmet } from "react-helmet-async";
 
 type Status = "pass" | "fail" | "warn" | "pending";
 
