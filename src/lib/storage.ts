@@ -1,3 +1,5 @@
+import { safeReadJSON, safeWriteJSON } from "./appVersion";
+
 export interface UserData {
   name?: string;
   substances: string[];
@@ -36,17 +38,16 @@ const STORAGE_KEYS = {
 };
 
 export const getUserData = (): UserData | null => {
-  const data = localStorage.getItem(STORAGE_KEYS.userData);
-  return data ? JSON.parse(data) : null;
+  return safeReadJSON<UserData | null>(STORAGE_KEYS.userData, null);
 };
 
 export const saveUserData = (data: UserData): void => {
-  localStorage.setItem(STORAGE_KEYS.userData, JSON.stringify(data));
+  safeWriteJSON(STORAGE_KEYS.userData, data);
 };
 
 export const getMoodEntries = (): MoodEntry[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.moodEntries);
-  return data ? JSON.parse(data) : [];
+  const data = safeReadJSON<MoodEntry[]>(STORAGE_KEYS.moodEntries, []);
+  return Array.isArray(data) ? data : [];
 };
 
 export const saveMoodEntry = (entry: MoodEntry): void => {
@@ -57,7 +58,7 @@ export const saveMoodEntry = (entry: MoodEntry): void => {
   } else {
     entries.push(entry);
   }
-  localStorage.setItem(STORAGE_KEYS.moodEntries, JSON.stringify(entries));
+  safeWriteJSON(STORAGE_KEYS.moodEntries, entries);
 };
 
 export const getTodaysMoodEntry = (): MoodEntry | null => {
@@ -68,19 +69,19 @@ export const getTodaysMoodEntry = (): MoodEntry | null => {
 
 // Trigger entries
 export const getTriggerEntries = (): TriggerEntry[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.triggerEntries);
-  return data ? JSON.parse(data) : [];
+  const data = safeReadJSON<TriggerEntry[]>(STORAGE_KEYS.triggerEntries, []);
+  return Array.isArray(data) ? data : [];
 };
 
 export const saveTriggerEntry = (entry: TriggerEntry): void => {
   const entries = getTriggerEntries();
   entries.unshift(entry);
-  localStorage.setItem(STORAGE_KEYS.triggerEntries, JSON.stringify(entries));
+  safeWriteJSON(STORAGE_KEYS.triggerEntries, entries);
 };
 
 export const deleteTriggerEntry = (id: string): void => {
   const entries = getTriggerEntries().filter((e) => e.id !== id);
-  localStorage.setItem(STORAGE_KEYS.triggerEntries, JSON.stringify(entries));
+  safeWriteJSON(STORAGE_KEYS.triggerEntries, entries);
 };
 
 // Pattern analysis

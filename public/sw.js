@@ -1,5 +1,5 @@
 // Service Worker for Sobable PWA
-const CACHE_NAME = 'sobable-v1';
+const CACHE_NAME = 'sobable-v2';
 const urlsToCache = [
   '/',
   '/index.html',
