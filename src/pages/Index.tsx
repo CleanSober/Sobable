@@ -396,6 +396,19 @@ const Index = () => {
     }
   }, [profile?.sobriety_start_date, user, triggerFeedback]);
 
+  // Auto-open the pricing dialog when arriving via ?upgrade=true so CTAs
+  // that route to "/?upgrade=true" (e.g., Profile upgrade button) work.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgrade") === "true") {
+      setMilestoneShowPricing(true);
+      params.delete("upgrade");
+      const qs = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    }
+  }, [setMilestoneShowPricing]);
+
   // Trigger milestone upgrade prompts at key engagement moments
   useEffect(() => {
     if (!user || !profile?.onboarding_complete) return;
