@@ -28,15 +28,9 @@ export const UserProfile = () => {
 
   return (
     <button
-      onClick={() => {
-        if (isGuest && !user) {
-          navigate("/auth");
-        } else {
-          navigate("/profile");
-        }
-      }}
+      onClick={() => navigate("/profile")}
       className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-secondary/50 hover:bg-secondary transition-colors border border-border/50"
-      aria-label={isGuest && !user ? "Sign up for an account" : "User profile"}
+      aria-label={isGuest && !user ? "View guest profile" : "User profile"}
     >
       <div className="relative">
         <Avatar className="w-8 h-8 border-2 border-primary/30">
@@ -54,7 +48,7 @@ export const UserProfile = () => {
           {displayName}
         </span>
         <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-          {isGuest && !user ? "Tap to sign up" : <><Zap className="w-2.5 h-2.5" /> Lvl {currentLevel}</>}
+          {isGuest && !user ? "Guest" : <><Zap className="w-2.5 h-2.5" /> Lvl {currentLevel}</>}
         </span>
       </div>
     </button>
