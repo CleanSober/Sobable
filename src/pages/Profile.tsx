@@ -768,7 +768,10 @@ const Profile = () => {
             </h3>
             <button
               onClick={() => {
-                localStorage.setItem("sober_club_welcome_tour_pending", "true");
+                localStorage.setItem(
+                  user ? "sober_club_welcome_tour_pending_user" : "sober_club_welcome_tour_pending_guest",
+                  "true"
+                );
                 toast.success("Replaying welcome tour…");
                 navigate("/");
               }}
