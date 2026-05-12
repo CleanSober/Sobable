@@ -404,20 +404,87 @@ export const useInAppPurchases = () => {
   );
 
   const restorePurchases = useCallback(async () => {
-    if (!hasNativePurchases || !session?.access_token) return;
+    if (!hasNativePurchases || !session?.access_token || !user) return;
 
     setState((s) => ({ ...s, restoring: true }));
 
     try {
-      await NativePurchases.restorePurchases();
-      toast.success("Purchases restored! Reopen the app if your premium status doesn't update.");
+      const restoreResult: any = await NativePurchases.restorePurchases();
+      const platform = Capacitor.getPlatform();
+
+      // Pull every active SUBS purchase the OS knows about and re-validate each
+      // one server-side. Without this, the DB never learns about the restore
+      // and the user stays on the free tier — an App Store submission blocker.
+      let activePurchases: any[] = [];
+      try {
+        const { purchases } = await NativePurchases.getPurchases({
+          productType: PURCHASE_TYPE.SUBS,
+          onlyCurrentEntitlements: true,
+        });
+        activePurchases = Array.isArray(purchases) ? purchases : [];
+      } catch (e) {
+        console.warn("[IAP] getPurchases after restore failed", e);
+      }
+
+      // Fall back to the raw restore payload if getPurchases returned nothing
+      if (activePurchases.length === 0 && Array.isArray(restoreResult?.purchases)) {
+        activePurchases = restoreResult.purchases;
+      }
+
+      if (activePurchases.length === 0) {
+        toast.info("No previous purchases found on this account.");
+        return;
+      }
+
+      let revalidated = 0;
+      for (const purchase of activePurchases) {
+        const productId =
+          purchase?.productIdentifier ||
+          purchase?.planIdentifier ||
+          purchase?.id;
+        if (!productId) continue;
+
+        const iosPayload =
+          platform === "ios"
+            ? await pickIosReceiptPayload(purchase, productId, user.id)
+            : null;
+
+        const { data, error } = await supabase.functions.invoke(
+          "validate-iap-receipt",
+          {
+            body: {
+              platform,
+              productId,
+              transactionId: purchase?.transactionId,
+              ...(platform === "ios" && {
+                receipt: iosPayload?.receipt,
+                jwsRepresentation: iosPayload?.jwsRepresentation,
+                environment: iosPayload?.environment,
+              }),
+              ...(platform === "android" && {
+                purchaseToken: purchase?.purchaseToken,
+              }),
+            },
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          }
+        );
+
+        if (!error && data?.success) revalidated += 1;
+        else console.warn("[IAP] restore re-validate failed", { productId, error, data });
+      }
+
+      if (revalidated > 0) {
+        toast.success("Purchases restored! Premium access is active.");
+      } else {
+        toast.error("Couldn't verify your previous purchase. Contact support if this persists.");
+      }
     } catch (error) {
       console.error("Restore failed:", error);
       toast.error("Failed to restore purchases.");
     } finally {
       setState((s) => ({ ...s, restoring: false }));
     }
-  }, [hasNativePurchases, session?.access_token]);
+  }, [hasNativePurchases, session?.access_token, user]);
 
   // Helper to get a display price from loaded products or fallback
   const getProductPrice = useCallback(

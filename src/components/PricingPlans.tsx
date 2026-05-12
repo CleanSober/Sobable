@@ -247,7 +247,14 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           </p>
 
           <button
-            onClick={restorePurchases}
+            onClick={async () => {
+              await restorePurchases();
+              // Pull fresh subscription/premium state so the dialog reflects
+              // the restored entitlement immediately (no focus event fires
+              // while the modal is open).
+              await checkSubscription();
+              refreshPremiumStatus();
+            }}
             disabled={restoring}
             className="w-full text-xs text-primary hover:text-primary/80 transition-colors py-1"
           >

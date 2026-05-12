@@ -16,8 +16,18 @@ export const PremiumLockOverlay = ({ children, featureName = "this feature", ico
   const { isPremium, loading } = usePremiumStatus();
   const [showPricing, setShowPricing] = useState(false);
 
-  if (loading || isPremium) {
+  // Premium users see the real feature.
+  if (isPremium) {
     return <>{children}</>;
+  }
+
+  // While we're still resolving status, render a neutral placeholder so a
+  // non-premium user never briefly sees the gated content before the lock
+  // appears (visible flash on slow networks).
+  if (loading) {
+    return (
+      <div className="w-full h-20 rounded-2xl bg-secondary/30 animate-pulse" />
+    );
   }
 
   return (
