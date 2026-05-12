@@ -99,7 +99,7 @@ const Index = () => {
     | null
   >(null);
   const [migrationConflict, setMigrationConflict] = useState<{ guest: GuestProfile } | null>(null);
-  const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
+  const { showWelcomeTour, completeWelcomeTour, tourContext } = useWelcomeTourTrigger({
     user: user ? { id: user.id } : null,
     isGuest,
     onboardingComplete: profile?.onboarding_complete,
