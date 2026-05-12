@@ -100,7 +100,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onComplete(); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
         <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: false }}>
           <CarouselContent>
