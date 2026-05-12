@@ -229,7 +229,8 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                   />
 
                   <button
-                    onClick={() => { setIsAnonymous(!isAnonymous); if (!isAnonymous) setName(""); }}
+                    onClick={() => setIsAnonymous((v) => !v)}
+                    aria-pressed={isAnonymous}
                     className={`w-full p-3 rounded-xl text-sm transition-all border flex items-center justify-center gap-2 active:scale-[0.98] ${
                       isAnonymous
                         ? "border-primary bg-primary/10 text-foreground"
@@ -428,9 +429,14 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
               {step === 4 && (
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">
-                      Why did you quit?
-                    </label>
+                    <div className="flex items-baseline justify-between mb-1.5">
+                      <label className="text-sm font-medium text-foreground">
+                        Why did you quit? <span className="text-muted-foreground font-normal">(optional)</span>
+                      </label>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">
+                        {personalReminder.length}/500
+                      </span>
+                    </div>
                     <Textarea
                       value={personalReminder}
                       onChange={(e) => setPersonalReminder(e.target.value)}
@@ -439,34 +445,47 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                       rows={2}
                       maxLength={500}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      We'll show this back to you in tough moments.
+                    </p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">Sponsor phone</label>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">
+                      Sponsor phone <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
                     <Input
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      enterKeyHint="next"
                       value={sponsorPhone}
                       onChange={(e) => setSponsorPhone(e.target.value)}
-                      placeholder="Optional"
+                      placeholder="e.g. +1 555 123 4567"
                       className="h-11 bg-secondary/50 border-border/50 text-sm"
                       maxLength={20}
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">Emergency contact</label>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">
+                      Emergency contact <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
                     <Input
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      enterKeyHint="done"
                       value={emergencyContact}
                       onChange={(e) => setEmergencyContact(e.target.value)}
-                      placeholder="Optional"
+                      placeholder="e.g. +1 555 987 6543"
                       className="h-11 bg-secondary/50 border-border/50 text-sm"
                       maxLength={20}
                     />
                   </div>
 
                   <p className="text-xs text-center text-muted-foreground">
-                    All fields on this step are optional — you can add them later
+                    All fields here are optional — tap “Start My Journey” to skip.
                   </p>
                 </div>
               )}
@@ -505,12 +524,9 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
           )}
 
           {step === TOTAL_STEPS && (
-            <button
-              onClick={handleComplete}
-              className="w-full mt-2 text-xs text-muted-foreground hover:text-foreground text-center py-2 transition-colors"
-            >
-              Skip for now
-            </button>
+            <p className="text-[11px] text-muted-foreground/70 text-center mt-2">
+              You can edit any of this later in Profile.
+            </p>
           )}
         </div>
       </div>
