@@ -1,3 +1,5 @@
+import { safeReadJSON, safeWriteJSON } from "./appVersion";
+
 export interface UserData {
   name?: string;
   substances: string[];
