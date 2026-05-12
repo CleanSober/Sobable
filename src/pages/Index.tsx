@@ -83,6 +83,7 @@ const Index = () => {
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
+  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
   const navigate = useNavigate();
 
   const handleTabChange = useCallback((tab: TabId) => {
