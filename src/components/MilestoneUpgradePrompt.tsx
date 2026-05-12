@@ -61,7 +61,7 @@ export const MilestoneUpgradePrompt = memo(({
                   <Button
                     onClick={onUpgrade}
                     size="sm"
-                    className="flex-1 h-9 text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                    className="flex-1 h-9 text-xs font-semibold gradient-premium text-primary-foreground hover:opacity-90 transition-opacity"
                   >
                     <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                     Join Sober Club

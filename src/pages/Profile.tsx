@@ -349,12 +349,12 @@ const Profile = () => {
               <Crown className="w-4 h-4 text-accent" />
               Subscription
             </h3>
-            <p className="text-xs text-muted-foreground mb-3">Your plan and billing for Sober Club premium.</p>
+            <p className="text-xs text-muted-foreground mb-4">Your plan and billing for Sober Club premium.</p>
             {isPremium ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
-                    <Crown className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-full gradient-premium flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">{planName || "Sober Club"}</p>
@@ -396,7 +396,7 @@ const Profile = () => {
                 </div>
                 <Button
                   onClick={() => navigate("/?upgrade=true")}
-                  className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                  className="w-full gap-2 gradient-premium text-primary-foreground hover:opacity-90 transition-opacity"
                 >
                   <Crown className="w-4 h-4" />
                   Upgrade to Sober Club
@@ -768,11 +768,13 @@ const Profile = () => {
             transition={{ delay: 0.4 }}
             className="card-enhanced overflow-hidden"
           >
-            <h3 className="text-sm font-semibold text-foreground p-4 pb-1 flex items-center gap-2">
-              <Settings2 className="w-4 h-4 text-muted-foreground" />
-              Account
-            </h3>
-            <p className="text-xs text-muted-foreground px-4 pb-2">Replay the welcome tour, sign out, or delete your account.</p>
+            <div className="px-4 pt-4 pb-3">
+              <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
+                <Settings2 className="w-4 h-4 text-muted-foreground" />
+                Account
+              </h3>
+              <p className="text-xs text-muted-foreground">Replay the welcome tour, sign out, or delete your account.</p>
+            </div>
             <button
               onClick={() => {
                 localStorage.setItem(
