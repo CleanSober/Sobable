@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +8,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { Home, Heart, Brain, TrendingUp, Users, ChevronRight, Sparkles } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 interface WelcomeTourProps {
   open: boolean;
