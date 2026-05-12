@@ -124,21 +124,31 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
 
-  // Show the welcome feature tour ONLY for users who just finished onboarding
+  // Show the welcome feature tour ONLY for users who JUST finished onboarding
   // in this session. The pending flag is set inside handleOnboardingComplete,
-  // so existing users (who never pass through that path again) never see it.
+  // and is scoped to guest vs. authed so the two flows can never cross-trigger
+  // each other (e.g. a guest finishes onboarding then signs into an existing
+  // account — the existing account should not inherit the pending flag).
+  const tourPendingKey = user
+    ? "sober_club_welcome_tour_pending_user"
+    : "sober_club_welcome_tour_pending_guest";
+
   useEffect(() => {
     const onboardingDone = user
       ? profile?.onboarding_complete
       : isGuest && !!localStorage.getItem("sober_club_guest_profile");
     if (!onboardingDone) return;
-    if (localStorage.getItem("sober_club_welcome_tour_pending") !== "true") return;
+    if (localStorage.getItem(tourPendingKey) !== "true") return;
     const timer = setTimeout(() => setShowWelcomeTour(true), 800);
     return () => clearTimeout(timer);
-  }, [user, isGuest, profile?.onboarding_complete]);
+  }, [user, isGuest, profile?.onboarding_complete, tourPendingKey]);
 
   const completeWelcomeTour = useCallback(() => {
-    localStorage.removeItem("sober_club_welcome_tour_pending");
+    // Clear both keys defensively so a stale flag from the other flow can
+    // never resurface the tour for a returning user/guest.
+    localStorage.removeItem("sober_club_welcome_tour_pending_user");
+    localStorage.removeItem("sober_club_welcome_tour_pending_guest");
+    localStorage.removeItem("sober_club_welcome_tour_pending"); // legacy
     setShowWelcomeTour(false);
   }, []);
 
@@ -312,7 +322,10 @@ const Index = () => {
   }) => {
     // Mark that this user just signed up — the welcome tour should appear
     // exactly once, immediately after this onboarding completes.
-    localStorage.setItem("sober_club_welcome_tour_pending", "true");
+    localStorage.setItem(
+      user ? "sober_club_welcome_tour_pending_user" : "sober_club_welcome_tour_pending_guest",
+      "true"
+    );
     if (user) {
       await updateProfile({
         display_name: data.name,
