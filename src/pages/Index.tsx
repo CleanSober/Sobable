@@ -15,7 +15,7 @@ import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { UserProfile } from "@/components/UserProfile";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
-import { HomeSkeleton } from "@/components/skeletons/HomeSkeleton";
+import { HomeSkeleton, CheckInSkeleton, TriggersSkeleton, ProgressSkeleton } from "@/components/skeletons/HomeSkeleton";
 
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
@@ -628,7 +628,7 @@ const Index = () => {
 
       case "checkin":
         return (
-          <Suspense fallback={<TabLoader />}>
+          <Suspense fallback={<CheckInSkeleton />}>
             <div className="space-y-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
@@ -654,7 +654,7 @@ const Index = () => {
 
       case "triggers":
         return (
-          <Suspense fallback={<TabLoader />}>
+          <Suspense fallback={<TriggersSkeleton />}>
             <div className="space-y-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Triggers & Coping</h1>
@@ -682,7 +682,7 @@ const Index = () => {
 
       case "progress":
         return (
-          <Suspense fallback={<TabLoader />}>
+          <Suspense fallback={<ProgressSkeleton />}>
             <div className="space-y-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Your Journey</h1>
