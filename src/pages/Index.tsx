@@ -24,6 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
+import { useWelcomeTourTrigger } from "@/hooks/useWelcomeTourTrigger";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -83,7 +84,11 @@ const Index = () => {
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
-  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+  const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
+    user: user ? { id: user.id } : null,
+    isGuest,
+    onboardingComplete: profile?.onboarding_complete,
+  });
   const navigate = useNavigate();
 
   const handleTabChange = useCallback((tab: TabId) => {
@@ -124,33 +129,7 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
 
-  // Show the welcome feature tour ONLY for users who JUST finished onboarding
-  // in this session. The pending flag is set inside handleOnboardingComplete,
-  // and is scoped to guest vs. authed so the two flows can never cross-trigger
-  // each other (e.g. a guest finishes onboarding then signs into an existing
-  // account — the existing account should not inherit the pending flag).
-  const tourPendingKey = user
-    ? "sober_club_welcome_tour_pending_user"
-    : "sober_club_welcome_tour_pending_guest";
-
-  useEffect(() => {
-    const onboardingDone = user
-      ? profile?.onboarding_complete
-      : isGuest && !!localStorage.getItem("sober_club_guest_profile");
-    if (!onboardingDone) return;
-    if (localStorage.getItem(tourPendingKey) !== "true") return;
-    const timer = setTimeout(() => setShowWelcomeTour(true), 800);
-    return () => clearTimeout(timer);
-  }, [user, isGuest, profile?.onboarding_complete, tourPendingKey]);
-
-  const completeWelcomeTour = useCallback(() => {
-    // Clear both keys defensively so a stale flag from the other flow can
-    // never resurface the tour for a returning user/guest.
-    localStorage.removeItem("sober_club_welcome_tour_pending_user");
-    localStorage.removeItem("sober_club_welcome_tour_pending_guest");
-    localStorage.removeItem("sober_club_welcome_tour_pending"); // legacy
-    setShowWelcomeTour(false);
-  }, []);
+  // Tour trigger logic lives in useWelcomeTourTrigger (see hook for details).
 
   useEffect(() => {
     if (!authLoading && !user && !isGuest) {
