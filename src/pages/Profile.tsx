@@ -345,10 +345,11 @@ const Profile = () => {
             transition={{ delay: 0.1 }}
             className="card-enhanced p-4"
           >
-            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
               <Crown className="w-4 h-4 text-accent" />
               Subscription
             </h3>
+            <p className="text-xs text-muted-foreground mb-3">Your plan and billing for Sober Club premium.</p>
             {isPremium ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20">
@@ -411,10 +412,11 @@ const Profile = () => {
             transition={{ delay: 0.13 }}
             className="card-enhanced p-4"
           >
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
               <Settings2 className="w-4 h-4 text-primary" />
               Profile Settings
             </h3>
+            <p className="text-xs text-muted-foreground mb-4">Your name, sobriety date, and recovery details.</p>
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="name" className="flex items-center gap-2 text-xs">
@@ -587,10 +589,11 @@ const Profile = () => {
             transition={{ delay: 0.16 }}
             className="card-enhanced p-4"
           >
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
               <Phone className="w-4 h-4 text-primary" />
               Emergency Contacts
             </h3>
+            <p className="text-xs text-muted-foreground mb-4">People you can reach instantly from the SOS button.</p>
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="sponsorPhone" className="flex items-center gap-2 text-xs">
@@ -630,10 +633,11 @@ const Profile = () => {
             transition={{ delay: 0.22 }}
             className="card-enhanced p-4"
           >
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
               {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
               Appearance
             </h3>
+            <p className="text-xs text-muted-foreground mb-4">Theme, dark mode, and accessibility options.</p>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -695,10 +699,11 @@ const Profile = () => {
             transition={{ delay: 0.25 }}
             className="card-enhanced p-4"
           >
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
               <Bell className="w-4 h-4 text-primary" />
               Notifications
             </h3>
+            <p className="text-xs text-muted-foreground mb-4">Daily reminders, milestones, and quiet hours.</p>
             <NotificationSettings sobrietyStartDate={sobrietyDate} />
           </motion.div>
 
@@ -748,10 +753,11 @@ const Profile = () => {
             transition={{ delay: 0.35 }}
             className="card-enhanced p-4"
           >
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
               Legal
             </h3>
+            <p className="text-xs text-muted-foreground mb-4">Terms of Service, Privacy Policy, and disclaimers.</p>
             <TermsAndConditions />
           </motion.div>
 
@@ -762,10 +768,11 @@ const Profile = () => {
             transition={{ delay: 0.4 }}
             className="card-enhanced overflow-hidden"
           >
-            <h3 className="text-sm font-semibold text-foreground p-4 pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground p-4 pb-1 flex items-center gap-2">
               <Settings2 className="w-4 h-4 text-muted-foreground" />
               Account
             </h3>
+            <p className="text-xs text-muted-foreground px-4 pb-2">Replay the welcome tour, sign out, or delete your account.</p>
             <button
               onClick={() => {
                 localStorage.setItem(

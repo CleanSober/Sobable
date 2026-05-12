@@ -629,16 +629,23 @@ const Index = () => {
       case "checkin":
         return (
           <Suspense fallback={<TabLoader />}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Daily Check-In</h1>
-                <p className="text-xs text-muted-foreground">How are you feeling today?</p>
+                <p className="text-xs text-muted-foreground">Log how today went — mood, sleep, hydration, and more.</p>
               </motion.div>
+
               <DailyAffirmation />
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Today's log</p>
               <MoodCheckIn />
               <SleepTracker />
               <HydrationTracker />
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Reflect</p>
               <Journal daysSober={daysSober} />
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Calm tools</p>
               <BreathingExercise />
               <GuidedMeditations />
             </div>
@@ -648,19 +655,25 @@ const Index = () => {
       case "triggers":
         return (
           <Suspense fallback={<TabLoader />}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Triggers & Coping</h1>
-                <p className="text-xs text-muted-foreground">Know yourself to protect yourself</p>
+                <p className="text-xs text-muted-foreground">Tools for cravings now, patterns over time, and a plan for tough moments.</p>
               </motion.div>
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1">In the moment</p>
               <CravingTimer />
               <PremiumLockOverlay featureName="Risk Insights">
                 <RiskPrediction />
               </PremiumLockOverlay>
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Track patterns</p>
               <TriggerLogger />
               <PremiumLockOverlay featureName="Pattern Analysis">
                 <PatternAnalysis />
               </PremiumLockOverlay>
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Plan ahead</p>
               <RelapsePreventionPlan />
               <CrisisResources />
             </div>
@@ -670,13 +683,19 @@ const Index = () => {
       case "progress":
         return (
           <Suspense fallback={<TabLoader />}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
                 <h1 className="text-lg font-bold text-foreground mb-0.5">Your Journey</h1>
-                <p className="text-xs text-muted-foreground">Every step counts</p>
+                <p className="text-xs text-muted-foreground">Your milestones, savings, and activity history at a glance.</p>
               </motion.div>
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1">Stats overview</p>
               <ProgressView daysSober={daysSober} totalSaved={moneySaved} dailySpending={userData.dailySpending} />
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Activity calendar</p>
               <CalendarHeatmap startDate={userData.sobrietyStartDate} />
+
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Premium insights</p>
               <PremiumLockOverlay featureName="Deep Insights & Analytics">
                 <PremiumProgressInsights daysSober={daysSober} />
               </PremiumLockOverlay>
