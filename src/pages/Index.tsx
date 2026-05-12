@@ -309,6 +309,9 @@ const Index = () => {
     emergencyContact?: string;
     personalReminder?: string;
   }) => {
+    // Mark that this user just signed up — the welcome tour should appear
+    // exactly once, immediately after this onboarding completes.
+    localStorage.setItem("sober_club_welcome_tour_pending", "true");
     if (user) {
       await updateProfile({
         display_name: data.name,
