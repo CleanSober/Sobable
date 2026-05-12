@@ -477,14 +477,23 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
         {/* Bottom CTA */}
         <div className="pb-6 pt-4">
           {step < TOTAL_STEPS ? (
-            <Button
-              onClick={() => setStep(step + 1)}
-              disabled={!canProceed()}
-              className="w-full h-12 font-semibold gradient-primary text-primary-foreground text-base"
-            >
-              Continue
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+            <>
+              <Button
+                onClick={() => setStep(step + 1)}
+                disabled={!canProceed()}
+                className="w-full h-12 font-semibold gradient-primary text-primary-foreground text-base"
+              >
+                Continue
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+              {!canProceed() && (
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  {step === 1 && "Enter your name or choose to stay anonymous"}
+                  {step === 2 && "Pick at least one to continue"}
+                  {step === 3 && "Pick a start date to continue"}
+                </p>
+              )}
+            </>
           ) : (
             <Button
               onClick={handleComplete}
