@@ -133,7 +133,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent
-        className="w-[calc(100%-1.5rem)] max-w-sm p-0 gap-0 max-h-[90dvh] overflow-hidden rounded-2xl sm:rounded-2xl flex flex-col [&>button.absolute]:hidden"
+        className="w-[calc(100%-1.5rem)] max-w-sm p-0 gap-0 max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] overflow-hidden rounded-2xl sm:rounded-2xl flex flex-col [&>button.absolute]:hidden"
         onCloseAutoFocus={(e) => {
           // Override Radix default so we can restore focus to the launch
           // control (or a sensible fallback on Home) instead of <body>.
@@ -179,7 +179,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
                   // or being announced as separate slide groups.
                   {...(!isActive ? { inert: "" as unknown as undefined } : {})}
                 >
-                  <div className="px-5 pt-7 pb-2 text-center sm:px-6 sm:pt-8" aria-live={isActive ? "polite" : "off"}>
+                  <div className="px-5 pt-[max(1.75rem,env(safe-area-inset-top))] pb-2 text-center sm:px-6 sm:pt-8" aria-live={isActive ? "polite" : "off"}>
                     <div
                       className={`mx-auto mb-4 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${slide.accent} text-white shadow-xl`}
                     >
