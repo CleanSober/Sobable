@@ -138,33 +138,42 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
         </Carousel>
 
         <div className="px-6 pb-6">
-          {/* Progress indicator */}
+          {/* Slide indicators (also act as jump controls) */}
           <div
             className="flex items-center justify-center gap-1.5 mt-2 mb-5"
             role="tablist"
-            aria-label="Tour progress"
+            aria-label="Welcome tour slides"
           >
-            {SLIDES.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                role="tab"
-                aria-selected={i === current}
-                aria-label={`Go to slide ${i + 1}`}
-                onClick={() => api?.scrollTo(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === current ? "w-6 bg-primary" : "w-1.5 bg-muted hover:bg-muted-foreground/40"
-                }`}
-              />
-            ))}
+            {SLIDES.map((slide, i) => {
+              const selected = i === current;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-current={selected ? "step" : undefined}
+                  aria-label={`Slide ${i + 1} of ${total}: ${slide.title}${selected ? " (current)" : ""}`}
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => api?.scrollTo(i)}
+                  className={`h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    selected ? "w-6 bg-primary" : "w-1.5 bg-muted hover:bg-muted-foreground/40"
+                  }`}
+                />
+              );
+            })}
           </div>
 
-          <div className="flex items-center justify-between gap-3">
+          <nav
+            className="flex items-center justify-between gap-3"
+            aria-label="Welcome tour navigation"
+          >
             {current === 0 ? (
               <button
                 type="button"
                 onClick={() => finish(false)}
-                className="text-xs text-muted-foreground/70 underline-offset-4 hover:underline hover:text-muted-foreground transition-colors"
+                aria-label="Skip welcome tour"
+                className="text-xs text-muted-foreground/70 underline-offset-4 hover:underline hover:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
               >
                 Skip
               </button>
@@ -173,19 +182,26 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => finish(false)}
+                aria-label="Skip welcome tour"
                 className="text-muted-foreground"
               >
                 Skip
               </Button>
             )}
-            <p className="text-xs text-muted-foreground hidden sm:block">
+            <p className="text-xs text-muted-foreground hidden sm:block" aria-hidden="true">
               Swipe to explore
             </p>
-            <Button onClick={next} autoFocus className="flex-1 max-w-[160px]">
+            <Button
+              onClick={next}
+              autoFocus
+              aria-label={isLast ? "Finish welcome tour and get started" : `Go to next slide (${current + 2} of ${total})`}
+              className="flex-1 max-w-[160px]"
+            >
               {isLast ? "Get started" : "Next"}
               {!isLast && <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />}
             </Button>
-          </div>
+          </nav>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
