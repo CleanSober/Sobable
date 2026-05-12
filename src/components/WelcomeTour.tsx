@@ -192,10 +192,17 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
                   aria-label={`Slide ${i + 1} of ${total}: ${slide.title}${selected ? " (current)" : ""}`}
                   tabIndex={selected ? 0 : -1}
                   onClick={() => api?.scrollTo(i)}
-                  className={`h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    selected ? "w-6 bg-primary" : "w-1.5 bg-muted hover:bg-muted-foreground/40"
-                  }`}
-                />
+                  // Wrapper provides a generous, visible focus ring; the inner
+                  // span is the actual visual dot/pill.
+                  className="group p-1.5 -m-1.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`block h-1.5 rounded-full transition-all ${
+                      selected ? "w-6 bg-primary" : "w-1.5 bg-muted group-hover:bg-muted-foreground/40"
+                    }`}
+                  />
+                </button>
               );
             })}
           </div>
@@ -209,7 +216,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
                 type="button"
                 onClick={() => finish(false)}
                 aria-label="Skip welcome tour"
-                className="text-xs text-muted-foreground/70 underline-offset-4 hover:underline hover:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                className="text-xs text-muted-foreground/70 underline-offset-4 hover:underline hover:text-muted-foreground transition-colors px-1.5 py-1 -mx-1.5 -my-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Skip
               </button>
@@ -219,7 +226,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
                 size="sm"
                 onClick={() => finish(false)}
                 aria-label="Skip welcome tour"
-                className="text-muted-foreground"
+                className="text-muted-foreground focus-visible:ring-offset-background"
               >
                 Skip
               </Button>
@@ -231,7 +238,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
               onClick={next}
               autoFocus
               aria-label={isLast ? "Finish welcome tour and get started" : `Go to next slide (${current + 2} of ${total})`}
-              className="flex-1 max-w-[160px]"
+              className="flex-1 max-w-[160px] focus-visible:ring-offset-background"
             >
               {isLast ? "Get started" : "Next"}
               {!isLast && <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />}
