@@ -38,6 +38,7 @@ import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { Switch } from "@/components/ui/switch";
 import { calculateDaysSober } from "@/lib/storage";
 import { applyThemePreference } from "@/lib/theme";
+import { readGuestProfile, patchGuestProfile, clearGuestProfile } from "@/lib/guestProfile";
 import cleanAndSoberLogo from "@/assets/clean-and-sober-logo.png";
 
 const Profile = () => {
