@@ -24,6 +24,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Support = lazy(() => import("./pages/Support"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SkeletonsDev = lazy(() => import("./pages/SkeletonsDev"));
+const VisualQADev = lazy(() => import("./pages/VisualQADev"));
 
 // Idle-prefetch the routes users are most likely to visit next so the chunks
 // are warm in the cache before they tap. Profile + Check-In are top targets.
