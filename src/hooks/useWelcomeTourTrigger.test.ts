@@ -119,6 +119,7 @@ describe("first-time guest sign-up -> welcome tour", () => {
     expect(result.current.showWelcomeTour).toBe(false);
     expect(localStorage.getItem(TOUR_PENDING_GUEST_KEY)).toBeNull();
     expect(localStorage.getItem(TOUR_PENDING_USER_KEY)).toBeNull();
+  });
 
   it("does NOT open the tour for an authed user after guest->account migration (onboarding already complete, no pending flag)", () => {
     // Migration cleared the guest profile and pending flags, then set
