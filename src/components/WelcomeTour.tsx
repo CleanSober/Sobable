@@ -1,84 +1,140 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Flame, DollarSign, ClipboardCheck, LifeBuoy, ChevronRight } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { Home, Heart, Brain, TrendingUp, Users, ChevronRight, Sparkles } from "lucide-react";
 
 interface WelcomeTourProps {
   open: boolean;
   onComplete: () => void;
 }
 
-const STEPS = [
+const SLIDES = [
   {
-    icon: Flame,
-    title: "Your sobriety counter",
-    body: "Track every day you stay strong. Your streak lives at the top of Home — tap it any time for a quick boost.",
+    icon: Sparkles,
+    title: "Welcome to Sober Club",
+    body: "A quick swipe-through of what lives inside the app — so you know exactly where to look when you need it.",
+    accent: "from-primary to-primary/60",
+  },
+  {
+    icon: Home,
+    title: "Home",
+    body: "Your sobriety counter, money saved, daily affirmation, and quick actions — your morning anchor each day.",
     accent: "from-orange-500 to-rose-500",
   },
   {
-    icon: DollarSign,
-    title: "Money saved",
-    body: "Watch the savings add up in real time, based on what you used to spend. Set milestones to celebrate.",
-    accent: "from-emerald-500 to-teal-500",
+    icon: Heart,
+    title: "Check-In",
+    body: "Log your mood, energy, sleep and cravings in under a minute. It powers your streaks and personalized insights.",
+    accent: "from-pink-500 to-rose-500",
   },
   {
-    icon: ClipboardCheck,
-    title: "Daily check-ins",
-    body: "A short mood and trigger check-in each day powers your insights, streaks, and personalized recommendations.",
+    icon: Brain,
+    title: "Triggers & Tools",
+    body: "Spot what sets you off, then reach for breathing exercises, the craving timer, or emergency support — anytime.",
     accent: "from-sky-500 to-indigo-500",
   },
   {
-    icon: LifeBuoy,
-    title: "Emergency support",
-    body: "Feeling shaky? The Emergency button gives instant access to coping tools and your support contacts.",
+    icon: TrendingUp,
+    title: "Progress",
+    body: "See your streaks, badges, calendar heatmap and analytics. Watch the wins stack up week after week.",
+    accent: "from-emerald-500 to-teal-500",
+  },
+  {
+    icon: Users,
+    title: "Community",
+    body: "Connect with others on the same path. Forums, live chat and accountability partners — judgment-free.",
     accent: "from-amber-500 to-yellow-500",
   },
 ];
 
 export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
-  const [step, setStep] = useState(0);
-  const isLast = step === STEPS.length - 1;
-  const current = STEPS[step];
-  const Icon = current.icon;
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const total = SLIDES.length;
+  const isLast = current === total - 1;
 
-  const next = () => (isLast ? onComplete() : setStep(s => s + 1));
+  useEffect(() => {
+    if (!api) return;
+    const handler = () => setCurrent(api.selectedScrollSnap());
+    handler();
+    api.on("select", handler);
+    return () => {
+      api.off("select", handler);
+    };
+  }, [api]);
+
+  const next = () => {
+    if (isLast) onComplete();
+    else api?.scrollNext();
+  };
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onComplete(); }}>
-      <DialogContent className="max-w-sm p-0 overflow-hidden">
-        <div className="p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="text-center"
-            >
-              <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${current.accent} text-white shadow-lg`}>
-                <Icon className="h-8 w-8" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">{current.title}</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">{current.body}</p>
-            </motion.div>
-          </AnimatePresence>
+      <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
+        <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: false }}>
+          <CarouselContent>
+            {SLIDES.map((slide, i) => {
+              const Icon = slide.icon;
+              return (
+                <CarouselItem key={i}>
+                  <div className="px-6 pt-8 pb-2 text-center">
+                    <div
+                      className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${slide.accent} text-white shadow-xl`}
+                    >
+                      <Icon className="h-10 w-10" />
+                    </div>
+                    <h2 className="text-xl font-bold text-foreground mb-2">{slide.title}</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed min-h-[64px]">
+                      {slide.body}
+                    </p>
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
 
-          <div className="mt-6 flex items-center justify-center gap-1.5">
-            {STEPS.map((_, i) => (
-              <span
+        <div className="px-6 pb-6">
+          {/* Progress indicator */}
+          <div
+            className="flex items-center justify-center gap-1.5 mt-2 mb-5"
+            role="tablist"
+            aria-label="Tour progress"
+          >
+            {SLIDES.map((_, i) => (
+              <button
                 key={i}
-                className={`h-1.5 rounded-full transition-all ${i === step ? "w-6 bg-primary" : "w-1.5 bg-muted"}`}
+                type="button"
+                role="tab"
+                aria-selected={i === current}
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => api?.scrollTo(i)}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === current ? "w-6 bg-primary" : "w-1.5 bg-muted hover:bg-muted-foreground/40"
+                }`}
               />
             ))}
           </div>
 
-          <div className="mt-6 flex items-center justify-between gap-3">
-            <Button variant="ghost" size="sm" onClick={onComplete} className="text-muted-foreground">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onComplete}
+              className="text-muted-foreground"
+            >
               Skip
             </Button>
-            <Button onClick={next} className="flex-1">
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              Swipe to explore
+            </p>
+            <Button onClick={next} className="flex-1 max-w-[160px]">
               {isLast ? "Get started" : "Next"}
               {!isLast && <ChevronRight className="ml-1 h-4 w-4" />}
             </Button>
