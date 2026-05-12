@@ -14,6 +14,15 @@ import { trackEvent } from "@/lib/analytics";
 interface WelcomeTourProps {
   open: boolean;
   onComplete: () => void;
+  /**
+   * Optional analytics context. When provided, every welcome_tour_* event is
+   * tagged with `user_type` and `is_first_time` so we can isolate first-time
+   * guest sign-up tours from authed-user tours and from manual replays.
+   */
+  context?: {
+    userType: "guest" | "authed";
+    isFirstTime: boolean;
+  } | null;
 }
 
 const SLIDES = [
@@ -25,7 +34,7 @@ const SLIDES = [
   { id: "community", icon: Users, title: "Community", body: "Connect with others on the same path. Forums, live chat and accountability partners — judgment-free.", accent: "from-amber-500 to-yellow-500" },
 ];
 
-export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
+export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const total = SLIDES.length;
@@ -40,11 +49,19 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
   // to it on close (Radix only auto-restores when there's a DialogTrigger).
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  // Build a stable analytics tag with user_type + first_time so every event
+  // can be filtered down to first-time guest sign-ups.
+  const ctxPayload = {
+    user_type: context?.userType ?? "unknown",
+    is_first_time: context?.isFirstTime ?? false,
+  };
+
   const logSlideView = (index: number) => {
     if (viewedRef.current.has(index)) return;
     viewedRef.current.add(index);
     const slide = SLIDES[index];
     trackEvent("welcome_tour_slide_viewed", {
+      ...ctxPayload,
       slide_index: index,
       slide_id: slide?.id,
       total_slides: total,
@@ -65,7 +82,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
     startedAtRef.current = Date.now();
     completedRef.current = false;
     viewedRef.current = new Set();
-    trackEvent("welcome_tour_started", { total_slides: total });
+    trackEvent("welcome_tour_started", { ...ctxPayload, total_slides: total });
     logSlideView(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -90,12 +107,14 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
     if (completed) {
       completedRef.current = true;
       trackEvent("welcome_tour_completed", {
+        ...ctxPayload,
         total_slides: total,
         slides_viewed: viewedRef.current.size,
         duration_ms,
       });
     } else {
       trackEvent("welcome_tour_skipped", {
+        ...ctxPayload,
         slide_index_at_skip: current,
         slide_id_at_skip: SLIDES[current]?.id,
         slides_viewed: viewedRef.current.size,

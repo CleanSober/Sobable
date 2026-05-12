@@ -99,7 +99,7 @@ const Index = () => {
     | null
   >(null);
   const [migrationConflict, setMigrationConflict] = useState<{ guest: GuestProfile } | null>(null);
-  const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
+  const { showWelcomeTour, completeWelcomeTour, tourContext } = useWelcomeTourTrigger({
     user: user ? { id: user.id } : null,
     isGuest,
     onboardingComplete: profile?.onboarding_complete,
@@ -830,7 +830,7 @@ const Index = () => {
             showPricing={milestoneShowPricing}
             onPricingChange={setMilestoneShowPricing}
           />
-          {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} />}
+          {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} context={tourContext} />}
         </Suspense>
         {migrationConflict && (
           <GuestMigrationConflictDialog
