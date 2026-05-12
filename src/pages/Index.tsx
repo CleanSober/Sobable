@@ -175,25 +175,31 @@ const Index = () => {
     if (migrationInFlightRef.current) return;
     if (localStorage.getItem(migrationDoneKey) === "true") return;
     if (profile?.onboarding_complete) {
-      // Account is already set up — mark migration done so we never touch it,
-      // drop any stale guest blob, and clear stale tour flags so the welcome
-      // tour cannot fire for a user who has already completed onboarding.
+      // Account is already set up. Check whether the local guest blob is
+      // strictly NEWER than the account record. If so, raise a conflict so
+      // the user can choose which version to keep. Otherwise the older guest
+      // blob is safely discarded — it's stale by definition.
+      const guest = readGuestProfile();
+      if (!guest) {
+        localStorage.setItem(migrationDoneKey, "true");
+        return;
+      }
+      const guestTs = guest.updated_at ?? 0;
+      const accountTs = profile?.updated_at ? new Date(profile.updated_at).getTime() : 0;
+      if (guestTs > accountTs && (guest.display_name || guest.sobriety_start_date)) {
+        // Surface the conflict UI; do NOT mark migration done so the user's
+        // choice can persist on next render.
+        setMigrationConflict({ guest });
+        return;
+      }
+      // Guest is older or equal -> safe auto-pick: keep account version.
       localStorage.setItem(migrationDoneKey, "true");
-      localStorage.removeItem("sober_club_guest_profile");
+      clearGuestProfile();
       localStorage.removeItem("sober_club_welcome_tour_pending_user");
       localStorage.removeItem("sober_club_welcome_tour_pending_guest");
       return;
     }
-    const raw = localStorage.getItem("sober_club_guest_profile");
-    if (!raw) return;
-
-    let guest: Record<string, unknown> | null = null;
-    try {
-      guest = JSON.parse(raw);
-    } catch {
-      localStorage.removeItem("sober_club_guest_profile");
-      return;
-    }
+    const guest = readGuestProfile();
     if (!guest) return;
 
     migrationInFlightRef.current = true;
