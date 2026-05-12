@@ -202,6 +202,12 @@ const Index = () => {
           onboarding_complete: true,
         });
         localStorage.removeItem("sober_club_guest_profile");
+        // Migration marks onboarding_complete = true, so by the rule
+        // "tour shows only when onboarding is incomplete" we must clear any
+        // stale tour-pending flags so the welcome tour never fires for a
+        // returning guest who has already finished onboarding.
+        localStorage.removeItem("sober_club_welcome_tour_pending_user");
+        localStorage.removeItem("sober_club_welcome_tour_pending_guest");
         const successMsg = "Your guest progress was migrated to your account.";
         toast.success(successMsg, {
           description: "Sobriety date, substances, and savings were all carried over.",
