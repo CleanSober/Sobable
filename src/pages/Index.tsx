@@ -427,11 +427,7 @@ const Index = () => {
   }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
   if (authLoading || (!isGuest && profileLoading)) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <HomeSkeleton />;
   }
 
   if (!user && !isGuest) return null;
