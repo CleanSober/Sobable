@@ -23,6 +23,21 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Support = lazy(() => import("./pages/Support"));
 const Profile = lazy(() => import("./pages/Profile"));
 
+// Idle-prefetch the routes users are most likely to visit next so the chunks
+// are warm in the cache before they tap. Profile + Check-In are top targets.
+const prefetchHotRoutes = () => {
+  const run = () => {
+    import("./pages/Profile");
+    import("@/components/MoodCheckIn");
+    import("@/components/CheckInProgress");
+  };
+  const ric = (window as any).requestIdleCallback as
+    | ((cb: () => void, opts?: { timeout: number }) => number)
+    | undefined;
+  if (ric) ric(run, { timeout: 2500 });
+  else setTimeout(run, 1500);
+};
+
 // Tuned defaults: avoid hammering the network on every focus/mount,
 // keep cached data warm so tab switches feel instant.
 const queryClient = new QueryClient({
@@ -88,7 +103,13 @@ const App = () => {
   const handleSplashComplete = () => {
     sessionStorage.setItem("sober_club_splash_shown", "true");
     setShowSplash(false);
+    prefetchHotRoutes();
   };
+
+  // Also prefetch on mount when the splash was already shown this session
+  useEffect(() => {
+    if (!showSplash) prefetchHotRoutes();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
