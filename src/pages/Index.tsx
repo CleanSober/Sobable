@@ -539,9 +539,7 @@ const Index = () => {
               if (user) {
                 await updateProfile({ savings_start_date: previousDate === effectiveProfile?.sobriety_start_date ? null : previousDate } as any);
               } else {
-                const gp = JSON.parse(localStorage.getItem("sober_club_guest_profile") || "{}");
-                gp.savings_start_date = previousDate;
-                localStorage.setItem("sober_club_guest_profile", JSON.stringify(gp));
+                patchGuestProfile({ savings_start_date: previousDate });
               }
               localStorage.removeItem("sober_club_savings_reset_undo");
               toast.success("Savings reset undone! Your previous tracking has been restored.");
