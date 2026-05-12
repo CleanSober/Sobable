@@ -836,7 +836,7 @@ const Profile = () => {
             <TermsAndConditions />
           </motion.div>
 
-          {/* Account Actions */}
+          {/* Account Actions — full set for authed users; guest-friendly variant for guests */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -848,7 +848,11 @@ const Profile = () => {
                 <Settings2 className="w-4 h-4 text-muted-foreground" />
                 Account
               </h3>
-              <p className="text-xs text-muted-foreground">Replay the welcome tour, sign out, or delete your account.</p>
+              <p className="text-xs text-muted-foreground">
+                {user
+                  ? "Replay the welcome tour, sign out, or delete your account."
+                  : "Replay the welcome tour or clear guest data on this device."}
+              </p>
             </div>
             <button
               onClick={() => {
@@ -865,71 +869,113 @@ const Profile = () => {
               <span className="text-sm font-medium text-foreground flex-1">Replay Welcome Tour</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
-            <div className="h-px bg-border/30 mx-4" />
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-            >
-              <LogOut className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground flex-1">Sign Out</span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <div className="h-px bg-border/30 mx-4" />
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-destructive/10 transition-colors text-left">
-                  <Trash2 className="w-5 h-5 text-destructive/70" />
-                  <span className="text-sm font-medium text-destructive/70 flex-1">Delete Account</span>
+
+            {user ? (
+              <>
+                <div className="h-px bg-border/30 mx-4" />
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
+                >
+                  <LogOut className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground flex-1">Sign Out</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="max-w-md">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="w-5 h-5" />
-                    Delete Account Permanently
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-3">
-                    <p>This action is <strong className="text-foreground">irreversible</strong>. All your data will be permanently deleted, including:</p>
-                    <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
-                      <li>Sobriety progress & streaks</li>
-                      <li>Journal entries & mood logs</li>
-                      <li>Community posts & messages</li>
-                      <li>Subscription & Sober Club features</li>
-                    </ul>
-                    <div className="pt-2">
-                      <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">
-                        Type <strong className="text-foreground">DELETE</strong> to confirm
-                      </Label>
-                      <Input
-                        id="deleteConfirm"
-                        value={deleteConfirmText}
-                        onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        placeholder="DELETE"
-                        className="mt-1.5"
-                      />
-                    </div>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    disabled={deleteConfirmText !== "DELETE" || deleting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {deleting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Deleting...
-                      </>
-                    ) : (
-                      "Delete My Account"
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                <div className="h-px bg-border/30 mx-4" />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-destructive/10 transition-colors text-left">
+                      <Trash2 className="w-5 h-5 text-destructive/70" />
+                      <span className="text-sm font-medium text-destructive/70 flex-1">Delete Account</span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="w-5 h-5" />
+                        Delete Account Permanently
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>This action is <strong className="text-foreground">irreversible</strong>. All your data will be permanently deleted, including:</p>
+                        <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                          <li>Sobriety progress & streaks</li>
+                          <li>Journal entries & mood logs</li>
+                          <li>Community posts & messages</li>
+                          <li>Subscription & Sober Club features</li>
+                        </ul>
+                        <div className="pt-2">
+                          <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">
+                            Type <strong className="text-foreground">DELETE</strong> to confirm
+                          </Label>
+                          <Input
+                            id="deleteConfirm"
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder="DELETE"
+                            className="mt-1.5"
+                          />
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirmText !== "DELETE" || deleting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Delete My Account"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            ) : (
+              <>
+                <div className="h-px bg-border/30 mx-4" />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-destructive/10 transition-colors text-left">
+                      <Trash2 className="w-5 h-5 text-destructive/70" />
+                      <span className="text-sm font-medium text-destructive/70 flex-1">Clear guest data</span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="w-5 h-5" />
+                        Clear guest data on this device
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This removes the local guest profile saved on this device. Nothing is sent to the server. You can start over fresh, or create a free account to back up your progress.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          clearGuestProfile();
+                          toast.success("Guest data cleared");
+                          navigate("/");
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Clear data
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
           </motion.div>
 
           {/* Version */}
