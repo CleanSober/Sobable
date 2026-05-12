@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { useHaptics } from "@/hooks/useHaptics";
 import { SUBSTANCE_OPTIONS } from "@/lib/substanceConfig";
-import { format } from "date-fns";
+import { format, subDays, subMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface OnboardingData {
@@ -212,10 +212,19 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && canProceed()) {
+                        e.preventDefault();
+                        setStep(step + 1);
+                      }
+                    }}
                     placeholder="Enter your name"
                     disabled={isAnonymous}
                     maxLength={50}
                     autoFocus
+                    autoCapitalize="words"
+                    autoComplete="given-name"
+                    enterKeyHint="next"
                     className="text-center text-lg h-12 bg-secondary/50 border-border/50"
                   />
 
@@ -240,6 +249,18 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
               {/* Step 2: Substances */}
               {step === 2 && (
                 <div className="space-y-4">
+                  {selectedSubstances.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-center"
+                    >
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full">
+                        <Check className="w-3 h-3" />
+                        {selectedSubstances.length} selected
+                      </span>
+                    </motion.div>
+                  )}
                   <div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wider">Substances</p>
                     <div className="grid grid-cols-2 gap-2">
@@ -300,8 +321,33 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
               {/* Step 3: Date + Spending combined */}
               {step === 3 && (
                 <div className="space-y-5">
-                   <div>
+                  <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">Sobriety start date</label>
+                    {/* Quick presets — most users pick one of these */}
+                    <div className="grid grid-cols-4 gap-1.5 mb-2">
+                      {[
+                        { label: "Today", date: new Date() },
+                        { label: "Yesterday", date: subDays(new Date(), 1) },
+                        { label: "1 wk ago", date: subDays(new Date(), 7) },
+                        { label: "1 mo ago", date: subMonths(new Date(), 1) },
+                      ].map((preset) => {
+                        const active = !!startDate && format(startDate, "yyyy-MM-dd") === format(preset.date, "yyyy-MM-dd");
+                        return (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => setStartDate(preset.date)}
+                            className={`py-2 rounded-lg text-xs font-medium border transition-all active:scale-95 ${
+                              active
+                                ? "border-primary bg-primary/10 text-foreground"
+                                : "border-border/50 bg-secondary/40 text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -312,7 +358,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                          {startDate ? format(startDate, "PPP") : <span>Or pick a specific date</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -338,6 +384,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">$</span>
                       <Input
                         type="number"
+                        inputMode="decimal"
                         value={dailySpending}
                         onChange={(e) => setDailySpending(e.target.value)}
                         placeholder="0"
@@ -346,7 +393,27 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                         className="text-lg pl-8 h-12 bg-secondary/50 border-border/50"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">We'll track how much money you're saving</p>
+                    {/* Quick spending presets */}
+                    <div className="grid grid-cols-4 gap-1.5 mt-2">
+                      {["5", "10", "20", "50"].map((amt) => {
+                        const active = dailySpending === amt;
+                        return (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => setDailySpending(amt)}
+                            className={`py-1.5 rounded-lg text-xs font-medium border transition-all active:scale-95 ${
+                              active
+                                ? "border-primary bg-primary/10 text-foreground"
+                                : "border-border/50 bg-secondary/40 text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            ${amt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">We'll track how much money you're saving</p>
                   </div>
 
                   <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">
@@ -410,14 +477,23 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
         {/* Bottom CTA */}
         <div className="pb-6 pt-4">
           {step < TOTAL_STEPS ? (
-            <Button
-              onClick={() => setStep(step + 1)}
-              disabled={!canProceed()}
-              className="w-full h-12 font-semibold gradient-primary text-primary-foreground text-base"
-            >
-              Continue
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+            <>
+              <Button
+                onClick={() => setStep(step + 1)}
+                disabled={!canProceed()}
+                className="w-full h-12 font-semibold gradient-primary text-primary-foreground text-base"
+              >
+                Continue
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+              {!canProceed() && (
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  {step === 1 && "Enter your name or choose to stay anonymous"}
+                  {step === 2 && "Pick at least one to continue"}
+                  {step === 3 && "Pick a start date to continue"}
+                </p>
+              )}
+            </>
           ) : (
             <Button
               onClick={handleComplete}
