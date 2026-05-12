@@ -148,14 +148,24 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => finish(false)}
-              className="text-muted-foreground"
-            >
-              Skip
-            </Button>
+            {current === 0 ? (
+              <button
+                type="button"
+                onClick={() => finish(false)}
+                className="text-xs text-muted-foreground/70 underline-offset-4 hover:underline hover:text-muted-foreground transition-colors"
+              >
+                Skip
+              </button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => finish(false)}
+                className="text-muted-foreground"
+              >
+                Skip
+              </Button>
+            )}
             <p className="text-xs text-muted-foreground hidden sm:block">
               Swipe to explore
             </p>
