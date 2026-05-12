@@ -151,7 +151,7 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={onComplete}
+              onClick={() => finish(false)}
               className="text-muted-foreground"
             >
               Skip
