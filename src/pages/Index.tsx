@@ -84,6 +84,11 @@ const Index = () => {
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
+  const [migrationBanner, setMigrationBanner] = useState<
+    | { status: "success"; message: string }
+    | { status: "error"; message: string }
+    | null
+  >(null);
   const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
     user: user ? { id: user.id } : null,
     isGuest,
