@@ -199,7 +199,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
         <div className="shrink-0 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-6 border-t border-border/50 bg-background">
           {/* Slide indicators (also act as jump controls) */}
           <div
-            className="flex items-center justify-center gap-1.5 mt-2 mb-5"
+            className="flex items-center justify-center gap-2 mt-2 mb-4"
             role="tablist"
             aria-label="Welcome tour slides"
           >
@@ -215,14 +215,14 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
                   aria-label={`Slide ${i + 1} of ${total}: ${slide.title}${selected ? " (current)" : ""}`}
                   tabIndex={selected ? 0 : -1}
                   onClick={() => api?.scrollTo(i)}
-                  // Wrapper provides a generous, visible focus ring; the inner
-                  // span is the actual visual dot/pill.
-                  className="group p-1.5 -m-1.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  // 44x44 minimum tap target (Apple HIG / Material), with the
+                  // visual dot/pill centered inside.
+                  className="group inline-flex items-center justify-center min-w-11 min-h-11 rounded-full touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:bg-muted/50"
                 >
                   <span
                     aria-hidden="true"
-                    className={`block h-1.5 rounded-full transition-all ${
-                      selected ? "w-6 bg-primary" : "w-1.5 bg-muted group-hover:bg-muted-foreground/40"
+                    className={`block h-2 rounded-full transition-all ${
+                      selected ? "w-7 bg-primary" : "w-2 bg-muted group-hover:bg-muted-foreground/40"
                     }`}
                   />
                 </button>
@@ -234,34 +234,21 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
             className="flex items-center justify-between gap-3"
             aria-label="Welcome tour navigation"
           >
-            {current === 0 ? (
-              <button
-                type="button"
-                onClick={() => finish(false)}
-                aria-label="Skip welcome tour"
-                className="text-xs text-muted-foreground/70 underline-offset-4 hover:underline hover:text-muted-foreground transition-colors px-1.5 py-1 -mx-1.5 -my-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                Skip
-              </button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => finish(false)}
-                aria-label="Skip welcome tour"
-                className="text-muted-foreground focus-visible:ring-offset-background"
-              >
-                Skip
-              </Button>
-            )}
-            <p className="text-xs text-muted-foreground hidden sm:block" aria-hidden="true">
-              Swipe to explore
-            </p>
+            <Button
+              variant="ghost"
+              size="default"
+              onClick={() => finish(false)}
+              aria-label="Skip welcome tour"
+              className="min-h-11 px-4 text-muted-foreground touch-manipulation focus-visible:ring-offset-background"
+            >
+              Skip
+            </Button>
             <Button
               onClick={next}
               autoFocus
+              size="default"
               aria-label={isLast ? "Finish welcome tour and get started" : `Go to next slide (${current + 2} of ${total})`}
-              className="flex-1 max-w-[160px] focus-visible:ring-offset-background"
+              className="flex-1 max-w-[180px] min-h-11 touch-manipulation focus-visible:ring-offset-background"
             >
               {isLast ? "Get started" : "Next"}
               {!isLast && <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />}
