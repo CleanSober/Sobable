@@ -41,7 +41,7 @@ import { applyThemePreference } from "@/lib/theme";
 import cleanAndSoberLogo from "@/assets/clean-and-sober-logo.png";
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, isGuest, signOut } = useAuth();
   const { profile, updateProfile, refetch, loading: profileLoading } = useUserData();
   const { userXP } = useGamification();
   const {
@@ -76,31 +76,39 @@ const Profile = () => {
     return document.documentElement.classList.contains("colorblind");
   });
 
+  // Only redirect to /auth if there is no user AND no guest session.
+  // Guests are first-class on this page (read/write to localStorage).
   useEffect(() => {
-    if (!user) {
+    if (!user && !isGuest) {
       navigate("/auth");
     }
-  }, [user, navigate]);
+  }, [user, isGuest, navigate]);
 
+  // Hydrate form fields from either the authed profile or the guest blob.
   useEffect(() => {
-    if (profile) {
-      setName(profile.display_name || "");
-      setSobrietyDate(profile.sobriety_start_date || "");
-      setDailySpending(profile.daily_spending?.toString() || "0");
-      const rawBreakdown = (profile as any).spending_breakdown;
-      if (Array.isArray(rawBreakdown)) {
-        setSpendingBreakdown(
-          rawBreakdown
-            .filter((c: any) => c && typeof c.name === "string")
-            .map((c: any) => ({ name: String(c.name), amount: Number(c.amount) || 0 }))
-        );
-      }
-      setSponsorPhone(profile.sponsor_phone || "");
-      setEmergencyContact(profile.emergency_contact || "");
-      setPersonalReminder(profile.personal_reminder || "");
-      setAvatarUrl((profile as any).avatar_url || null);
+    const source: any = user
+      ? profile
+      : isGuest
+        ? readGuestProfile()
+        : null;
+    if (!source) return;
+
+    setName(source.display_name || "");
+    setSobrietyDate(source.sobriety_start_date || "");
+    setDailySpending(source.daily_spending?.toString() || "0");
+    const rawBreakdown = source.spending_breakdown;
+    if (Array.isArray(rawBreakdown)) {
+      setSpendingBreakdown(
+        rawBreakdown
+          .filter((c: any) => c && typeof c.name === "string")
+          .map((c: any) => ({ name: String(c.name), amount: Number(c.amount) || 0 }))
+      );
     }
-  }, [profile]);
+    setSponsorPhone(source.sponsor_phone || "");
+    setEmergencyContact(source.emergency_contact || "");
+    setPersonalReminder(source.personal_reminder || "");
+    setAvatarUrl(source.avatar_url || null);
+  }, [user, isGuest, profile]);
 
   const displayName = profile?.display_name || "Friend";
   const initials = profile?.display_name
