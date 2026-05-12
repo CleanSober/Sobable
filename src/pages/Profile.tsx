@@ -767,6 +767,19 @@ const Profile = () => {
               Account
             </h3>
             <button
+              onClick={() => {
+                localStorage.setItem("sober_club_welcome_tour_pending", "true");
+                toast.success("Replaying welcome tour…");
+                navigate("/");
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
+            >
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-foreground flex-1">Replay Welcome Tour</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <div className="h-px bg-border/30 mx-4" />
+            <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
             >
