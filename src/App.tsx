@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
+import { PageSkeleton } from "@/components/skeletons/HomeSkeleton";
 import { applyThemePreference } from "@/lib/theme";
 import { Capacitor } from "@capacitor/core";
 // Lazy load non-critical routes to reduce initial bundle size
@@ -52,12 +53,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Simple loading fallback
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="animate-pulse text-muted-foreground">Loading...</div>
-  </div>
-);
+// Lightweight fallback shown while a lazy route's chunk is fetched.
+const PageLoader = () => <PageSkeleton />;
 
 const AppContent = () => {
   // Track affiliate referral codes from URL

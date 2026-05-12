@@ -15,6 +15,7 @@ import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
 import { UserProfile } from "@/components/UserProfile";
 import { CheckInProgress } from "@/components/CheckInProgress";
 import { DailyRitual } from "@/components/DailyRitual";
+import { HomeSkeleton } from "@/components/skeletons/HomeSkeleton";
 
 import { XPNotificationProvider } from "@/components/XPNotification";
 import { PremiumLockOverlay } from "@/components/premium/PremiumLockOverlay";
@@ -427,11 +428,7 @@ const Index = () => {
   }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
   if (authLoading || (!isGuest && profileLoading)) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <HomeSkeleton />;
   }
 
   if (!user && !isGuest) return null;
