@@ -52,8 +52,6 @@ const queryClient = new QueryClient({
   },
 });
 
-import { PageSkeleton } from "@/components/skeletons/HomeSkeleton";
-
 // Lightweight fallback shown while a lazy route's chunk is fetched.
 const PageLoader = () => <PageSkeleton />;
 
