@@ -38,86 +38,40 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden"
         >
-          {/* Background gradient mesh */}
-          <div className="absolute inset-0 overflow-hidden">
-            {/* Teal primary orb */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.35, scale: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-[150px]"
-              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--success)))" }}
-            />
-            {/* Amber accent orb */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.25, scale: 1 }}
-              transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-              className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px]"
-              style={{ background: "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--warning)))" }}
-            />
-            {/* Subtle center glow */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.15 }}
-              transition={{ duration: 2, delay: 0.5 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[200px]"
-              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 70%)" }}
-            />
-          </div>
+          {/* Background gradient mesh - static for smooth performance */}
+          <div
+            className="absolute inset-0 opacity-90 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at 30% 35%, hsl(var(--primary) / 0.28), transparent 60%), radial-gradient(ellipse at 75% 70%, hsl(var(--accent) / 0.22), transparent 60%)",
+              willChange: "opacity",
+            }}
+          />
 
           {/* Logo container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, y: 30 }}
+            initial={{ opacity: 0, scale: 0.85, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.2,
-              type: "spring",
-              stiffness: 180,
-              damping: 18
+            transition={{
+              duration: 0.6,
+              delay: 0.1,
+              ease: [0.22, 1, 0.36, 1],
             }}
+            style={{ willChange: "transform, opacity" }}
             className="relative z-10 flex flex-col items-center"
           >
             {/* Icon with premium glow effect */}
-            <motion.div
-              initial={{ rotate: -10 }}
-              animate={{ rotate: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="relative mb-8"
-            >
-              {/* Outer glow ring */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.2, delay: 0.4 }}
-                className="absolute inset-0 rounded-3xl"
-                style={{ 
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--accent) / 0.4))",
-                  transform: "scale(1.4)",
-                  filter: "blur(30px)"
+            <div className="relative mb-8">
+              {/* Soft static glow (cheap) */}
+              <div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(var(--primary) / 0.45), hsl(var(--accent) / 0.35))",
+                  transform: "scale(1.25)",
+                  filter: "blur(24px)",
                 }}
               />
-              
-              {/* Inner glow ring */}
-              <motion.div
-                animate={{ 
-                  opacity: [0.5, 0.8, 0.5],
-                  scale: [1, 1.05, 1]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute inset-0 rounded-3xl"
-                style={{ 
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3))",
-                  transform: "scale(1.2)",
-                  filter: "blur(15px)"
-                }}
-              />
-              
               {/* Main icon container with tech border */}
               <div className="relative w-32 h-32 rounded-3xl overflow-hidden shadow-elevated tech-border">
                 <img 
@@ -155,23 +109,23 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
               >
                 <Sparkles className="w-4 h-4 text-primary drop-shadow-lg" />
               </motion.div>
-            </motion.div>
+            </div>
 
             {/* App name with gradient */}
             <motion.h1
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.7 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
               className="text-4xl font-bold tracking-tight mb-3 text-gradient"
             >
-              Sober Club
+              Sobable
             </motion.h1>
 
             {/* Tagline */}
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
+              transition={{ duration: 0.4, delay: 0.45 }}
               className="text-muted-foreground text-base font-medium"
             >
               Rise. Recover. Renew.
@@ -182,7 +136,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.2 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
             className="absolute bottom-24 flex flex-col items-center gap-4"
           >
             <div className="flex gap-2">
