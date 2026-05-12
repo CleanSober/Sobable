@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
-  User, Calendar as CalendarIcon, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle, Eye, Save, ExternalLink
+  User, Calendar as CalendarIcon, DollarSign, Phone, LogOut, Bell, FileText, Camera, Loader2, Zap, ArrowLeft, Settings2, Shield, Crown, ChevronRight, Mail, Sun, Moon, Trash2, AlertTriangle, Eye, Save, ExternalLink, Sparkles
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
