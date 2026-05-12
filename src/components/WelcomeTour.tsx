@@ -181,9 +181,9 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
             <p className="text-xs text-muted-foreground hidden sm:block">
               Swipe to explore
             </p>
-            <Button onClick={next} className="flex-1 max-w-[160px]">
+            <Button onClick={next} autoFocus className="flex-1 max-w-[160px]">
               {isLast ? "Get started" : "Next"}
-              {!isLast && <ChevronRight className="ml-1 h-4 w-4" />}
+              {!isLast && <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />}
             </Button>
           </div>
         </div>
