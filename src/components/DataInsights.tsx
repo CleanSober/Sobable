@@ -9,6 +9,8 @@ import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./community/PremiumGate";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ScatterChart, Scatter, ZAxis } from "recharts";
 import { format, subDays, parseISO } from "date-fns";
+import { ChartLinePlaceholder, StatGridPlaceholder } from "@/components/skeletons/FieldPlaceholders";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface MoodData {
   date: string;
@@ -292,8 +294,15 @@ export const DataInsights = () => {
   if (loading || premiumLoading) {
     return (
       <Card className="gradient-card border-border/50">
-        <CardContent className="py-12 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <BarChart3 className="w-5 h-5 text-primary animate-pulse" />
+            <Skeleton className="h-4 w-32" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <StatGridPlaceholder cols={3} />
+          <ChartLinePlaceholder />
         </CardContent>
       </Card>
     );
