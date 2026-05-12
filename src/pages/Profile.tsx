@@ -38,10 +38,11 @@ import { BottomTabs, type TabId } from "@/components/BottomTabs";
 import { Switch } from "@/components/ui/switch";
 import { calculateDaysSober } from "@/lib/storage";
 import { applyThemePreference } from "@/lib/theme";
+import { readGuestProfile, patchGuestProfile, clearGuestProfile } from "@/lib/guestProfile";
 import cleanAndSoberLogo from "@/assets/clean-and-sober-logo.png";
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, isGuest, signOut } = useAuth();
   const { profile, updateProfile, refetch, loading: profileLoading } = useUserData();
   const { userXP } = useGamification();
   const {
@@ -76,39 +77,55 @@ const Profile = () => {
     return document.documentElement.classList.contains("colorblind");
   });
 
+  // Only redirect to /auth if there is no user AND no guest session.
+  // Guests are first-class on this page (read/write to localStorage).
   useEffect(() => {
-    if (!user) {
+    if (!user && !isGuest) {
       navigate("/auth");
     }
-  }, [user, navigate]);
+  }, [user, isGuest, navigate]);
 
+  // Hydrate form fields from either the authed profile or the guest blob.
   useEffect(() => {
-    if (profile) {
-      setName(profile.display_name || "");
-      setSobrietyDate(profile.sobriety_start_date || "");
-      setDailySpending(profile.daily_spending?.toString() || "0");
-      const rawBreakdown = (profile as any).spending_breakdown;
-      if (Array.isArray(rawBreakdown)) {
-        setSpendingBreakdown(
-          rawBreakdown
-            .filter((c: any) => c && typeof c.name === "string")
-            .map((c: any) => ({ name: String(c.name), amount: Number(c.amount) || 0 }))
-        );
-      }
-      setSponsorPhone(profile.sponsor_phone || "");
-      setEmergencyContact(profile.emergency_contact || "");
-      setPersonalReminder(profile.personal_reminder || "");
-      setAvatarUrl((profile as any).avatar_url || null);
-    }
-  }, [profile]);
+    const source: any = user
+      ? profile
+      : isGuest
+        ? readGuestProfile()
+        : null;
+    if (!source) return;
 
-  const displayName = profile?.display_name || "Friend";
-  const initials = profile?.display_name
-    ? profile.display_name.slice(0, 2).toUpperCase()
-    : user?.email?.slice(0, 2).toUpperCase() || "ME";
+    setName(source.display_name || "");
+    setSobrietyDate(source.sobriety_start_date || "");
+    setDailySpending(source.daily_spending?.toString() || "0");
+    const rawBreakdown = source.spending_breakdown;
+    if (Array.isArray(rawBreakdown)) {
+      setSpendingBreakdown(
+        rawBreakdown
+          .filter((c: any) => c && typeof c.name === "string")
+          .map((c: any) => ({ name: String(c.name), amount: Number(c.amount) || 0 }))
+      );
+    }
+    setSponsorPhone(source.sponsor_phone || "");
+    setEmergencyContact(source.emergency_contact || "");
+    setPersonalReminder(source.personal_reminder || "");
+    setAvatarUrl(source.avatar_url || null);
+  }, [user, isGuest, profile]);
+
+  const guestSnapshot = !user && isGuest ? readGuestProfile() : null;
+  const displayName =
+    profile?.display_name ||
+    guestSnapshot?.display_name ||
+    (isGuest && !user ? "Guest" : "Friend");
+  const initials = (profile?.display_name || guestSnapshot?.display_name)
+    ? (profile?.display_name || guestSnapshot?.display_name)!.slice(0, 2).toUpperCase()
+    : isGuest && !user
+      ? "GU"
+      : user?.email?.slice(0, 2).toUpperCase() || "ME";
   const currentLevel = userXP?.current_level || 1;
   const totalXP = userXP?.total_xp || 0;
-  const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
+  const sobrietyStartForCounter =
+    profile?.sobriety_start_date || guestSnapshot?.sobriety_start_date || null;
+  const daysSober = sobrietyStartForCounter ? calculateDaysSober(sobrietyStartForCounter) : 0;
   const manageSubscriptionDestination =
     billingSource === "app_store"
       ? "App Store"
@@ -205,6 +222,29 @@ const Profile = () => {
       .slice(0, 12);
 
     setSaving(true);
+
+    // Guest mode: persist locally instead of hitting Supabase.
+    if (!user && isGuest) {
+      try {
+        patchGuestProfile({
+          display_name: name.trim().slice(0, 50) || null,
+          sobriety_start_date: sobrietyDate || null,
+          daily_spending: spending,
+          sponsor_phone: sponsorPhone.slice(0, 20) || null,
+          emergency_contact: emergencyContact.slice(0, 20) || null,
+          personal_reminder: personalReminder.slice(0, 500) || null,
+          // spending_breakdown isn't in the typed GuestProfile but we store it
+          // alongside so it survives migration to a real account.
+          ...({ spending_breakdown: cleanedBreakdown } as any),
+        });
+        toast.success("Saved on this device");
+      } catch (e) {
+        toast.error("Couldn't save on this device");
+      }
+      setSaving(false);
+      return;
+    }
+
     const { error } = await updateProfile({
       display_name: name.trim().slice(0, 50) || null,
       sobriety_start_date: sobrietyDate || null,
@@ -223,7 +263,7 @@ const Profile = () => {
     }
   };
 
-  if (!user) return null;
+  if (!user && !isGuest) return null;
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background noise-overlay">
@@ -271,6 +311,32 @@ const Profile = () => {
         }}
       >
         <div className="space-y-4">
+          {/* Guest banner */}
+          {isGuest && !user && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card-enhanced p-4 border-primary/30 flex items-start gap-3"
+            >
+              <div className="p-2 rounded-xl bg-primary/15 shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">You're using Sobable as a guest</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Your changes save on this device. Create a free account to back up your progress and sync across devices.
+                </p>
+                <Button
+                  size="sm"
+                  className="mt-2 gradient-primary text-primary-foreground text-xs h-8"
+                  onClick={() => navigate("/auth")}
+                >
+                  Create free account
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Profile Hero */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -285,31 +351,35 @@ const Profile = () => {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                >
-                  {uploading ? (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  ) : (
-                    <Camera className="w-5 h-5 text-white" />
-                  )}
-                </button>
+                {user && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                )}
                 <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-bold text-white shadow-lg border-2 border-background">
                   {currentLevel}
                 </div>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="hidden"
-              />
+              {user && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              )}
               <div>
                 <h2 className="text-lg font-bold text-foreground">{displayName}</h2>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className="text-xs text-muted-foreground">{user?.email || "Guest mode · saved on this device"}</p>
               </div>
 
               {/* Premium badge */}
@@ -391,15 +461,19 @@ const Profile = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">Free Plan</p>
-                    <p className="text-[10px] text-muted-foreground">Upgrade to unlock all recovery tools</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {isGuest && !user
+                        ? "Create an account to subscribe to Sober Club"
+                        : "Upgrade to unlock all recovery tools"}
+                    </p>
                   </div>
                 </div>
                 <Button
-                  onClick={() => navigate("/?upgrade=true")}
+                  onClick={() => navigate(isGuest && !user ? "/auth" : "/?upgrade=true")}
                   className="w-full gap-2 gradient-premium text-primary-foreground hover:opacity-90 transition-opacity"
                 >
                   <Crown className="w-4 h-4" />
-                  Upgrade to Sober Club
+                  {isGuest && !user ? "Create account to upgrade" : "Upgrade to Sober Club"}
                 </Button>
               </div>
             )}
@@ -692,21 +766,22 @@ const Profile = () => {
             </div>
           </motion.div>
 
-          {/* Notifications */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="card-enhanced p-4"
-          >
-            <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-primary" />
-              Notifications
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">Daily reminders, milestones, and quiet hours.</p>
-            <NotificationSettings sobrietyStartDate={sobrietyDate} />
-          </motion.div>
-
+          {/* Notifications — auth required (push token, server prefs) */}
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="card-enhanced p-4"
+            >
+              <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Notifications
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">Daily reminders, milestones, and quiet hours.</p>
+              <NotificationSettings sobrietyStartDate={sobrietyDate} />
+            </motion.div>
+          )}
           {/* Follow Us */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -761,7 +836,7 @@ const Profile = () => {
             <TermsAndConditions />
           </motion.div>
 
-          {/* Account Actions */}
+          {/* Account Actions — full set for authed users; guest-friendly variant for guests */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -773,7 +848,11 @@ const Profile = () => {
                 <Settings2 className="w-4 h-4 text-muted-foreground" />
                 Account
               </h3>
-              <p className="text-xs text-muted-foreground">Replay the welcome tour, sign out, or delete your account.</p>
+              <p className="text-xs text-muted-foreground">
+                {user
+                  ? "Replay the welcome tour, sign out, or delete your account."
+                  : "Replay the welcome tour or clear guest data on this device."}
+              </p>
             </div>
             <button
               onClick={() => {
@@ -790,71 +869,113 @@ const Profile = () => {
               <span className="text-sm font-medium text-foreground flex-1">Replay Welcome Tour</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
-            <div className="h-px bg-border/30 mx-4" />
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
-            >
-              <LogOut className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground flex-1">Sign Out</span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <div className="h-px bg-border/30 mx-4" />
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-destructive/10 transition-colors text-left">
-                  <Trash2 className="w-5 h-5 text-destructive/70" />
-                  <span className="text-sm font-medium text-destructive/70 flex-1">Delete Account</span>
+
+            {user ? (
+              <>
+                <div className="h-px bg-border/30 mx-4" />
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
+                >
+                  <LogOut className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground flex-1">Sign Out</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="max-w-md">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="w-5 h-5" />
-                    Delete Account Permanently
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-3">
-                    <p>This action is <strong className="text-foreground">irreversible</strong>. All your data will be permanently deleted, including:</p>
-                    <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
-                      <li>Sobriety progress & streaks</li>
-                      <li>Journal entries & mood logs</li>
-                      <li>Community posts & messages</li>
-                      <li>Subscription & Sober Club features</li>
-                    </ul>
-                    <div className="pt-2">
-                      <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">
-                        Type <strong className="text-foreground">DELETE</strong> to confirm
-                      </Label>
-                      <Input
-                        id="deleteConfirm"
-                        value={deleteConfirmText}
-                        onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        placeholder="DELETE"
-                        className="mt-1.5"
-                      />
-                    </div>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    disabled={deleteConfirmText !== "DELETE" || deleting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {deleting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Deleting...
-                      </>
-                    ) : (
-                      "Delete My Account"
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                <div className="h-px bg-border/30 mx-4" />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-destructive/10 transition-colors text-left">
+                      <Trash2 className="w-5 h-5 text-destructive/70" />
+                      <span className="text-sm font-medium text-destructive/70 flex-1">Delete Account</span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="w-5 h-5" />
+                        Delete Account Permanently
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>This action is <strong className="text-foreground">irreversible</strong>. All your data will be permanently deleted, including:</p>
+                        <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                          <li>Sobriety progress & streaks</li>
+                          <li>Journal entries & mood logs</li>
+                          <li>Community posts & messages</li>
+                          <li>Subscription & Sober Club features</li>
+                        </ul>
+                        <div className="pt-2">
+                          <Label htmlFor="deleteConfirm" className="text-xs text-muted-foreground">
+                            Type <strong className="text-foreground">DELETE</strong> to confirm
+                          </Label>
+                          <Input
+                            id="deleteConfirm"
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder="DELETE"
+                            className="mt-1.5"
+                          />
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirmText !== "DELETE" || deleting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Delete My Account"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            ) : (
+              <>
+                <div className="h-px bg-border/30 mx-4" />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-destructive/10 transition-colors text-left">
+                      <Trash2 className="w-5 h-5 text-destructive/70" />
+                      <span className="text-sm font-medium text-destructive/70 flex-1">Clear guest data</span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="w-5 h-5" />
+                        Clear guest data on this device
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This removes the local guest profile saved on this device. Nothing is sent to the server. You can start over fresh, or create a free account to back up your progress.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          clearGuestProfile();
+                          toast.success("Guest data cleared");
+                          navigate("/");
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Clear data
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
           </motion.div>
 
           {/* Version */}
