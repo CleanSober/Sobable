@@ -15,6 +15,8 @@ export interface UserProfile {
   personal_reminder: string | null;
   onboarding_complete: boolean;
   avatar_url: string | null;
+  updated_at?: string | null;
+  created_at?: string | null;
 }
 
 export const useUserData = () => {

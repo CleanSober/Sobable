@@ -25,6 +25,15 @@ import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { useWelcomeTourTrigger } from "@/hooks/useWelcomeTourTrigger";
+import {
+  GUEST_PROFILE_KEY,
+  readGuestProfile,
+  writeGuestProfile,
+  patchGuestProfile,
+  clearGuestProfile,
+  type GuestProfile,
+} from "@/lib/guestProfile";
+import { GuestMigrationConflictDialog } from "@/components/GuestMigrationConflictDialog";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -89,6 +98,7 @@ const Index = () => {
     | { status: "error"; message: string }
     | null
   >(null);
+  const [migrationConflict, setMigrationConflict] = useState<{ guest: GuestProfile } | null>(null);
   const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
     user: user ? { id: user.id } : null,
     isGuest,
@@ -165,25 +175,31 @@ const Index = () => {
     if (migrationInFlightRef.current) return;
     if (localStorage.getItem(migrationDoneKey) === "true") return;
     if (profile?.onboarding_complete) {
-      // Account is already set up — mark migration done so we never touch it,
-      // drop any stale guest blob, and clear stale tour flags so the welcome
-      // tour cannot fire for a user who has already completed onboarding.
+      // Account is already set up. Check whether the local guest blob is
+      // strictly NEWER than the account record. If so, raise a conflict so
+      // the user can choose which version to keep. Otherwise the older guest
+      // blob is safely discarded — it's stale by definition.
+      const guest = readGuestProfile();
+      if (!guest) {
+        localStorage.setItem(migrationDoneKey, "true");
+        return;
+      }
+      const guestTs = guest.updated_at ?? 0;
+      const accountTs = profile?.updated_at ? new Date(profile.updated_at).getTime() : 0;
+      if (guestTs > accountTs && (guest.display_name || guest.sobriety_start_date)) {
+        // Surface the conflict UI; do NOT mark migration done so the user's
+        // choice can persist on next render.
+        setMigrationConflict({ guest });
+        return;
+      }
+      // Guest is older or equal -> safe auto-pick: keep account version.
       localStorage.setItem(migrationDoneKey, "true");
-      localStorage.removeItem("sober_club_guest_profile");
+      clearGuestProfile();
       localStorage.removeItem("sober_club_welcome_tour_pending_user");
       localStorage.removeItem("sober_club_welcome_tour_pending_guest");
       return;
     }
-    const raw = localStorage.getItem("sober_club_guest_profile");
-    if (!raw) return;
-
-    let guest: Record<string, unknown> | null = null;
-    try {
-      guest = JSON.parse(raw);
-    } catch {
-      localStorage.removeItem("sober_club_guest_profile");
-      return;
-    }
+    const guest = readGuestProfile();
     if (!guest) return;
 
     migrationInFlightRef.current = true;
@@ -229,6 +245,52 @@ const Index = () => {
       }
     })();
   }, [user, profile, profileLoading, updateProfile, migrationDoneKey]);
+
+  const resolveConflictKeepAccount = useCallback(() => {
+    if (migrationDoneKey) localStorage.setItem(migrationDoneKey, "true");
+    clearGuestProfile();
+    localStorage.removeItem("sober_club_welcome_tour_pending_user");
+    localStorage.removeItem("sober_club_welcome_tour_pending_guest");
+    setMigrationConflict(null);
+    toast.success("Kept your account version.");
+  }, [migrationDoneKey]);
+
+  const resolveConflictUseGuest = useCallback(async () => {
+    const conflict = migrationConflict;
+    if (!conflict || !migrationDoneKey) return;
+    setMigrationConflict(null);
+    migrationInFlightRef.current = true;
+    localStorage.setItem(migrationDoneKey, "true");
+    try {
+      const g = conflict.guest;
+      await updateProfile({
+        display_name: g.display_name ?? profile?.display_name ?? null,
+        substances: g.substances ?? [],
+        sobriety_start_date: g.sobriety_start_date ?? null,
+        daily_spending: g.daily_spending ?? 0,
+        sponsor_phone: g.sponsor_phone ?? null,
+        emergency_contact: g.emergency_contact ?? null,
+        personal_reminder: g.personal_reminder ?? null,
+        onboarding_complete: true,
+      });
+      clearGuestProfile();
+      localStorage.removeItem("sober_club_welcome_tour_pending_user");
+      localStorage.removeItem("sober_club_welcome_tour_pending_guest");
+      const msg = "Your guest version was applied to your account.";
+      toast.success(msg);
+      setMigrationBanner({ status: "success", message: msg });
+    } catch (err) {
+      localStorage.removeItem(migrationDoneKey);
+      console.error("Conflict resolution failed:", err);
+      const msg = "Couldn't apply your guest version.";
+      toast.error(msg, { description: "We'll try again next time you open the app." });
+      setMigrationBanner({ status: "error", message: msg });
+      // Restore conflict so user can retry without losing data.
+      setMigrationConflict(conflict);
+    } finally {
+      migrationInFlightRef.current = false;
+    }
+  }, [migrationConflict, migrationDoneKey, updateProfile, profile]);
 
   // Daily motivational messages pool
   const dailyMotivations = useMemo(() => [
@@ -423,7 +485,7 @@ const Index = () => {
         personal_reminder: data.personalReminder,
         onboarding_complete: true,
       };
-      localStorage.setItem("sober_club_guest_profile", JSON.stringify(guestData));
+      writeGuestProfile(guestData);
       // Force re-render
       window.location.reload();
     }
@@ -520,9 +582,7 @@ const Index = () => {
               if (user) {
                 await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
               } else {
-                const gp = JSON.parse(localStorage.getItem("sober_club_guest_profile") || "{}");
-                gp.savings_start_date = new Date().toISOString().split("T")[0];
-                localStorage.setItem("sober_club_guest_profile", JSON.stringify(gp));
+                patchGuestProfile({ savings_start_date: new Date().toISOString().split("T")[0] });
               }
               toast.success("Savings counter reset! Your sobriety date is unchanged.");
             }} onUndo={async () => {
@@ -532,9 +592,7 @@ const Index = () => {
               if (user) {
                 await updateProfile({ savings_start_date: previousDate === effectiveProfile?.sobriety_start_date ? null : previousDate } as any);
               } else {
-                const gp = JSON.parse(localStorage.getItem("sober_club_guest_profile") || "{}");
-                gp.savings_start_date = previousDate;
-                localStorage.setItem("sober_club_guest_profile", JSON.stringify(gp));
+                patchGuestProfile({ savings_start_date: previousDate });
               }
               localStorage.removeItem("sober_club_savings_reset_undo");
               toast.success("Savings reset undone! Your previous tracking has been restored.");
@@ -774,6 +832,20 @@ const Index = () => {
           />
           {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} />}
         </Suspense>
+        {migrationConflict && (
+          <GuestMigrationConflictDialog
+            open
+            guest={migrationConflict.guest}
+            account={{
+              display_name: profile?.display_name,
+              sobriety_start_date: profile?.sobriety_start_date,
+              daily_spending: profile?.daily_spending,
+              updated_at: profile?.updated_at ?? null,
+            }}
+            onKeepAccount={resolveConflictKeepAccount}
+            onUseGuest={resolveConflictUseGuest}
+          />
+        )}
       </div>
     </XPNotificationProvider>
   );
