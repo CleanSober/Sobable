@@ -23,6 +23,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Support = lazy(() => import("./pages/Support"));
 const Profile = lazy(() => import("./pages/Profile"));
+const SkeletonsDev = lazy(() => import("./pages/SkeletonsDev"));
 
 // Idle-prefetch the routes users are most likely to visit next so the chunks
 // are warm in the cache before they tap. Profile + Check-In are top targets.
@@ -131,6 +132,7 @@ const App = () => {
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/dev/skeletons" element={<SkeletonsDev />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
