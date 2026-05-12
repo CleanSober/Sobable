@@ -140,13 +140,32 @@ const Index = () => {
   // Guest -> Account migration: when a previously-guest user finally signs up
   // (or signs in for the first time on this device), carry their guest profile
   // data into their real account so they don't lose their start date, money
-  // saved, substances, etc. Runs once per device, only if the new account
-  // hasn't already completed onboarding.
-  const migratedRef = useRef(false);
+  // saved, substances, etc.
+  //
+  // Strong run-once guard:
+  //   1. In-memory `migrationInFlightRef` blocks parallel invocations within
+  //      the same session even if the effect re-fires while updateProfile is
+  //      still pending (e.g. profileLoading toggling, refetches).
+  //   2. Persistent per-account key `sober_club_guest_migration_done:<userId>`
+  //      blocks re-running across reloads, even if the guest profile somehow
+  //      reappears or the new profile hasn't yet reflected onboarding_complete.
+  //   3. The persistent flag is written BEFORE the async updateProfile call so
+  //      a reload in the middle of the call cannot trigger a second migration.
+  //      On failure we clear it so the next mount can retry.
+  const migrationInFlightRef = useRef(false);
+  const migrationDoneKey = user ? `sober_club_guest_migration_done:${user.id}` : null;
   useEffect(() => {
-    if (migratedRef.current) return;
-    if (!user || profileLoading) return;
-    if (profile?.onboarding_complete) return;
+    if (!user || !migrationDoneKey) return;
+    if (profileLoading) return;
+    if (migrationInFlightRef.current) return;
+    if (localStorage.getItem(migrationDoneKey) === "true") return;
+    if (profile?.onboarding_complete) {
+      // Account is already set up — mark migration done so we never touch it,
+      // and drop any stale guest blob so it can't leak into another account.
+      localStorage.setItem(migrationDoneKey, "true");
+      localStorage.removeItem("sober_club_guest_profile");
+      return;
+    }
     const raw = localStorage.getItem("sober_club_guest_profile");
     if (!raw) return;
 
@@ -159,7 +178,9 @@ const Index = () => {
     }
     if (!guest) return;
 
-    migratedRef.current = true;
+    migrationInFlightRef.current = true;
+    // Persist BEFORE the network call so a reload mid-flight cannot retrigger.
+    localStorage.setItem(migrationDoneKey, "true");
     (async () => {
       try {
         await updateProfile({
@@ -173,15 +194,16 @@ const Index = () => {
           onboarding_complete: true,
         });
         localStorage.removeItem("sober_club_guest_profile");
-        // Don't double-show the tour: if the guest already saw it,
-        // the guest pending flag would be gone; if not, we keep it.
         toast.success("Your guest progress was saved to your account.");
       } catch (err) {
-        migratedRef.current = false;
+        // Allow a retry on next mount.
+        localStorage.removeItem(migrationDoneKey);
         console.error("Guest profile migration failed:", err);
+      } finally {
+        migrationInFlightRef.current = false;
       }
     })();
-  }, [user, profile, profileLoading, updateProfile]);
+  }, [user, profile, profileLoading, updateProfile, migrationDoneKey]);
 
   // Daily motivational messages pool
   const dailyMotivations = useMemo(() => [
