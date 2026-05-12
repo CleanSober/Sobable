@@ -111,13 +111,20 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
           <CarouselContent>
             {SLIDES.map((slide, i) => {
               const Icon = slide.icon;
+              const isActive = i === current;
               return (
-                <CarouselItem key={i}>
-                  <div className="px-6 pt-8 pb-2 text-center">
+                <CarouselItem
+                  key={i}
+                  aria-hidden={!isActive}
+                  // Prevent off-screen slides from being part of the tab order
+                  // or being announced as separate slide groups.
+                  {...(!isActive ? { inert: "" as unknown as undefined } : {})}
+                >
+                  <div className="px-6 pt-8 pb-2 text-center" aria-live={isActive ? "polite" : "off"}>
                     <div
                       className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${slide.accent} text-white shadow-xl`}
                     >
-                      <Icon className="h-10 w-10" />
+                      <Icon className="h-10 w-10" aria-hidden="true" />
                     </div>
                     <h2 className="text-xl font-bold text-foreground mb-2">{slide.title}</h2>
                     <p className="text-sm text-muted-foreground leading-relaxed min-h-[64px]">
@@ -174,9 +181,9 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
             <p className="text-xs text-muted-foreground hidden sm:block">
               Swipe to explore
             </p>
-            <Button onClick={next} className="flex-1 max-w-[160px]">
+            <Button onClick={next} autoFocus className="flex-1 max-w-[160px]">
               {isLast ? "Get started" : "Next"}
-              {!isLast && <ChevronRight className="ml-1 h-4 w-4" />}
+              {!isLast && <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />}
             </Button>
           </div>
         </div>
