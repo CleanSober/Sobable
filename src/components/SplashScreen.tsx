@@ -123,9 +123,9 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
 
             {/* Tagline */}
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
+              transition={{ duration: 0.4, delay: 0.45 }}
               className="text-muted-foreground text-base font-medium"
             >
               Rise. Recover. Renew.
@@ -136,7 +136,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 2000 }: SplashScreen
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.2 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
             className="absolute bottom-24 flex flex-col items-center gap-4"
           >
             <div className="flex gap-2">
