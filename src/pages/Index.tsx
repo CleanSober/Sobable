@@ -647,6 +647,7 @@ const Index = () => {
             showPricing={milestoneShowPricing}
             onPricingChange={setMilestoneShowPricing}
           />
+          {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} />}
         </Suspense>
       </div>
     </XPNotificationProvider>
