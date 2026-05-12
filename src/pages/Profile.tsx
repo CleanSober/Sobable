@@ -311,6 +311,32 @@ const Profile = () => {
         }}
       >
         <div className="space-y-4">
+          {/* Guest banner */}
+          {isGuest && !user && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card-enhanced p-4 border-primary/30 flex items-start gap-3"
+            >
+              <div className="p-2 rounded-xl bg-primary/15 shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">You're using Sobable as a guest</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Your changes save on this device. Create a free account to back up your progress and sync across devices.
+                </p>
+                <Button
+                  size="sm"
+                  className="mt-2 gradient-primary text-primary-foreground text-xs h-8"
+                  onClick={() => navigate("/auth")}
+                >
+                  Create free account
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Profile Hero */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -325,31 +351,35 @@ const Profile = () => {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                >
-                  {uploading ? (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  ) : (
-                    <Camera className="w-5 h-5 text-white" />
-                  )}
-                </button>
+                {user && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                )}
                 <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-bold text-white shadow-lg border-2 border-background">
                   {currentLevel}
                 </div>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="hidden"
-              />
+              {user && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              )}
               <div>
                 <h2 className="text-lg font-bold text-foreground">{displayName}</h2>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className="text-xs text-muted-foreground">{user?.email || "Guest mode · saved on this device"}</p>
               </div>
 
               {/* Premium badge */}
