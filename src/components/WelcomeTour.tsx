@@ -133,7 +133,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent
-        className="max-w-sm p-0 overflow-hidden gap-0"
+        className="w-[calc(100%-1.5rem)] max-w-sm p-0 overflow-hidden gap-0 max-h-[90dvh] overflow-y-auto rounded-2xl sm:rounded-2xl [&>button.absolute]:hidden"
         onCloseAutoFocus={(e) => {
           // Override Radix default so we can restore focus to the launch
           // control (or a sensible fallback on Home) instead of <body>.
@@ -175,14 +175,14 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
                   // or being announced as separate slide groups.
                   {...(!isActive ? { inert: "" as unknown as undefined } : {})}
                 >
-                  <div className="px-6 pt-8 pb-2 text-center" aria-live={isActive ? "polite" : "off"}>
+                  <div className="px-5 pt-7 pb-2 text-center sm:px-6 sm:pt-8" aria-live={isActive ? "polite" : "off"}>
                     <div
-                      className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${slide.accent} text-white shadow-xl`}
+                      className={`mx-auto mb-4 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${slide.accent} text-white shadow-xl`}
                     >
-                      <Icon className="h-10 w-10" aria-hidden="true" />
+                      <Icon className="h-8 w-8 sm:h-10 sm:w-10" aria-hidden="true" />
                     </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">{slide.title}</h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed min-h-[64px]">
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground mb-2">{slide.title}</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed min-h-[72px] sm:min-h-[64px]">
                       {slide.body}
                     </p>
                   </div>
@@ -192,7 +192,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
           </CarouselContent>
         </Carousel>
 
-        <div className="px-6 pb-6">
+        <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6">
           {/* Slide indicators (also act as jump controls) */}
           <div
             className="flex items-center justify-center gap-1.5 mt-2 mb-5"
