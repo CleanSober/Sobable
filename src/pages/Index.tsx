@@ -166,9 +166,12 @@ const Index = () => {
     if (localStorage.getItem(migrationDoneKey) === "true") return;
     if (profile?.onboarding_complete) {
       // Account is already set up — mark migration done so we never touch it,
-      // and drop any stale guest blob so it can't leak into another account.
+      // drop any stale guest blob, and clear stale tour flags so the welcome
+      // tour cannot fire for a user who has already completed onboarding.
       localStorage.setItem(migrationDoneKey, "true");
       localStorage.removeItem("sober_club_guest_profile");
+      localStorage.removeItem("sober_club_welcome_tour_pending_user");
+      localStorage.removeItem("sober_club_welcome_tour_pending_guest");
       return;
     }
     const raw = localStorage.getItem("sober_club_guest_profile");
