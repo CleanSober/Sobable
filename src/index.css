@@ -1,7 +1,5 @@
-@import "@fontsource/outfit/400.css";
-@import "@fontsource/outfit/500.css";
-@import "@fontsource/outfit/600.css";
-@import "@fontsource/outfit/700.css";
+/* Outfit font is loaded via Google Fonts in index.html with preconnect + display=swap
+   for faster first paint than the @fontsource @import chain. */
 
 @tailwind base;
 @tailwind components;
