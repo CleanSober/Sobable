@@ -103,6 +103,10 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
+        <VisuallyHidden>
+          <DialogTitle>Welcome tour</DialogTitle>
+          <DialogDescription>Quick walkthrough of the main features.</DialogDescription>
+        </VisuallyHidden>
         <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: false }}>
           <CarouselContent>
             {SLIDES.map((slide, i) => {
