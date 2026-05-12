@@ -1,4 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import {
+  SKELETON_GAP,
+  SKELETON_HEIGHT,
+  SKELETON_RADIUS,
+} from "./tokens";
+import { SkeletonLine, SkeletonListRow } from "./primitives";
 
 /**
  * Per-field placeholders.
@@ -7,8 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
  * badge rails, lists, calendars, stat grids) so that a section reserves its
  * real height before data hydrates — eliminating layout shift inside cards.
  *
- * Every placeholder accepts an optional `className` so callers can tune
- * spacing/padding to fit the surrounding card.
+ * All sizing is driven by the shared tokens in `./tokens.ts` so spacing,
+ * radii, and responsive widths stay consistent across breakpoints.
  */
 
 type WithClass = { className?: string };
@@ -19,17 +26,17 @@ type WithClass = { className?: string };
 
 /**
  * Bar chart placeholder — matches typical Recharts BarChart used in
- * PremiumAnalytics / DataInsights (height ~h-48).
+ * PremiumAnalytics / DataInsights.
  */
 export const ChartBarPlaceholder = ({
   className = "",
   bars = 7,
-  height = "h-48",
+  height = SKELETON_HEIGHT.hero, // h-44
 }: WithClass & { bars?: number; height?: string }) => {
-  // Pseudo-random but stable bar heights for visual rhythm.
+  // Stable pseudo-random heights for visual rhythm.
   const heights = ["40%", "65%", "55%", "80%", "45%", "70%", "60%", "75%", "50%", "85%"];
   return (
-    <div className={`w-full ${height} flex items-end justify-between gap-2 px-1 ${className}`}>
+    <div className={cn("w-full flex items-end justify-between gap-2 px-1", height, className)}>
       {Array.from({ length: bars }).map((_, i) => (
         <Skeleton
           key={i}
@@ -42,22 +49,20 @@ export const ChartBarPlaceholder = ({
 };
 
 /**
- * Line chart placeholder — single muted band that takes the typical
+ * Line chart placeholder — single muted band with axis ticks at the typical
  * trend-line container height.
  */
 export const ChartLinePlaceholder = ({
   className = "",
-  height = "h-40",
+  height = SKELETON_HEIGHT.cardXl, // h-36
 }: WithClass & { height?: string }) => (
-  <div className={`relative w-full ${height} ${className}`}>
-    {/* Faint axis ticks */}
+  <div className={cn("relative w-full", height, className)}>
     <div className="absolute inset-y-0 left-0 w-full flex flex-col justify-between py-2">
       {[0, 1, 2, 3].map((i) => (
         <Skeleton key={i} className="h-px w-full opacity-40" />
       ))}
     </div>
-    {/* Trend band */}
-    <Skeleton className="absolute inset-x-0 top-1/3 h-1/3 rounded-xl opacity-70" />
+    <Skeleton className={cn("absolute inset-x-0 top-1/3 h-1/3 opacity-70", SKELETON_RADIUS.lg)} />
   </div>
 );
 
@@ -72,11 +77,11 @@ export const BadgeRailPlaceholder = ({
   className = "",
   count = 6,
 }: WithClass & { count?: number }) => (
-  <div className={`flex flex-wrap gap-2 ${className}`}>
+  <div className={cn("flex flex-wrap gap-2", className)}>
     {Array.from({ length: count }).map((_, i) => (
       <Skeleton
         key={i}
-        className="h-7 rounded-full"
+        className={cn("h-7", SKELETON_RADIUS.pill)}
         style={{ width: `${4 + ((i * 7) % 6)}rem` }}
       />
     ))}
@@ -84,55 +89,58 @@ export const BadgeRailPlaceholder = ({
 );
 
 /**
- * Generic stacked list placeholder — for recommendations, insights, log
- * entries. Each row has a left icon, a title line, and a sub-line.
+ * Generic stacked list placeholder — for recommendations, insights, log entries.
  */
 export const ListPlaceholder = ({
   className = "",
   rows = 3,
-  rowHeight = "h-14",
-}: WithClass & { rows?: number; rowHeight?: string }) => (
-  <div className={`space-y-2 ${className}`}>
-    {Array.from({ length: rows }).map((_, i) => (
-      <div
-        key={i}
-        className={`flex items-center gap-3 ${rowHeight} rounded-xl border border-border/30 bg-card/30 px-3`}
-      >
-        <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
-        <div className="flex-1 space-y-1.5 min-w-0">
-          <Skeleton className="h-3 w-3/5" />
-          <Skeleton className="h-2.5 w-4/5" />
-        </div>
-        <Skeleton className="w-12 h-5 rounded-full shrink-0" />
-      </div>
-    ))}
-  </div>
-);
+  rowHeight,
+}: WithClass & { rows?: number; rowHeight?: string }) => {
+  // rowHeight is kept as a free-form Tailwind class for backwards compat.
+  const heightToken = rowHeight ?? SKELETON_HEIGHT.listRow;
+  return (
+    <div className={cn(SKELETON_GAP.sm, className)}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <SkeletonListRow
+          key={i}
+          // SkeletonListRow defaults to listRow; only forward when caller customised.
+          {...(rowHeight
+            ? { className: cn(rowHeight) }
+            : { className: heightToken === SKELETON_HEIGHT.listRow ? undefined : heightToken })}
+        />
+      ))}
+    </div>
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /* Stat grids                                                          */
 /* ------------------------------------------------------------------ */
 
 /**
- * Small stat tile grid (e.g. "Days · Money saved · Streak"). Defaults to
- * a 3-column grid with chunky 14-unit tiles.
+ * Small stat tile grid (e.g. "Days · Money saved · Streak"). Defaults to a
+ * 3-column grid with cardSm tiles so it matches real summary tiles.
  */
 export const StatGridPlaceholder = ({
   className = "",
   cols = 3,
-  tileHeight = "h-16",
+  tileHeight = SKELETON_HEIGHT.cardSm.replace("h-20", "h-16"), // slightly tighter
 }: WithClass & { cols?: number; tileHeight?: string }) => (
   <div
-    className={`grid gap-2 ${className}`}
+    className={cn("grid gap-2", className)}
     style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
   >
     {Array.from({ length: cols }).map((_, i) => (
       <div
         key={i}
-        className={`${tileHeight} rounded-xl border border-border/30 bg-card/30 p-2 flex flex-col justify-between`}
+        className={cn(
+          tileHeight,
+          SKELETON_RADIUS.lg,
+          "border border-border/30 bg-card/30 p-2 flex flex-col justify-between",
+        )}
       >
-        <Skeleton className="h-2.5 w-12" />
-        <Skeleton className="h-4 w-3/4" />
+        <SkeletonLine height="caption" width="w-12" />
+        <SkeletonLine height="title" width="w-3/4" />
       </div>
     ))}
   </div>
@@ -154,7 +162,7 @@ export const CalendarGridPlaceholder = ({ className = "" }: WithClass) => (
     </div>
     <div className="grid grid-cols-7 gap-1">
       {Array.from({ length: 42 }).map((_, i) => (
-        <Skeleton key={i} className="aspect-square rounded-lg" />
+        <Skeleton key={i} className={cn("aspect-square", SKELETON_RADIUS.md)} />
       ))}
     </div>
   </div>
