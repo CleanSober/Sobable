@@ -423,7 +423,7 @@ const Index = () => {
         personal_reminder: data.personalReminder,
         onboarding_complete: true,
       };
-      localStorage.setItem("sober_club_guest_profile", JSON.stringify(guestData));
+      writeGuestProfile(guestData);
       // Force re-render
       window.location.reload();
     }
