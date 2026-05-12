@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./community/PremiumGate";
 import { calculateDaysSober, type UserData } from "@/lib/storage";
+import { StatGridPlaceholder, ListPlaceholder } from "@/components/skeletons/FieldPlaceholders";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface WeeklyReportProps {
   userData: UserData;
@@ -208,9 +210,13 @@ export const WeeklyReport = ({ userData }: WeeklyReportProps) => {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <FileText className="w-5 h-5 text-primary animate-pulse" />
-            Loading report...
+            <Skeleton className="h-4 w-36" />
           </CardTitle>
         </CardHeader>
+        <CardContent className="space-y-4">
+          <StatGridPlaceholder cols={3} />
+          <ListPlaceholder rows={3} rowHeight="h-12" />
+        </CardContent>
       </Card>
     );
   }

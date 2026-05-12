@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PremiumGate } from "./community/PremiumGate";
+import { ListPlaceholder, BadgeRailPlaceholder } from "@/components/skeletons/FieldPlaceholders";
 
 interface ActionItem {
   title: string;
@@ -137,9 +138,9 @@ export const PersonalizedRecommendations = () => {
       </CardHeader>
       <CardContent className="space-y-3 px-3 pb-3">
         {loading && !recommendations ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="text-muted-foreground">Analyzing your recovery data...</p>
+          <div className="space-y-3">
+            <BadgeRailPlaceholder count={4} />
+            <ListPlaceholder rows={4} />
           </div>
         ) : error ? (
           <div className="text-center py-8">

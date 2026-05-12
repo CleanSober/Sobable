@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PremiumGate } from "./community/PremiumGate";
+import { BadgeRailPlaceholder, ListPlaceholder } from "@/components/skeletons/FieldPlaceholders";
 
 interface PatternAnalysis {
   topTriggers: { name: string; count: number }[];
@@ -96,12 +97,14 @@ export const PatternAnalysis = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl gradient-card shadow-card border border-border/50 p-4 text-center"
+        className="rounded-2xl gradient-card shadow-card border border-border/50 p-4 space-y-3"
       >
-        <div className="p-3 rounded-full bg-primary/10 inline-block mb-3">
-          <Brain className="w-6 h-6 text-primary animate-pulse" />
+        <div className="flex items-center gap-2">
+          <Brain className="w-5 h-5 text-primary animate-pulse" />
+          <h3 className="text-sm font-semibold text-foreground">Analyzing patterns...</h3>
         </div>
-        <h3 className="text-sm font-semibold text-foreground">Analyzing patterns...</h3>
+        <BadgeRailPlaceholder count={5} />
+        <ListPlaceholder rows={3} rowHeight="h-12" />
       </motion.div>
     );
   }

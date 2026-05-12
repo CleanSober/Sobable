@@ -18,6 +18,8 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, PieChart, Pie, Cell
 } from "recharts";
 import { format, subDays, parseISO, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
+import { ChartBarPlaceholder, StatGridPlaceholder } from "@/components/skeletons/FieldPlaceholders";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PremiumGate } from "./community/PremiumGate";
 
 interface AdvancedInsight {
@@ -468,8 +470,15 @@ export const PremiumAnalytics = () => {
   if (loading) {
     return (
       <Card className="gradient-card border-border/50">
-        <CardContent className="py-12 flex items-center justify-center">
-          <Brain className="w-8 h-8 animate-pulse text-primary" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Brain className="w-5 h-5 text-primary animate-pulse" />
+            <Skeleton className="h-4 w-40" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <StatGridPlaceholder cols={4} />
+          <ChartBarPlaceholder />
         </CardContent>
       </Card>
     );

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { PremiumGate } from "./community/PremiumGate";
+import { ListPlaceholder } from "@/components/skeletons/FieldPlaceholders";
 
 interface Insight {
   id: string;
@@ -254,6 +255,9 @@ export const SmartInsights = () => {
             Analyzing patterns...
           </CardTitle>
         </CardHeader>
+        <CardContent>
+          <ListPlaceholder rows={3} />
+        </CardContent>
       </Card>
     );
   }
