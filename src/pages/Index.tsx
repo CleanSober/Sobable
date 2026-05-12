@@ -25,6 +25,15 @@ import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { useWelcomeTourTrigger } from "@/hooks/useWelcomeTourTrigger";
+import {
+  GUEST_PROFILE_KEY,
+  readGuestProfile,
+  writeGuestProfile,
+  patchGuestProfile,
+  clearGuestProfile,
+  type GuestProfile,
+} from "@/lib/guestProfile";
+import { GuestMigrationConflictDialog } from "@/components/GuestMigrationConflictDialog";
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
