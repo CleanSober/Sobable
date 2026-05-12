@@ -120,4 +120,22 @@ describe("first-time guest sign-up -> welcome tour", () => {
     expect(localStorage.getItem(TOUR_PENDING_GUEST_KEY)).toBeNull();
     expect(localStorage.getItem(TOUR_PENDING_USER_KEY)).toBeNull();
   });
+
+  it("does NOT open the tour for an authed user after guest->account migration (onboarding already complete, no pending flag)", () => {
+    // Migration cleared the guest profile and pending flags, then set
+    // onboarding_complete = true on the new account.
+    const { result } = renderHook(() =>
+      useWelcomeTourTrigger({
+        user: { id: "user-1" },
+        isGuest: false,
+        onboardingComplete: true,
+      }),
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(TOUR_OPEN_DELAY_MS * 5);
+    });
+
+    expect(result.current.showWelcomeTour).toBe(false);
+  });
 });
