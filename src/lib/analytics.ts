@@ -12,11 +12,11 @@ export async function trackEvent(
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return; // guest — skip
-    await supabase.from("analytics_events").insert({
+    await supabase.from("analytics_events").insert([{
       user_id: user.id,
       event_type,
-      event_data: event_data ?? {},
-    });
+      event_data: (event_data ?? {}) as never,
+    }]);
   } catch {
     // swallow — analytics failures must never surface to users
   }
