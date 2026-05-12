@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
+import { PageSkeleton } from "@/components/skeletons/HomeSkeleton";
 import { applyThemePreference } from "@/lib/theme";
 import { Capacitor } from "@capacitor/core";
 // Lazy load non-critical routes to reduce initial bundle size
