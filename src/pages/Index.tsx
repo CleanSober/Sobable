@@ -246,6 +246,52 @@ const Index = () => {
     })();
   }, [user, profile, profileLoading, updateProfile, migrationDoneKey]);
 
+  const resolveConflictKeepAccount = useCallback(() => {
+    if (migrationDoneKey) localStorage.setItem(migrationDoneKey, "true");
+    clearGuestProfile();
+    localStorage.removeItem("sober_club_welcome_tour_pending_user");
+    localStorage.removeItem("sober_club_welcome_tour_pending_guest");
+    setMigrationConflict(null);
+    toast.success("Kept your account version.");
+  }, [migrationDoneKey]);
+
+  const resolveConflictUseGuest = useCallback(async () => {
+    const conflict = migrationConflict;
+    if (!conflict || !migrationDoneKey) return;
+    setMigrationConflict(null);
+    migrationInFlightRef.current = true;
+    localStorage.setItem(migrationDoneKey, "true");
+    try {
+      const g = conflict.guest;
+      await updateProfile({
+        display_name: g.display_name ?? profile?.display_name ?? null,
+        substances: g.substances ?? [],
+        sobriety_start_date: g.sobriety_start_date ?? null,
+        daily_spending: g.daily_spending ?? 0,
+        sponsor_phone: g.sponsor_phone ?? null,
+        emergency_contact: g.emergency_contact ?? null,
+        personal_reminder: g.personal_reminder ?? null,
+        onboarding_complete: true,
+      });
+      clearGuestProfile();
+      localStorage.removeItem("sober_club_welcome_tour_pending_user");
+      localStorage.removeItem("sober_club_welcome_tour_pending_guest");
+      const msg = "Your guest version was applied to your account.";
+      toast.success(msg);
+      setMigrationBanner({ status: "success", message: msg });
+    } catch (err) {
+      localStorage.removeItem(migrationDoneKey);
+      console.error("Conflict resolution failed:", err);
+      const msg = "Couldn't apply your guest version.";
+      toast.error(msg, { description: "We'll try again next time you open the app." });
+      setMigrationBanner({ status: "error", message: msg });
+      // Restore conflict so user can retry without losing data.
+      setMigrationConflict(conflict);
+    } finally {
+      migrationInFlightRef.current = false;
+    }
+  }, [migrationConflict, migrationDoneKey, updateProfile, profile]);
+
   // Daily motivational messages pool
   const dailyMotivations = useMemo(() => [
     { emoji: "💪", message: "Every single day you choose yourself. That's real strength." },
