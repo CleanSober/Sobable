@@ -351,6 +351,8 @@ const Index = () => {
       user ? "sober_club_welcome_tour_pending_user" : "sober_club_welcome_tour_pending_guest",
       "true"
     );
+    // Clear any in-progress onboarding draft now that the flow is complete.
+    try { localStorage.removeItem("sober_club_onboarding_draft"); } catch { /* noop */ }
     if (user) {
       await updateProfile({
         display_name: data.name,

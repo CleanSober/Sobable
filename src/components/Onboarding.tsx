@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft, Check, Shield, Sparkles, PartyPopper, Rocket, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,19 +30,70 @@ interface OnboardingProps {
 
 const TOTAL_STEPS = 4;
 const CELEBRATION_DURATION = 3500;
+export const ONBOARDING_DRAFT_KEY = "sober_club_onboarding_draft";
+
+interface OnboardingDraft {
+  step: number;
+  name: string;
+  isAnonymous: boolean;
+  selectedSubstances: string[];
+  startDate?: string; // ISO yyyy-MM-dd
+  dailySpending: string;
+  personalReminder: string;
+  sponsorPhone: string;
+  emergencyContact: string;
+}
+
+const loadDraft = (): Partial<OnboardingDraft> | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(ONBOARDING_DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Partial<OnboardingDraft>) : null;
+  } catch {
+    return null;
+  }
+};
 
 export const Onboarding = ({ onComplete, initialName, isSocialLogin }: OnboardingProps) => {
   const skipNameStep = !!(isSocialLogin || (initialName && initialName.trim()));
-  const [step, setStep] = useState(skipNameStep ? 2 : 1);
+  const draft = loadDraft();
+
+  const [step, setStep] = useState<number>(draft?.step ?? (skipNameStep ? 2 : 1));
   const [showCelebration, setShowCelebration] = useState(false);
-  const [name, setName] = useState(initialName?.trim() || "");
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [dailySpending, setDailySpending] = useState("");
-  const [personalReminder, setPersonalReminder] = useState("");
-  const [sponsorPhone, setSponsorPhone] = useState("");
-  const [emergencyContact, setEmergencyContact] = useState("");
+  const [name, setName] = useState(draft?.name ?? (initialName?.trim() || ""));
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(draft?.isAnonymous ?? false);
+  const [selectedSubstances, setSelectedSubstances] = useState<string[]>(draft?.selectedSubstances ?? []);
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    draft?.startDate ? new Date(draft.startDate) : undefined,
+  );
+  const [dailySpending, setDailySpending] = useState(draft?.dailySpending ?? "");
+  const [personalReminder, setPersonalReminder] = useState(draft?.personalReminder ?? "");
+  const [sponsorPhone, setSponsorPhone] = useState(draft?.sponsorPhone ?? "");
+  const [emergencyContact, setEmergencyContact] = useState(draft?.emergencyContact ?? "");
+
+  // Persist a draft on every change so a guest who closes the tab mid-onboarding
+  // resumes exactly where they left off (and still triggers the welcome tour
+  // when they finally complete). The draft is cleared on successful completion.
+  const completedRef = useRef(false);
+  useEffect(() => {
+    if (completedRef.current) return;
+    const payload: OnboardingDraft = {
+      step,
+      name,
+      isAnonymous,
+      selectedSubstances,
+      startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
+      dailySpending,
+      personalReminder,
+      sponsorPhone,
+      emergencyContact,
+    };
+    try {
+      localStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(payload));
+    } catch {
+      // Quota / private mode — non-fatal.
+    }
+  }, [step, name, isAnonymous, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact]);
 
   const toggleSubstance = (id: string) => {
     setSelectedSubstances((prev) =>
@@ -53,6 +104,8 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
   const { notification, impact } = useHaptics();
 
   const handleComplete = useCallback(() => {
+    completedRef.current = true;
+    try { localStorage.removeItem(ONBOARDING_DRAFT_KEY); } catch { /* noop */ }
     setShowCelebration(true);
 
     // Haptic celebration burst: success notification + heavy impact combo
