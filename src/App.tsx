@@ -52,12 +52,10 @@ const queryClient = new QueryClient({
   },
 });
 
-// Simple loading fallback
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="animate-pulse text-muted-foreground">Loading...</div>
-  </div>
-);
+import { PageSkeleton } from "@/components/skeletons/HomeSkeleton";
+
+// Lightweight fallback shown while a lazy route's chunk is fetched.
+const PageLoader = () => <PageSkeleton />;
 
 const AppContent = () => {
   // Track affiliate referral codes from URL
