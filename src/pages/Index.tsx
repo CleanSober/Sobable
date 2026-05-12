@@ -199,11 +199,22 @@ const Index = () => {
           onboarding_complete: true,
         });
         localStorage.removeItem("sober_club_guest_profile");
-        toast.success("Your guest progress was saved to your account.");
+        const successMsg = "Your guest progress was migrated to your account.";
+        toast.success(successMsg, {
+          description: "Sobriety date, substances, and savings were all carried over.",
+          duration: 6000,
+        });
+        setMigrationBanner({ status: "success", message: successMsg });
       } catch (err) {
         // Allow a retry on next mount.
         localStorage.removeItem(migrationDoneKey);
         console.error("Guest profile migration failed:", err);
+        const errorMsg = "We couldn't migrate your guest progress.";
+        toast.error(errorMsg, {
+          description: "We'll try again automatically next time you open the app.",
+          duration: 8000,
+        });
+        setMigrationBanner({ status: "error", message: errorMsg });
       } finally {
         migrationInFlightRef.current = false;
       }
