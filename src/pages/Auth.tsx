@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import soberClubLogo from "@/assets/sober-club-logo.png";
+import soberClubLogo from "@/assets/sober-club-logo.webp";
 
 type AuthMode = "login" | "signup" | "forgot" | "reset";
 
