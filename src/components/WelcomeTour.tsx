@@ -133,7 +133,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent
-        className="w-[calc(100%-1.5rem)] max-w-sm p-0 gap-0 max-h-[90dvh] overflow-hidden rounded-2xl sm:rounded-2xl flex flex-col [&>button.absolute]:hidden"
+        className="w-[calc(100%-1.5rem)] max-w-sm p-0 gap-0 max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] overflow-hidden rounded-2xl sm:rounded-2xl flex flex-col [&>button.absolute]:hidden"
         onCloseAutoFocus={(e) => {
           // Override Radix default so we can restore focus to the launch
           // control (or a sensible fallback on Home) instead of <body>.
