@@ -165,9 +165,6 @@ const SkeletonsDevQA = () => {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <Helmet>
-        <title>Visual QA · Dev</title>
-      </Helmet>
 
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Visual QA Runner</h1>
