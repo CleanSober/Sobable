@@ -124,20 +124,21 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
 
-  // Backfill: existing users who already completed onboarding before this
-  // feature existed should NEVER see the tour. Mark them as already-seen.
+  // Show the welcome feature tour ONLY for users who just finished onboarding
+  // in this session. The pending flag is set inside handleOnboardingComplete,
+  // so existing users (who never pass through that path again) never see it.
   useEffect(() => {
     const onboardingDone = user
       ? profile?.onboarding_complete
       : isGuest && !!localStorage.getItem("sober_club_guest_profile");
     if (!onboardingDone) return;
-    const key = user ? `sober_club_welcome_tour_${user.id}` : "sober_club_welcome_tour_guest";
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, "true");
-    }
+    if (localStorage.getItem("sober_club_welcome_tour_pending") !== "true") return;
+    const timer = setTimeout(() => setShowWelcomeTour(true), 800);
+    return () => clearTimeout(timer);
   }, [user, isGuest, profile?.onboarding_complete]);
 
   const completeWelcomeTour = useCallback(() => {
+    localStorage.removeItem("sober_club_welcome_tour_pending");
     setShowWelcomeTour(false);
   }, []);
 
