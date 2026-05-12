@@ -249,6 +249,18 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
               {/* Step 2: Substances */}
               {step === 2 && (
                 <div className="space-y-4">
+                  {selectedSubstances.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-center"
+                    >
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full">
+                        <Check className="w-3 h-3" />
+                        {selectedSubstances.length} selected
+                      </span>
+                    </motion.div>
+                  )}
                   <div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wider">Substances</p>
                     <div className="grid grid-cols-2 gap-2">
