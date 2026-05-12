@@ -26,12 +26,55 @@ interface WelcomeTourProps {
 }
 
 const SLIDES = [
-  { id: "intro", icon: Sparkles, title: "Welcome to Sober Club", body: "A quick swipe-through of what lives inside the app — so you know exactly where to look when you need it.", accent: "from-primary to-primary/60" },
-  { id: "home", icon: Home, title: "Home", body: "Your sobriety counter, money saved, daily affirmation, and quick actions — your morning anchor each day.", accent: "from-orange-500 to-rose-500" },
-  { id: "checkin", icon: Heart, title: "Check-In", body: "Log your mood, energy, sleep and cravings in under a minute. It powers your streaks and personalized insights.", accent: "from-pink-500 to-rose-500" },
-  { id: "triggers", icon: Brain, title: "Triggers & Tools", body: "Spot what sets you off, then reach for breathing exercises, the craving timer, or emergency support — anytime.", accent: "from-sky-500 to-indigo-500" },
-  { id: "progress", icon: TrendingUp, title: "Progress", body: "See your streaks, badges, calendar heatmap and analytics. Watch the wins stack up week after week.", accent: "from-emerald-500 to-teal-500" },
-  { id: "community", icon: Users, title: "Community", body: "Connect with others on the same path. Forums, live chat and accountability partners — judgment-free.", accent: "from-amber-500 to-yellow-500" },
+  {
+    id: "intro",
+    icon: Sparkles,
+    title: "Welcome to Sobable",
+    body: "Sobable is your daily companion for staying sober. In the next few screens you'll learn exactly how to use each part of the app — swipe or tap Next to begin.",
+    accent: "from-primary to-primary/60",
+  },
+  {
+    id: "home",
+    icon: Home,
+    title: "Start on Home",
+    body: "Open the app each morning to see your sobriety counter, money saved and a fresh affirmation. Tap any Quick Action to log a craving, start a breathing exercise, or open your journal in one tap.",
+    accent: "from-orange-500 to-rose-500",
+  },
+  {
+    id: "checkin",
+    icon: Heart,
+    title: "Do your daily Check-In",
+    body: "Tap Check-In once a day and rate your mood, energy, sleep and cravings. It takes under a minute and it's what powers your streaks, insights and personalized recommendations — so don't skip it.",
+    accent: "from-pink-500 to-rose-500",
+  },
+  {
+    id: "triggers",
+    icon: Brain,
+    title: "Use Tools when it's hard",
+    body: "Feeling a craving or trigger? Open Triggers & Tools to log what set you off, then tap the Craving Timer, a 4-7-8 Breathing exercise, or Emergency Support. The urge usually passes in under 10 minutes.",
+    accent: "from-sky-500 to-indigo-500",
+  },
+  {
+    id: "progress",
+    icon: TrendingUp,
+    title: "Track your Progress",
+    body: "Visit Progress to see your streak, badges, calendar heatmap and weekly analytics. Check in here every Sunday to celebrate wins and spot patterns before they become slips.",
+    accent: "from-emerald-500 to-teal-500",
+  },
+  {
+    id: "community",
+    icon: Users,
+    title: "Lean on the Community",
+    body: "You're not alone. Open Community to read the forums, join live chat, or pair up with an accountability partner. Post anonymously anytime — it's a judgment-free space.",
+    accent: "from-amber-500 to-yellow-500",
+  },
+  {
+    id: "ready",
+    icon: Sparkles,
+    title: "You're ready",
+    body: "Tip: you can replay this tour anytime from your Profile. Tap Get started to open your Home screen and begin day one.",
+    accent: "from-primary to-primary/60",
+  },
 ];
 
 export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => {
