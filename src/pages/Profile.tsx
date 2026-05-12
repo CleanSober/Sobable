@@ -111,13 +111,21 @@ const Profile = () => {
     setAvatarUrl(source.avatar_url || null);
   }, [user, isGuest, profile]);
 
-  const displayName = profile?.display_name || "Friend";
-  const initials = profile?.display_name
-    ? profile.display_name.slice(0, 2).toUpperCase()
-    : user?.email?.slice(0, 2).toUpperCase() || "ME";
+  const guestSnapshot = !user && isGuest ? readGuestProfile() : null;
+  const displayName =
+    profile?.display_name ||
+    guestSnapshot?.display_name ||
+    (isGuest && !user ? "Guest" : "Friend");
+  const initials = (profile?.display_name || guestSnapshot?.display_name)
+    ? (profile?.display_name || guestSnapshot?.display_name)!.slice(0, 2).toUpperCase()
+    : isGuest && !user
+      ? "GU"
+      : user?.email?.slice(0, 2).toUpperCase() || "ME";
   const currentLevel = userXP?.current_level || 1;
   const totalXP = userXP?.total_xp || 0;
-  const daysSober = profile?.sobriety_start_date ? calculateDaysSober(profile.sobriety_start_date) : 0;
+  const sobrietyStartForCounter =
+    profile?.sobriety_start_date || guestSnapshot?.sobriety_start_date || null;
+  const daysSober = sobrietyStartForCounter ? calculateDaysSober(sobrietyStartForCounter) : 0;
   const manageSubscriptionDestination =
     billingSource === "app_store"
       ? "App Store"
@@ -214,6 +222,29 @@ const Profile = () => {
       .slice(0, 12);
 
     setSaving(true);
+
+    // Guest mode: persist locally instead of hitting Supabase.
+    if (!user && isGuest) {
+      try {
+        patchGuestProfile({
+          display_name: name.trim().slice(0, 50) || null,
+          sobriety_start_date: sobrietyDate || null,
+          daily_spending: spending,
+          sponsor_phone: sponsorPhone.slice(0, 20) || null,
+          emergency_contact: emergencyContact.slice(0, 20) || null,
+          personal_reminder: personalReminder.slice(0, 500) || null,
+          // spending_breakdown isn't in the typed GuestProfile but we store it
+          // alongside so it survives migration to a real account.
+          ...({ spending_breakdown: cleanedBreakdown } as any),
+        });
+        toast.success("Saved on this device");
+      } catch (e) {
+        toast.error("Couldn't save on this device");
+      }
+      setSaving(false);
+      return;
+    }
+
     const { error } = await updateProfile({
       display_name: name.trim().slice(0, 50) || null,
       sobriety_start_date: sobrietyDate || null,
@@ -232,7 +263,7 @@ const Profile = () => {
     }
   };
 
-  if (!user) return null;
+  if (!user && !isGuest) return null;
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background noise-overlay">
