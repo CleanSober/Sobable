@@ -14,6 +14,15 @@ import { trackEvent } from "@/lib/analytics";
 interface WelcomeTourProps {
   open: boolean;
   onComplete: () => void;
+  /**
+   * Optional analytics context. When provided, every welcome_tour_* event is
+   * tagged with `user_type` and `is_first_time` so we can isolate first-time
+   * guest sign-up tours from authed-user tours and from manual replays.
+   */
+  context?: {
+    userType: "guest" | "authed";
+    isFirstTime: boolean;
+  } | null;
 }
 
 const SLIDES = [
