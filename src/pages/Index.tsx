@@ -529,9 +529,7 @@ const Index = () => {
               if (user) {
                 await updateProfile({ savings_start_date: new Date().toISOString().split("T")[0] } as any);
               } else {
-                const gp = JSON.parse(localStorage.getItem("sober_club_guest_profile") || "{}");
-                gp.savings_start_date = new Date().toISOString().split("T")[0];
-                localStorage.setItem("sober_club_guest_profile", JSON.stringify(gp));
+                patchGuestProfile({ savings_start_date: new Date().toISOString().split("T")[0] });
               }
               toast.success("Savings counter reset! Your sobriety date is unchanged.");
             }} onUndo={async () => {
