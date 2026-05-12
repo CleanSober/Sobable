@@ -322,7 +322,10 @@ const Index = () => {
   }) => {
     // Mark that this user just signed up — the welcome tour should appear
     // exactly once, immediately after this onboarding completes.
-    localStorage.setItem("sober_club_welcome_tour_pending", "true");
+    localStorage.setItem(
+      user ? "sober_club_welcome_tour_pending_user" : "sober_club_welcome_tour_pending_guest",
+      "true"
+    );
     if (user) {
       await updateProfile({
         display_name: data.name,
