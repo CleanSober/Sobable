@@ -84,6 +84,11 @@ const Index = () => {
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [showPremiumOnboarding, setShowPremiumOnboarding] = useState(false);
+  const [migrationBanner, setMigrationBanner] = useState<
+    | { status: "success"; message: string }
+    | { status: "error"; message: string }
+    | null
+  >(null);
   const { showWelcomeTour, completeWelcomeTour } = useWelcomeTourTrigger({
     user: user ? { id: user.id } : null,
     isGuest,
@@ -194,11 +199,22 @@ const Index = () => {
           onboarding_complete: true,
         });
         localStorage.removeItem("sober_club_guest_profile");
-        toast.success("Your guest progress was saved to your account.");
+        const successMsg = "Your guest progress was migrated to your account.";
+        toast.success(successMsg, {
+          description: "Sobriety date, substances, and savings were all carried over.",
+          duration: 6000,
+        });
+        setMigrationBanner({ status: "success", message: successMsg });
       } catch (err) {
         // Allow a retry on next mount.
         localStorage.removeItem(migrationDoneKey);
         console.error("Guest profile migration failed:", err);
+        const errorMsg = "We couldn't migrate your guest progress.";
+        toast.error(errorMsg, {
+          description: "We'll try again automatically next time you open the app.",
+          duration: 8000,
+        });
+        setMigrationBanner({ status: "error", message: errorMsg });
       } finally {
         migrationInFlightRef.current = false;
       }
@@ -685,6 +701,41 @@ const Index = () => {
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
+          <AnimatePresence>
+            {migrationBanner && (
+              <motion.div
+                key="migration-banner"
+                role="status"
+                aria-live="polite"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className={`mb-3 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+                  migrationBanner.status === "success"
+                    ? "border-primary/30 bg-primary/10 text-foreground"
+                    : "border-destructive/30 bg-destructive/10 text-foreground"
+                }`}
+              >
+                <div className="flex-1">
+                  <p className="font-semibold">
+                    {migrationBanner.status === "success"
+                      ? "Welcome back — progress restored"
+                      : "Guest progress migration failed"}
+                  </p>
+                  <p className="text-muted-foreground mt-0.5">{migrationBanner.message}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setMigrationBanner(null)}
+                  aria-label="Dismiss"
+                >
+                  Dismiss
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <AnimatePresence mode="wait" custom={swipeDirection}>
             <motion.div
               key={activeTab}
