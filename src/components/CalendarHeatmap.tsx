@@ -123,10 +123,20 @@ export const CalendarHeatmap = ({ startDate }: CalendarHeatmapProps) => {
 
   if (loading) {
     return (
-      <Card className="gradient-card border-border/50">
-        <CardContent className="p-4 flex items-center justify-center gap-2">
-          <Calendar className="w-4 h-4 text-primary animate-pulse" />
-          <span className="text-sm text-muted-foreground">Loading calendar...</span>
+      <Card className="gradient-card border-border/50 overflow-hidden">
+        <CardHeader className="pb-1 pt-3 px-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Calendar className="w-4 h-4 text-primary animate-pulse" />
+            Mood Calendar
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-3 pb-3">
+          <div className="flex items-center justify-between mb-3 h-8">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-8 w-8 rounded-lg" />
+          </div>
+          <CalendarGridPlaceholder />
         </CardContent>
       </Card>
     );
