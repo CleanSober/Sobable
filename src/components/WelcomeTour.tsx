@@ -49,11 +49,19 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
   // to it on close (Radix only auto-restores when there's a DialogTrigger).
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  // Build a stable analytics tag with user_type + first_time so every event
+  // can be filtered down to first-time guest sign-ups.
+  const ctxPayload = {
+    user_type: context?.userType ?? "unknown",
+    is_first_time: context?.isFirstTime ?? false,
+  };
+
   const logSlideView = (index: number) => {
     if (viewedRef.current.has(index)) return;
     viewedRef.current.add(index);
     const slide = SLIDES[index];
     trackEvent("welcome_tour_slide_viewed", {
+      ...ctxPayload,
       slide_index: index,
       slide_id: slide?.id,
       total_slides: total,
@@ -74,7 +82,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
     startedAtRef.current = Date.now();
     completedRef.current = false;
     viewedRef.current = new Set();
-    trackEvent("welcome_tour_started", { total_slides: total });
+    trackEvent("welcome_tour_started", { ...ctxPayload, total_slides: total });
     logSlideView(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -99,12 +107,14 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
     if (completed) {
       completedRef.current = true;
       trackEvent("welcome_tour_completed", {
+        ...ctxPayload,
         total_slides: total,
         slides_viewed: viewedRef.current.size,
         duration_ms,
       });
     } else {
       trackEvent("welcome_tour_skipped", {
+        ...ctxPayload,
         slide_index_at_skip: current,
         slide_id_at_skip: SLIDES[current]?.id,
         slides_viewed: viewedRef.current.size,
