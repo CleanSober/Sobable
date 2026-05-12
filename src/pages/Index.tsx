@@ -158,6 +158,52 @@ const Index = () => {
     }
   }, [user, authLoading, isGuest, navigate]);
 
+  // Guest -> Account migration: when a previously-guest user finally signs up
+  // (or signs in for the first time on this device), carry their guest profile
+  // data into their real account so they don't lose their start date, money
+  // saved, substances, etc. Runs once per device, only if the new account
+  // hasn't already completed onboarding.
+  const migratedRef = useRef(false);
+  useEffect(() => {
+    if (migratedRef.current) return;
+    if (!user || profileLoading) return;
+    if (profile?.onboarding_complete) return;
+    const raw = localStorage.getItem("sober_club_guest_profile");
+    if (!raw) return;
+
+    let guest: Record<string, unknown> | null = null;
+    try {
+      guest = JSON.parse(raw);
+    } catch {
+      localStorage.removeItem("sober_club_guest_profile");
+      return;
+    }
+    if (!guest) return;
+
+    migratedRef.current = true;
+    (async () => {
+      try {
+        await updateProfile({
+          display_name: (guest!.display_name as string) || profile?.display_name || null,
+          substances: (guest!.substances as string[]) || [],
+          sobriety_start_date: (guest!.sobriety_start_date as string) || null,
+          daily_spending: (guest!.daily_spending as number) ?? 0,
+          sponsor_phone: (guest!.sponsor_phone as string) || null,
+          emergency_contact: (guest!.emergency_contact as string) || null,
+          personal_reminder: (guest!.personal_reminder as string) || null,
+          onboarding_complete: true,
+        });
+        localStorage.removeItem("sober_club_guest_profile");
+        // Don't double-show the tour: if the guest already saw it,
+        // the guest pending flag would be gone; if not, we keep it.
+        toast.success("Your guest progress was saved to your account.");
+      } catch (err) {
+        migratedRef.current = false;
+        console.error("Guest profile migration failed:", err);
+      }
+    })();
+  }, [user, profile, profileLoading, updateProfile]);
+
   // Daily motivational messages pool
   const dailyMotivations = useMemo(() => [
     { emoji: "💪", message: "Every single day you choose yourself. That's real strength." },
