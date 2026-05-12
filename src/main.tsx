@@ -2,6 +2,11 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { applyThemePreference } from "@/lib/theme";
+import { runStorageMigrations } from "@/lib/appVersion";
+
+// Run any pending storage schema migrations FIRST so newly-installed
+// App Store / web updates can safely read data written by older versions.
+try { runStorageMigrations(); } catch { /* never block boot */ }
 
 // Apply saved theme before render to prevent flash
 applyThemePreference();
