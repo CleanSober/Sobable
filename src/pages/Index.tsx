@@ -124,23 +124,22 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [user, profile?.onboarding_complete, requestNotifPermission]);
 
-  // Show one-time welcome feature tour after onboarding completes
+  // Backfill: existing users who already completed onboarding before this
+  // feature existed should NEVER see the tour. Mark them as already-seen.
   useEffect(() => {
     const onboardingDone = user
       ? profile?.onboarding_complete
       : isGuest && !!localStorage.getItem("sober_club_guest_profile");
     if (!onboardingDone) return;
     const key = user ? `sober_club_welcome_tour_${user.id}` : "sober_club_welcome_tour_guest";
-    if (localStorage.getItem(key)) return;
-    const timer = setTimeout(() => setShowWelcomeTour(true), 800);
-    return () => clearTimeout(timer);
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, "true");
+    }
   }, [user, isGuest, profile?.onboarding_complete]);
 
   const completeWelcomeTour = useCallback(() => {
-    const key = user ? `sober_club_welcome_tour_${user.id}` : "sober_club_welcome_tour_guest";
-    localStorage.setItem(key, "true");
     setShowWelcomeTour(false);
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user && !isGuest) {
