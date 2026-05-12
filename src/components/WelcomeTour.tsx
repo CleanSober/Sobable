@@ -133,7 +133,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
       <DialogContent
-        className="w-[calc(100%-1.5rem)] max-w-sm p-0 overflow-hidden gap-0 max-h-[90dvh] overflow-y-auto rounded-2xl sm:rounded-2xl [&>button.absolute]:hidden"
+        className="w-[calc(100%-1.5rem)] max-w-sm p-0 gap-0 max-h-[90dvh] overflow-hidden rounded-2xl sm:rounded-2xl flex flex-col [&>button.absolute]:hidden"
         onCloseAutoFocus={(e) => {
           // Override Radix default so we can restore focus to the launch
           // control (or a sensible fallback on Home) instead of <body>.
@@ -162,7 +162,11 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
           <DialogTitle>Welcome tour</DialogTitle>
           <DialogDescription>Quick walkthrough of the main features.</DialogDescription>
         </VisuallyHidden>
-        <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: false }}>
+        <Carousel
+          setApi={setApi}
+          className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain"
+          opts={{ align: "start", loop: false }}
+        >
           <CarouselContent>
             {SLIDES.map((slide, i) => {
               const Icon = slide.icon;
@@ -182,7 +186,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
                       <Icon className="h-8 w-8 sm:h-10 sm:w-10" aria-hidden="true" />
                     </div>
                     <h2 className="text-lg sm:text-xl font-bold text-foreground mb-2">{slide.title}</h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed min-h-[72px] sm:min-h-[64px]">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {slide.body}
                     </p>
                   </div>
@@ -192,7 +196,7 @@ export const WelcomeTour = ({ open, onComplete, context }: WelcomeTourProps) => 
           </CarouselContent>
         </Carousel>
 
-        <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6">
+        <div className="shrink-0 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-6 border-t border-border/50 bg-background">
           {/* Slide indicators (also act as jump controls) */}
           <div
             className="flex items-center justify-center gap-1.5 mt-2 mb-5"
