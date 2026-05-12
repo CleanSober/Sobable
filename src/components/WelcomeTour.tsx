@@ -36,6 +36,9 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
   // Used to distinguish completion vs. skip on dismiss.
   const completedRef = useRef(false);
   const startedAtRef = useRef<number>(0);
+  // Element that was focused before the dialog opened, so we can restore focus
+  // to it on close (Radix only auto-restores when there's a DialogTrigger).
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const logSlideView = (index: number) => {
     if (viewedRef.current.has(index)) return;
@@ -51,6 +54,14 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
   // Fire "started" + first slide view when the dialog opens
   useEffect(() => {
     if (!open) return;
+    // Capture the element that had focus right before the dialog opened so we
+    // can return focus to it after close (e.g. the "Replay Welcome Tour" button).
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body) {
+      previousFocusRef.current = active;
+    } else {
+      previousFocusRef.current = null;
+    }
     startedAtRef.current = Date.now();
     completedRef.current = false;
     viewedRef.current = new Set();
@@ -102,7 +113,32 @@ export const WelcomeTour = ({ open, onComplete }: WelcomeTourProps) => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !completedRef.current) finish(false); }}>
-      <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
+      <DialogContent
+        className="max-w-sm p-0 overflow-hidden gap-0"
+        onCloseAutoFocus={(e) => {
+          // Override Radix default so we can restore focus to the launch
+          // control (or a sensible fallback on Home) instead of <body>.
+          e.preventDefault();
+          const target = previousFocusRef.current;
+          const stillUsable =
+            target &&
+            target.isConnected &&
+            !(target as HTMLButtonElement).disabled &&
+            target.offsetParent !== null;
+          if (stillUsable) {
+            target!.focus();
+          } else {
+            const fallback =
+              (document.querySelector("main h1") as HTMLElement | null) ??
+              (document.querySelector("main") as HTMLElement | null);
+            if (fallback) {
+              if (!fallback.hasAttribute("tabindex")) fallback.setAttribute("tabindex", "-1");
+              fallback.focus();
+            }
+          }
+          previousFocusRef.current = null;
+        }}
+      >
         <VisuallyHidden>
           <DialogTitle>Welcome tour</DialogTitle>
           <DialogDescription>Quick walkthrough of the main features.</DialogDescription>
