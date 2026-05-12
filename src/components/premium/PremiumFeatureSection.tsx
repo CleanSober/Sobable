@@ -25,8 +25,14 @@ export const PremiumFeatureSection = ({
   const { isPremium, loading } = usePremiumStatus();
   const [showPricing, setShowPricing] = useState(false);
 
-  if (loading || isPremium) {
+  // Premium users see the real children. Non-premium see the upsell card.
+  // While status is loading we render a neutral placeholder so non-premium
+  // users never see real premium content flash before the lock.
+  if (isPremium) {
     return <>{children}</>;
+  }
+  if (loading) {
+    return <div className="w-full h-40 rounded-2xl bg-secondary/30 animate-pulse" />;
   }
 
   return (
