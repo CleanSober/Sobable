@@ -212,10 +212,19 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && canProceed()) {
+                        e.preventDefault();
+                        setStep(step + 1);
+                      }
+                    }}
                     placeholder="Enter your name"
                     disabled={isAnonymous}
                     maxLength={50}
                     autoFocus
+                    autoCapitalize="words"
+                    autoComplete="given-name"
+                    enterKeyHint="next"
                     className="text-center text-lg h-12 bg-secondary/50 border-border/50"
                   />
 
