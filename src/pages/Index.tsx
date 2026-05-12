@@ -832,6 +832,20 @@ const Index = () => {
           />
           {showWelcomeTour && <WelcomeTour open={showWelcomeTour} onComplete={completeWelcomeTour} />}
         </Suspense>
+        {migrationConflict && (
+          <GuestMigrationConflictDialog
+            open
+            guest={migrationConflict.guest}
+            account={{
+              display_name: profile?.display_name,
+              sobriety_start_date: profile?.sobriety_start_date,
+              daily_spending: profile?.daily_spending,
+              updated_at: profile?.updated_at ?? null,
+            }}
+            onKeepAccount={resolveConflictKeepAccount}
+            onUseGuest={resolveConflictUseGuest}
+          />
+        )}
       </div>
     </XPNotificationProvider>
   );
