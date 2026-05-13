@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { getLatestBadge } from "@/lib/badges";
 import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
@@ -786,8 +787,26 @@ const Index = () => {
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           
           <div className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 py-2 flex items-center justify-between relative">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-base font-bold text-foreground tracking-tight">Sobable</span>
+              {(() => {
+                const latest = getLatestBadge(daysSober);
+                if (!latest) return null;
+                const Icon = latest.icon;
+                return (
+                  <motion.button
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    onClick={() => setActiveTab("home")}
+                    title={`${latest.name} • Day ${latest.daysRequired}`}
+                    aria-label={`Latest milestone: ${latest.name}`}
+                    className={`flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br ${latest.color} ring-1 ring-white/30 shadow-sm shrink-0`}
+                  >
+                    <Icon className="w-2.5 h-2.5 text-white" />
+                  </motion.button>
+                );
+              })()}
               {(userXP?.daily_login_streak ?? 0) > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}
