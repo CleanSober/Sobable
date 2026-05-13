@@ -319,7 +319,20 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div
+            className="space-y-4 overflow-y-auto px-6 flex-1 min-h-0"
+            onPointerDown={(e) => {
+              const target = e.target as HTMLElement;
+              const active = document.activeElement as HTMLElement | null;
+              if (
+                active &&
+                (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT') &&
+                !target.closest('textarea, input, button, [role="button"]')
+              ) {
+                active.blur();
+              }
+            }}
+          >
             {/* AI Prompt Section - Premium Feature */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
