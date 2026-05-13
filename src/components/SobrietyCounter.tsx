@@ -53,6 +53,42 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
     { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
   ];
 
+  // Personalized, pluralized summary line with milestone-specific wording
+  const pluralize = (n: number, s: string) => `${n} ${s}${n === 1 ? "" : "s"}`;
+  const buildSummary = () => {
+    const milestoneCopy: Record<number, string> = {
+      0: "Day one — the bravest step. 🌱",
+      1: "First full day in the books. ✨",
+      7: "One week strong. A new rhythm begins. 🌊",
+      14: "Two weeks — momentum is real. 💪",
+      30: "One month milestone unlocked! 🏅",
+      60: "Two months of steady progress. 🌟",
+      90: "Ninety days — a true turning point. 🔥",
+      180: "Half a year of showing up. 🌅",
+      365: "One full year. Extraordinary. 🏆",
+      730: "Two years — a life rebuilt. 👑",
+      1095: "Three years of unwavering strength. 💎",
+      1825: "Five years. A living testament. 🌈",
+      3650: "A decade of freedom. Legendary. 🕊️",
+    };
+    if (milestoneCopy[daysSober]) return milestoneCopy[daysSober];
+
+    const parts: string[] = [];
+    if (years > 0) parts.push(pluralize(years, "year"));
+    if (months > 0) parts.push(pluralize(months, "month"));
+    if (days > 0 || parts.length === 0) parts.push(pluralize(days, "day"));
+
+    const formatted =
+      parts.length === 1
+        ? parts[0]
+        : parts.length === 2
+        ? `${parts[0]} and ${parts[1]}`
+        : `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`;
+
+    return `That's ${formatted} ${wording.sinceLabel.toLowerCase()}. Keep going. 💚`;
+  };
+  const summaryText = buildSummary();
+
   const progressToNext = next
     ? ((daysSober / next.days) * 100).toFixed(0)
     : 100;
@@ -196,6 +232,16 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
             );
           })()}
         </div>
+
+        <motion.p
+          key={summaryText}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-center text-sm text-foreground/85 font-medium px-2 mb-3"
+        >
+          {summaryText}
+        </motion.p>
 
         <div className="flex justify-center mb-2">
           <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-muted/50 border border-border/40 text-[10px] font-medium">
