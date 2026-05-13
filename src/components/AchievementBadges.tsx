@@ -267,11 +267,37 @@ const openShareWithCopy = async (
   window.open(shareUrl, "_blank", "width=600,height=600,noopener");
 };
 
-const shareToFacebook = (msg: string) =>
-  openShareWithCopy(
-    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(msg)}`,
-    msg, "Facebook",
+// Facebook's web sharer ignores prefilled text and cannot accept image uploads
+// from third-party apps. To actually post with the badge image we:
+//  1. On mobile: open the native share sheet with the PNG file attached so the
+//     user can pick the Facebook app, which DOES accept the image + caption.
+//  2. On desktop: download the PNG, copy the caption, then open Facebook so
+//     the user can paste the text and drag the downloaded image in.
+const shareToFacebook = async (badge: Badge, daysSober: number, msg: string) => {
+  const url = getShareUrl();
+  const blob = await generateBadgeImage(badge, daysSober);
+  const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
+  const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+
+  if (file && nav.canShare?.({ files: [file] }) && nav.share) {
+    try {
+      await copyText(`${msg} ${url}`);
+      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text: `${msg} ${url}` });
+      toast.success("Pick Facebook from the share sheet — caption is copied!");
+      return;
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  }
+
+  await copyText(`${msg} ${url}`);
+  if (blob) downloadBlob(blob, `${badge.id}-badge.png`);
+  toast.success(
+    "Badge image downloaded & caption copied. Paste the text and attach the image in Facebook!",
+    { duration: 6000 },
   );
+  window.open("https://www.facebook.com/", "_blank", "noopener");
+};
 const shareToTwitter = (msg: string) =>
   openShareWithCopy(
     `https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(getShareUrl())}`,
@@ -712,7 +738,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                   </div>
 
                   <div className="grid grid-cols-4 gap-2">
-                    <Button variant="outline" size="sm" onClick={() => shareToFacebook(shareMessage)} className="flex flex-col items-center gap-1 h-auto py-2 hover:bg-[#1877F2]/10 hover:border-[#1877F2]/50">
+                    <Button variant="outline" size="sm" onClick={() => shareToFacebook(selectedBadge, daysSober, shareMessage)} className="flex flex-col items-center gap-1 h-auto py-2 hover:bg-[#1877F2]/10 hover:border-[#1877F2]/50">
                       <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                       <span className="text-[10px]">Facebook</span>
                     </Button>
