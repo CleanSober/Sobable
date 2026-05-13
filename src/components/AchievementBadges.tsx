@@ -500,12 +500,12 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
     }
   }, [selectedBadge, daysSober]);
 
-  // Generate a preview image whenever an unlocked badge is selected
+  // Generate a preview image whenever the selected badge/message changes
   useEffect(() => {
     let revoke: string | null = null;
     let cancelled = false;
     if (selectedBadge && daysSober >= selectedBadge.daysRequired) {
-      generateBadgeImage(selectedBadge, daysSober).then((blob) => {
+      generateBadgeImage(selectedBadge, daysSober, shareMessage).then((blob) => {
         if (cancelled || !blob) return;
         const url = URL.createObjectURL(blob);
         revoke = url;
@@ -518,7 +518,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
       cancelled = true;
       if (revoke) URL.revokeObjectURL(revoke);
     };
-  }, [selectedBadge, daysSober]);
+  }, [selectedBadge, daysSober, shareMessage]);
 
   const unlockedBadges = badges.filter((b) => daysSober >= b.daysRequired);
   const lockedBadges = badges.filter((b) => daysSober < b.daysRequired);
@@ -760,7 +760,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                       )}
                     </div>
                     <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-                      This image is attached when you tap "Share with badge image" or "Download Image".
+                      Your message is baked into the image because social apps may ignore shared text.
                     </p>
                   </div>
 
