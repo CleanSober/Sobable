@@ -132,6 +132,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   ].sort((a, b) => b.relevance - a.relevance);
 
   return (
+    <>
+    <RelapsePreventionDialog open={sosOpen} onOpenChange={setSosOpen} />
     <div className="card-enhanced p-3 sm:p-4">
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-4 h-4 text-primary" />
