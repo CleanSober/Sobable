@@ -385,6 +385,15 @@ export const useInAppPurchases = () => {
           // hook) re-reads the DB and unlocks immediately.
           window.dispatchEvent(new Event("premium-status-refresh"));
 
+          // Fallback re-dispatches in case the first refresh races the DB
+          // write or a listener mounted late. Cheap, idempotent, no-op once
+          // the row is read.
+          [1500, 4000, 9000].forEach((delay) => {
+            setTimeout(() => {
+              window.dispatchEvent(new Event("premium-status-refresh"));
+            }, delay);
+          });
+
           return true;
         } else {
           throw new Error(data?.error || "Validation failed");
