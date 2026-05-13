@@ -21,9 +21,26 @@ interface QuickAction {
 
 export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const { profile } = useUserData();
+  const { getTodaysMoodEntry } = useMoodEntries();
+  const [todayCraving, setTodayCraving] = useState<number | null>(null);
+  const [todayMood, setTodayMood] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getTodaysMoodEntry().then((entry) => {
+      if (cancelled || !entry) return;
+      setTodayCraving(entry.craving_level ?? null);
+      setTodayMood(entry.mood ?? null);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const hasSponsor = !!profile?.sponsor_phone;
   const hasReminder = !!profile?.personal_reminder;
+  // Higher craving / lower mood => crisis-oriented actions surface first
+  const highCraving = (todayCraving ?? 0) >= 7;
+  const lowMood = todayMood !== null && todayMood <= 4;
+  const inDistress = highCraving || lowMood;
 
   const actions: QuickAction[] = [
     {
@@ -32,8 +49,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: Phone,
       gradient: "from-emerald-400 to-teal-500",
       glowColor: "168 84% 45%",
-      // Highly relevant when configured; otherwise deprioritized
-      relevance: hasSponsor ? 100 : 20,
+      // Boosted in distress when sponsor is configured
+      relevance: hasSponsor ? (inDistress ? 95 : 70) : 20,
       action: async () => {
         if (profile?.sponsor_phone) {
           await makePhoneCall(profile.sponsor_phone);
