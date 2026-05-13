@@ -74,14 +74,12 @@ export const CheckInProgress = memo(() => {
       .eq("date", todayDate)
       .maybeSingle();
 
-    if (data) {
-      setStatus({
-        mood_logged: data.mood_logged ?? false,
-        journal_written: data.journal_written ?? false,
-        meditation_done: data.meditation_done ?? false,
-        trigger_logged: data.trigger_logged ?? false,
-      });
-    }
+    setStatus({
+      mood_logged: data?.mood_logged ?? false,
+      journal_written: data?.journal_written ?? false,
+      meditation_done: data?.meditation_done ?? false,
+      trigger_logged: data?.trigger_logged ?? false,
+    });
   };
 
   const completed = goals.filter((g) => status[g.key]).length;
