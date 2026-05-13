@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Phone, BookHeart, Wind, MessageCircle, Sparkles } from "lucide-react";
+import { Phone, BookHeart, Wind, MessageCircle, Sparkles, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUserData, useMoodEntries } from "@/hooks/useUserData";
 import { toast } from "sonner";
 import { makePhoneCall, hapticSuccess } from "@/lib/nativeActions";
+import { RelapsePreventionDialog } from "./RelapsePreventionDialog";
 
 interface QuickActionsProps {
   onNavigateToCheckIn?: () => void;
