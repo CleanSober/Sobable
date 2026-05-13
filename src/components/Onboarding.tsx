@@ -89,6 +89,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
       selectedSubstances,
       startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
       dailySpending,
+      spendingBreakdown,
       personalReminder,
       sponsorPhone,
       emergencyContact,
@@ -98,7 +99,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     } catch {
       // Quota / private mode — non-fatal.
     }
-  }, [step, name, isAnonymous, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact]);
+  }, [step, name, isAnonymous, selectedSubstances, startDate, dailySpending, spendingBreakdown, personalReminder, sponsorPhone, emergencyContact]);
 
   const toggleSubstance = (id: string) => {
     setSelectedSubstances((prev) =>
