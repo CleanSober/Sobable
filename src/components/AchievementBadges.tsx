@@ -267,11 +267,37 @@ const openShareWithCopy = async (
   window.open(shareUrl, "_blank", "width=600,height=600,noopener");
 };
 
-const shareToFacebook = (msg: string) =>
-  openShareWithCopy(
-    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(msg)}`,
-    msg, "Facebook",
+// Facebook's web sharer ignores prefilled text and cannot accept image uploads
+// from third-party apps. To actually post with the badge image we:
+//  1. On mobile: open the native share sheet with the PNG file attached so the
+//     user can pick the Facebook app, which DOES accept the image + caption.
+//  2. On desktop: download the PNG, copy the caption, then open Facebook so
+//     the user can paste the text and drag the downloaded image in.
+const shareToFacebook = async (badge: Badge, daysSober: number, msg: string) => {
+  const url = getShareUrl();
+  const blob = await generateBadgeImage(badge, daysSober);
+  const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
+  const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+
+  if (file && nav.canShare?.({ files: [file] }) && nav.share) {
+    try {
+      await copyText(`${msg} ${url}`);
+      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text: `${msg} ${url}` });
+      toast.success("Pick Facebook from the share sheet — caption is copied!");
+      return;
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  }
+
+  await copyText(`${msg} ${url}`);
+  if (blob) downloadBlob(blob, `${badge.id}-badge.png`);
+  toast.success(
+    "Badge image downloaded & caption copied. Paste the text and attach the image in Facebook!",
+    { duration: 6000 },
   );
+  window.open("https://www.facebook.com/", "_blank", "noopener");
+};
 const shareToTwitter = (msg: string) =>
   openShareWithCopy(
     `https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(getShareUrl())}`,
