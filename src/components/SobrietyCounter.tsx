@@ -1,8 +1,9 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Flame } from "lucide-react";
 import { getMilestones, formatMilestoneName } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
+import { cn } from "@/lib/utils";
 
 interface SobrietyCounterProps {
   daysSober: number;
