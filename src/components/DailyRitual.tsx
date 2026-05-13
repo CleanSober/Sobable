@@ -133,7 +133,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
     const { error } = await supabase
       .from("daily_goals")
-      .upsert({ user_id: user.id, date: today, [goal.field]: newValue }, { onConflict: "user_id,date" });
+      .upsert({ user_id: user.id, date: todayDate, [goal.field]: newValue }, { onConflict: "user_id,date" });
 
     if (error) {
       setGoals((prev) => ({ ...prev, [goal.field]: !newValue }));
