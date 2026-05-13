@@ -15,10 +15,14 @@ interface QuickAction {
   gradient: string;
   glowColor: string;
   action: () => void;
+  relevance: number;
 }
 
 export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const { profile } = useUserData();
+
+  const hasSponsor = !!profile?.sponsor_phone;
+  const hasReminder = !!profile?.personal_reminder;
 
   const actions: QuickAction[] = [
     {
@@ -27,6 +31,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: Phone,
       gradient: "from-emerald-400 to-teal-500",
       glowColor: "168 84% 45%",
+      // Highly relevant when configured; otherwise deprioritized
+      relevance: hasSponsor ? 100 : 20,
       action: async () => {
         if (profile?.sponsor_phone) {
           await makePhoneCall(profile.sponsor_phone);
@@ -41,6 +47,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: BookHeart,
       gradient: "from-pink-400 to-rose-500",
       glowColor: "340 82% 52%",
+      relevance: hasReminder ? 90 : 25,
       action: async () => {
         if (profile?.personal_reminder) {
           await hapticSuccess();
@@ -59,6 +66,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: Wind,
       gradient: "from-blue-400 to-cyan-500",
       glowColor: "190 90% 50%",
+      // Always usable, baseline relevance
+      relevance: 60,
       action: () => {
         if (onNavigateToCheckIn) {
           onNavigateToCheckIn();
@@ -75,6 +84,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: MessageCircle,
       gradient: "from-violet-400 to-purple-500",
       glowColor: "270 76% 55%",
+      relevance: 50,
       action: () => {
         toast("988 Suicide & Crisis Lifeline", {
           description: "Call or text 988 for 24/7 free support",
@@ -87,7 +97,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
         });
       }
     }
-  ];
+  ].sort((a, b) => b.relevance - a.relevance);
 
   return (
     <div className="card-enhanced p-3 sm:p-4">
