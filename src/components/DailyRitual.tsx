@@ -57,7 +57,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
   // Single batch fetch for all daily ritual data
   const fetchAll = useCallback(async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const todayDate = getLocalDateString();
 
     const [goalsRes, streakRes] = await Promise.all([
       supabase
