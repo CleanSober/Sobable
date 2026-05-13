@@ -120,11 +120,17 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     setTimeout(() => impact('medium'), 400);
     setTimeout(() => impact('light'), 550);
 
+    const cleanedBreakdown = spendingBreakdown
+      .map((c) => ({ name: c.name.trim().slice(0, 40), amount: Math.max(0, Number(c.amount) || 0) }))
+      .filter((c) => c.name.length > 0)
+      .slice(0, 12);
+
     const data: OnboardingData = {
       name: isAnonymous ? "" : name.trim().slice(0, 50),
       substances: selectedSubstances,
       sobrietyStartDate: startDate ? format(startDate, "yyyy-MM-dd") : "",
       dailySpending: parseFloat(dailySpending) || 0,
+      spendingBreakdown: cleanedBreakdown,
       personalReminder: personalReminder.trim().slice(0, 500) || undefined,
       sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
       emergencyContact: emergencyContact.trim().slice(0, 20) || undefined,
@@ -133,7 +139,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     setTimeout(() => {
       onComplete(data);
     }, CELEBRATION_DURATION);
-  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact, onComplete, notification, impact]);
+  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, spendingBreakdown, personalReminder, sponsorPhone, emergencyContact, onComplete, notification, impact]);
 
   const canProceed = () => {
     switch (step) {
