@@ -562,6 +562,42 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                     <p className="text-[10px] text-muted-foreground text-right mt-1">
                       {shareMessage.length}/500
                     </p>
+
+                    {/* Suggested recovery hashtags */}
+                    <div className="mt-2">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
+                        Suggested hashtags
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {getSuggestedHashtags(selectedBadge).map((tag) => {
+                          const active = shareMessage.includes(tag);
+                          return (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => {
+                                if (active) {
+                                  setShareMessage((m) =>
+                                    m.replace(new RegExp(`\\s*${tag}\\b`, "g"), "").trimEnd()
+                                  );
+                                } else {
+                                  setShareMessage((m) =>
+                                    (m.trimEnd() + " " + tag).slice(0, 500)
+                                  );
+                                }
+                              }}
+                              className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-muted/50 text-foreground border-border hover:bg-primary/10 hover:border-primary/50"
+                              }`}
+                            >
+                              {tag}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2">
