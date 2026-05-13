@@ -174,7 +174,10 @@ const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
   { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
 ];
 
-export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUndo }: MoneySavedProps) => {
+export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreakdown, onReset, onUndo }: MoneySavedProps) => {
+  const userBreakdown = (spendingBreakdown ?? []).filter((c) => c && c.name?.trim() && (Number(c.amount) || 0) > 0);
+  const breakdownTotal = userBreakdown.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+  const breakdownPalette = ["hsl(0 75% 55%)", "hsl(42 100% 55%)", "hsl(168 84% 45%)", "hsl(215 18% 58%)", "hsl(280 65% 60%)", "hsl(120 50% 50%)", "hsl(30 90% 55%)", "hsl(200 80% 55%)", "hsl(340 70% 55%)", "hsl(60 80% 50%)", "hsl(260 60% 60%)", "hsl(150 60% 45%)"];
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { isPremium } = usePremiumStatus();
 
