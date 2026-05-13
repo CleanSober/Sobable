@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, InterstitialAdPluginEvents, RewardAdPluginEvents } from "@capacitor-community/admob";
 import { admobConfig } from "@/lib/admobConfig";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 interface UseAdMobReturn {
   isInitialized: boolean;
@@ -58,6 +59,23 @@ export const useAdMob = (): UseAdMobReturn => {
   const [isBannerVisible, setIsBannerVisible] = useState(false);
   const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Hard guard: premium users must NEVER see ads, even if a caller forgets
+  // to gate. Kept in a ref so callbacks always read the latest value without
+  // needing to be re-created.
+  const { isPremium } = usePremiumStatus();
+  const isPremiumRef = useRef(isPremium);
+  useEffect(() => {
+    isPremiumRef.current = isPremium;
+    if (isPremium && Capacitor.isNativePlatform()) {
+      // Tear down any visible banner the moment premium turns on.
+      AdMob.hideBanner().catch(() => undefined);
+      globalBannerVisible = false;
+      globalBannerPosition = null;
+      setBannerHeight(0);
+      setIsBannerVisible(false);
+    }
+  }, [isPremium]);
 
   const waitForInterstitial = useCallback((timeoutMs = 10000) => {
     return new Promise<boolean>((resolve) => {
@@ -229,6 +247,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
   // Show banner ad
   const showBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     const unitIdError = admobConfig.getUnitIdError("banner");
@@ -290,6 +309,7 @@ export const useAdMob = (): UseAdMobReturn => {
   }, []);
 
   const resumeBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     await queueBannerOperation(async () => {
@@ -322,6 +342,7 @@ export const useAdMob = (): UseAdMobReturn => {
   }, []);
 
   const refreshBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     const unitIdError = admobConfig.getUnitIdError("banner");
@@ -365,6 +386,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
   // Load interstitial ad
   const loadInterstitial = useCallback(async () => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     const unitIdError = admobConfig.getUnitIdError("interstitial");
@@ -391,6 +413,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
   // Show interstitial ad
   const showInterstitial = useCallback(async (): Promise<boolean> => {
+    if (isPremiumRef.current) return true; // Premium users skip ads
     if (!Capacitor.isNativePlatform()) return false;
     
     if (!isInterstitialLoaded) {
