@@ -31,11 +31,8 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const [claimingPass, setClaimingPass] = useState(false);
   const { isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
-  const previewPass = usePreviewPass();
-  const { showRewarded } = useAdMob();
   const navigate = useNavigate();
   const {
     isNative,
@@ -46,30 +43,6 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
     getProductPrice,
     getMonthlyEquivalentPrice,
   } = useInAppPurchases();
-
-  const handleClaimPreviewPass = async () => {
-    if (previewPass.alreadyClaimed) return;
-    setClaimingPass(true);
-    try {
-      if (isNative) {
-        const earned = await showRewarded();
-        if (!earned) {
-          toast.error("Ad not completed. Preview Pass not unlocked.");
-          return;
-        }
-      }
-      const result = previewPass.claim();
-      if (result) {
-        toast.success("7-day Preview Pass unlocked! Enjoy full access.");
-        refreshPremiumStatus();
-        if (onClose) onClose();
-      } else {
-        toast.error("Preview Pass already used.");
-      }
-    } finally {
-      setClaimingPass(false);
-    }
-  };
 
   const handleSubscribe = async () => {
     if (!isNative) {
