@@ -474,20 +474,44 @@ export const useInAppPurchases = () => {
         if (data?.success) {
           toast.success("Welcome to Sober Club! 🎉");
 
-          // Transaction is auto-finished by StoreKit 2 on iOS
-
-          // Broadcast so every gated component (premium hooks, subscription
-          // hook) re-reads the DB and unlocks immediately.
+          // Transaction is auto-finished by StoreKit 2 on iOS.
+          // Actively poll the subscriptions row and keep firing the refresh
+          // event until every gated component sees the active premium row.
+          // Closes the race between the server write and React's cached
+          // premium state so locks disappear right after a successful
+          // Apple/Google purchase.
           window.dispatchEvent(new Event("premium-status-refresh"));
 
-          // Fallback re-dispatches in case the first refresh races the DB
-          // write or a listener mounted late. Cheap, idempotent, no-op once
-          // the row is read.
-          [1500, 4000, 9000].forEach((delay) => {
-            setTimeout(() => {
-              window.dispatchEvent(new Event("premium-status-refresh"));
-            }, delay);
-          });
+          (async () => {
+            const maxAttempts = 15; // ~15s
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+              await new Promise((r) => setTimeout(r, 1000));
+              try {
+                const { data: subRow } = await supabase
+                  .from("subscriptions")
+                  .select("plan_type, status")
+                  .eq("user_id", user.id)
+                  .in("status", ["active", "trialing"])
+                  .in("plan_type", ["premium", "pro"])
+                  .maybeSingle();
+
+                window.dispatchEvent(new Event("premium-status-refresh"));
+
+                if (subRow) {
+                  setTimeout(
+                    () =>
+                      window.dispatchEvent(
+                        new Event("premium-status-refresh"),
+                      ),
+                    500,
+                  );
+                  return;
+                }
+              } catch (pollError) {
+                console.warn("[IAP] subscription poll error", pollError);
+              }
+            }
+          })();
 
           return true;
         } else {
