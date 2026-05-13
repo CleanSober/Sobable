@@ -241,8 +241,29 @@ interface AchievementBadgesProps {
 export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesProps) => {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { showAd } = useInterstitialAd();
   const previousUnlockedCount = useRef<number | null>(null);
+
+  // Generate a preview image whenever an unlocked badge is selected
+  useEffect(() => {
+    let revoke: string | null = null;
+    let cancelled = false;
+    if (selectedBadge && daysSober >= selectedBadge.daysRequired) {
+      generateBadgeImage(selectedBadge, daysSober).then((blob) => {
+        if (cancelled || !blob) return;
+        const url = URL.createObjectURL(blob);
+        revoke = url;
+        setPreviewUrl(url);
+      });
+    } else {
+      setPreviewUrl(null);
+    }
+    return () => {
+      cancelled = true;
+      if (revoke) URL.revokeObjectURL(revoke);
+    };
+  }, [selectedBadge, daysSober]);
 
   const unlockedBadges = badges.filter((b) => daysSober >= b.daysRequired);
   const lockedBadges = badges.filter((b) => daysSober < b.daysRequired);
