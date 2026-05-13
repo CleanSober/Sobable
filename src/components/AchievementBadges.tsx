@@ -8,99 +8,228 @@ import { toast } from "sonner";
 import { useInterstitialAd } from "./InterstitialAd";
 
 import { badges, type Badge } from "@/lib/badges";
+import { copyText } from "@/lib/clipboard";
 
-// Social media sharing utilities
-const getShareText = (badge: Badge, daysSober: number) => {
-  return `🎉 I just earned the "${badge.name}" badge! ${daysSober} days sober and counting. ${badge.description} #Sobriety #Recovery #Progress`;
+const getShareText = (badge: Badge, daysSober: number) =>
+  `🎉 I just earned the "${badge.name}" badge! ${daysSober} days sober and counting. ${badge.description} #Sobriety #Recovery #Progress`;
+
+const getShareUrl = () => window.location.origin;
+
+// Map a tailwind color token like "amber-500" to a hex value for canvas rendering.
+const GRADIENT_HEX: Record<string, string> = {
+  "amber-400": "#fbbf24", "amber-500": "#f59e0b", "amber-600": "#d97706",
+  "orange-400": "#fb923c", "orange-500": "#f97316", "orange-600": "#ea580c",
+  "yellow-400": "#facc15", "yellow-500": "#eab308",
+  "rose-400": "#fb7185", "rose-500": "#f43f5e", "rose-600": "#e11d48",
+  "pink-400": "#f472b6", "pink-500": "#ec4899", "pink-600": "#db2777",
+  "red-400": "#f87171", "red-500": "#ef4444", "red-600": "#dc2626",
+  "purple-400": "#c084fc", "purple-500": "#a855f7", "purple-600": "#9333ea",
+  "violet-500": "#8b5cf6", "violet-600": "#7c3aed",
+  "indigo-400": "#818cf8", "indigo-500": "#6366f1", "indigo-600": "#4f46e5",
+  "blue-400": "#60a5fa", "blue-500": "#3b82f6", "blue-600": "#2563eb",
+  "sky-400": "#38bdf8", "sky-500": "#0ea5e9",
+  "cyan-400": "#22d3ee", "cyan-500": "#06b6d4",
+  "teal-400": "#2dd4bf", "teal-500": "#14b8a6", "teal-600": "#0d9488",
+  "emerald-400": "#34d399", "emerald-500": "#10b981", "emerald-600": "#059669",
+  "green-400": "#4ade80", "green-500": "#22c55e", "green-600": "#16a34a",
+  "lime-400": "#a3e635", "lime-500": "#84cc16",
+  "fuchsia-500": "#d946ef", "fuchsia-600": "#c026d3",
+  "slate-500": "#64748b", "slate-600": "#475569", "slate-700": "#334155",
+  "gray-500": "#6b7280", "gray-600": "#4b5563",
+  "stone-500": "#78716c", "stone-600": "#57534e",
 };
 
-const getShareUrl = () => {
-  return window.location.origin;
+const parseGradient = (cls: string): [string, string] => {
+  const from = cls.match(/from-([a-z]+-\d{3})/)?.[1];
+  const to = cls.match(/to-([a-z]+-\d{3})/)?.[1];
+  return [GRADIENT_HEX[from || ""] || "#6366f1", GRADIENT_HEX[to || ""] || "#a855f7"];
 };
 
-const shareToFacebook = (badge: Badge, daysSober: number) => {
-  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(getShareText(badge, daysSober))}`;
-  window.open(url, '_blank', 'width=600,height=400');
+// Render a 1080x1080 shareable badge image using canvas.
+const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+  const size = 1080;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  const [c1, c2] = parseGradient(badge.color);
+
+  const bg = ctx.createLinearGradient(0, 0, size, size);
+  bg.addColorStop(0, "#0b1020");
+  bg.addColorStop(1, "#1a1033");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, size, size);
+
+  const glow = ctx.createRadialGradient(size / 2, 460, 80, size / 2, 460, size / 1.4);
+  glow.addColorStop(0, c1 + "55");
+  glow.addColorStop(1, "transparent");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.beginPath();
+  ctx.arc(size / 2, 460, 280, 0, Math.PI * 2);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "rgba(255,255,255,0.15)";
+  ctx.stroke();
+
+  const medGrad = ctx.createLinearGradient(size / 2 - 240, 220, size / 2 + 240, 700);
+  medGrad.addColorStop(0, c1);
+  medGrad.addColorStop(1, c2);
+  ctx.beginPath();
+  ctx.arc(size / 2, 460, 240, 0, Math.PI * 2);
+  ctx.fillStyle = medGrad;
+  ctx.fill();
+
+  const gloss = ctx.createLinearGradient(0, 220, 0, 460);
+  gloss.addColorStop(0, "rgba(255,255,255,0.35)");
+  gloss.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gloss;
+  ctx.beginPath();
+  ctx.arc(size / 2, 460, 220, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.font = "260px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("🏆", size / 2, 470);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 78px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText(badge.name, size / 2, 800);
+
+  ctx.fillStyle = c1;
+  ctx.font = "bold 64px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText(`${daysSober} days sober`, size / 2, 890);
+
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "500 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText("sobable.app", size / 2, 990);
+
+  return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
 
-const shareToTwitter = (badge: Badge, daysSober: number) => {
-  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText(badge, daysSober))}&url=${encodeURIComponent(getShareUrl())}`;
-  window.open(url, '_blank', 'width=600,height=400');
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-const shareToLinkedIn = (badge: Badge, daysSober: number) => {
-  const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl())}&summary=${encodeURIComponent(getShareText(badge, daysSober))}`;
-  window.open(url, '_blank', 'width=600,height=400');
+// Most platforms ignore prefill query params for non-verified apps, so we
+// always copy the message to the clipboard before opening the share window
+// and tell the user to paste.
+const openShareWithCopy = async (
+  shareUrl: string,
+  badge: Badge,
+  daysSober: number,
+  platform: string,
+) => {
+  const text = `${getShareText(badge, daysSober)} ${getShareUrl()}`;
+  const result = await copyText(text);
+  if (result.ok) toast.success(`Message copied — paste it into ${platform}!`);
+  window.open(shareUrl, "_blank", "width=600,height=600,noopener");
 };
 
-const shareToWhatsApp = (badge: Badge, daysSober: number) => {
-  const url = `https://wa.me/?text=${encodeURIComponent(getShareText(badge, daysSober) + ' ' + getShareUrl())}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
-
-const shareToTelegram = (badge: Badge, daysSober: number) => {
-  const url = `https://t.me/share/url?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText(badge, daysSober))}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
-
-const shareToPinterest = (badge: Badge, daysSober: number) => {
-  const url = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(getShareUrl())}&description=${encodeURIComponent(getShareText(badge, daysSober))}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
-
-const shareToReddit = (badge: Badge, daysSober: number) => {
-  const url = `https://www.reddit.com/submit?url=${encodeURIComponent(getShareUrl())}&title=${encodeURIComponent(getShareText(badge, daysSober))}`;
-  window.open(url, '_blank', 'width=600,height=500');
-};
-
-const shareToMessenger = (badge: Badge, daysSober: number) => {
-  const url = `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${encodeURIComponent(getShareUrl())}&redirect_uri=${encodeURIComponent(getShareUrl())}`;
-  window.open(url, '_blank', 'width=600,height=500');
-};
-
-const shareToEmail = (badge: Badge, daysSober: number) => {
-  const subject = `I earned the "${badge.name}" sobriety badge!`;
-  const body = `${getShareText(badge, daysSober)}\n\n${getShareUrl()}`;
+const shareToFacebook = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(getShareText(b, d))}`,
+    b, d, "Facebook",
+  );
+const shareToTwitter = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText(b, d))}&url=${encodeURIComponent(getShareUrl())}`,
+    b, d, "X",
+  );
+const shareToLinkedIn = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl())}`,
+    b, d, "LinkedIn",
+  );
+const shareToWhatsApp = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://wa.me/?text=${encodeURIComponent(getShareText(b, d) + " " + getShareUrl())}`,
+    b, d, "WhatsApp",
+  );
+const shareToTelegram = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://t.me/share/url?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText(b, d))}`,
+    b, d, "Telegram",
+  );
+const shareToPinterest = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(getShareUrl())}&description=${encodeURIComponent(getShareText(b, d))}`,
+    b, d, "Pinterest",
+  );
+const shareToReddit = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://www.reddit.com/submit?url=${encodeURIComponent(getShareUrl())}&title=${encodeURIComponent(getShareText(b, d))}`,
+    b, d, "Reddit",
+  );
+const shareToMessenger = (b: Badge, d: number) =>
+  openShareWithCopy(
+    `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${encodeURIComponent(getShareUrl())}&redirect_uri=${encodeURIComponent(getShareUrl())}`,
+    b, d, "Messenger",
+  );
+const shareToEmail = (b: Badge, d: number) => {
+  const subject = `I earned the "${b.name}" sobriety badge!`;
+  const body = `${getShareText(b, d)}\n\n${getShareUrl()}`;
   window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
-
-const shareToSMS = (badge: Badge, daysSober: number) => {
-  const text = `${getShareText(badge, daysSober)} ${getShareUrl()}`;
+const shareToSMS = (b: Badge, d: number) => {
+  const text = `${getShareText(b, d)} ${getShareUrl()}`;
   window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
 };
 
+// Native share — attaches the generated badge image when supported (mobile share sheets
+// including Instagram, TikTok, Snapchat, Signal, etc.).
 const shareNative = async (badge: Badge, daysSober: number) => {
   const text = getShareText(badge, daysSober);
   const url = getShareUrl();
-  if (typeof navigator !== "undefined" && (navigator as Navigator).share) {
+  const blob = await generateBadgeImage(badge, daysSober);
+  const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
+
+  const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+  if (file && nav.canShare?.({ files: [file] }) && nav.share) {
     try {
-      await (navigator as Navigator).share({
-        title: `${badge.name} • Sobable`,
-        text,
-        url,
-      });
+      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text, url });
       return;
     } catch (err) {
-      // User cancelled or share failed — fall through to clipboard
       if ((err as DOMException)?.name === "AbortError") return;
     }
   }
-  // Fallback: copy to clipboard
-  try {
-    await navigator.clipboard.writeText(`${text} ${url}`);
-    toast.success("Copied — paste it anywhere!");
-  } catch {
-    toast.error("Sharing not available on this device");
+  if (nav.share) {
+    try {
+      await nav.share({ title: `${badge.name} • Sobable`, text, url });
+      return;
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
   }
+  await copyText(`${text} ${url}`);
+  if (blob) downloadBlob(blob, `${badge.id}-badge.png`);
+  toast.success("Message copied & badge image downloaded — attach it to your post!");
+};
+
+const downloadBadgeImage = async (badge: Badge, daysSober: number) => {
+  const blob = await generateBadgeImage(badge, daysSober);
+  if (!blob) {
+    toast.error("Couldn't generate badge image");
+    return;
+  }
+  downloadBlob(blob, `${badge.id}-badge.png`);
+  toast.success("Badge image downloaded!");
 };
 
 const copyToClipboard = async (badge: Badge, daysSober: number) => {
-  try {
-    await navigator.clipboard.writeText(getShareText(badge, daysSober) + ' ' + getShareUrl());
-    toast.success("Copied to clipboard!");
-  } catch {
-    toast.error("Failed to copy");
-  }
+  const result = await copyText(getShareText(badge, daysSober) + " " + getShareUrl());
+  if (result.ok) toast.success("Copied to clipboard!");
+  else toast.error(result.message);
 };
 
 
