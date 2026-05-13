@@ -355,7 +355,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                   transition={{ delay: 0.05 * index }}
                   className="px-3 py-1.5 text-xs font-semibold rounded-full bg-accent/15 text-accent border border-accent/25 hover:bg-accent/25 transition-colors"
                 >
-                  {milestone}
+                  {formatMilestoneName(milestone, wording.statusWord)}
                 </motion.span>
               ))}
             </div>
