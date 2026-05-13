@@ -201,16 +201,16 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.015 }}
                 onClick={() => setSelectedBadge(badge)}
-                className={`relative flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all border ${
+                className={`relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all border min-h-[78px] ${
                   isUnlocked
                     ? "bg-gradient-to-br " + badge.color + " border-white/20 shadow-lg shadow-black/10 active:scale-95"
                     : isNextUp
-                    ? "bg-muted/30 border-primary/30 border-dashed"
-                    : "bg-muted/20 border-transparent opacity-40"
+                    ? "bg-muted/40 border-primary/40 border-dashed"
+                    : "bg-muted/30 border-border/40 opacity-70"
                 }`}
               >
-                <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center ${
-                  isUnlocked ? "bg-white/20" : "bg-muted/50"
+                <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  isUnlocked ? "bg-white/20" : "bg-muted/60"
                 }`}>
                   {isUnlocked ? (
                     <Icon className="w-4 h-4 text-white" />
@@ -218,7 +218,7 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
                     <Lock className="w-3.5 h-3.5 text-muted-foreground" />
                   )}
                 </div>
-                <span className={`text-[7px] text-center font-semibold leading-tight line-clamp-2 ${
+                <span className={`text-[10px] text-center font-semibold leading-tight line-clamp-2 ${
                   isUnlocked ? "text-white" : "text-muted-foreground"
                 }`}>
                   {badge.name}
