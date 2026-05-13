@@ -309,6 +309,7 @@ export const useAdMob = (): UseAdMobReturn => {
   }, []);
 
   const resumeBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     await queueBannerOperation(async () => {
