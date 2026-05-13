@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense, memo
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -116,11 +116,6 @@ const Index = () => {
     });
   }, []);
 
-  const { onTouchStart, onTouchEnd } = useSwipeNavigation(
-    TAB_ORDER,
-    activeTab,
-    handleTabChange
-  );
   // Initialize Capacitor for native mobile features
   useCapacitor();
 
@@ -799,8 +794,6 @@ const Index = () => {
                 ? "calc(0.75rem + var(--admob-banner-height, 0px) + env(safe-area-inset-bottom, 0px))"
                 : "calc(7rem + var(--admob-banner-height, 0px) + env(safe-area-inset-bottom, 0px))",
           }}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
         >
           <AnimatePresence>
             {migrationBanner && (
