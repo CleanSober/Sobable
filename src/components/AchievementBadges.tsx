@@ -132,6 +132,117 @@ const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
 
+// Render a 1080x1920 vertical "story" image for Instagram Stories / TikTok / Snapchat.
+const generateStoryImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+  const w = 1080;
+  const h = 1920;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  const [c1, c2] = parseGradient(badge.color);
+
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, "#0b1020");
+  bg.addColorStop(1, "#1a1033");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.fillStyle = "rgba(255,255,255,0.65)";
+  ctx.font = "600 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("SOBABLE", w / 2, 140);
+
+  const cx = w / 2;
+  const cy = 820;
+  const glow = ctx.createRadialGradient(cx, cy, 80, cx, cy, 900);
+  glow.addColorStop(0, c1 + "66");
+  glow.addColorStop(1, "transparent");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 360, 0, Math.PI * 2);
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.stroke();
+
+  const medGrad = ctx.createLinearGradient(cx - 320, cy - 320, cx + 320, cy + 320);
+  medGrad.addColorStop(0, c1);
+  medGrad.addColorStop(1, c2);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 320, 0, Math.PI * 2);
+  ctx.fillStyle = medGrad;
+  ctx.fill();
+
+  const gloss = ctx.createLinearGradient(0, cy - 320, 0, cy);
+  gloss.addColorStop(0, "rgba(255,255,255,0.4)");
+  gloss.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gloss;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 300, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.font = "340px serif";
+  ctx.fillText("🏆", cx, cy + 20);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 220px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText(String(daysSober), cx, 1370);
+
+  ctx.fillStyle = "rgba(255,255,255,0.75)";
+  ctx.font = "600 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText("DAYS SOBER", cx, 1490);
+
+  ctx.fillStyle = c1;
+  ctx.font = "bold 68px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText(badge.name, cx, 1620);
+
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "500 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText("sobable.app", cx, 1820);
+
+  return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
+};
+
+// Share the vertical story image via the native share sheet (mobile).
+// On desktop, falls back to downloading the PNG and copying the caption.
+const shareStoryImage = async (
+  badge: Badge,
+  daysSober: number,
+  msg: string,
+  platform: "Instagram Stories" | "TikTok",
+) => {
+  const blob = await generateStoryImage(badge, daysSober);
+  if (!blob) {
+    toast.error("Couldn't generate story image");
+    return;
+  }
+  const file = new File([blob], `${badge.id}-story.png`, { type: "image/png" });
+  const url = getShareUrl();
+  const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+
+  if (nav.canShare?.({ files: [file] }) && nav.share) {
+    try {
+      await copyText(`${msg} ${url}`);
+      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text: msg });
+      toast.success(`Pick ${platform} from the share sheet — caption is copied!`);
+      return;
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  }
+
+  await copyText(`${msg} ${url}`);
+  downloadBlob(blob, `${badge.id}-story.png`);
+  toast.success(
+    `Image downloaded & caption copied. Open ${platform} on your phone to post it.`,
+  );
+};
+
 const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -654,6 +765,16 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                     <Button variant="outline" size="sm" onClick={() => shareNative(selectedBadge, daysSober, shareMessage)} className="flex flex-col items-center gap-1 h-auto py-2 col-span-4 hover:bg-primary/10 hover:border-primary/50">
                       <Share2 className="w-5 h-5 text-primary" />
                       <span className="text-[10px]">Share with badge image (Instagram, TikTok…)</span>
+                    </Button>
+
+                    <Button variant="outline" size="sm" onClick={() => shareStoryImage(selectedBadge, daysSober, shareMessage, "Instagram Stories")} className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-pink-500/10 hover:border-pink-500/50">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="url(#igGrad)"><defs><linearGradient id="igGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#feda75"/><stop offset="0.5" stopColor="#d62976"/><stop offset="1" stopColor="#4f5bd5"/></linearGradient></defs><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.26.07 1.64.07 4.85s0 3.6-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.26.06-1.64.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.15 0-3.5 0-4.74.06-.99.05-1.53.22-1.89.36-.47.18-.81.4-1.17.76-.36.36-.58.7-.76 1.17-.14.36-.31.9-.36 1.89C3.02 9.5 3 9.85 3 13s0 3.5.06 4.74c.05.99.22 1.53.36 1.89.18.47.4.81.76 1.17.36.36.7.58 1.17.76.36.14.9.31 1.89.36 1.24.06 1.59.06 4.74.06s3.5 0 4.74-.06c.99-.05 1.53-.22 1.89-.36.47-.18.81-.4 1.17-.76.36-.36.58-.7.76-1.17.14-.36.31-.9.36-1.89.06-1.24.06-1.59.06-4.74s0-3.5-.06-4.74c-.05-.99-.22-1.53-.36-1.89a3.16 3.16 0 0 0-.76-1.17 3.16 3.16 0 0 0-1.17-.76c-.36-.14-.9-.31-1.89-.36C15.5 4 15.15 4 12 4zm0 3.05a4.95 4.95 0 1 1 0 9.9 4.95 4.95 0 0 1 0-9.9zm0 1.8a3.15 3.15 0 1 0 0 6.3 3.15 3.15 0 0 0 0-6.3zm5.15-2.05a1.16 1.16 0 1 1 0 2.32 1.16 1.16 0 0 1 0-2.32z"/></svg>
+                      <span className="text-[10px]">IG Story</span>
+                    </Button>
+
+                    <Button variant="outline" size="sm" onClick={() => shareStoryImage(selectedBadge, daysSober, shareMessage, "TikTok")} className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-foreground/10 hover:border-foreground/50">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-.88-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.85a8.16 8.16 0 0 0 4.77 1.52V6.92a4.85 4.85 0 0 1-1.84-.23z"/></svg>
+                      <span className="text-[10px]">TikTok Story</span>
                     </Button>
 
                     <Button variant="outline" size="sm" onClick={() => downloadBadgeImage(selectedBadge, daysSober)} className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-primary/10 hover:border-primary/50">
