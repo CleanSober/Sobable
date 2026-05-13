@@ -233,6 +233,16 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
           })()}
         </div>
 
+        <motion.p
+          key={summaryText}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-center text-sm text-foreground/85 font-medium px-2 mb-3"
+        >
+          {summaryText}
+        </motion.p>
+
         <div className="flex justify-center mb-2">
           <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-muted/50 border border-border/40 text-[10px] font-medium">
             <button
