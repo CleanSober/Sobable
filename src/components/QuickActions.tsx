@@ -65,7 +65,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: BookHeart,
       gradient: "from-pink-400 to-rose-500",
       glowColor: "340 82% 52%",
-      relevance: hasReminder ? 90 : 25,
+      // Boost "My Why" when craving high or mood low — motivational reminder
+      relevance: hasReminder ? (inDistress ? 92 : 65) : 25,
       action: async () => {
         if (profile?.personal_reminder) {
           await hapticSuccess();
