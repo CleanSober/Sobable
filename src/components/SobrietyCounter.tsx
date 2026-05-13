@@ -223,7 +223,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                   </span>
                   {next && (
                     <span className="text-[9px] text-muted-foreground mt-0.5">
-                      {Math.round(ringPct * 100)}% → {next.name}
+                      {Math.round(ringPct * 100)}% → {formatMilestoneName(next.name, wording.statusWord)}
                     </span>
                   )}
                 </div>
