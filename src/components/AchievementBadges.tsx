@@ -11,8 +11,29 @@ import { useInterstitialAd } from "./InterstitialAd";
 import { badges, type Badge } from "@/lib/badges";
 import { copyText } from "@/lib/clipboard";
 
+// Recovery-focused hashtag pool. #Sobable is always included.
+const RECOVERY_HASHTAGS = [
+  "#Recovery", "#Sobriety", "#SoberLife", "#OneDayAtATime", "#SoberJourney",
+  "#Healing", "#MentalHealth", "#Progress", "#StrongerEveryDay", "#Mindfulness",
+  "#SoberAF", "#RecoveryWins", "#CleanAndSober", "#NewBeginnings", "#SelfLove",
+];
+
+// Pick 2 deterministic recovery hashtags for a badge + always include #Sobable.
+const getSuggestedHashtags = (badge: Badge): string[] => {
+  let seed = 0;
+  for (let i = 0; i < badge.id.length; i++) seed = (seed * 31 + badge.id.charCodeAt(i)) >>> 0;
+  const pool = [...RECOVERY_HASHTAGS];
+  const picks: string[] = [];
+  for (let i = 0; i < 2 && pool.length; i++) {
+    seed = (seed * 1103515245 + 12345) >>> 0;
+    picks.push(pool.splice(seed % pool.length, 1)[0]);
+  }
+  return [...picks, "#Sobable"];
+};
+
 const getShareText = (badge: Badge, daysSober: number) =>
-  `🎉 I just earned the "${badge.name}" badge! ${daysSober} days sober and counting. ${badge.description} #Sobriety #Recovery #Progress`;
+  `🎉 I just earned the "${badge.name}" badge! ${daysSober} days sober and counting. ${badge.description} ${getSuggestedHashtags(badge).join(" ")}`;
+
 
 const getShareUrl = () => window.location.origin;
 
@@ -541,6 +562,42 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                     <p className="text-[10px] text-muted-foreground text-right mt-1">
                       {shareMessage.length}/500
                     </p>
+
+                    {/* Suggested recovery hashtags */}
+                    <div className="mt-2">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
+                        Suggested hashtags
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {getSuggestedHashtags(selectedBadge).map((tag) => {
+                          const active = shareMessage.includes(tag);
+                          return (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => {
+                                if (active) {
+                                  setShareMessage((m) =>
+                                    m.replace(new RegExp(`\\s*${tag}\\b`, "g"), "").trimEnd()
+                                  );
+                                } else {
+                                  setShareMessage((m) =>
+                                    (m.trimEnd() + " " + tag).slice(0, 500)
+                                  );
+                                }
+                              }}
+                              className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-muted/50 text-foreground border-border hover:bg-primary/10 hover:border-primary/50"
+                              }`}
+                            >
+                              {tag}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2">
