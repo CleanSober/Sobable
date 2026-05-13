@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { SEO } from "@/components/SEO";
 
 // Import brand assets
 import appIcon from "@/assets/brand/app-icon-1024.png";
@@ -255,7 +256,12 @@ const screenshotRecommendations = [
 export const AppStoreGuide = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
+      <SEO
+        title="App Store Publishing Guide — Sober Club"
+        description="Step-by-step playbook for submitting Sober Club to the Apple App Store and Google Play, including assets, copy, and review tips."
+        path="/app-store-guide"
+      />
+      <main className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -959,7 +965,7 @@ export const AppStoreGuide = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </main>
     </div>
   );
 };

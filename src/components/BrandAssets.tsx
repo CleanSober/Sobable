@@ -3,6 +3,7 @@ import { Download, Image, Smartphone, Share2, FileText, Play, Video } from "luci
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SEO } from "@/components/SEO";
 
 // Import brand assets
 import appIcon from "@/assets/brand/app-icon-1024.png";
@@ -132,7 +133,12 @@ const brandColors = [
 export const BrandAssets = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-12">
-      <div className="max-w-6xl mx-auto">
+      <SEO
+        title="Sober Club Brand Assets & Marketing Package"
+        description="Download Sober Club logos, app icons, social templates, and video assets for partners, press, and store listings."
+        path="/brand"
+      />
+      <main className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -370,7 +376,7 @@ export const BrandAssets = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 };

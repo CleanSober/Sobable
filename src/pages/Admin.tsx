@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdmin";
+import { SEO } from "@/components/SEO";
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -36,6 +37,12 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Admin Console — Sober Club"
+        description="Internal moderation and operations tools for Sober Club staff."
+        path="/admin"
+        noIndex
+      />
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
