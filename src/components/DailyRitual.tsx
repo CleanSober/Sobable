@@ -126,7 +126,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
   const toggleGoal = async (goal: GoalDef) => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const todayDate = getLocalDateString();
     const newValue = !goals[goal.field];
 
     setGoals((prev) => ({ ...prev, [goal.field]: newValue }));
