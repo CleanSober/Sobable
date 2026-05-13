@@ -14,6 +14,7 @@ import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { PricingPlans } from "@/components/PricingPlans";
 import { setPaywallVisibility } from "@/lib/paywallVisibility";
 import { toast } from "sonner";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface HabitLoopCardProps {
   onNavigateToCheckIn?: () => void;
