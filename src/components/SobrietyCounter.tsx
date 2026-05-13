@@ -2,7 +2,7 @@ import { useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getMilestones } from "@/lib/storage";
+import { getMilestones, formatMilestoneName } from "@/lib/storage";
 import { useGamification, getLevelTitle } from "@/hooks/useGamification";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 
@@ -223,7 +223,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                   </span>
                   {next && (
                     <span className="text-[9px] text-muted-foreground mt-0.5">
-                      {Math.round(ringPct * 100)}% → {next.name}
+                      {Math.round(ringPct * 100)}% → {formatMilestoneName(next.name, wording.statusWord)}
                     </span>
                   )}
                 </div>
@@ -319,7 +319,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                 <TrendingUp className="w-4 h-4 text-primary" />
                 <span className="text-foreground font-medium">Next Milestone</span>
               </div>
-              <span className="text-primary font-semibold">{next.name}</span>
+              <span className="text-primary font-semibold">{formatMilestoneName(next.name, wording.statusWord)}</span>
             </div>
             <div className="relative h-3 bg-muted/50 rounded-full overflow-hidden">
               <motion.div
@@ -355,7 +355,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                   transition={{ delay: 0.05 * index }}
                   className="px-3 py-1.5 text-xs font-semibold rounded-full bg-accent/15 text-accent border border-accent/25 hover:bg-accent/25 transition-colors"
                 >
-                  {milestone}
+                  {formatMilestoneName(milestone, wording.statusWord)}
                 </motion.span>
               ))}
             </div>

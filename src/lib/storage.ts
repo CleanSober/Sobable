@@ -223,6 +223,24 @@ export const getMilestones = (daysSober: number): { reached: string[]; next: { n
   return { reached, next };
 };
 
+/**
+ * Formats a milestone name with the user's personalized status word.
+ * Examples:
+ *   formatMilestoneName("30 Days", "sober")     → "30 days sober"
+ *   formatMilestoneName("6 Months", "clean")    → "6 months clean"
+ *   formatMilestoneName("1 Year", "smoke-free") → "1 year smoke-free"
+ * Falls back to the original name when no statusWord is provided.
+ */
+export const formatMilestoneName = (name: string, statusWord?: string): string => {
+  if (!statusWord) return name;
+  const normalized = name.replace(
+    /\b(Day|Days|Week|Weeks|Month|Months|Year|Years)\b/g,
+    (u) => u.toLowerCase()
+  );
+  return `${normalized} ${statusWord}`;
+};
+
+
 // Coping strategies based on triggers/emotions
 export const getCopingStrategies = (emotion: string, trigger: string): string[] => {
   const strategies: Record<string, string[]> = {
