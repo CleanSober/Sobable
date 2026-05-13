@@ -80,28 +80,7 @@ const Support = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {[
-              {
-                q: "How do I reset my sobriety counter?",
-                a: "Go to your Profile and tap 'Edit Profile' to update your sobriety start date.",
-              },
-              {
-                q: "How do I cancel my subscription?",
-                a: "On iOS, go to Settings → Apple ID → Subscriptions. On Android, go to Google Play Store → Subscriptions. On web, use the 'Manage Subscription' button in the app.",
-              },
-              {
-                q: "How do I restore my purchases on a new device?",
-                a: "Open the app, go to the upgrade screen, and tap 'Restore Purchases' at the bottom.",
-              },
-              {
-                q: "Is my data private?",
-                a: "Yes. Your journal entries, mood data, and personal information are encrypted and only accessible to you. We never sell your data.",
-              },
-              {
-                q: "How do I delete my account?",
-                a: "Go to Profile → scroll to the bottom and tap 'Delete Account'. This will permanently remove all your data.",
-              },
-            ].map(({ q, a }) => (
+            {FAQS.map(({ q, a }) => (
               <div key={q} className="space-y-1">
                 <p className="text-sm font-medium text-foreground">{q}</p>
                 <p className="text-sm text-muted-foreground">{a}</p>
