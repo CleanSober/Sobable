@@ -73,12 +73,27 @@ export const admobConfig = {
     return {
       banner: config.bannerId,
       interstitial: config.interstitialId,
+      rewarded: (config as { rewardedId?: string | null }).rewardedId ?? null,
     };
   },
-  getUnitIdError(type: "banner" | "interstitial") {
+  getUnitIdError(type: "banner" | "interstitial" | "rewarded") {
     if (!enabled) {
       return "AdMob disabled: set VITE_ADMOB_ENABLED=true after adding ad unit IDs.";
     }
+
+    const config = platformConfig();
+    if (!config.appId) {
+      return "AdMob disabled: native app ID missing for this platform.";
+    }
+
+    if (!(config as Record<string, string | null>)[`${type}Id`]) {
+      return `AdMob ${type} disabled: ${type} ad unit ID missing for this platform.`;
+    }
+
+    return null;
+  },
+};
+
 
     const config = platformConfig();
     if (!config.appId) {
