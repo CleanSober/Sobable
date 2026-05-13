@@ -31,6 +31,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
   const { user } = useAuth();
   const { isPremium } = usePremiumStatus();
   const { missedActions, streakAtRisk } = useSmartNotifications();
+  const today = useTodayLocal();
   const [streak, setStreak] = useState<StreakInfo>({
     current: 0,
     longest: 0,
