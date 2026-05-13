@@ -512,7 +512,7 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t border-border/50 flex-shrink-0 bg-background">
             <Button variant="outline" onClick={() => setIsWriting(false)}>
               Cancel
             </Button>
