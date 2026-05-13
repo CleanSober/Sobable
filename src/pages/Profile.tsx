@@ -270,6 +270,12 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background noise-overlay">
+      <SEO
+        title="Your Profile — Sobable"
+        description="Manage your Sobable account, sobriety start date, notifications, and subscription."
+        path="/profile"
+        noIndex
+      />
       {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 blur-[60px] rounded-full" />
