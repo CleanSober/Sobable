@@ -46,7 +46,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
 
   const fetchStreakData = useCallback(async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
 
     const [streakData, goalsData] = await Promise.all([
       supabase
