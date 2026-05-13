@@ -588,18 +588,29 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                       <span className="text-[10px]">SMS</span>
                     </Button>
 
-                    {/* Native share sheet (Instagram, TikTok, Snap, etc.) */}
+                    {/* Native share sheet (Instagram, TikTok, Snap, etc.) — includes badge image when supported */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => shareNative(selectedBadge, daysSober)}
-                      className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-primary/10 hover:border-primary/50"
+                      className="flex flex-col items-center gap-1 h-auto py-2 col-span-4 hover:bg-primary/10 hover:border-primary/50"
                     >
                       <Share2 className="w-5 h-5 text-primary" />
-                      <span className="text-[10px]">More (Instagram, TikTok…)</span>
+                      <span className="text-[10px]">Share with badge image (Instagram, TikTok…)</span>
                     </Button>
 
-                    {/* Copy Link */}
+                    {/* Download badge image */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadBadgeImage(selectedBadge, daysSober)}
+                      className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-primary/10 hover:border-primary/50"
+                    >
+                      <Download className="w-5 h-5 text-primary" />
+                      <span className="text-[10px]">Download Image</span>
+                    </Button>
+
+                    {/* Copy Message */}
                     <Button
                       variant="outline"
                       size="sm"
