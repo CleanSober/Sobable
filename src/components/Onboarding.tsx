@@ -17,6 +17,7 @@ interface OnboardingData {
   substances: string[];
   sobrietyStartDate: string;
   dailySpending: number;
+  spendingBreakdown?: Array<{ name: string; amount: number }>;
   sponsorPhone?: string;
   emergencyContact?: string;
   personalReminder?: string;
@@ -39,6 +40,7 @@ interface OnboardingDraft {
   selectedSubstances: string[];
   startDate?: string; // ISO yyyy-MM-dd
   dailySpending: string;
+  spendingBreakdown: Array<{ name: string; amount: number }>;
   personalReminder: string;
   sponsorPhone: string;
   emergencyContact: string;
@@ -67,6 +69,9 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     draft?.startDate ? new Date(draft.startDate) : undefined,
   );
   const [dailySpending, setDailySpending] = useState(draft?.dailySpending ?? "");
+  const [spendingBreakdown, setSpendingBreakdown] = useState<Array<{ name: string; amount: number }>>(
+    Array.isArray(draft?.spendingBreakdown) ? draft!.spendingBreakdown! : []
+  );
   const [personalReminder, setPersonalReminder] = useState(draft?.personalReminder ?? "");
   const [sponsorPhone, setSponsorPhone] = useState(draft?.sponsorPhone ?? "");
   const [emergencyContact, setEmergencyContact] = useState(draft?.emergencyContact ?? "");
@@ -84,6 +89,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
       selectedSubstances,
       startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
       dailySpending,
+      spendingBreakdown,
       personalReminder,
       sponsorPhone,
       emergencyContact,
@@ -93,7 +99,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     } catch {
       // Quota / private mode — non-fatal.
     }
-  }, [step, name, isAnonymous, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact]);
+  }, [step, name, isAnonymous, selectedSubstances, startDate, dailySpending, spendingBreakdown, personalReminder, sponsorPhone, emergencyContact]);
 
   const toggleSubstance = (id: string) => {
     setSelectedSubstances((prev) =>
@@ -114,11 +120,17 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     setTimeout(() => impact('medium'), 400);
     setTimeout(() => impact('light'), 550);
 
+    const cleanedBreakdown = spendingBreakdown
+      .map((c) => ({ name: c.name.trim().slice(0, 40), amount: Math.max(0, Number(c.amount) || 0) }))
+      .filter((c) => c.name.length > 0)
+      .slice(0, 12);
+
     const data: OnboardingData = {
       name: isAnonymous ? "" : name.trim().slice(0, 50),
       substances: selectedSubstances,
       sobrietyStartDate: startDate ? format(startDate, "yyyy-MM-dd") : "",
       dailySpending: parseFloat(dailySpending) || 0,
+      spendingBreakdown: cleanedBreakdown,
       personalReminder: personalReminder.trim().slice(0, 500) || undefined,
       sponsorPhone: sponsorPhone.trim().slice(0, 20) || undefined,
       emergencyContact: emergencyContact.trim().slice(0, 20) || undefined,
@@ -127,7 +139,7 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     setTimeout(() => {
       onComplete(data);
     }, CELEBRATION_DURATION);
-  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, personalReminder, sponsorPhone, emergencyContact, onComplete, notification, impact]);
+  }, [isAnonymous, name, selectedSubstances, startDate, dailySpending, spendingBreakdown, personalReminder, sponsorPhone, emergencyContact, onComplete, notification, impact]);
 
   const canProceed = () => {
     switch (step) {
@@ -468,6 +480,70 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
                       })}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">We'll track how much money you're saving</p>
+                  </div>
+
+                  {/* Optional spending breakdown */}
+                  <div className="space-y-2 rounded-xl border border-border/50 bg-secondary/30 p-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-foreground">
+                        Spending breakdown <span className="text-muted-foreground font-normal">(optional)</span>
+                      </label>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">
+                        Total: ${spendingBreakdown.reduce((s, c) => s + (Number(c.amount) || 0), 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Split your daily spend into categories (e.g., Beer, Cigarettes, Uber). You'll see this on your Money Saved card.
+                    </p>
+
+                    {spendingBreakdown.map((cat, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <Input
+                          value={cat.name}
+                          placeholder="Category"
+                          maxLength={40}
+                          onChange={(e) => {
+                            const next = [...spendingBreakdown];
+                            next[idx] = { ...next[idx], name: e.target.value };
+                            setSpendingBreakdown(next);
+                          }}
+                          className="flex-1 h-9 text-sm bg-secondary/50 border-border/50"
+                        />
+                        <div className="relative w-24">
+                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={cat.amount || ""}
+                            placeholder="0"
+                            onChange={(e) => {
+                              const next = [...spendingBreakdown];
+                              next[idx] = { ...next[idx], amount: parseFloat(e.target.value) || 0 };
+                              setSpendingBreakdown(next);
+                            }}
+                            className="h-9 text-sm pl-5 bg-secondary/50 border-border/50"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSpendingBreakdown(spendingBreakdown.filter((_, i) => i !== idx))}
+                          className="text-muted-foreground hover:text-destructive text-xs px-2 h-9"
+                          aria-label="Remove category"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      disabled={spendingBreakdown.length >= 12}
+                      onClick={() => setSpendingBreakdown([...spendingBreakdown, { name: "", amount: 0 }])}
+                      className="w-full h-9 rounded-lg border border-dashed border-border/60 bg-secondary/30 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      + Add category
+                    </button>
                   </div>
 
                   <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">

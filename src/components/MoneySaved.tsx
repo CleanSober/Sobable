@@ -7,10 +7,16 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
+interface SpendingCategory {
+  name: string;
+  amount: number;
+}
+
 interface MoneySavedProps {
   totalSaved: number;
   dailySpending: number;
   daysSober: number;
+  spendingBreakdown?: SpendingCategory[];
   onReset?: () => void;
   onUndo?: () => void;
 }
@@ -168,7 +174,10 @@ const getFinancialGoals = (totalSaved: number, dailySpending: number) => [
   { name: "Financial Freedom", target: 50000, icon: "🦅", daysNeeded: Math.ceil(50000 / dailySpending) },
 ];
 
-export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUndo }: MoneySavedProps) => {
+export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreakdown, onReset, onUndo }: MoneySavedProps) => {
+  const userBreakdown = (spendingBreakdown ?? []).filter((c) => c && c.name?.trim() && (Number(c.amount) || 0) > 0);
+  const breakdownTotal = userBreakdown.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+  const breakdownPalette = ["hsl(0 75% 55%)", "hsl(42 100% 55%)", "hsl(168 84% 45%)", "hsl(215 18% 58%)", "hsl(280 65% 60%)", "hsl(120 50% 50%)", "hsl(30 90% 55%)", "hsl(200 80% 55%)", "hsl(340 70% 55%)", "hsl(60 80% 50%)", "hsl(260 60% 60%)", "hsl(150 60% 45%)"];
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { isPremium } = usePremiumStatus();
 
@@ -458,6 +467,46 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, onReset, onUn
                 </motion.div>
               ))}
             </div>
+
+            {/* User's spending breakdown */}
+            {userBreakdown.length > 0 && breakdownTotal > 0 && (
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">Your spending breakdown</span>
+                  <span className="ml-auto text-xs text-muted-foreground">${breakdownTotal.toFixed(2)}/day</span>
+                </div>
+                <div className="space-y-2">
+                  {userBreakdown.map((cat, i) => {
+                    const pct = (Number(cat.amount) / breakdownTotal) * 100;
+                    const savedForCat = totalSaved * (Number(cat.amount) / breakdownTotal);
+                    const color = breakdownPalette[i % breakdownPalette.length];
+                    return (
+                      <div key={`${cat.name}-${i}`} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-foreground font-medium truncate pr-2">{cat.name}</span>
+                          <span className="text-muted-foreground tabular-nums">
+                            ${Number(cat.amount).toFixed(2)}/day · ${Math.round(savedForCat).toLocaleString()} saved
+                          </span>
+                        </div>
+                        <div className="relative h-2 bg-muted/40 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ duration: 0.8, delay: 0.05 * i }}
+                            className="absolute inset-y-0 left-0 rounded-full"
+                            style={{ background: color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-3">
+                  Based on the categories you set during sign-up. Edit anytime in Profile.
+                </p>
+              </div>
+            )}
 
             {/* What you could buy */}
             {affordableItems.length > 0 && (

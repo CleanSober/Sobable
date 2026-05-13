@@ -456,6 +456,7 @@ const Index = () => {
     substances: string[];
     sobrietyStartDate: string;
     dailySpending: number;
+    spendingBreakdown?: Array<{ name: string; amount: number }>;
     sponsorPhone?: string;
     emergencyContact?: string;
     personalReminder?: string;
@@ -468,6 +469,10 @@ const Index = () => {
     );
     // Clear any in-progress onboarding draft now that the flow is complete.
     try { localStorage.removeItem("sober_club_onboarding_draft"); } catch { /* noop */ }
+    const cleanedBreakdown = (data.spendingBreakdown ?? [])
+      .map((c) => ({ name: (c?.name ?? "").trim().slice(0, 40), amount: Math.max(0, Number(c?.amount) || 0) }))
+      .filter((c) => c.name.length > 0)
+      .slice(0, 12);
     if (user) {
       await updateProfile({
         display_name: data.name,
@@ -478,7 +483,8 @@ const Index = () => {
         emergency_contact: data.emergencyContact,
         personal_reminder: data.personalReminder,
         onboarding_complete: true,
-      });
+        ...({ spending_breakdown: cleanedBreakdown } as any),
+      } as any);
     } else {
       // Guest mode: save to localStorage
       const guestData = {
@@ -490,8 +496,9 @@ const Index = () => {
         emergency_contact: data.emergencyContact,
         personal_reminder: data.personalReminder,
         onboarding_complete: true,
+        spending_breakdown: cleanedBreakdown,
       };
-      writeGuestProfile(guestData);
+      writeGuestProfile(guestData as any);
       // Force re-render
       window.location.reload();
     }
@@ -582,7 +589,7 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} substances={userData.substances} />
             <CheckInProgress />
-            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
+            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} spendingBreakdown={Array.isArray((effectiveProfile as any)?.spending_breakdown) ? (effectiveProfile as any).spending_breakdown : []} onReset={async () => {
               const prevDate = effectiveProfile?.savings_start_date || effectiveProfile?.sobriety_start_date || null;
               if (prevDate) {
                 localStorage.setItem("sober_club_savings_reset_undo", JSON.stringify({
