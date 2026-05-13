@@ -89,6 +89,17 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
     { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
   ];
 
+  type Unit = "days" | "months" | "years";
+  const [unit, setUnit] = useState<Unit>("days");
+  const totalMonths = years * 12 + months + (days >= 15 ? 1 : 0);
+  const displayValue = unit === "days" ? daysSober : unit === "months" ? totalMonths : years;
+  const displayLabel =
+    unit === "days"
+      ? daysSober === 1 ? "Day" : "Days"
+      : unit === "months"
+      ? totalMonths === 1 ? "Month" : "Months"
+      : years === 1 ? "Year" : "Years";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
