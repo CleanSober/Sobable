@@ -223,6 +223,101 @@ export const useInAppPurchases = () => {
     };
   }, [hasNativePurchases]);
 
+  // Fallback entitlement sync: if the device has an active native subscription
+  // but our `subscriptions` table doesn't reflect premium yet (missed event,
+  // failed initial validation, fresh install on a re-purchasing user), silently
+  // re-validate every active purchase server-side. Runs on mount, when auth
+  // becomes available, and whenever the app regains focus.
+  useEffect(() => {
+    if (!hasNativePurchases || !user || !session?.access_token) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const syncEntitlements = async () => {
+      try {
+        const { data: subRow } = await supabase
+          .from("subscriptions")
+          .select("plan_type, status")
+          .eq("user_id", user.id)
+          .in("status", ["active", "trialing"])
+          .in("plan_type", ["premium", "pro"])
+          .maybeSingle();
+        if (cancelled || subRow) return; // already premium, nothing to do
+
+        const { purchases } = await NativePurchases.getPurchases({
+          productType: PURCHASE_TYPE.SUBS,
+          onlyCurrentEntitlements: true,
+        });
+        const active = Array.isArray(purchases) ? purchases : [];
+        if (cancelled || active.length === 0) return;
+
+        const platform = Capacitor.getPlatform();
+        let revalidated = 0;
+        for (const purchase of active) {
+          const productId =
+            purchase?.productIdentifier ||
+            purchase?.planIdentifier ||
+            purchase?.id;
+          if (!productId || !purchase?.transactionId) continue;
+
+          const iosPayload =
+            platform === "ios"
+              ? await pickIosReceiptPayload(purchase, productId, user.id)
+              : null;
+
+          const { data, error } = await supabase.functions.invoke(
+            "validate-iap-receipt",
+            {
+              body: {
+                platform,
+                productId,
+                transactionId: purchase.transactionId,
+                ...(platform === "ios" && {
+                  receipt: iosPayload?.receipt,
+                  jwsRepresentation: iosPayload?.jwsRepresentation,
+                  environment: iosPayload?.environment,
+                }),
+                ...(platform === "android" && {
+                  purchaseToken: purchase?.purchaseToken,
+                }),
+              },
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            }
+          );
+
+          if (!error && data?.success) revalidated += 1;
+          else
+            console.warn("[IAP] background re-validate failed", {
+              productId,
+              error,
+              data,
+            });
+        }
+
+        if (!cancelled && revalidated > 0) {
+          window.dispatchEvent(new Event("premium-status-refresh"));
+        }
+      } catch (e) {
+        console.warn("[IAP] entitlement sync failed", e);
+      }
+    };
+
+    // Defer slightly to let initial product load settle.
+    timer = setTimeout(syncEntitlements, 1500);
+
+    const onFocus = () => {
+      void syncEntitlements();
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [hasNativePurchases, user?.id, session?.access_token]);
+
   const purchaseProduct = useCallback(
     async (productId: string) => {
       if (!hasNativePurchases) {
