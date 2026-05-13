@@ -85,7 +85,7 @@ export const DailyGoals = () => {
 
   const toggleGoal = async (goal: DailyGoal) => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
     const newValue = !completedGoals[goal.field];
     
     setCompletedGoals(prev => ({ ...prev, [goal.field]: newValue }));
