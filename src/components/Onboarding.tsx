@@ -17,6 +17,7 @@ interface OnboardingData {
   substances: string[];
   sobrietyStartDate: string;
   dailySpending: number;
+  spendingBreakdown?: Array<{ name: string; amount: number }>;
   sponsorPhone?: string;
   emergencyContact?: string;
   personalReminder?: string;
