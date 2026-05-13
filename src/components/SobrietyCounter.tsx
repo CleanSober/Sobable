@@ -211,11 +211,6 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                   <span className="text-xs text-foreground/80 font-medium tracking-wide mt-1">
                     {wording.counterLabel}
                   </span>
-                  {next && (
-                    <span className="text-[9px] text-muted-foreground mt-0.5">
-                      {Math.round(ringPct * 100)}% → {formatMilestoneName(next.name, wording.statusWord)}
-                    </span>
-                  )}
                 </div>
                 <Sparkles className="absolute top-1 right-3 w-4 h-4 text-accent animate-pulse" />
               </div>
