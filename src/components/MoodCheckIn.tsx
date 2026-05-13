@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { cn } from "@/lib/utils";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 // ─── Data ──────────────────────────────────────────────
 const moodEmojis = ["😔", "😕", "😐", "🙂", "😊", "😄", "🤗", "😁", "🥳", "🌟"];
