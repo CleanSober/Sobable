@@ -10,11 +10,58 @@ interface SobrietyCounterProps {
   daysSober: number;
   startDate: string;
   substances?: string[] | null;
+  compact?: boolean;
 }
 
-export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
+export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact = false }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
+
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="card-enhanced relative overflow-hidden"
+      >
+        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-60 h-60 bg-primary/15 blur-[60px] rounded-full" />
+        </div>
+        <div className="relative z-10 p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-primary/15 border border-primary/20 icon-glow">
+              <Flame className="w-5 h-5 text-primary" />
+            </div>
+            <div className="leading-tight">
+              <motion.span
+                key={daysSober}
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="text-3xl font-bold text-gradient tracking-tight"
+              >
+                {daysSober}
+              </motion.span>
+              <span className="ml-2 text-xs text-foreground/80 font-medium">
+                {wording.counterLabel}
+              </span>
+            </div>
+          </div>
+          {next && (
+            <div className="text-right">
+              <p className="text-[10px] text-muted-foreground font-medium">
+                {formatMilestoneName(next.name, wording.statusWord)}
+              </p>
+              <p className="text-sm text-accent font-semibold">
+                {next.days - daysSober} days to go
+              </p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
 
   // Exact calendar breakdown using actual start date
   const computeExact = () => {
