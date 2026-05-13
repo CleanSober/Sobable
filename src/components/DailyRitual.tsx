@@ -38,6 +38,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
   const { user } = useAuth();
   const { isPremium } = usePremiumStatus();
   const { userXP, claiming, claimDailyReward, canClaimDailyReward } = useGamification();
+  const today = useTodayLocal();
 
   const [goals, setGoals] = useState<Record<string, boolean>>({
     mood_logged: false,
