@@ -109,11 +109,31 @@ const badges: Badge[] = [
   { id: "year8", name: "Eight Year Elite", description: "8 years of excellence", icon: Diamond, daysRequired: 2920, color: "from-cyan-400 to-teal-500" },
   { id: "year9", name: "Nine Year Noble", description: "9 years of honor", icon: Shield, daysRequired: 3285, color: "from-violet-400 to-purple-500" },
   { id: "year10", name: "Decade of Freedom", description: "10 years - a true inspiration", icon: Gem, daysRequired: 3650, color: "from-emerald-400 to-green-600" },
-  
-  // Years 15-25
+
+  // Years 11-14
+  { id: "year11", name: "Eleven Year Ember", description: "11 years burning bright", icon: Flame, daysRequired: 4015, color: "from-orange-400 to-amber-500" },
+  { id: "year12", name: "Twelve Year Titan", description: "12 years of strength", icon: Mountain, daysRequired: 4380, color: "from-slate-400 to-stone-500" },
+  { id: "year13", name: "Thirteen Year Beacon", description: "13 years of guiding light", icon: Sun, daysRequired: 4745, color: "from-yellow-300 to-orange-400" },
+  { id: "year14", name: "Fourteen Year Force", description: "14 years of resolve", icon: Zap, daysRequired: 5110, color: "from-indigo-400 to-blue-500" },
+
+  // Years 15-19
   { id: "year15", name: "15 Year Phoenix", description: "15 years risen from ashes", icon: Flame, daysRequired: 5475, color: "from-orange-400 to-red-600" },
+  { id: "year16", name: "Sixteen Year Sentinel", description: "16 years standing tall", icon: Shield, daysRequired: 5840, color: "from-teal-400 to-cyan-600" },
+  { id: "year17", name: "Seventeen Year Spark", description: "17 years of inspiration", icon: Sparkles, daysRequired: 6205, color: "from-pink-400 to-rose-500" },
+  { id: "year18", name: "Eighteen Year Elder", description: "18 years of wisdom", icon: Moon, daysRequired: 6570, color: "from-indigo-500 to-purple-600" },
+  { id: "year19", name: "Nineteen Year Noble", description: "19 years of honor", icon: Crown, daysRequired: 6935, color: "from-amber-400 to-yellow-500" },
+
+  // Years 20-29
   { id: "year20", name: "Two Decade Diamond", description: "20 years of unbreakable spirit", icon: Diamond, daysRequired: 7300, color: "from-blue-300 to-cyan-400" },
+  { id: "year21", name: "Twenty-One Year Ace", description: "21 years of mastery", icon: Star, daysRequired: 7665, color: "from-yellow-400 to-amber-500" },
+  { id: "year22", name: "Twenty-Two Year Beacon", description: "22 years lighting the way", icon: Sun, daysRequired: 8030, color: "from-orange-300 to-amber-400" },
+  { id: "year23", name: "Twenty-Three Year Sage", description: "23 years of wisdom", icon: TreePine, daysRequired: 8395, color: "from-green-500 to-emerald-600" },
+  { id: "year24", name: "Twenty-Four Year Titan", description: "24 years of greatness", icon: Mountain, daysRequired: 8760, color: "from-slate-500 to-gray-600" },
   { id: "year25", name: "Silver Jubilee", description: "25 years of living proof", icon: Crown, daysRequired: 9125, color: "from-gray-300 to-slate-400" },
+  { id: "year26", name: "Twenty-Six Year Star", description: "26 years shining on", icon: Star, daysRequired: 9490, color: "from-cyan-400 to-blue-500" },
+  { id: "year27", name: "Twenty-Seven Year Spirit", description: "27 years unbroken", icon: Heart, daysRequired: 9855, color: "from-rose-400 to-pink-500" },
+  { id: "year28", name: "Twenty-Eight Year Elite", description: "28 years of excellence", icon: Award, daysRequired: 10220, color: "from-violet-400 to-purple-500" },
+  { id: "year29", name: "Twenty-Nine Year Anchor", description: "29 years steady and strong", icon: Shield, daysRequired: 10585, color: "from-blue-500 to-indigo-600" },
   
   // Years 30-50
   { id: "year30", name: "Three Decade Legend", description: "30 years of legacy", icon: Trophy, daysRequired: 10950, color: "from-amber-400 to-yellow-600" },
