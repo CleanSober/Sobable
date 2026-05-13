@@ -15,6 +15,7 @@ interface QuickAction {
   gradient: string;
   glowColor: string;
   action: () => void;
+  relevance: number;
 }
 
 export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
