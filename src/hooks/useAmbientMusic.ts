@@ -71,6 +71,83 @@ export const useAmbientMusic = () => {
     }
   }, []);
 
+  const watchRewardedAd = useCallback(async (): Promise<boolean> => {
+    if (!Capacitor.isNativePlatform()) return false;
+
+    const unitIdError = admobConfig.getUnitIdError("rewarded");
+    if (unitIdError) {
+      console.warn("Rewarded ad unavailable:", unitIdError);
+      return false;
+    }
+
+    const adUnitIds = admobConfig.getUnitIds();
+    if (!adUnitIds.rewarded) return false;
+
+    try {
+      await AdMob.prepareRewardVideoAd({
+        adId: adUnitIds.rewarded,
+        isTesting: import.meta.env.DEV,
+      });
+    } catch (err) {
+      console.warn("Rewarded prepare failed:", err);
+      return false;
+    }
+
+    return new Promise<boolean>((resolve) => {
+      let earned = false;
+      let settled = false;
+      const finish = (value: boolean) => {
+        if (settled) return;
+        settled = true;
+        rewardedListener.then((l) => l.remove()).catch(() => undefined);
+        dismissedListener.then((l) => l.remove()).catch(() => undefined);
+        failedListener.then((l) => l.remove()).catch(() => undefined);
+        resolve(value);
+      };
+      const rewardedListener = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+        earned = true;
+      });
+      const dismissedListener = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+        finish(earned);
+      });
+      const failedListener = AdMob.addListener(RewardAdPluginEvents.FailedToLoad, () => {
+        finish(false);
+      });
+      AdMob.showRewardVideoAd().catch((err) => {
+        console.warn("Rewarded show failed:", err);
+        finish(false);
+      });
+    });
+  }, []);
+
+  const claimAdPass = useCallback(async (source: "rewarded_ad" | "rewarded_ad_web") => {
+    const { data, error } = await supabase.functions.invoke("claim-ambient-pass", {
+      body: { source },
+    });
+    if (error) {
+      console.warn("claim-ambient-pass error", error);
+      return false;
+    }
+    return Boolean(data?.success);
+  }, []);
+
+  const requestMusic = useCallback(
+    async (type: string, duration: number, accessToken: string) => {
+      return fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ambient-music`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ type, duration }),
+        },
+      );
+    },
+    [],
+  );
+
   const generateAndPlay = useCallback(async (type: string, duration: number = 30) => {
     setIsLoading(true);
     try {
@@ -83,17 +160,32 @@ export const useAmbientMusic = () => {
         return null;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ambient-music`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ type, duration }),
+      let response = await requestMusic(type, duration, session.access_token);
+
+      // Premium-required fallback: offer rewarded ad to unlock for 1 hour
+      if (response.status === 403) {
+        const errorData = await response.clone().json().catch(() => ({}));
+        if (errorData?.code === "PREMIUM_REQUIRED") {
+          if (!Capacitor.isNativePlatform()) {
+            toast.error("Watch-ad unlock is only available in the mobile app. Upgrade to Sober Club on web.");
+            return null;
+          }
+
+          toast.info("Watch a short ad to unlock ambient music for 1 hour");
+          const earned = await watchRewardedAd();
+          if (!earned) {
+            toast.error("Ad wasn't completed. Ambient music stays locked.");
+            return null;
+          }
+          const granted = await claimAdPass("rewarded_ad");
+          if (!granted) {
+            toast.error("Couldn't activate your unlock. Try again in a moment.");
+            return null;
+          }
+          toast.success("Unlocked! Loading ambient music…");
+          response = await requestMusic(type, duration, session.access_token);
         }
-      );
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -138,7 +230,7 @@ export const useAmbientMusic = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [createNativeAudioUrl, unlockNativeAudioPlayback, waitForAudioReady]);
+  }, [claimAdPass, createNativeAudioUrl, requestMusic, unlockNativeAudioPlayback, waitForAudioReady, watchRewardedAd]);
 
   const play = useCallback(() => {
     if (audioRef.current) {
