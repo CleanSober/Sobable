@@ -104,7 +104,8 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
   useEffect(() => {
     fetchAll();
-  }, [fetchAll]);
+    // `today` re-renders at local midnight, triggering a fresh fetch and reset
+  }, [fetchAll, today]);
 
   const completedCount = Object.values(goals).filter(Boolean).length;
   const allDone = completedCount === GOALS.length;
