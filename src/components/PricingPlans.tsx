@@ -112,58 +112,6 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         </p>
       </div>
 
-      {/* 7-day Preview Pass via rewarded ad — one-time */}
-      {!previewPass.alreadyClaimed && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border-2 border-dashed border-amber-500/40 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-3 space-y-2"
-        >
-          <div className="flex items-start gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
-              <Gift className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground">7-Day Preview Pass</p>
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                {isNative
-                  ? "Watch a short ad to unlock full Sober Club access for 7 days. One-time only."
-                  : "Try Sober Club free for 7 days. One-time only."}
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={handleClaimPreviewPass}
-            disabled={claimingPass}
-            variant="outline"
-            className="w-full h-9 text-xs font-semibold border-amber-500/50 text-amber-600 hover:bg-amber-500/10 hover:text-amber-700"
-          >
-            {claimingPass ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                {isNative ? "Loading ad..." : "Unlocking..."}
-              </>
-            ) : (
-              <>
-                <PlayCircle className="w-3.5 h-3.5 mr-1.5" />
-                {isNative ? "Watch ad · Unlock 7 days free" : "Unlock 7 days free"}
-              </>
-            )}
-          </Button>
-        </motion.div>
-      )}
-
-      {previewPass.alreadyClaimed && previewPass.isActive && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-center">
-          <p className="text-xs font-semibold text-amber-600">
-            Preview Pass active · {previewPass.daysRemaining} day{previewPass.daysRemaining === 1 ? "" : "s"} left
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">
-            Subscribe below to keep full access after your pass ends.
-          </p>
-        </div>
-      )}
-
       {/* Plan selector */}
       <div className="grid grid-cols-2 gap-2.5">
         <button
