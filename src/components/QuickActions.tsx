@@ -140,7 +140,10 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
         <h3 className="text-sm font-semibold text-foreground">Quick Actions</h3>
       </div>
       
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory">
+      <div
+        className="grid gap-1.5 sm:gap-2"
+        style={{ gridTemplateColumns: `repeat(${actions.length}, minmax(0, 1fr))` }}
+      >
         {actions.map((action, index) => {
           const Icon = action.icon;
           return (
@@ -151,7 +154,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
               transition={{ delay: index * 0.05 }}
               whileTap={{ scale: 0.92 }}
               onClick={action.action}
-              className="group flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl bg-secondary/40 active:bg-secondary/70 border border-transparent active:border-border/50 transition-all duration-200 min-w-[72px] snap-start flex-shrink-0"
+              className="group flex flex-col items-center justify-start gap-1.5 p-1.5 sm:p-2.5 rounded-xl bg-secondary/40 active:bg-secondary/70 border border-transparent active:border-border/50 transition-all duration-200 min-w-0 w-full"
             >
               <div 
                 className={`relative p-2 sm:p-2.5 rounded-xl bg-gradient-to-br ${action.gradient} shadow-lg transition-all duration-300`}
@@ -161,7 +164,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground leading-tight text-center">
+              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground leading-tight text-center w-full truncate">
                 {action.label}
               </span>
             </motion.button>
