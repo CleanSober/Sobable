@@ -61,10 +61,12 @@ serve(async (req) => {
 
       const activePass = passes?.[0];
       if (!activePass) {
+        // Return 200 with a locked flag so callers can handle gracefully
+        // without triggering runtime-error reporters on 4xx responses.
         return new Response(
-          JSON.stringify({ error: "Premium subscription required", code: "PREMIUM_REQUIRED" }),
+          JSON.stringify({ locked: true, code: "PREMIUM_REQUIRED" }),
           {
-            status: 403,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           },
         );
@@ -80,9 +82,9 @@ serve(async (req) => {
 
       if (!consumed || consumed.length === 0) {
         return new Response(
-          JSON.stringify({ error: "Premium subscription required", code: "PREMIUM_REQUIRED" }),
+          JSON.stringify({ locked: true, code: "PREMIUM_REQUIRED" }),
           {
-            status: 403,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           },
         );
