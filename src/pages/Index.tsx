@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
 import { SobrietyCounter } from "@/components/SobrietyCounter";
+import { SEO } from "@/components/SEO";
 
 import { Onboarding } from "@/components/Onboarding";
 import { BottomTabs, type TabId, TAB_ORDER } from "@/components/BottomTabs";
