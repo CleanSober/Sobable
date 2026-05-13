@@ -15,13 +15,6 @@ interface SobrietyCounterProps {
 export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
-  const [exactMode, setExactMode] = useState(false);
-
-  // Approximate breakdown (fixed 365/30 day buckets)
-  const approxYears = Math.floor(daysSober / 365);
-  const approxRemAfterYears = daysSober - approxYears * 365;
-  const approxMonths = Math.floor(approxRemAfterYears / 30);
-  const approxDays = approxRemAfterYears - approxMonths * 30;
 
   // Exact calendar breakdown using actual start date
   const computeExact = () => {
@@ -32,7 +25,6 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
     let days = now.getDate() - start.getDate();
     if (days < 0) {
       months -= 1;
-      // days in previous month
       const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
       days += prevMonth;
     }
@@ -43,9 +35,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
     return { years: Math.max(0, years), months: Math.max(0, months), days: Math.max(0, days) };
   };
 
-  const { years, months, days } = exactMode
-    ? computeExact()
-    : { years: approxYears, months: approxMonths, days: approxDays };
+  const { years, months, days } = computeExact();
 
   const breakdown = [
     { label: days === 1 ? "Day" : "Days", value: days, icon: "✨" },
