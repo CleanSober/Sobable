@@ -746,6 +746,21 @@ const Index = () => {
 
   return (
     <XPNotificationProvider>
+      <SEO
+        title="Sobable — Free Sobriety Tracker & Sober Days Counter"
+        description="Track sober days, see money saved, log triggers, and prevent relapse. Free, private sobriety tracker used by 50,000+ people in recovery."
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "Is Sobable really free?", acceptedAnswer: { "@type": "Answer", text: "Yes! All core features — day counter, money saved, mood tracking, trigger logging — are 100% free forever. We offer an optional premium 'Sober Club' for advanced AI coaching and community features." } },
+            { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Absolutely. Your recovery journey is personal. We use bank-level encryption and never sell your data. You can use the app completely anonymously." } },
+            { "@type": "Question", name: "What if I relapse?", acceptedAnswer: { "@type": "Answer", text: "Recovery isn't linear. Sobable has a built-in relapse prevention plan, emergency SOS button, and supportive community. You can reset your counter without shame — what matters is getting back up." } },
+            { "@type": "Question", name: "Does it work for all addictions?", acceptedAnswer: { "@type": "Answer", text: "Yes. Sobable works for alcohol, drugs, smoking, gambling, and more. You customize it to your specific recovery journey during onboarding." } },
+          ],
+        }}
+      />
       <div className="min-h-screen min-h-[100dvh] bg-background noise-overlay">
         {/* Ambient background effects */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
