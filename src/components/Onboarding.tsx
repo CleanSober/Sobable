@@ -40,6 +40,7 @@ interface OnboardingDraft {
   selectedSubstances: string[];
   startDate?: string; // ISO yyyy-MM-dd
   dailySpending: string;
+  spendingBreakdown: Array<{ name: string; amount: number }>;
   personalReminder: string;
   sponsorPhone: string;
   emergencyContact: string;
