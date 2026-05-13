@@ -376,7 +376,7 @@ export const BrandAssets = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 };
