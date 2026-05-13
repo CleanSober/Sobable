@@ -46,6 +46,16 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
 
   const actions: QuickAction[] = [
     {
+      id: "sos",
+      label: "SOS Routine",
+      icon: ShieldAlert,
+      gradient: "from-rose-500 to-amber-500",
+      glowColor: "12 90% 55%",
+      // Always at the top — instant relapse-prevention
+      relevance: inDistress ? 120 : 110,
+      action: () => setSosOpen(true)
+    },
+    {
       id: "sponsor",
       label: "Call Sponsor",
       icon: Phone,
