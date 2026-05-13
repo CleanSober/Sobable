@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Phone, BookHeart, Wind, MessageCircle, Sparkles } from "lucide-react";
-import { useUserData } from "@/hooks/useUserData";
+import { useEffect, useState } from "react";
+import { useUserData, useMoodEntries } from "@/hooks/useUserData";
 import { toast } from "sonner";
 import { makePhoneCall, hapticSuccess } from "@/lib/nativeActions";
 
@@ -20,9 +21,26 @@ interface QuickAction {
 
 export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const { profile } = useUserData();
+  const { getTodaysMoodEntry } = useMoodEntries();
+  const [todayCraving, setTodayCraving] = useState<number | null>(null);
+  const [todayMood, setTodayMood] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getTodaysMoodEntry().then((entry) => {
+      if (cancelled || !entry) return;
+      setTodayCraving(entry.craving_level ?? null);
+      setTodayMood(entry.mood ?? null);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const hasSponsor = !!profile?.sponsor_phone;
   const hasReminder = !!profile?.personal_reminder;
+  // Higher craving / lower mood => crisis-oriented actions surface first
+  const highCraving = (todayCraving ?? 0) >= 7;
+  const lowMood = todayMood !== null && todayMood <= 4;
+  const inDistress = highCraving || lowMood;
 
   const actions: QuickAction[] = [
     {
@@ -31,8 +49,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: Phone,
       gradient: "from-emerald-400 to-teal-500",
       glowColor: "168 84% 45%",
-      // Highly relevant when configured; otherwise deprioritized
-      relevance: hasSponsor ? 100 : 20,
+      // Boosted in distress when sponsor is configured
+      relevance: hasSponsor ? (inDistress ? 95 : 70) : 20,
       action: async () => {
         if (profile?.sponsor_phone) {
           await makePhoneCall(profile.sponsor_phone);
@@ -47,7 +65,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: BookHeart,
       gradient: "from-pink-400 to-rose-500",
       glowColor: "340 82% 52%",
-      relevance: hasReminder ? 90 : 25,
+      // Boost "My Why" when craving high or mood low — motivational reminder
+      relevance: hasReminder ? (inDistress ? 92 : 65) : 25,
       action: async () => {
         if (profile?.personal_reminder) {
           await hapticSuccess();
@@ -66,8 +85,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: Wind,
       gradient: "from-blue-400 to-cyan-500",
       glowColor: "190 90% 50%",
-      // Always usable, baseline relevance
-      relevance: 60,
+      // Big boost when craving is high — breathing is fastest in-app intervention
+      relevance: highCraving ? 98 : (inDistress ? 75 : 60),
       action: () => {
         if (onNavigateToCheckIn) {
           onNavigateToCheckIn();
@@ -84,7 +103,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: MessageCircle,
       gradient: "from-violet-400 to-purple-500",
       glowColor: "270 76% 55%",
-      relevance: 50,
+      // Surface crisis line first when in distress
+      relevance: inDistress ? 99 : 50,
       action: () => {
         toast("988 Suicide & Crisis Lifeline", {
           description: "Call or text 988 for 24/7 free support",
