@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdmin";
+import { SEO } from "@/components/SEO";
 
 const Admin = () => {
   const { user, loading } = useAuth();
