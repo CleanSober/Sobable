@@ -226,7 +226,7 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         <div className="rounded-xl border border-border/50 bg-secondary/40 p-3 text-center space-y-1">
           <p className="text-xs font-semibold text-foreground">Available on iOS and Android</p>
           <p className="text-[11px] text-muted-foreground">
-            Sober Club subscriptions are sold through the App Store and Google Play. Open the Sober Club app on your phone to subscribe.
+            Subscriptions are sold through the App Store and Google Play. Open Sobable on your phone to subscribe.
           </p>
         </div>
       )}
