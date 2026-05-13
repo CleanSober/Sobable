@@ -125,23 +125,76 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
           )}
         </div>
 
-        {/* Main Counter */}
-        <div className="text-center mb-3">
-          <motion.div
-            key={daysSober}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="relative inline-block mb-0.5"
-          >
-            <span className="text-5xl font-bold text-gradient tracking-tight">
-              {daysSober}
-            </span>
-            <Sparkles className="absolute -top-1 -right-3 w-4 h-4 text-accent animate-pulse" />
-          </motion.div>
-          <p className="text-base text-foreground/80 font-medium tracking-wide">
-            {wording.counterLabel}
-          </p>
+        {/* Main Counter with circular progress ring to next milestone */}
+        <div className="flex flex-col items-center mb-3">
+          {(() => {
+            const size = 168;
+            const stroke = 10;
+            const radius = (size - stroke) / 2;
+            const circumference = 2 * Math.PI * radius;
+            const milestoneStops = [0, 1, 7, 30, 60, 90, 180, 365, 730, 1095, 1825, 3650];
+            const prevMilestone = next
+              ? milestoneStops.filter((d) => d < next.days && d <= daysSober).pop() ?? 0
+              : 0;
+            const span = next ? Math.max(1, next.days - prevMilestone) : 1;
+            const into = Math.min(span, Math.max(0, daysSober - prevMilestone));
+            const ringPct = next ? into / span : 1;
+            const dashOffset = circumference * (1 - ringPct);
+            return (
+              <div className="relative" style={{ width: size, height: size }}>
+                <svg width={size} height={size} className="-rotate-90">
+                  <defs>
+                    <linearGradient id="sobrietyRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" />
+                      <stop offset="100%" stopColor="hsl(var(--accent))" />
+                    </linearGradient>
+                  </defs>
+                  <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="hsl(var(--muted))"
+                    strokeOpacity={0.35}
+                    strokeWidth={stroke}
+                  />
+                  <motion.circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="url(#sobrietyRing)"
+                    strokeWidth={stroke}
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset: dashOffset }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                  <motion.span
+                    key={daysSober}
+                    initial={{ scale: 0.85, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    className="text-5xl font-bold text-gradient tracking-tight leading-none"
+                  >
+                    {daysSober}
+                  </motion.span>
+                  <span className="text-xs text-foreground/80 font-medium tracking-wide mt-1">
+                    {wording.counterLabel}
+                  </span>
+                  {next && (
+                    <span className="text-[9px] text-muted-foreground mt-0.5">
+                      {Math.round(ringPct * 100)}% → {next.name}
+                    </span>
+                  )}
+                </div>
+                <Sparkles className="absolute top-1 right-3 w-4 h-4 text-accent animate-pulse" />
+              </div>
+            );
+          })()}
         </div>
 
         <div className="flex justify-center mb-2">
