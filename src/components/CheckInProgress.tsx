@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Check, Circle, Heart, BookOpen, Wind, AlertTriangle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface GoalStatus {
   mood_logged: boolean;
