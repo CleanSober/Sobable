@@ -74,14 +74,13 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
         .maybeSingle(),
     ]);
 
-    if (goalsRes.data) {
-      setGoals({
-        mood_logged: goalsRes.data.mood_logged,
-        trigger_logged: goalsRes.data.trigger_logged,
-        meditation_done: goalsRes.data.meditation_done,
-        journal_written: goalsRes.data.journal_written,
-      });
-    }
+    // Always set goals — null means a brand-new day with no row yet (reset)
+    setGoals({
+      mood_logged: goalsRes.data?.mood_logged ?? false,
+      trigger_logged: goalsRes.data?.trigger_logged ?? false,
+      meditation_done: goalsRes.data?.meditation_done ?? false,
+      journal_written: goalsRes.data?.journal_written ?? false,
+    });
 
     if (streakRes.data) {
       setStreak({
