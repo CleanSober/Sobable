@@ -3,15 +3,13 @@ import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
   Check, Crown, Loader2, Shield, Bot, Users, Brain,
-  Compass, Zap, Heart, BarChart3, ExternalLink, PlayCircle, Gift,
+  Compass, Zap, Heart, BarChart3, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
-import { usePreviewPass } from "@/hooks/usePreviewPass";
-import { useAdMob } from "@/hooks/useAdMob";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
