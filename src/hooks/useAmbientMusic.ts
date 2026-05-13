@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
+import { AdMob, RewardAdPluginEvents } from "@capacitor-community/admob";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { admobConfig } from "@/lib/admobConfig";
 
 export const useAmbientMusic = () => {
   const [isLoading, setIsLoading] = useState(false);
