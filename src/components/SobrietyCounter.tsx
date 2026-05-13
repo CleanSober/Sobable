@@ -126,12 +126,11 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {[
-            { label: "Weeks", value: weeks, icon: "📅" },
-            { label: "Months", value: months, icon: "🌙" },
-            { label: "Years", value: years, icon: "🏆" },
-          ].map((item, index) => (
+        <div
+          className="grid gap-2 mb-3"
+          style={{ gridTemplateColumns: `repeat(${breakdown.length}, minmax(0, 1fr))` }}
+        >
+          {breakdown.map((item, index) => (
             <motion.div
               key={item.label}
               initial={{ opacity: 0, y: 10 }}
