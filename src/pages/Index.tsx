@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { getLatestBadge } from "@/lib/badges";
 import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
