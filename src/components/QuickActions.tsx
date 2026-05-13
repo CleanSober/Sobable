@@ -47,7 +47,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const actions: QuickAction[] = [
     {
       id: "sos",
-      label: "SOS Routine",
+      label: "SOS",
       icon: ShieldAlert,
       gradient: "from-rose-500 to-amber-500",
       glowColor: "12 90% 55%",
@@ -57,7 +57,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
     },
     {
       id: "sponsor",
-      label: "Call Sponsor",
+      label: "Sponsor",
       icon: Phone,
       gradient: "from-emerald-400 to-teal-500",
       glowColor: "168 84% 45%",
@@ -164,7 +164,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground leading-tight text-center w-full truncate">
+              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground leading-tight text-center w-full break-words">
                 {action.label}
               </span>
             </motion.button>
