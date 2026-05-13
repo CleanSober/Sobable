@@ -319,7 +319,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
                 <TrendingUp className="w-4 h-4 text-primary" />
                 <span className="text-foreground font-medium">Next Milestone</span>
               </div>
-              <span className="text-primary font-semibold">{next.name}</span>
+              <span className="text-primary font-semibold">{formatMilestoneName(next.name, wording.statusWord)}</span>
             </div>
             <div className="relative h-3 bg-muted/50 rounded-full overflow-hidden">
               <motion.div
