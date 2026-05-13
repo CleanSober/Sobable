@@ -11,8 +11,29 @@ import { useInterstitialAd } from "./InterstitialAd";
 import { badges, type Badge } from "@/lib/badges";
 import { copyText } from "@/lib/clipboard";
 
+// Recovery-focused hashtag pool. #Sobable is always included.
+const RECOVERY_HASHTAGS = [
+  "#Recovery", "#Sobriety", "#SoberLife", "#OneDayAtATime", "#SoberJourney",
+  "#Healing", "#MentalHealth", "#Progress", "#StrongerEveryDay", "#Mindfulness",
+  "#SoberAF", "#RecoveryWins", "#CleanAndSober", "#NewBeginnings", "#SelfLove",
+];
+
+// Pick 2 deterministic recovery hashtags for a badge + always include #Sobable.
+const getSuggestedHashtags = (badge: Badge): string[] => {
+  let seed = 0;
+  for (let i = 0; i < badge.id.length; i++) seed = (seed * 31 + badge.id.charCodeAt(i)) >>> 0;
+  const pool = [...RECOVERY_HASHTAGS];
+  const picks: string[] = [];
+  for (let i = 0; i < 2 && pool.length; i++) {
+    seed = (seed * 1103515245 + 12345) >>> 0;
+    picks.push(pool.splice(seed % pool.length, 1)[0]);
+  }
+  return [...picks, "#Sobable"];
+};
+
 const getShareText = (badge: Badge, daysSober: number) =>
-  `🎉 I just earned the "${badge.name}" badge! ${daysSober} days sober and counting. ${badge.description} #Sobriety #Recovery #Progress`;
+  `🎉 I just earned the "${badge.name}" badge! ${daysSober} days sober and counting. ${badge.description} ${getSuggestedHashtags(badge).join(" ")}`;
+
 
 const getShareUrl = () => window.location.origin;
 
