@@ -15,9 +15,25 @@ interface SobrietyCounterProps {
 export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
-  const weeks = Math.floor(daysSober / 7);
-  const months = Math.floor(daysSober / 30);
+  // Cascading breakdown: years → months → weeks → days
   const years = Math.floor(daysSober / 365);
+  let remainderAfterYears = daysSober - years * 365;
+  const months = Math.floor(remainderAfterYears / 30);
+  let remainderAfterMonths = remainderAfterYears - months * 30;
+  const weeks = Math.floor(remainderAfterMonths / 7);
+  const remainderDays = remainderAfterMonths - weeks * 7;
+
+  const breakdown = [
+    { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
+    { label: months === 1 ? "Month" : "Months", value: months, icon: "🌙" },
+    { label: weeks === 1 ? "Week" : "Weeks", value: weeks, icon: "📅" },
+    { label: remainderDays === 1 ? "Day" : "Days", value: remainderDays, icon: "✨" },
+  ].filter((item) => item.value > 0);
+
+  // Always show at least Days if everything is zero (day 0)
+  if (breakdown.length === 0) {
+    breakdown.push({ label: "Days", value: 0, icon: "✨" });
+  }
 
   const progressToNext = next
     ? ((daysSober / next.days) * 100).toFixed(0)
@@ -110,12 +126,11 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {[
-            { label: "Weeks", value: weeks, icon: "📅" },
-            { label: "Months", value: months, icon: "🌙" },
-            { label: "Years", value: years, icon: "🏆" },
-          ].map((item, index) => (
+        <div
+          className="grid gap-2 mb-3"
+          style={{ gridTemplateColumns: `repeat(${breakdown.length}, minmax(0, 1fr))` }}
+        >
+          {breakdown.map((item, index) => (
             <motion.div
               key={item.label}
               initial={{ opacity: 0, y: 10 }}
