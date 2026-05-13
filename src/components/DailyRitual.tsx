@@ -13,6 +13,7 @@ import { useGamification, XP_REWARDS, getLevelTitle } from "@/hooks/useGamificat
 import { PricingPlans } from "@/components/PricingPlans";
 import { setPaywallVisibility } from "@/lib/paywallVisibility";
 import { toast } from "sonner";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface DailyRitualProps {
   onNavigateToCheckIn: () => void;
