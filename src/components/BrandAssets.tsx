@@ -3,6 +3,7 @@ import { Download, Image, Smartphone, Share2, FileText, Play, Video } from "luci
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SEO } from "@/components/SEO";
 
 // Import brand assets
 import appIcon from "@/assets/brand/app-icon-1024.png";
