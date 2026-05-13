@@ -158,7 +158,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
   const updateStreak = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
 
     const { data: existing } = await supabase
       .from("user_streaks")
@@ -170,7 +170,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
     if (existing) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yesterdayStr = getLocalDateString(yesterday);
 
       let newStreak = 1;
       if (existing.last_activity_date === yesterdayStr) {
