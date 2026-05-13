@@ -210,6 +210,11 @@ LEGAL REQUIREMENTS: We may retain certain data as required by applicable laws, r
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Privacy Policy — Sobable"
+        description="How Sobable handles your recovery data: end-to-end encryption, no data sales, anonymous use, and your right to delete everything."
+        path="/privacy"
+      />
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
