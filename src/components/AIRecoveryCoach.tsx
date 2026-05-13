@@ -176,6 +176,21 @@ How can I support you today?`;
         return;
       }
 
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({} as { code?: string; error?: string }));
+        if (errorData.code === "weekly_limit_reached") {
+          setFreeUsedThisWeek(true);
+          setMessages((prev) => prev.slice(0, -1));
+          setIsLoading(false);
+          setShowUpgrade(true);
+          return;
+        }
+        toast.error(errorData.error || "Access denied");
+        setMessages((prev) => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to connect to coach");
