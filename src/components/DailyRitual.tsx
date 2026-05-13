@@ -64,7 +64,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
         .from("daily_goals")
         .select("mood_logged, journal_written, meditation_done, trigger_logged")
         .eq("user_id", user.id)
-        .eq("date", today)
+        .eq("date", todayDate)
         .maybeSingle(),
       supabase
         .from("user_streaks")
