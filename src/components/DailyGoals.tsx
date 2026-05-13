@@ -130,7 +130,7 @@ export const DailyGoals = () => {
 
   const updateStreak = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
 
     const { data: existing } = await supabase
       .from("user_streaks")
@@ -143,7 +143,7 @@ export const DailyGoals = () => {
       const lastDate = existing.last_activity_date;
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yesterdayStr = getLocalDateString(yesterday);
       
       let newStreak = 1;
       if (lastDate === yesterdayStr) {
