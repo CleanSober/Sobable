@@ -116,6 +116,18 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
           <span className="text-sm text-foreground/80 font-medium tracking-wide mt-2">
             {wording.counterLabel}
           </span>
+          <p className="text-xs text-muted-foreground italic mt-3 px-4 max-w-xs">
+            {(() => {
+              if (daysSober === 0) return "Day one — the bravest step. 🌱";
+              if (daysSober === 1) return "First full day in the books. ✨";
+              if (daysSober < 7) return "Building momentum, one day at a time. 💪";
+              if (daysSober < 30) return "You're forming a powerful new rhythm. 🌊";
+              if (daysSober < 90) return "Your strength is showing. Keep going. 🔥";
+              if (daysSober < 365) return "Look how far you've come. 🌟";
+              if (daysSober < 730) return "A year-plus of freedom. Extraordinary. 🏆";
+              return "A life rebuilt — you are the proof. 👑";
+            })()}
+          </p>
           <Sparkles className="absolute top-2 right-6 w-4 h-4 text-accent animate-pulse" />
         </div>
 
