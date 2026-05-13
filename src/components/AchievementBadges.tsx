@@ -148,10 +148,12 @@ const badges: Badge[] = [
 
 interface AchievementBadgesProps {
   daysSober: number;
+  startDate?: string;
 }
 
-export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
+export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesProps) => {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
   const { showAd } = useInterstitialAd();
   const previousUnlockedCount = useRef<number | null>(null);
 
