@@ -13,7 +13,7 @@ interface SobrietyCounterProps {
 
 export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact = false }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
-  const { reached, next } = getMilestones(daysSober);
+  const { next } = getMilestones(daysSober);
 
   if (compact) {
     return (
