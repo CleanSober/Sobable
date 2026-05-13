@@ -413,6 +413,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
   // Show interstitial ad
   const showInterstitial = useCallback(async (): Promise<boolean> => {
+    if (isPremiumRef.current) return true; // Premium users skip ads
     if (!Capacitor.isNativePlatform()) return false;
     
     if (!isInterstitialLoaded) {
