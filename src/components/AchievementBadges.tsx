@@ -214,6 +214,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
               {unlockedBadges.length}/{badges.length}
             </span>
           </div>
+        </div>
         {nextBadge && (
           <div className="flex items-center gap-2 mt-1">
             <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
