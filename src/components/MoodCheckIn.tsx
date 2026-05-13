@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { cn } from "@/lib/utils";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 // ─── Data ──────────────────────────────────────────────
 const moodEmojis = ["😔", "😕", "😐", "🙂", "😊", "😄", "🤗", "😁", "🥳", "🌟"];
@@ -85,7 +86,7 @@ const stepLabels: Record<Step, string> = {
 export const MoodCheckIn = () => {
   const { user } = useAuth();
   const { addXP } = useGamification();
-
+  const today = useTodayLocal();
   // Form state
   const [mood, setMood] = useState(5);
   const [craving, setCraving] = useState(0);
@@ -109,12 +110,23 @@ export const MoodCheckIn = () => {
 
   useEffect(() => {
     if (!user) return;
+    // Reset the form when the local day rolls over so a new check-in can happen
+    setMood(5);
+    setCraving(0);
+    setSelectedEmotions([]);
+    setEnergy(3);
+    setSelectedSymptoms([]);
+    setSocial(3);
+    setGratitude("");
+    setNote("");
+    setCurrentStep(0);
+    setCompleted(false);
+    setWasAlreadyCompleted(false);
     checkExistingEntry();
-  }, [user]);
+  }, [user, today]);
 
   const checkExistingEntry = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
 
     const { data } = await supabase
       .from("mood_entries")
@@ -154,7 +166,8 @@ export const MoodCheckIn = () => {
     }
     setLoading(true);
 
-    const today = new Date().toISOString().split("T")[0];
+    // Use the local-tz date that the rest of the app keys on (avoids 6h UTC drift)
+    const todayDate = getLocalDateString();
 
     // Build the note with extra context
     const fullNote = [
@@ -173,7 +186,7 @@ export const MoodCheckIn = () => {
     const { error } = await supabase.from("mood_entries").upsert(
       {
         user_id: user.id,
-        date: today,
+        date: todayDate,
         mood,
         craving_level: craving,
         note: fullNote || null,
@@ -188,7 +201,7 @@ export const MoodCheckIn = () => {
     }
 
     await supabase.from("daily_goals").upsert(
-      { user_id: user.id, date: today, mood_logged: true },
+      { user_id: user.id, date: todayDate, mood_logged: true },
       { onConflict: "user_id,date" }
     );
 

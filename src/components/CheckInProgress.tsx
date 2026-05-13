@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Check, Circle, Heart, BookOpen, Wind, AlertTriangle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface GoalStatus {
   mood_logged: boolean;
@@ -20,6 +21,7 @@ const goals = [
 
 export const CheckInProgress = memo(() => {
   const { user } = useAuth();
+  const today = useTodayLocal();
   const [status, setStatus] = useState<GoalStatus>({
     mood_logged: false,
     journal_written: false,
@@ -29,10 +31,17 @@ export const CheckInProgress = memo(() => {
 
   useEffect(() => {
     if (!user) return;
+    // Reset visible progress at local midnight, then load fresh row for the new day
+    setStatus({
+      mood_logged: false,
+      journal_written: false,
+      meditation_done: false,
+      trigger_logged: false,
+    });
     fetchGoals();
 
     const channel = supabase
-      .channel(`checkin-progress-${user.id}`)
+      .channel(`checkin-progress-${user.id}-${today}`)
       .on("postgres_changes", {
         event: "*",
         schema: "public",
@@ -40,7 +49,8 @@ export const CheckInProgress = memo(() => {
         filter: `user_id=eq.${user.id}`,
       }, (payload) => {
         const data = payload.new as any;
-        if (data) {
+        // Only apply realtime updates that belong to today's row
+        if (data && data.date === today) {
           setStatus({
             mood_logged: data.mood_logged ?? false,
             journal_written: data.journal_written ?? false,
@@ -52,26 +62,24 @@ export const CheckInProgress = memo(() => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [user, today]);
 
   const fetchGoals = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const todayDate = getLocalDateString();
     const { data } = await supabase
       .from("daily_goals")
       .select("mood_logged, journal_written, meditation_done, trigger_logged")
       .eq("user_id", user.id)
-      .eq("date", today)
+      .eq("date", todayDate)
       .maybeSingle();
 
-    if (data) {
-      setStatus({
-        mood_logged: data.mood_logged ?? false,
-        journal_written: data.journal_written ?? false,
-        meditation_done: data.meditation_done ?? false,
-        trigger_logged: data.trigger_logged ?? false,
-      });
-    }
+    setStatus({
+      mood_logged: data?.mood_logged ?? false,
+      journal_written: data?.journal_written ?? false,
+      meditation_done: data?.meditation_done ?? false,
+      trigger_logged: data?.trigger_logged ?? false,
+    });
   };
 
   const completed = goals.filter((g) => status[g.key]).length;

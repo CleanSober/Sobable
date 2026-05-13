@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useInterstitialAd } from "./InterstitialAd";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface DailyGoal {
   id: string;
@@ -25,6 +26,7 @@ const goals: DailyGoal[] = [
 export const DailyGoals = () => {
   const { user } = useAuth();
   const { showAd } = useInterstitialAd();
+  const today = useTodayLocal();
   const [completedGoals, setCompletedGoals] = useState<Record<string, boolean>>({
     mood_logged: false,
     trigger_logged: false,
@@ -36,29 +38,34 @@ export const DailyGoals = () => {
 
   useEffect(() => {
     if (!user) return;
+    // Reset on day rollover before re-fetching
+    setCompletedGoals({
+      mood_logged: false,
+      trigger_logged: false,
+      meditation_done: false,
+      journal_written: false,
+    });
     fetchTodayGoals();
     fetchStreak();
-  }, [user]);
+  }, [user, today]);
 
   const fetchTodayGoals = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
-    
+    const todayDate = getLocalDateString();
+
     const { data } = await supabase
       .from("daily_goals")
       .select("*")
       .eq("user_id", user.id)
-      .eq("date", today)
+      .eq("date", todayDate)
       .maybeSingle();
 
-    if (data) {
-      setCompletedGoals({
-        mood_logged: data.mood_logged,
-        trigger_logged: data.trigger_logged,
-        meditation_done: data.meditation_done,
-        journal_written: data.journal_written,
-      });
-    }
+    setCompletedGoals({
+      mood_logged: data?.mood_logged ?? false,
+      trigger_logged: data?.trigger_logged ?? false,
+      meditation_done: data?.meditation_done ?? false,
+      journal_written: data?.journal_written ?? false,
+    });
   };
 
   const fetchStreak = async () => {
@@ -78,7 +85,7 @@ export const DailyGoals = () => {
 
   const toggleGoal = async (goal: DailyGoal) => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
     const newValue = !completedGoals[goal.field];
     
     setCompletedGoals(prev => ({ ...prev, [goal.field]: newValue }));
@@ -123,7 +130,7 @@ export const DailyGoals = () => {
 
   const updateStreak = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
 
     const { data: existing } = await supabase
       .from("user_streaks")
@@ -136,7 +143,7 @@ export const DailyGoals = () => {
       const lastDate = existing.last_activity_date;
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yesterdayStr = getLocalDateString(yesterday);
       
       let newStreak = 1;
       if (lastDate === yesterdayStr) {

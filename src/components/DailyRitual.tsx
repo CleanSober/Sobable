@@ -13,6 +13,7 @@ import { useGamification, XP_REWARDS, getLevelTitle } from "@/hooks/useGamificat
 import { PricingPlans } from "@/components/PricingPlans";
 import { setPaywallVisibility } from "@/lib/paywallVisibility";
 import { toast } from "sonner";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface DailyRitualProps {
   onNavigateToCheckIn: () => void;
@@ -37,6 +38,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
   const { user } = useAuth();
   const { isPremium } = usePremiumStatus();
   const { userXP, claiming, claimDailyReward, canClaimDailyReward } = useGamification();
+  const today = useTodayLocal();
 
   const [goals, setGoals] = useState<Record<string, boolean>>({
     mood_logged: false,
@@ -55,14 +57,14 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
   // Single batch fetch for all daily ritual data
   const fetchAll = useCallback(async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const todayDate = getLocalDateString();
 
     const [goalsRes, streakRes] = await Promise.all([
       supabase
         .from("daily_goals")
         .select("mood_logged, journal_written, meditation_done, trigger_logged")
         .eq("user_id", user.id)
-        .eq("date", today)
+        .eq("date", todayDate)
         .maybeSingle(),
       supabase
         .from("user_streaks")
@@ -72,14 +74,13 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
         .maybeSingle(),
     ]);
 
-    if (goalsRes.data) {
-      setGoals({
-        mood_logged: goalsRes.data.mood_logged,
-        trigger_logged: goalsRes.data.trigger_logged,
-        meditation_done: goalsRes.data.meditation_done,
-        journal_written: goalsRes.data.journal_written,
-      });
-    }
+    // Always set goals — null means a brand-new day with no row yet (reset)
+    setGoals({
+      mood_logged: goalsRes.data?.mood_logged ?? false,
+      trigger_logged: goalsRes.data?.trigger_logged ?? false,
+      meditation_done: goalsRes.data?.meditation_done ?? false,
+      journal_written: goalsRes.data?.journal_written ?? false,
+    });
 
     if (streakRes.data) {
       setStreak({
@@ -103,7 +104,8 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
   useEffect(() => {
     fetchAll();
-  }, [fetchAll]);
+    // `today` re-renders at local midnight, triggering a fresh fetch and reset
+  }, [fetchAll, today]);
 
   const completedCount = Object.values(goals).filter(Boolean).length;
   const allDone = completedCount === GOALS.length;
@@ -124,14 +126,14 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
   const toggleGoal = async (goal: GoalDef) => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const todayDate = getLocalDateString();
     const newValue = !goals[goal.field];
 
     setGoals((prev) => ({ ...prev, [goal.field]: newValue }));
 
     const { error } = await supabase
       .from("daily_goals")
-      .upsert({ user_id: user.id, date: today, [goal.field]: newValue }, { onConflict: "user_id,date" });
+      .upsert({ user_id: user.id, date: todayDate, [goal.field]: newValue }, { onConflict: "user_id,date" });
 
     if (error) {
       setGoals((prev) => ({ ...prev, [goal.field]: !newValue }));
@@ -156,7 +158,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
 
   const updateStreak = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
 
     const { data: existing } = await supabase
       .from("user_streaks")
@@ -168,7 +170,7 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
     if (existing) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yesterdayStr = getLocalDateString(yesterday);
 
       let newStreak = 1;
       if (existing.last_activity_date === yesterdayStr) {

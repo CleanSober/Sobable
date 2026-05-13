@@ -14,6 +14,7 @@ import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { PricingPlans } from "@/components/PricingPlans";
 import { setPaywallVisibility } from "@/lib/paywallVisibility";
 import { toast } from "sonner";
+import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
 
 interface HabitLoopCardProps {
   onNavigateToCheckIn?: () => void;
@@ -30,6 +31,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
   const { user } = useAuth();
   const { isPremium } = usePremiumStatus();
   const { missedActions, streakAtRisk } = useSmartNotifications();
+  const today = useTodayLocal();
   const [streak, setStreak] = useState<StreakInfo>({
     current: 0,
     longest: 0,
@@ -45,7 +47,7 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
 
   const fetchStreakData = useCallback(async () => {
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
 
     const [streakData, goalsData] = await Promise.all([
       supabase
@@ -92,9 +94,11 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
 
   useEffect(() => {
     if (user) {
+      // Reset local state at day rollover, then refetch fresh data for the new day
+      setTodayComplete(false);
       fetchStreakData();
     }
-  }, [user, fetchStreakData]);
+  }, [user, fetchStreakData, today]);
 
   const handleUseFreeze = async () => {
     if (!user || !canUseFreeze) return;
