@@ -69,6 +69,9 @@ export const Onboarding = ({ onComplete, initialName, isSocialLogin }: Onboardin
     draft?.startDate ? new Date(draft.startDate) : undefined,
   );
   const [dailySpending, setDailySpending] = useState(draft?.dailySpending ?? "");
+  const [spendingBreakdown, setSpendingBreakdown] = useState<Array<{ name: string; amount: number }>>(
+    Array.isArray(draft?.spendingBreakdown) ? draft!.spendingBreakdown! : []
+  );
   const [personalReminder, setPersonalReminder] = useState(draft?.personalReminder ?? "");
   const [sponsorPhone, setSponsorPhone] = useState(draft?.sponsorPhone ?? "");
   const [emergencyContact, setEmergencyContact] = useState(draft?.emergencyContact ?? "");
