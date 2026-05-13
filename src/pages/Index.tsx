@@ -582,7 +582,7 @@ const Index = () => {
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} substances={userData.substances} />
             <CheckInProgress />
-            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} onReset={async () => {
+            {userData.dailySpending > 0 && <MoneySaved totalSaved={moneySaved} dailySpending={userData.dailySpending} daysSober={savingsDaysSober} spendingBreakdown={Array.isArray((effectiveProfile as any)?.spending_breakdown) ? (effectiveProfile as any).spending_breakdown : []} onReset={async () => {
               const prevDate = effectiveProfile?.savings_start_date || effectiveProfile?.sobriety_start_date || null;
               if (prevDate) {
                 localStorage.setItem("sober_club_savings_reset_undo", JSON.stringify({
