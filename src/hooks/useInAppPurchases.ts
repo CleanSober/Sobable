@@ -607,8 +607,26 @@ export const useInAppPurchases = () => {
 
       if (revalidated > 0) {
         toast.success("Purchases restored! Premium access is active.");
-        // Notify gated components to refetch immediately.
+        // Notify gated components and poll until the active row is visible.
         window.dispatchEvent(new Event("premium-status-refresh"));
+        (async () => {
+          for (let attempt = 0; attempt < 15; attempt++) {
+            await new Promise((r) => setTimeout(r, 1000));
+            try {
+              const { data: subRow } = await supabase
+                .from("subscriptions")
+                .select("plan_type, status")
+                .eq("user_id", user.id)
+                .in("status", ["active", "trialing"])
+                .in("plan_type", ["premium", "pro"])
+                .maybeSingle();
+              window.dispatchEvent(new Event("premium-status-refresh"));
+              if (subRow) return;
+            } catch (pollError) {
+              console.warn("[IAP] restore poll error", pollError);
+            }
+          }
+        })();
       } else {
         toast.error("Couldn't verify your previous purchase. Contact support if this persists.");
       }
