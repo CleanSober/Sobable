@@ -86,7 +86,7 @@ const stepLabels: Record<Step, string> = {
 export const MoodCheckIn = () => {
   const { user } = useAuth();
   const { addXP } = useGamification();
-
+  const today = useTodayLocal();
   // Form state
   const [mood, setMood] = useState(5);
   const [craving, setCraving] = useState(0);
