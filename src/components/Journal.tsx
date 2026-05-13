@@ -311,15 +311,28 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
 
       {/* New Entry Dialog */}
       <Dialog open={isWriting} onOpenChange={setIsWriting}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90dvh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-3 flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               Write Journal Entry
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div
+            className="space-y-4 overflow-y-auto px-6 flex-1 min-h-0"
+            onPointerDown={(e) => {
+              const target = e.target as HTMLElement;
+              const active = document.activeElement as HTMLElement | null;
+              if (
+                active &&
+                (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT') &&
+                !target.closest('textarea, input, button, [role="button"]')
+              ) {
+                active.blur();
+              }
+            }}
+          >
             {/* AI Prompt Section - Premium Feature */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -499,7 +512,7 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t border-border/50 flex-shrink-0 bg-background">
             <Button variant="outline" onClick={() => setIsWriting(false)}>
               Cancel
             </Button>
