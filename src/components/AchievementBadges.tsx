@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Award, Lock, Star, Trophy, Medal, Crown, Gem, Heart, Zap, Shield, Flame, Diamond, Sparkles, Sun, Moon, Target, Rocket, Mountain, TreePine, Infinity, Share2, X } from "lucide-react";
+import { Award, Lock, Star, Trophy, Medal, Crown, Gem, Heart, Zap, Shield, Flame, Diamond, Sparkles, Sun, Moon, Target, Rocket, Mountain, TreePine, Infinity, Share2, X, History as HistoryIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -109,11 +109,31 @@ const badges: Badge[] = [
   { id: "year8", name: "Eight Year Elite", description: "8 years of excellence", icon: Diamond, daysRequired: 2920, color: "from-cyan-400 to-teal-500" },
   { id: "year9", name: "Nine Year Noble", description: "9 years of honor", icon: Shield, daysRequired: 3285, color: "from-violet-400 to-purple-500" },
   { id: "year10", name: "Decade of Freedom", description: "10 years - a true inspiration", icon: Gem, daysRequired: 3650, color: "from-emerald-400 to-green-600" },
-  
-  // Years 15-25
+
+  // Years 11-14
+  { id: "year11", name: "Eleven Year Ember", description: "11 years burning bright", icon: Flame, daysRequired: 4015, color: "from-orange-400 to-amber-500" },
+  { id: "year12", name: "Twelve Year Titan", description: "12 years of strength", icon: Mountain, daysRequired: 4380, color: "from-slate-400 to-stone-500" },
+  { id: "year13", name: "Thirteen Year Beacon", description: "13 years of guiding light", icon: Sun, daysRequired: 4745, color: "from-yellow-300 to-orange-400" },
+  { id: "year14", name: "Fourteen Year Force", description: "14 years of resolve", icon: Zap, daysRequired: 5110, color: "from-indigo-400 to-blue-500" },
+
+  // Years 15-19
   { id: "year15", name: "15 Year Phoenix", description: "15 years risen from ashes", icon: Flame, daysRequired: 5475, color: "from-orange-400 to-red-600" },
+  { id: "year16", name: "Sixteen Year Sentinel", description: "16 years standing tall", icon: Shield, daysRequired: 5840, color: "from-teal-400 to-cyan-600" },
+  { id: "year17", name: "Seventeen Year Spark", description: "17 years of inspiration", icon: Sparkles, daysRequired: 6205, color: "from-pink-400 to-rose-500" },
+  { id: "year18", name: "Eighteen Year Elder", description: "18 years of wisdom", icon: Moon, daysRequired: 6570, color: "from-indigo-500 to-purple-600" },
+  { id: "year19", name: "Nineteen Year Noble", description: "19 years of honor", icon: Crown, daysRequired: 6935, color: "from-amber-400 to-yellow-500" },
+
+  // Years 20-29
   { id: "year20", name: "Two Decade Diamond", description: "20 years of unbreakable spirit", icon: Diamond, daysRequired: 7300, color: "from-blue-300 to-cyan-400" },
+  { id: "year21", name: "Twenty-One Year Ace", description: "21 years of mastery", icon: Star, daysRequired: 7665, color: "from-yellow-400 to-amber-500" },
+  { id: "year22", name: "Twenty-Two Year Beacon", description: "22 years lighting the way", icon: Sun, daysRequired: 8030, color: "from-orange-300 to-amber-400" },
+  { id: "year23", name: "Twenty-Three Year Sage", description: "23 years of wisdom", icon: TreePine, daysRequired: 8395, color: "from-green-500 to-emerald-600" },
+  { id: "year24", name: "Twenty-Four Year Titan", description: "24 years of greatness", icon: Mountain, daysRequired: 8760, color: "from-slate-500 to-gray-600" },
   { id: "year25", name: "Silver Jubilee", description: "25 years of living proof", icon: Crown, daysRequired: 9125, color: "from-gray-300 to-slate-400" },
+  { id: "year26", name: "Twenty-Six Year Star", description: "26 years shining on", icon: Star, daysRequired: 9490, color: "from-cyan-400 to-blue-500" },
+  { id: "year27", name: "Twenty-Seven Year Spirit", description: "27 years unbroken", icon: Heart, daysRequired: 9855, color: "from-rose-400 to-pink-500" },
+  { id: "year28", name: "Twenty-Eight Year Elite", description: "28 years of excellence", icon: Award, daysRequired: 10220, color: "from-violet-400 to-purple-500" },
+  { id: "year29", name: "Twenty-Nine Year Anchor", description: "29 years steady and strong", icon: Shield, daysRequired: 10585, color: "from-blue-500 to-indigo-600" },
   
   // Years 30-50
   { id: "year30", name: "Three Decade Legend", description: "30 years of legacy", icon: Trophy, daysRequired: 10950, color: "from-amber-400 to-yellow-600" },
@@ -128,10 +148,12 @@ const badges: Badge[] = [
 
 interface AchievementBadgesProps {
   daysSober: number;
+  startDate?: string;
 }
 
-export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
+export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesProps) => {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
   const { showAd } = useInterstitialAd();
   const previousUnlockedCount = useRef<number | null>(null);
 
@@ -139,6 +161,15 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
   const lockedBadges = badges.filter((b) => daysSober < b.daysRequired);
   const nextBadge = lockedBadges[0];
   const daysToNext = nextBadge ? nextBadge.daysRequired - daysSober : 0;
+
+  // Compute the date a badge was reached based on startDate
+  const startMs = startDate ? new Date(startDate).getTime() : null;
+  const dateForBadge = (b: Badge): string | null => {
+    if (!startMs) return null;
+    const d = new Date(startMs + (b.daysRequired - 1) * 86400000);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  };
+  const historyBadges = [...unlockedBadges].reverse();
 
   // Show interstitial ad when a new badge is unlocked
   useEffect(() => {
@@ -166,9 +197,23 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
             <Award className="w-4 h-4 text-primary" />
             Achievement Badges
           </CardTitle>
-          <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-            {unlockedBadges.length}/{badges.length}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowHistory((v) => !v)}
+              className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+                showHistory
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/70"
+              }`}
+              aria-pressed={showHistory}
+            >
+              <HistoryIcon className="w-3 h-3" />
+              History
+            </button>
+            <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {unlockedBadges.length}/{badges.length}
+            </span>
+          </div>
         </div>
         {nextBadge && (
           <div className="flex items-center gap-2 mt-1">
@@ -188,63 +233,103 @@ export const AchievementBadges = ({ daysSober }: AchievementBadgesProps) => {
       </CardHeader>
       <CardContent className="px-3 pb-3">
         <ScrollArea className="h-[280px]">
-          <div className="grid grid-cols-4 gap-2 pt-1 pb-1 pr-2">
-          {badges.map((badge, index) => {
-            const isUnlocked = daysSober >= badge.daysRequired;
-            const Icon = badge.icon;
-            const isNextUp = nextBadge?.id === badge.id;
-
-            return (
-              <motion.button
-                key={badge.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.015 }}
-                onClick={() => setSelectedBadge(badge)}
-                className={`relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all border min-h-[78px] ${
-                  isUnlocked
-                    ? "bg-gradient-to-br " + badge.color + " border-white/20 shadow-lg shadow-black/10 active:scale-95"
-                    : isNextUp
-                    ? "bg-muted/40 border-primary/40 border-dashed"
-                    : "bg-muted/30 border-border/40 opacity-70"
-                }`}
-              >
-                <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                  isUnlocked ? "bg-white/20" : "bg-muted/60"
-                }`}>
-                  {isUnlocked ? (
-                    <Icon className="w-4 h-4 text-white" />
-                  ) : (
-                    <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-                  )}
+          {showHistory ? (
+            <div className="pt-1 pb-1 pr-2 space-y-1.5">
+              {historyBadges.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <HistoryIcon className="w-8 h-8 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground">
+                    No milestones yet. Your achievement history will appear here.
+                  </p>
                 </div>
-                <span className={`text-[10px] text-center font-semibold leading-tight line-clamp-2 ${
-                  isUnlocked ? "text-white" : "text-muted-foreground"
-                }`}>
-                  {badge.name}
-                </span>
-                {isUnlocked && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-card"
-                  >
-                    <Star className="w-2 h-2 text-white" />
-                  </motion.div>
-                )}
-                {isNextUp && !isUnlocked && (
-                  <motion.div
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: 999 }}
-                    className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center ring-2 ring-card"
-                  >
-                    <Zap className="w-2 h-2 text-primary-foreground" />
-                  </motion.div>
-                )}
-              </motion.button>
-            );
-          })}
-          </div>
+              ) : (
+                historyBadges.map((badge, index) => {
+                  const Icon = badge.icon;
+                  const reachedOn = dateForBadge(badge);
+                  return (
+                    <motion.button
+                      key={badge.id}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.02 }}
+                      onClick={() => setSelectedBadge(badge)}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 active:scale-[0.99] transition-all text-left"
+                    >
+                      <div className={`relative w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br ${badge.color}`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold leading-tight truncate">{badge.name}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          Day {badge.daysRequired}
+                          {reachedOn ? ` • ${reachedOn}` : ""}
+                        </p>
+                      </div>
+                      <Star className="w-3.5 h-3.5 text-primary shrink-0" />
+                    </motion.button>
+                  );
+                })
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-2 pt-1 pb-1 pr-2">
+            {badges.map((badge, index) => {
+              const isUnlocked = daysSober >= badge.daysRequired;
+              const Icon = badge.icon;
+              const isNextUp = nextBadge?.id === badge.id;
+
+              return (
+                <motion.button
+                  key={badge.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.015 }}
+                  onClick={() => setSelectedBadge(badge)}
+                  className={`relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all border min-h-[78px] ${
+                    isUnlocked
+                      ? "bg-gradient-to-br " + badge.color + " border-white/20 shadow-lg shadow-black/10 active:scale-95"
+                      : isNextUp
+                      ? "bg-muted/40 border-primary/40 border-dashed"
+                      : "bg-muted/30 border-border/40 opacity-70"
+                  }`}
+                >
+                  <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    isUnlocked ? "bg-white/20" : "bg-muted/60"
+                  }`}>
+                    {isUnlocked ? (
+                      <Icon className="w-4 h-4 text-white" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <span className={`text-[10px] text-center font-semibold leading-tight line-clamp-2 ${
+                    isUnlocked ? "text-white" : "text-muted-foreground"
+                  }`}>
+                    {badge.name}
+                  </span>
+                  {isUnlocked && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-card"
+                    >
+                      <Star className="w-2 h-2 text-white" />
+                    </motion.div>
+                  )}
+                  {isNextUp && !isUnlocked && (
+                    <motion.div
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: 999 }}
+                      className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center ring-2 ring-card"
+                    >
+                      <Zap className="w-2 h-2 text-primary-foreground" />
+                    </motion.div>
+                  )}
+                </motion.button>
+              );
+            })}
+            </div>
+          )}
         </ScrollArea>
 
         <AnimatePresence>
