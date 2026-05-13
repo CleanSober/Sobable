@@ -15,14 +15,40 @@ interface SobrietyCounterProps {
 export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
-  // Cascading breakdown: years → months → days (always shown)
-  const years = Math.floor(daysSober / 365);
-  const remainderAfterYears = daysSober - years * 365;
-  const months = Math.floor(remainderAfterYears / 30);
-  const remainderDays = remainderAfterYears - months * 30;
+  const [exactMode, setExactMode] = useState(false);
+
+  // Approximate breakdown (fixed 365/30 day buckets)
+  const approxYears = Math.floor(daysSober / 365);
+  const approxRemAfterYears = daysSober - approxYears * 365;
+  const approxMonths = Math.floor(approxRemAfterYears / 30);
+  const approxDays = approxRemAfterYears - approxMonths * 30;
+
+  // Exact calendar breakdown using actual start date
+  const computeExact = () => {
+    const start = new Date(startDate);
+    const now = new Date();
+    let years = now.getFullYear() - start.getFullYear();
+    let months = now.getMonth() - start.getMonth();
+    let days = now.getDate() - start.getDate();
+    if (days < 0) {
+      months -= 1;
+      // days in previous month
+      const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+      days += prevMonth;
+    }
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+    return { years: Math.max(0, years), months: Math.max(0, months), days: Math.max(0, days) };
+  };
+
+  const { years, months, days } = exactMode
+    ? computeExact()
+    : { years: approxYears, months: approxMonths, days: approxDays };
 
   const breakdown = [
-    { label: remainderDays === 1 ? "Day" : "Days", value: remainderDays, icon: "✨" },
+    { label: days === 1 ? "Day" : "Days", value: days, icon: "✨" },
     { label: months === 1 ? "Month" : "Months", value: months, icon: "🌙" },
     { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
   ];
@@ -116,6 +142,27 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
           <p className="text-base text-foreground/80 font-medium tracking-wide">
             {wording.counterLabel}
           </p>
+        </div>
+
+        <div className="flex justify-center mb-2">
+          <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-muted/50 border border-border/40 text-[10px] font-medium">
+            <button
+              type="button"
+              onClick={() => setExactMode(false)}
+              className={`px-2.5 py-1 rounded-full transition-colors ${!exactMode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={!exactMode}
+            >
+              Approx
+            </button>
+            <button
+              type="button"
+              onClick={() => setExactMode(true)}
+              className={`px-2.5 py-1 rounded-full transition-colors ${exactMode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={exactMode}
+            >
+              Exact
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 mb-3">
