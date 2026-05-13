@@ -197,10 +197,23 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
             <Award className="w-4 h-4 text-primary" />
             Achievement Badges
           </CardTitle>
-          <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-            {unlockedBadges.length}/{badges.length}
-          </span>
-        </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowHistory((v) => !v)}
+              className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+                showHistory
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/70"
+              }`}
+              aria-pressed={showHistory}
+            >
+              <HistoryIcon className="w-3 h-3" />
+              History
+            </button>
+            <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {unlockedBadges.length}/{badges.length}
+            </span>
+          </div>
         {nextBadge && (
           <div className="flex items-center gap-2 mt-1">
             <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
