@@ -50,6 +50,8 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
 
   if (compact) {
     return (
+      <>
+      {celebrating && <ConfettiCelebration />}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,6 +93,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
           )}
         </div>
       </motion.div>
+      </>
     );
   }
 
@@ -133,6 +136,8 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
       : years === 1 ? "Year" : "Years";
 
   return (
+    <>
+    {celebrating && <ConfettiCelebration />}
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -205,5 +210,6 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
         </div>
       </div>
     </motion.div>
+    </>
   );
 });
