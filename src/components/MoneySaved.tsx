@@ -7,10 +7,16 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
+interface SpendingCategory {
+  name: string;
+  amount: number;
+}
+
 interface MoneySavedProps {
   totalSaved: number;
   dailySpending: number;
   daysSober: number;
+  spendingBreakdown?: SpendingCategory[];
   onReset?: () => void;
   onUndo?: () => void;
 }
