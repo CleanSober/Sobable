@@ -48,6 +48,52 @@ const shareToPinterest = (badge: Badge, daysSober: number) => {
   window.open(url, '_blank', 'width=600,height=400');
 };
 
+const shareToReddit = (badge: Badge, daysSober: number) => {
+  const url = `https://www.reddit.com/submit?url=${encodeURIComponent(getShareUrl())}&title=${encodeURIComponent(getShareText(badge, daysSober))}`;
+  window.open(url, '_blank', 'width=600,height=500');
+};
+
+const shareToMessenger = (badge: Badge, daysSober: number) => {
+  const url = `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${encodeURIComponent(getShareUrl())}&redirect_uri=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank', 'width=600,height=500');
+};
+
+const shareToEmail = (badge: Badge, daysSober: number) => {
+  const subject = `I earned the "${badge.name}" sobriety badge!`;
+  const body = `${getShareText(badge, daysSober)}\n\n${getShareUrl()}`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
+
+const shareToSMS = (badge: Badge, daysSober: number) => {
+  const text = `${getShareText(badge, daysSober)} ${getShareUrl()}`;
+  window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
+};
+
+const shareNative = async (badge: Badge, daysSober: number) => {
+  const text = getShareText(badge, daysSober);
+  const url = getShareUrl();
+  if (typeof navigator !== "undefined" && (navigator as Navigator).share) {
+    try {
+      await (navigator as Navigator).share({
+        title: `${badge.name} • Sobable`,
+        text,
+        url,
+      });
+      return;
+    } catch (err) {
+      // User cancelled or share failed — fall through to clipboard
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  }
+  // Fallback: copy to clipboard
+  try {
+    await navigator.clipboard.writeText(`${text} ${url}`);
+    toast.success("Copied — paste it anywhere!");
+  } catch {
+    toast.error("Sharing not available on this device");
+  }
+};
+
 const copyToClipboard = async (badge: Badge, daysSober: number) => {
   try {
     await navigator.clipboard.writeText(getShareText(badge, daysSober) + ' ' + getShareUrl());
