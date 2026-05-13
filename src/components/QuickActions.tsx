@@ -103,7 +103,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: MessageCircle,
       gradient: "from-violet-400 to-purple-500",
       glowColor: "270 76% 55%",
-      relevance: 50,
+      // Surface crisis line first when in distress
+      relevance: inDistress ? 99 : 50,
       action: () => {
         toast("988 Suicide & Crisis Lifeline", {
           description: "Call or text 988 for 24/7 free support",
