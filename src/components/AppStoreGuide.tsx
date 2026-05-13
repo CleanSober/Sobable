@@ -965,7 +965,7 @@ export const AppStoreGuide = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </main>
     </div>
   );
 };
