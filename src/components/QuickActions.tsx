@@ -57,7 +57,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
     },
     {
       id: "sponsor",
-      label: "Call Sponsor",
+      label: "Sponsor",
       icon: Phone,
       gradient: "from-emerald-400 to-teal-500",
       glowColor: "168 84% 45%",
