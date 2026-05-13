@@ -18,7 +18,7 @@ export const usePremiumStatus = () => {
     }
 
     if (!user) {
-      setIsPremium(false);
+      setIsPremium(isPreviewPassActive(null));
       setLoading(false);
       return;
     }
@@ -32,9 +32,10 @@ export const usePremiumStatus = () => {
         .in("plan_type", ["premium", "pro"])
         .maybeSingle();
 
-      setIsPremium(!error && !!data);
+      const subscribed = !error && !!data;
+      setIsPremium(subscribed || isPreviewPassActive(user.id));
     } catch {
-      setIsPremium(false);
+      setIsPremium(isPreviewPassActive(user?.id));
     }
     setLoading(false);
   }, [user?.id]);
