@@ -133,7 +133,12 @@ const brandColors = [
 export const BrandAssets = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-12">
-      <div className="max-w-6xl mx-auto">
+      <SEO
+        title="Sober Club Brand Assets & Marketing Package"
+        description="Download Sober Club logos, app icons, social templates, and video assets for partners, press, and store listings."
+        path="/brand"
+      />
+      <main className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
