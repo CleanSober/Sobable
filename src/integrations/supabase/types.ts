@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ambient_music_passes: {
+        Row: {
+          consumed_at: string | null
+          expires_at: string
+          granted_at: string
+          id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          expires_at?: string
+          granted_at?: string
+          id?: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          expires_at?: string
+          granted_at?: string
+          id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string

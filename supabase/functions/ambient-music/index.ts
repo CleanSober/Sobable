@@ -40,13 +40,55 @@ serve(async (req) => {
     const userId = user.id;
     console.log("Generating ambient music for user:", userId);
 
-    // Premium gate
-    const { data: isPremium, error: premErr } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
-    if (premErr || !isPremium) {
-      return new Response(JSON.stringify({ error: "Premium subscription required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Premium gate (with rewarded-ad pass fallback)
+    const { data: isPremium } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
+
+    let passConsumed = false;
+    if (!isPremium) {
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      );
+
+      const { data: passes } = await adminClient
+        .from("ambient_music_passes")
+        .select("id, expires_at")
+        .eq("user_id", userId)
+        .is("consumed_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .order("granted_at", { ascending: false })
+        .limit(1);
+
+      const activePass = passes?.[0];
+      if (!activePass) {
+        return new Response(
+          JSON.stringify({ error: "Premium subscription required", code: "PREMIUM_REQUIRED" }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // Consume the pass atomically
+      const { data: consumed } = await adminClient
+        .from("ambient_music_passes")
+        .update({ consumed_at: new Date().toISOString() })
+        .eq("id", activePass.id)
+        .is("consumed_at", null)
+        .select("id");
+
+      if (!consumed || consumed.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "Premium subscription required", code: "PREMIUM_REQUIRED" }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      passConsumed = true;
     }
 
     const { type, duration } = await req.json();

@@ -13,11 +13,13 @@ const TEST_IDS = {
     appId: "ca-app-pub-3940256099942544~1458002511",
     bannerId: "ca-app-pub-3940256099942544/2435281174",
     interstitialId: "ca-app-pub-3940256099942544/4411468910",
+    rewardedId: "ca-app-pub-3940256099942544/1712485313",
   },
   android: {
     appId: "ca-app-pub-3940256099942544~3347511713",
     bannerId: "ca-app-pub-3940256099942544/6300978111",
     interstitialId: "ca-app-pub-3940256099942544/1033173712",
+    rewardedId: "ca-app-pub-3940256099942544/5224354917",
   },
 } as const;
 
@@ -25,13 +27,16 @@ const iosConfig = {
   appId: trimEnv(import.meta.env.VITE_ADMOB_IOS_APP_ID),
   bannerId: trimEnv(import.meta.env.VITE_ADMOB_IOS_BANNER_ID),
   interstitialId: trimEnv(import.meta.env.VITE_ADMOB_IOS_INTERSTITIAL_ID),
+  rewardedId: trimEnv(import.meta.env.VITE_ADMOB_IOS_REWARDED_ID) ?? TEST_IDS.ios.rewardedId,
 };
 
 const androidConfig = {
   appId: trimEnv(import.meta.env.VITE_ADMOB_ANDROID_APP_ID),
   bannerId: trimEnv(import.meta.env.VITE_ADMOB_ANDROID_BANNER_ID),
   interstitialId: trimEnv(import.meta.env.VITE_ADMOB_ANDROID_INTERSTITIAL_ID),
+  rewardedId: trimEnv(import.meta.env.VITE_ADMOB_ANDROID_REWARDED_ID) ?? TEST_IDS.android.rewardedId,
 };
+
 
 const platformConfig = () => {
   if (forceTestIds) {
@@ -68,9 +73,10 @@ export const admobConfig = {
     return {
       banner: config.bannerId,
       interstitial: config.interstitialId,
+      rewarded: (config as { rewardedId?: string | null }).rewardedId ?? null,
     };
   },
-  getUnitIdError(type: "banner" | "interstitial") {
+  getUnitIdError(type: "banner" | "interstitial" | "rewarded") {
     if (!enabled) {
       return "AdMob disabled: set VITE_ADMOB_ENABLED=true after adding ad unit IDs.";
     }
@@ -80,10 +86,11 @@ export const admobConfig = {
       return "AdMob disabled: native app ID missing for this platform.";
     }
 
-    if (!config[`${type}Id`]) {
+    if (!(config as Record<string, string | null>)[`${type}Id`]) {
       return `AdMob ${type} disabled: ${type} ad unit ID missing for this platform.`;
     }
 
     return null;
   },
 };
+
