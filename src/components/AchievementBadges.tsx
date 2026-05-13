@@ -162,6 +162,15 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
   const nextBadge = lockedBadges[0];
   const daysToNext = nextBadge ? nextBadge.daysRequired - daysSober : 0;
 
+  // Compute the date a badge was reached based on startDate
+  const startMs = startDate ? new Date(startDate).getTime() : null;
+  const dateForBadge = (b: Badge): string | null => {
+    if (!startMs) return null;
+    const d = new Date(startMs + (b.daysRequired - 1) * 86400000);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  };
+  const historyBadges = [...unlockedBadges].reverse();
+
   // Show interstitial ad when a new badge is unlocked
   useEffect(() => {
     const currentUnlockedCount = unlockedBadges.length;
