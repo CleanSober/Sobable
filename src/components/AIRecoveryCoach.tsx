@@ -84,12 +84,25 @@ export const AIRecoveryCoach = ({ isOpen: controlledOpen, onOpenChange }: { isOp
   const isOpen = controlledOpen ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
 
+  const [freeUsedThisWeek, setFreeUsedThisWeek] = useState<boolean | null>(null);
+
+  // Check free-tier weekly usage when opening for non-premium users
+  useEffect(() => {
+    if (!isOpen || isPremium || !user) return;
+    (async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+      const { count } = await supabase
+        .from("analytics_events")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("event_type", "ai_coach_message")
+        .gte("created_at", sevenDaysAgo);
+      setFreeUsedThisWeek((count ?? 0) >= 1);
+    })();
+  }, [isOpen, isPremium, user]);
+
   const handleOpenChat = () => {
-    if (!isPremium && !premiumLoading) {
-      setShowUpgrade(true);
-    } else {
-      setIsOpen(true);
-    }
+    setIsOpen(true);
   };
 
   const daysSober = profile?.sobriety_start_date
