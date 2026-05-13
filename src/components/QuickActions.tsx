@@ -25,6 +25,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const { getTodaysMoodEntry } = useMoodEntries();
   const [todayCraving, setTodayCraving] = useState<number | null>(null);
   const [todayMood, setTodayMood] = useState<number | null>(null);
+  const [sosOpen, setSosOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
