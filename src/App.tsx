@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { useNativeOAuthCallback } from "@/lib/nativeOAuth";
+import { useDismissibleInputs } from "@/hooks/useDismissibleInputs";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
