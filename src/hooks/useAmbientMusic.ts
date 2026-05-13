@@ -161,38 +161,40 @@ export const useAmbientMusic = () => {
       }
 
       let response = await requestMusic(type, duration, session.access_token);
+      let payload: any = await response.clone().json().catch(() => ({}));
 
-      // Premium-required fallback: offer rewarded ad to unlock for 1 hour
-      if (response.status === 403) {
-        const errorData = await response.clone().json().catch(() => ({}));
-        if (errorData?.code === "PREMIUM_REQUIRED") {
-          if (!Capacitor.isNativePlatform()) {
-            toast.error("Watch-ad unlock is only available in the mobile app. Upgrade to Sober Club on web.");
-            return null;
-          }
+      // Locked: edge function returns 200 with { locked: true, code: "PREMIUM_REQUIRED" }
+      // (legacy 403 also handled defensively)
+      const isLocked =
+        payload?.code === "PREMIUM_REQUIRED" || payload?.locked === true;
 
-          toast.info("Watch a short ad to unlock ambient music for 1 hour");
-          const earned = await watchRewardedAd();
-          if (!earned) {
-            toast.error("Ad wasn't completed. Ambient music stays locked.");
-            return null;
-          }
-          const granted = await claimAdPass("rewarded_ad");
-          if (!granted) {
-            toast.error("Couldn't activate your unlock. Try again in a moment.");
-            return null;
-          }
-          toast.success("Unlocked! Loading ambient music…");
-          response = await requestMusic(type, duration, session.access_token);
+      if (isLocked) {
+        if (!Capacitor.isNativePlatform()) {
+          // Silent on web: ambient music is a Sober Club perk; exercise still runs without audio.
+          return null;
         }
+
+        toast.info("Watch a short ad to unlock ambient music for 1 hour");
+        const earned = await watchRewardedAd();
+        if (!earned) {
+          toast.error("Ad wasn't completed. Ambient music stays locked.");
+          return null;
+        }
+        const granted = await claimAdPass("rewarded_ad");
+        if (!granted) {
+          toast.error("Couldn't activate your unlock. Try again in a moment.");
+          return null;
+        }
+        toast.success("Unlocked! Loading ambient music…");
+        response = await requestMusic(type, duration, session.access_token);
+        payload = await response.clone().json().catch(() => ({}));
       }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to generate music");
+        throw new Error(payload?.error || "Failed to generate music");
       }
 
-      const data = await response.json();
+      const data = payload;
       
       // Clean up previous audio
       if (audioRef.current) {
