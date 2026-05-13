@@ -386,6 +386,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
   // Load interstitial ad
   const loadInterstitial = useCallback(async () => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     const unitIdError = admobConfig.getUnitIdError("interstitial");
