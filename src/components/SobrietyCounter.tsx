@@ -114,19 +114,39 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
       </div>
 
       <div className="relative z-10 p-4">
+        {/* Unit toggle */}
+        <div className="flex justify-center mb-3">
+          <div className="inline-flex items-center gap-1 p-1 rounded-full bg-muted/40 border border-border/40">
+            {(["days", "months", "years"] as const).map((u) => (
+              <button
+                key={u}
+                onClick={() => setUnit(u)}
+                className={cn(
+                  "px-3 py-1 text-xs font-medium rounded-full capitalize transition-colors",
+                  unit === u
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Main Counter */}
         <div className="flex flex-col items-center justify-center text-center mb-4 py-4 relative">
           <motion.span
-            key={daysSober}
+            key={`${unit}-${displayValue}`}
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
             className="text-6xl font-bold text-gradient tracking-tight leading-none"
           >
-            {daysSober}
+            {displayValue}
           </motion.span>
           <span className="text-sm text-foreground/80 font-medium tracking-wide mt-2">
-            {wording.counterLabel}
+            {displayLabel} {wording.counterLabel.replace(/^days?\s*/i, "")}
           </span>
           <p className="text-xs text-muted-foreground italic mt-3 px-4 max-w-xs">
             {(() => {
