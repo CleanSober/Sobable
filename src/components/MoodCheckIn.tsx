@@ -166,7 +166,8 @@ export const MoodCheckIn = () => {
     }
     setLoading(true);
 
-    const today = new Date().toISOString().split("T")[0];
+    // Use the local-tz date that the rest of the app keys on (avoids 6h UTC drift)
+    const todayDate = getLocalDateString();
 
     // Build the note with extra context
     const fullNote = [
