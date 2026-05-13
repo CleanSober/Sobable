@@ -94,16 +94,3 @@ export const admobConfig = {
   },
 };
 
-
-    const config = platformConfig();
-    if (!config.appId) {
-      return "AdMob disabled: native app ID missing for this platform.";
-    }
-
-    if (!config[`${type}Id`]) {
-      return `AdMob ${type} disabled: ${type} ad unit ID missing for this platform.`;
-    }
-
-    return null;
-  },
-};
