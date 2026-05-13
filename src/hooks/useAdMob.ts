@@ -342,6 +342,7 @@ export const useAdMob = (): UseAdMobReturn => {
   }, []);
 
   const refreshBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     const unitIdError = admobConfig.getUnitIdError("banner");
