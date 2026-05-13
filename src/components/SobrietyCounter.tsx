@@ -297,8 +297,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
               />
               <div className="absolute inset-0 animate-shimmer rounded-full" />
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">{progressToNext}% complete</span>
+            <div className="flex justify-end text-xs">
               <span className="text-accent font-medium">{next.days - daysSober} days to go</span>
             </div>
           </div>
