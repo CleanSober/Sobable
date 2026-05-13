@@ -411,6 +411,65 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                       <span className="text-[10px]">Pinterest</span>
                     </Button>
                     
+                    {/* Reddit */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareToReddit(selectedBadge, daysSober)}
+                      className="flex flex-col items-center gap-1 h-auto py-2 hover:bg-[#FF4500]/10 hover:border-[#FF4500]/50"
+                    >
+                      <svg className="w-5 h-5" fill="#FF4500" viewBox="0 0 24 24">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12.4c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+                      </svg>
+                      <span className="text-[10px]">Reddit</span>
+                    </Button>
+
+                    {/* Messenger */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareToMessenger(selectedBadge, daysSober)}
+                      className="flex flex-col items-center gap-1 h-auto py-2 hover:bg-[#0084FF]/10 hover:border-[#0084FF]/50"
+                    >
+                      <svg className="w-5 h-5" fill="#0084FF" viewBox="0 0 24 24">
+                        <path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.654V24l4.088-2.242c1.092.3 2.246.464 3.443.464 6.627 0 12-4.975 12-11.111S18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8l3.131 3.259L19.752 8l-6.561 6.963z"/>
+                      </svg>
+                      <span className="text-[10px]">Messenger</span>
+                    </Button>
+
+                    {/* Email */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareToEmail(selectedBadge, daysSober)}
+                      className="flex flex-col items-center gap-1 h-auto py-2 hover:bg-primary/10 hover:border-primary/50"
+                    >
+                      <Mail className="w-5 h-5 text-primary" />
+                      <span className="text-[10px]">Email</span>
+                    </Button>
+
+                    {/* SMS */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareToSMS(selectedBadge, daysSober)}
+                      className="flex flex-col items-center gap-1 h-auto py-2 hover:bg-green-500/10 hover:border-green-500/50"
+                    >
+                      <MessageSquare className="w-5 h-5 text-green-500" />
+                      <span className="text-[10px]">SMS</span>
+                    </Button>
+
+                    {/* Native share sheet (Instagram, TikTok, Snap, etc.) */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareNative(selectedBadge, daysSober)}
+                      className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-primary/10 hover:border-primary/50"
+                    >
+                      <Share2 className="w-5 h-5 text-primary" />
+                      <span className="text-[10px]">More (Instagram, TikTok…)</span>
+                    </Button>
+
                     {/* Copy Link */}
                     <Button
                       variant="outline"
@@ -418,7 +477,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                       onClick={() => copyToClipboard(selectedBadge, daysSober)}
                       className="flex flex-col items-center gap-1 h-auto py-2 col-span-2 hover:bg-primary/10 hover:border-primary/50"
                     >
-                      <Share2 className="w-5 h-5 text-primary" />
+                      <Copy className="w-5 h-5 text-primary" />
                       <span className="text-[10px]">Copy Message</span>
                     </Button>
                   </div>
