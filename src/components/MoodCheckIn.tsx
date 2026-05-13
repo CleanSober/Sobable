@@ -186,7 +186,7 @@ export const MoodCheckIn = () => {
     const { error } = await supabase.from("mood_entries").upsert(
       {
         user_id: user.id,
-        date: today,
+        date: todayDate,
         mood,
         craving_level: craving,
         note: fullNote || null,
@@ -201,7 +201,7 @@ export const MoodCheckIn = () => {
     }
 
     await supabase.from("daily_goals").upsert(
-      { user_id: user.id, date: today, mood_logged: true },
+      { user_id: user.id, date: todayDate, mood_logged: true },
       { onConflict: "user_id,date" }
     );
 
