@@ -1,9 +1,11 @@
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Flame } from "lucide-react";
+import { toast } from "sonner";
 import { getMilestones, formatMilestoneName } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { cn } from "@/lib/utils";
+import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 
 interface SobrietyCounterProps {
   daysSober: number;
@@ -12,12 +14,44 @@ interface SobrietyCounterProps {
   compact?: boolean;
 }
 
+const CELEBRATED_KEY = "sober_club_celebrated_milestones";
+
 export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact = false }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
-  const { next } = getMilestones(daysSober);
+  const { reached, next } = getMilestones(daysSober);
+  const [celebrating, setCelebrating] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (reached.length === 0) return;
+    let celebrated: string[] = [];
+    try {
+      const raw = localStorage.getItem(CELEBRATED_KEY);
+      celebrated = raw ? JSON.parse(raw) : [];
+    } catch { celebrated = []; }
+
+    const fresh = reached.filter((m) => !celebrated.includes(m));
+    if (fresh.length === 0) return;
+
+    // Celebrate the most advanced new milestone (in case multiple are crossed at once)
+    const milestone = fresh[fresh.length - 1];
+    setCelebrating(milestone);
+    toast.success(`🎉 Milestone unlocked: ${formatMilestoneName(milestone, wording.statusWord)}!`, {
+      description: "Look how far you've come. Keep going.",
+      duration: 5000,
+    });
+
+    try {
+      localStorage.setItem(CELEBRATED_KEY, JSON.stringify([...celebrated, ...fresh]));
+    } catch { /* ignore quota */ }
+
+    const t = setTimeout(() => setCelebrating(null), 4500);
+    return () => clearTimeout(t);
+  }, [reached.join("|"), wording.statusWord]);
 
   if (compact) {
     return (
+      <>
+      {celebrating && <ConfettiCelebration />}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,6 +93,7 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
           )}
         </div>
       </motion.div>
+      </>
     );
   }
 
@@ -101,6 +136,8 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
       : years === 1 ? "Year" : "Years";
 
   return (
+    <>
+    {celebrating && <ConfettiCelebration />}
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -173,5 +210,6 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
         </div>
       </div>
     </motion.div>
+    </>
   );
 });
