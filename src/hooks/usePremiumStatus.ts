@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { isPreviewPassActive } from "@/hooks/usePreviewPass";
 
 const BYPASS_PAYWALL = false;
 
@@ -18,7 +17,7 @@ export const usePremiumStatus = () => {
     }
 
     if (!user) {
-      setIsPremium(isPreviewPassActive(null));
+      setIsPremium(false);
       setLoading(false);
       return;
     }
@@ -32,10 +31,9 @@ export const usePremiumStatus = () => {
         .in("plan_type", ["premium", "pro"])
         .maybeSingle();
 
-      const subscribed = !error && !!data;
-      setIsPremium(subscribed || isPreviewPassActive(user.id));
+      setIsPremium(!error && !!data);
     } catch {
-      setIsPremium(isPreviewPassActive(user?.id));
+      setIsPremium(false);
     }
     setLoading(false);
   }, [user?.id]);

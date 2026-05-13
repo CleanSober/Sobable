@@ -3,15 +3,13 @@ import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
   Check, Crown, Loader2, Shield, Bot, Users, Brain,
-  Compass, Zap, Heart, BarChart3, ExternalLink, PlayCircle, Gift,
+  Compass, Zap, Heart, BarChart3, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useInAppPurchases, IAP_PRODUCTS } from "@/hooks/useInAppPurchases";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
-import { usePreviewPass } from "@/hooks/usePreviewPass";
-import { useAdMob } from "@/hooks/useAdMob";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -33,11 +31,8 @@ interface PricingPlansProps {
 
 export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const [claimingPass, setClaimingPass] = useState(false);
   const { isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
-  const previewPass = usePreviewPass();
-  const { showRewarded } = useAdMob();
   const navigate = useNavigate();
   const {
     isNative,
@@ -48,30 +43,6 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
     getProductPrice,
     getMonthlyEquivalentPrice,
   } = useInAppPurchases();
-
-  const handleClaimPreviewPass = async () => {
-    if (previewPass.alreadyClaimed) return;
-    setClaimingPass(true);
-    try {
-      if (isNative) {
-        const earned = await showRewarded();
-        if (!earned) {
-          toast.error("Ad not completed. Preview Pass not unlocked.");
-          return;
-        }
-      }
-      const result = previewPass.claim();
-      if (result) {
-        toast.success("7-day Preview Pass unlocked! Enjoy full access.");
-        refreshPremiumStatus();
-        if (onClose) onClose();
-      } else {
-        toast.error("Preview Pass already used.");
-      }
-    } finally {
-      setClaimingPass(false);
-    }
-  };
 
   const handleSubscribe = async () => {
     if (!isNative) {
@@ -140,58 +111,6 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
           Get full access to every recovery tool in Sober Club.
         </p>
       </div>
-
-      {/* 7-day Preview Pass via rewarded ad — one-time */}
-      {!previewPass.alreadyClaimed && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border-2 border-dashed border-amber-500/40 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-3 space-y-2"
-        >
-          <div className="flex items-start gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
-              <Gift className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground">7-Day Preview Pass</p>
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                {isNative
-                  ? "Watch a short ad to unlock full Sober Club access for 7 days. One-time only."
-                  : "Try Sober Club free for 7 days. One-time only."}
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={handleClaimPreviewPass}
-            disabled={claimingPass}
-            variant="outline"
-            className="w-full h-9 text-xs font-semibold border-amber-500/50 text-amber-600 hover:bg-amber-500/10 hover:text-amber-700"
-          >
-            {claimingPass ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                {isNative ? "Loading ad..." : "Unlocking..."}
-              </>
-            ) : (
-              <>
-                <PlayCircle className="w-3.5 h-3.5 mr-1.5" />
-                {isNative ? "Watch ad · Unlock 7 days free" : "Unlock 7 days free"}
-              </>
-            )}
-          </Button>
-        </motion.div>
-      )}
-
-      {previewPass.alreadyClaimed && previewPass.isActive && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-center">
-          <p className="text-xs font-semibold text-amber-600">
-            Preview Pass active · {previewPass.daysRemaining} day{previewPass.daysRemaining === 1 ? "" : "s"} left
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">
-            Subscribe below to keep full access after your pass ends.
-          </p>
-        </div>
-      )}
 
       {/* Plan selector */}
       <div className="grid grid-cols-2 gap-2.5">
