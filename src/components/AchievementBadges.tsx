@@ -121,75 +121,71 @@ const downloadBlob = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-// Most platforms ignore prefill query params for non-verified apps, so we
-// always copy the message to the clipboard before opening the share window
-// and tell the user to paste.
+// Pre-copy text + open share URL so user can paste into the social composer
+// (most platforms ignore prefill params for non-verified apps).
 const openShareWithCopy = async (
   shareUrl: string,
-  badge: Badge,
-  daysSober: number,
+  message: string,
   platform: string,
 ) => {
-  const text = `${getShareText(badge, daysSober)} ${getShareUrl()}`;
+  const text = `${message} ${getShareUrl()}`;
   const result = await copyText(text);
   if (result.ok) toast.success(`Message copied — paste it into ${platform}!`);
   window.open(shareUrl, "_blank", "width=600,height=600,noopener");
 };
 
-const shareToFacebook = (b: Badge, d: number) =>
+const shareToFacebook = (msg: string) =>
   openShareWithCopy(
-    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(getShareText(b, d))}`,
-    b, d, "Facebook",
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(msg)}`,
+    msg, "Facebook",
   );
-const shareToTwitter = (b: Badge, d: number) =>
+const shareToTwitter = (msg: string) =>
   openShareWithCopy(
-    `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText(b, d))}&url=${encodeURIComponent(getShareUrl())}`,
-    b, d, "X",
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(getShareUrl())}`,
+    msg, "X",
   );
-const shareToLinkedIn = (b: Badge, d: number) =>
+const shareToLinkedIn = (msg: string) =>
   openShareWithCopy(
     `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl())}`,
-    b, d, "LinkedIn",
+    msg, "LinkedIn",
   );
-const shareToWhatsApp = (b: Badge, d: number) =>
+const shareToWhatsApp = (msg: string) =>
   openShareWithCopy(
-    `https://wa.me/?text=${encodeURIComponent(getShareText(b, d) + " " + getShareUrl())}`,
-    b, d, "WhatsApp",
+    `https://wa.me/?text=${encodeURIComponent(msg + " " + getShareUrl())}`,
+    msg, "WhatsApp",
   );
-const shareToTelegram = (b: Badge, d: number) =>
+const shareToTelegram = (msg: string) =>
   openShareWithCopy(
-    `https://t.me/share/url?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText(b, d))}`,
-    b, d, "Telegram",
+    `https://t.me/share/url?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(msg)}`,
+    msg, "Telegram",
   );
-const shareToPinterest = (b: Badge, d: number) =>
+const shareToPinterest = (msg: string) =>
   openShareWithCopy(
-    `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(getShareUrl())}&description=${encodeURIComponent(getShareText(b, d))}`,
-    b, d, "Pinterest",
+    `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(getShareUrl())}&description=${encodeURIComponent(msg)}`,
+    msg, "Pinterest",
   );
-const shareToReddit = (b: Badge, d: number) =>
+const shareToReddit = (msg: string) =>
   openShareWithCopy(
-    `https://www.reddit.com/submit?url=${encodeURIComponent(getShareUrl())}&title=${encodeURIComponent(getShareText(b, d))}`,
-    b, d, "Reddit",
+    `https://www.reddit.com/submit?url=${encodeURIComponent(getShareUrl())}&title=${encodeURIComponent(msg)}`,
+    msg, "Reddit",
   );
-const shareToMessenger = (b: Badge, d: number) =>
+const shareToMessenger = (msg: string) =>
   openShareWithCopy(
     `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${encodeURIComponent(getShareUrl())}&redirect_uri=${encodeURIComponent(getShareUrl())}`,
-    b, d, "Messenger",
+    msg, "Messenger",
   );
-const shareToEmail = (b: Badge, d: number) => {
-  const subject = `I earned the "${b.name}" sobriety badge!`;
-  const body = `${getShareText(b, d)}\n\n${getShareUrl()}`;
+const shareToEmail = (badge: Badge, msg: string) => {
+  const subject = `I earned the "${badge.name}" sobriety badge!`;
+  const body = `${msg}\n\n${getShareUrl()}`;
   window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
-const shareToSMS = (b: Badge, d: number) => {
-  const text = `${getShareText(b, d)} ${getShareUrl()}`;
+const shareToSMS = (msg: string) => {
+  const text = `${msg} ${getShareUrl()}`;
   window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
 };
 
-// Native share — attaches the generated badge image when supported (mobile share sheets
-// including Instagram, TikTok, Snapchat, Signal, etc.).
-const shareNative = async (badge: Badge, daysSober: number) => {
-  const text = getShareText(badge, daysSober);
+// Native share — attaches the generated badge image when supported.
+const shareNative = async (badge: Badge, daysSober: number, msg: string) => {
   const url = getShareUrl();
   const blob = await generateBadgeImage(badge, daysSober);
   const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
@@ -197,7 +193,7 @@ const shareNative = async (badge: Badge, daysSober: number) => {
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
   if (file && nav.canShare?.({ files: [file] }) && nav.share) {
     try {
-      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text, url });
+      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text: msg, url });
       return;
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
@@ -205,13 +201,13 @@ const shareNative = async (badge: Badge, daysSober: number) => {
   }
   if (nav.share) {
     try {
-      await nav.share({ title: `${badge.name} • Sobable`, text, url });
+      await nav.share({ title: `${badge.name} • Sobable`, text: msg, url });
       return;
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
     }
   }
-  await copyText(`${text} ${url}`);
+  await copyText(`${msg} ${url}`);
   if (blob) downloadBlob(blob, `${badge.id}-badge.png`);
   toast.success("Message copied & badge image downloaded — attach it to your post!");
 };
@@ -226,8 +222,8 @@ const downloadBadgeImage = async (badge: Badge, daysSober: number) => {
   toast.success("Badge image downloaded!");
 };
 
-const copyToClipboard = async (badge: Badge, daysSober: number) => {
-  const result = await copyText(getShareText(badge, daysSober) + " " + getShareUrl());
+const copyToClipboard = async (msg: string) => {
+  const result = await copyText(msg + " " + getShareUrl());
   if (result.ok) toast.success("Copied to clipboard!");
   else toast.error(result.message);
 };
