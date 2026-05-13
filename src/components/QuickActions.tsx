@@ -85,8 +85,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
       icon: Wind,
       gradient: "from-blue-400 to-cyan-500",
       glowColor: "190 90% 50%",
-      // Always usable, baseline relevance
-      relevance: 60,
+      // Big boost when craving is high — breathing is fastest in-app intervention
+      relevance: highCraving ? 98 : (inDistress ? 75 : 60),
       action: () => {
         if (onNavigateToCheckIn) {
           onNavigateToCheckIn();
