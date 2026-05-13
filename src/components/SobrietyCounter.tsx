@@ -86,6 +86,10 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
     { label: days === 1 ? "Day" : "Days", value: days, icon: "✨" },
     { label: months === 1 ? "Month" : "Months", value: months, icon: "🌙" },
     { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
+  ];
+
+  const { reached: _r } = { reached };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
