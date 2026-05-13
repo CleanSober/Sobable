@@ -132,6 +132,117 @@ const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
 
+// Render a 1080x1920 vertical "story" image for Instagram Stories / TikTok / Snapchat.
+const generateStoryImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+  const w = 1080;
+  const h = 1920;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  const [c1, c2] = parseGradient(badge.color);
+
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, "#0b1020");
+  bg.addColorStop(1, "#1a1033");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.fillStyle = "rgba(255,255,255,0.65)";
+  ctx.font = "600 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("SOBABLE", w / 2, 140);
+
+  const cx = w / 2;
+  const cy = 820;
+  const glow = ctx.createRadialGradient(cx, cy, 80, cx, cy, 900);
+  glow.addColorStop(0, c1 + "66");
+  glow.addColorStop(1, "transparent");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 360, 0, Math.PI * 2);
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.stroke();
+
+  const medGrad = ctx.createLinearGradient(cx - 320, cy - 320, cx + 320, cy + 320);
+  medGrad.addColorStop(0, c1);
+  medGrad.addColorStop(1, c2);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 320, 0, Math.PI * 2);
+  ctx.fillStyle = medGrad;
+  ctx.fill();
+
+  const gloss = ctx.createLinearGradient(0, cy - 320, 0, cy);
+  gloss.addColorStop(0, "rgba(255,255,255,0.4)");
+  gloss.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gloss;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 300, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.font = "340px serif";
+  ctx.fillText("🏆", cx, cy + 20);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 220px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText(String(daysSober), cx, 1370);
+
+  ctx.fillStyle = "rgba(255,255,255,0.75)";
+  ctx.font = "600 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText("DAYS SOBER", cx, 1490);
+
+  ctx.fillStyle = c1;
+  ctx.font = "bold 68px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText(badge.name, cx, 1620);
+
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "500 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  ctx.fillText("sobable.app", cx, 1820);
+
+  return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
+};
+
+// Share the vertical story image via the native share sheet (mobile).
+// On desktop, falls back to downloading the PNG and copying the caption.
+const shareStoryImage = async (
+  badge: Badge,
+  daysSober: number,
+  msg: string,
+  platform: "Instagram Stories" | "TikTok",
+) => {
+  const blob = await generateStoryImage(badge, daysSober);
+  if (!blob) {
+    toast.error("Couldn't generate story image");
+    return;
+  }
+  const file = new File([blob], `${badge.id}-story.png`, { type: "image/png" });
+  const url = getShareUrl();
+  const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+
+  if (nav.canShare?.({ files: [file] }) && nav.share) {
+    try {
+      await copyText(`${msg} ${url}`);
+      await nav.share({ files: [file], title: `${badge.name} • Sobable`, text: msg });
+      toast.success(`Pick ${platform} from the share sheet — caption is copied!`);
+      return;
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  }
+
+  await copyText(`${msg} ${url}`);
+  downloadBlob(blob, `${badge.id}-story.png`);
+  toast.success(
+    `Image downloaded & caption copied. Open ${platform} on your phone to post it.`,
+  );
+};
+
 const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
