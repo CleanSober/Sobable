@@ -254,7 +254,7 @@ export const useInAppPurchases = () => {
 
         const platform = Capacitor.getPlatform();
         let revalidated = 0;
-        for (const purchase of active) {
+        for (const purchase of active as any[]) {
           const productId =
             purchase?.productIdentifier ||
             purchase?.planIdentifier ||
