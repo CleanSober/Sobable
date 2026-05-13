@@ -127,7 +127,6 @@ export const MoodCheckIn = () => {
 
   const checkExistingEntry = async () => {
     if (!user) return;
-    const todayStr = getLocalDateString();
 
     const { data } = await supabase
       .from("mood_entries")
