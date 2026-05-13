@@ -169,5 +169,6 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
         })}
       </div>
     </div>
+    </>
   );
 };
