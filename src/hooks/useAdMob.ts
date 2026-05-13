@@ -60,6 +60,23 @@ export const useAdMob = (): UseAdMobReturn => {
   const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Hard guard: premium users must NEVER see ads, even if a caller forgets
+  // to gate. Kept in a ref so callbacks always read the latest value without
+  // needing to be re-created.
+  const { isPremium } = usePremiumStatus();
+  const isPremiumRef = useRef(isPremium);
+  useEffect(() => {
+    isPremiumRef.current = isPremium;
+    if (isPremium && Capacitor.isNativePlatform()) {
+      // Tear down any visible banner the moment premium turns on.
+      AdMob.hideBanner().catch(() => undefined);
+      globalBannerVisible = false;
+      globalBannerPosition = null;
+      setBannerHeight(0);
+      setIsBannerVisible(false);
+    }
+  }, [isPremium]);
+
   const waitForInterstitial = useCallback((timeoutMs = 10000) => {
     return new Promise<boolean>((resolve) => {
       const startedAt = Date.now();
