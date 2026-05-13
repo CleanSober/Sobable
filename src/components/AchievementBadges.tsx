@@ -7,14 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useInterstitialAd } from "./InterstitialAd";
 
-interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ElementType;
-  daysRequired: number;
-  color: string;
-}
+import { badges, type Badge } from "@/lib/badges";
 
 // Social media sharing utilities
 const getShareText = (badge: Badge, daysSober: number) => {
