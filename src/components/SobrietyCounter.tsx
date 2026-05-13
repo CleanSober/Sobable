@@ -233,26 +233,8 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances }: Sobri
           {summaryText}
         </motion.p>
 
-        <div className="flex justify-center mb-2">
-          <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-muted/50 border border-border/40 text-[10px] font-medium">
-            <button
-              type="button"
-              onClick={() => setExactMode(false)}
-              className={`px-2.5 py-1 rounded-full transition-colors ${!exactMode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-              aria-pressed={!exactMode}
-            >
-              Approx
-            </button>
-            <button
-              type="button"
-              onClick={() => setExactMode(true)}
-              className={`px-2.5 py-1 rounded-full transition-colors ${exactMode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-              aria-pressed={exactMode}
-            >
-              Exact
-            </button>
-          </div>
-        </div>
+        <div className="flex justify-center mb-2" />
+
 
         <div className="grid grid-cols-3 gap-2 mb-3">
           {breakdown.map((item, index) => (
