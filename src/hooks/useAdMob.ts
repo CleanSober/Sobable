@@ -416,6 +416,61 @@ export const useAdMob = (): UseAdMobReturn => {
     }
   }, [isInterstitialLoaded, loadInterstitial, waitForInterstitial]);
 
+  // Show a rewarded ad and resolve true only when the user earned the reward
+  const showRewarded = useCallback(async (): Promise<boolean> => {
+    if (!Capacitor.isNativePlatform()) return false;
+
+    const unitIdError = admobConfig.getUnitIdError("rewarded");
+    if (unitIdError) {
+      setError(unitIdError);
+      return false;
+    }
+
+    const adUnitIds = admobConfig.getUnitIds();
+    if (!adUnitIds.rewarded) return false;
+
+    try {
+      await AdMob.prepareRewardVideoAd({
+        adId: adUnitIds.rewarded,
+        isTesting: IS_TESTING,
+      });
+    } catch (err) {
+      console.error("AdMob: Failed to prepare rewarded", err);
+      setError(err instanceof Error ? err.message : "Rewarded ad not available");
+      return false;
+    }
+
+    return new Promise<boolean>((resolve) => {
+      let earned = false;
+      let settled = false;
+
+      const finish = (value: boolean) => {
+        if (settled) return;
+        settled = true;
+        rewardedListener.then((l) => l.remove()).catch(() => undefined);
+        dismissedListener.then((l) => l.remove()).catch(() => undefined);
+        failedListener.then((l) => l.remove()).catch(() => undefined);
+        resolve(value);
+      };
+
+      const rewardedListener = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+        earned = true;
+      });
+      const dismissedListener = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+        finish(earned);
+      });
+      const failedListener = AdMob.addListener(RewardAdPluginEvents.FailedToLoad, () => {
+        finish(false);
+      });
+
+      AdMob.showRewardVideoAd().catch((err) => {
+        console.error("AdMob: Failed to show rewarded", err);
+        setError(err instanceof Error ? err.message : "Failed to show rewarded ad");
+        finish(false);
+      });
+    });
+  }, []);
+
   return {
     isInitialized,
     isBannerVisible,
@@ -426,6 +481,7 @@ export const useAdMob = (): UseAdMobReturn => {
     refreshBanner,
     loadInterstitial,
     showInterstitial,
+    showRewarded,
     error,
   };
 };
