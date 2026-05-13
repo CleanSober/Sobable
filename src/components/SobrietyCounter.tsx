@@ -15,25 +15,17 @@ interface SobrietyCounterProps {
 export const SobrietyCounter = memo(({ daysSober, startDate, substances }: SobrietyCounterProps) => {
   const wording = getPersonalizedWording(substances);
   const { reached, next } = getMilestones(daysSober);
-  // Cascading breakdown: years → months → weeks → days
+  // Cascading breakdown: years → months → days (always shown)
   const years = Math.floor(daysSober / 365);
-  let remainderAfterYears = daysSober - years * 365;
+  const remainderAfterYears = daysSober - years * 365;
   const months = Math.floor(remainderAfterYears / 30);
-  let remainderAfterMonths = remainderAfterYears - months * 30;
-  const weeks = Math.floor(remainderAfterMonths / 7);
-  const remainderDays = remainderAfterMonths - weeks * 7;
+  const remainderDays = remainderAfterYears - months * 30;
 
   const breakdown = [
-    { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
-    { label: months === 1 ? "Month" : "Months", value: months, icon: "🌙" },
-    { label: weeks === 1 ? "Week" : "Weeks", value: weeks, icon: "📅" },
     { label: remainderDays === 1 ? "Day" : "Days", value: remainderDays, icon: "✨" },
-  ].filter((item) => item.value > 0);
-
-  // Always show at least Days if everything is zero (day 0)
-  if (breakdown.length === 0) {
-    breakdown.push({ label: "Days", value: 0, icon: "✨" });
-  }
+    { label: months === 1 ? "Month" : "Months", value: months, icon: "🌙" },
+    { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
+  ];
 
   const progressToNext = next
     ? ((daysSober / next.days) * 100).toFixed(0)
