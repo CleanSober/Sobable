@@ -482,6 +482,32 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                     <Share2 className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">Share your achievement</span>
                   </div>
+
+                  {/* Preview of the image that will be shared */}
+                  <div className="mb-3">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
+                      Share preview
+                    </p>
+                    <div className="relative rounded-xl overflow-hidden border border-border/60 bg-muted/30 aspect-square max-w-[220px] mx-auto">
+                      {previewUrl ? (
+                        <motion.img
+                          key={previewUrl}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          src={previewUrl}
+                          alt={`${selectedBadge.name} share preview`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-muted-foreground animate-pulse" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground text-center mt-1.5">
+                      This image is attached when you tap "Share with badge image" or "Download Image".
+                    </p>
+                  </div>
                   <div className="grid grid-cols-4 gap-2">
                     {/* Facebook */}
                     <Button
