@@ -42,5 +42,19 @@ export const usePremiumStatus = () => {
     checkPremiumStatus();
   }, [checkPremiumStatus]);
 
+  // Refresh premium state on tab focus and on global "premium-status-refresh"
+  // events (dispatched after a successful in-app purchase or restore). This
+  // ensures every gated component unlocks immediately, not just the one that
+  // initiated the purchase.
+  useEffect(() => {
+    const refresh = () => checkPremiumStatus(true);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("premium-status-refresh", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("premium-status-refresh", refresh);
+    };
+  }, [checkPremiumStatus]);
+
   return { isPremium: isPremium ?? false, loading, refreshPremiumStatus: () => checkPremiumStatus(true) };
 };

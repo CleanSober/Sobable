@@ -381,6 +381,10 @@ export const useInAppPurchases = () => {
 
           // Transaction is auto-finished by StoreKit 2 on iOS
 
+          // Broadcast so every gated component (premium hooks, subscription
+          // hook) re-reads the DB and unlocks immediately.
+          window.dispatchEvent(new Event("premium-status-refresh"));
+
           return true;
         } else {
           throw new Error(data?.error || "Validation failed");
@@ -475,6 +479,8 @@ export const useInAppPurchases = () => {
 
       if (revalidated > 0) {
         toast.success("Purchases restored! Premium access is active.");
+        // Notify gated components to refetch immediately.
+        window.dispatchEvent(new Event("premium-status-refresh"));
       } else {
         toast.error("Couldn't verify your previous purchase. Contact support if this persists.");
       }

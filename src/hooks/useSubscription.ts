@@ -76,13 +76,18 @@ export const useSubscription = () => {
     checkSubscription();
   }, [checkSubscription]);
 
-  // Refresh subscription when the tab regains focus (covers IAP flows)
+  // Refresh subscription when the tab regains focus (covers IAP flows) or
+  // when a successful purchase/restore dispatches the global refresh event.
   useEffect(() => {
-    const onFocus = () => {
+    const onRefresh = () => {
       if (user) checkSubscription();
     };
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    window.addEventListener("focus", onRefresh);
+    window.addEventListener("premium-status-refresh", onRefresh);
+    return () => {
+      window.removeEventListener("focus", onRefresh);
+      window.removeEventListener("premium-status-refresh", onRefresh);
+    };
   }, [checkSubscription, user]);
 
   const openNativeSubscriptionManagement = useCallback(() => {
