@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Phone, BookHeart, Wind, MessageCircle, Sparkles } from "lucide-react";
+import { Phone, BookHeart, Wind, MessageCircle, Sparkles, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUserData, useMoodEntries } from "@/hooks/useUserData";
 import { toast } from "sonner";
 import { makePhoneCall, hapticSuccess } from "@/lib/nativeActions";
+import { RelapsePreventionDialog } from "./RelapsePreventionDialog";
 
 interface QuickActionsProps {
   onNavigateToCheckIn?: () => void;
@@ -24,6 +25,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const { getTodaysMoodEntry } = useMoodEntries();
   const [todayCraving, setTodayCraving] = useState<number | null>(null);
   const [todayMood, setTodayMood] = useState<number | null>(null);
+  const [sosOpen, setSosOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +45,16 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const inDistress = highCraving || lowMood;
 
   const actions: QuickAction[] = [
+    {
+      id: "sos",
+      label: "SOS Routine",
+      icon: ShieldAlert,
+      gradient: "from-rose-500 to-amber-500",
+      glowColor: "12 90% 55%",
+      // Always at the top — instant relapse-prevention
+      relevance: inDistress ? 120 : 110,
+      action: () => setSosOpen(true)
+    },
     {
       id: "sponsor",
       label: "Call Sponsor",
@@ -120,6 +132,8 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   ].sort((a, b) => b.relevance - a.relevance);
 
   return (
+    <>
+    <RelapsePreventionDialog open={sosOpen} onOpenChange={setSosOpen} />
     <div className="card-enhanced p-3 sm:p-4">
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-4 h-4 text-primary" />
@@ -155,5 +169,6 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
         })}
       </div>
     </div>
+    </>
   );
 };
