@@ -1,0 +1,16 @@
+# Sobable
+
+> Free, private sobriety tracker. Count sober days, see money saved, log triggers, journal, and prevent relapse. Used by 50,000+ people in recovery from alcohol, drugs, smoking, gambling, and more.
+
+Sobable is a web and mobile app focused on long-term recovery. Core tracking is free forever; an optional "Sober Club" tier unlocks AI coaching, smart risk insights, and premium community features.
+
+## Pages
+
+- [Home](/): Sobriety counter, money saved, mood check-in, daily ritual, triggers and progress dashboard.
+- [Support](/support): FAQs, contact, subscription help, and crisis resources.
+- [Privacy Policy](/privacy): How recovery data is collected, encrypted, stored, and deleted.
+- [Terms of Service](/terms): Legal terms for using Sobable.
+
+## Optional
+
+- [Sign in](/auth): Account creation and login.

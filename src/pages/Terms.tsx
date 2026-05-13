@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 
 const Terms = () => {
   const sections = [
@@ -249,6 +250,11 @@ SURVIVAL: All provisions of these Terms which by their nature should survive ter
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Terms of Service — Sobable"
+        description="The legal terms for using Sobable, our recovery support platform: subscriptions, eligibility, content rules, and disclaimers."
+        path="/terms"
+      />
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>

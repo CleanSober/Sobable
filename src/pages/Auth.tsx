@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, ArrowRight, ArrowLeft, CheckCircle2, KeyRound, UserX } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
@@ -266,6 +267,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col items-center justify-center p-5 relative overflow-hidden">
+      <SEO
+        title="Sign in to Sobable"
+        description="Sign in or create your free Sobable account to track sober days, save money, and join a supportive recovery community."
+        path="/auth"
+        noIndex
+      />
       {/* Background gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div

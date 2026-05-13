@@ -1,9 +1,47 @@
 import { Mail, MessageCircle, Shield, Clock, HelpCircle, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
+
+const FAQS = [
+  {
+    q: "How do I reset my sobriety counter?",
+    a: "Go to your Profile and tap 'Edit Profile' to update your sobriety start date.",
+  },
+  {
+    q: "How do I cancel my subscription?",
+    a: "On iOS, go to Settings → Apple ID → Subscriptions. On Android, go to Google Play Store → Subscriptions. On web, use the 'Manage Subscription' button in the app.",
+  },
+  {
+    q: "How do I restore my purchases on a new device?",
+    a: "Open the app, go to the upgrade screen, and tap 'Restore Purchases' at the bottom.",
+  },
+  {
+    q: "Is my data private?",
+    a: "Yes. Your journal entries, mood data, and personal information are encrypted and only accessible to you. We never sell your data.",
+  },
+  {
+    q: "How do I delete my account?",
+    a: "Go to Profile → scroll to the bottom and tap 'Delete Account'. This will permanently remove all your data.",
+  },
+];
 
 const Support = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO
+        title="Sobable Support — FAQs, Contact & Crisis Resources"
+        description="Get help with Sobable: reset your sober counter, manage your subscription, restore purchases, delete your account, and find crisis support."
+        path="/support"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQS.map(({ q, a }) => ({
+            "@type": "Question",
+            name: q,
+            acceptedAnswer: { "@type": "Answer", text: a },
+          })),
+        }}
+      />
       <div className="max-w-2xl mx-auto px-4 py-12 space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Sober Club Support</h1>
@@ -42,28 +80,7 @@ const Support = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {[
-              {
-                q: "How do I reset my sobriety counter?",
-                a: "Go to your Profile and tap 'Edit Profile' to update your sobriety start date.",
-              },
-              {
-                q: "How do I cancel my subscription?",
-                a: "On iOS, go to Settings → Apple ID → Subscriptions. On Android, go to Google Play Store → Subscriptions. On web, use the 'Manage Subscription' button in the app.",
-              },
-              {
-                q: "How do I restore my purchases on a new device?",
-                a: "Open the app, go to the upgrade screen, and tap 'Restore Purchases' at the bottom.",
-              },
-              {
-                q: "Is my data private?",
-                a: "Yes. Your journal entries, mood data, and personal information are encrypted and only accessible to you. We never sell your data.",
-              },
-              {
-                q: "How do I delete my account?",
-                a: "Go to Profile → scroll to the bottom and tap 'Delete Account'. This will permanently remove all your data.",
-              },
-            ].map(({ q, a }) => (
+            {FAQS.map(({ q, a }) => (
               <div key={q} className="space-y-1">
                 <p className="text-sm font-medium text-foreground">{q}</p>
                 <p className="text-sm text-muted-foreground">{a}</p>
