@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Phone, BookHeart, Wind, MessageCircle, Sparkles } from "lucide-react";
-import { useUserData } from "@/hooks/useUserData";
+import { useEffect, useState } from "react";
+import { useUserData, useMoodEntries } from "@/hooks/useUserData";
 import { toast } from "sonner";
 import { makePhoneCall, hapticSuccess } from "@/lib/nativeActions";
 
