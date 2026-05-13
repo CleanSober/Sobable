@@ -537,26 +537,26 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreak
           <TabsContent value="growth" className="space-y-4 mt-0">
             {daysSober >= 2 ? (
               <>
-                <div className="glass-card rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium text-foreground">Savings Growth</span>
+                <div className="glass-card rounded-xl p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <BarChart3 className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="text-sm font-medium text-foreground truncate">Savings Growth</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-primary" />
                         <span className="text-[10px] text-muted-foreground">Saved</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-accent" />
                         <span className="text-[10px] text-muted-foreground">Invested</span>
                       </div>
                     </div>
                   </div>
-                  <div className="h-48">
+                  <div className="h-44 sm:h-48 -mx-1">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={growthData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                      <AreaChart data={growthData} margin={{ top: 5, right: 8, left: -10, bottom: 0 }}>
                         <defs>
                           <linearGradient id="savingsGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="hsl(168 84% 45%)" stopOpacity={0.3} />
@@ -573,12 +573,15 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreak
                           axisLine={false}
                           tickLine={false}
                           interval="preserveStartEnd"
+                          minTickGap={24}
+                          tickFormatter={(v: string) => v === "Start" ? "0" : v.replace("Day ", "D")}
                         />
                         <YAxis
                           tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }}
                           axisLine={false}
                           tickLine={false}
-                          tickFormatter={(v) => `$${v}`}
+                          width={36}
+                          tickFormatter={(v: number) => v >= 1000 ? `$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `$${v}`}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Area
@@ -1016,9 +1019,9 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreak
                     ))}
                   </div>
                 </div>
-                <div className="h-52">
+                <div className="h-52 -mx-1">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={multiYearData} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                    <AreaChart data={multiYearData} margin={{ top: 5, right: 8, left: -8, bottom: 0 }}>
                       <defs>
                         <linearGradient id="aggressiveGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(280 65% 60%)" stopOpacity={0.2} />
@@ -1029,8 +1032,8 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreak
                           <stop offset="95%" stopColor="hsl(42 100% 55%)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="year" tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`} />
+                      <XAxis dataKey="year" tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={16} />
+                      <YAxis tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `$${v}`} />
                       <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" dataKey="cash" name="Cash" stroke="hsl(215 18% 60%)" strokeWidth={1.5} strokeDasharray="4 4" fill="none" />
                       <Area type="monotone" dataKey="conservative" name={`Conservative (${Math.max(proSettings.returnRate - 3, 2)}%)`} stroke="hsl(168 84% 45%)" strokeWidth={1.5} fill="none" />
@@ -1051,11 +1054,11 @@ export const MoneySaved = ({ totalSaved, dailySpending, daysSober, spendingBreak
                     <CalendarDays className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium text-foreground">Monthly Savings</span>
                   </div>
-                  <div className="h-36">
+                  <div className="h-36 -mx-1">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                        <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 8, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                      <BarChart data={monthlyData} margin={{ top: 5, right: 8, left: -8, bottom: 0 }}>
+                        <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={12} tickFormatter={(v) => v.replace("Month ", "M")} />
+                        <YAxis tick={{ fontSize: 9, fill: "hsl(215 18% 58%)" }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `$${v}`} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="saved" name="Saved" radius={[4, 4, 0, 0]}>
                           {monthlyData.map((_, index) => (
