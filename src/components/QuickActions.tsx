@@ -47,7 +47,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
   const actions: QuickAction[] = [
     {
       id: "sos",
-      label: "SOS Routine",
+      label: "SOS",
       icon: ShieldAlert,
       gradient: "from-rose-500 to-amber-500",
       glowColor: "12 90% 55%",
