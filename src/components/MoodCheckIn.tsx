@@ -110,8 +110,20 @@ export const MoodCheckIn = () => {
 
   useEffect(() => {
     if (!user) return;
+    // Reset the form when the local day rolls over so a new check-in can happen
+    setMood(5);
+    setCraving(0);
+    setSelectedEmotions([]);
+    setEnergy(3);
+    setSelectedSymptoms([]);
+    setSocial(3);
+    setGratitude("");
+    setNote("");
+    setCurrentStep(0);
+    setCompleted(false);
+    setWasAlreadyCompleted(false);
     checkExistingEntry();
-  }, [user]);
+  }, [user, today]);
 
   const checkExistingEntry = async () => {
     if (!user) return;
