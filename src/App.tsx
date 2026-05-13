@@ -63,6 +63,7 @@ const AppContent = () => {
   // Track affiliate referral codes from URL
   useReferralTracking();
   useNativeOAuthCallback();
+  useDismissibleInputs();
   return null; // Just runs the hook inside Router context
 };
 
