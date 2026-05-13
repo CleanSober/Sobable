@@ -179,7 +179,7 @@ export const SleepTracker = () => {
       <CardContent className="space-y-3 px-3 pb-3">
         {/* Time Inputs */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0">
             <label className="flex items-center gap-1.5 text-xs font-medium">
               <Moon className="w-3.5 h-3.5 text-indigo-400" />
               Bedtime
@@ -188,10 +188,10 @@ export const SleepTracker = () => {
               type="time"
               value={bedtime}
               onChange={(e) => setBedtime(e.target.value)}
-              className="w-full p-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none text-sm"
+              className="w-full max-w-full min-w-0 p-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none text-sm appearance-none"
             />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0">
             <label className="flex items-center gap-1.5 text-xs font-medium">
               <Sun className="w-3.5 h-3.5 text-amber-400" />
               Wake Time
@@ -200,7 +200,7 @@ export const SleepTracker = () => {
               type="time"
               value={wakeTime}
               onChange={(e) => setWakeTime(e.target.value)}
-              className="w-full p-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none text-sm"
+              className="w-full max-w-full min-w-0 p-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary outline-none text-sm appearance-none"
             />
           </div>
         </div>
