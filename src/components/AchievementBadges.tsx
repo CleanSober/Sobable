@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Award, Lock, Star, Trophy, Medal, Crown, Gem, Heart, Zap, Shield, Flame, Diamond, Sparkles, Sun, Moon, Target, Rocket, Mountain, TreePine, Infinity, Share2, X, History as HistoryIcon, Mail, MessageSquare, Copy, Download } from "lucide-react";
+import { Award, Lock, Star, Trophy, Medal, Crown, Gem, Heart, Zap, Shield, Flame, Diamond, Sparkles, Sun, Moon, Target, Rocket, Mountain, TreePine, Infinity as InfinityIcon, Share2, X, History as HistoryIcon, Mail, MessageSquare, Copy, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -67,8 +67,76 @@ const parseGradient = (cls: string): [string, string] => {
   return [GRADIENT_HEX[from || ""] || "#6366f1", GRADIENT_HEX[to || ""] || "#a855f7"];
 };
 
+const normalizeCanvasText = (text: string) => text.replace(/\s+/g, " ").trim();
+
+const splitLongToken = (ctx: CanvasRenderingContext2D, token: string, maxWidth: number) => {
+  const parts: string[] = [];
+  let part = "";
+  for (const char of token) {
+    const next = part + char;
+    if (ctx.measureText(next).width <= maxWidth || !part) {
+      part = next;
+    } else {
+      parts.push(part);
+      part = char;
+    }
+  }
+  if (part) parts.push(part);
+  return parts;
+};
+
+const wrapCanvasText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number) => {
+  const normalized = normalizeCanvasText(text);
+  if (!normalized) return [];
+
+  const tokens = normalized
+    .split(" ")
+    .flatMap((token) =>
+      ctx.measureText(token).width > maxWidth ? splitLongToken(ctx, token, maxWidth) : [token],
+    );
+  const lines: string[] = [];
+  let line = "";
+
+  for (let i = 0; i < tokens.length; i++) {
+    const test = line ? `${line} ${tokens[i]}` : tokens[i];
+    if (ctx.measureText(test).width <= maxWidth) {
+      line = test;
+      continue;
+    }
+
+    if (line) lines.push(line);
+    line = tokens[i];
+
+    if (lines.length === maxLines) {
+      let last = lines[maxLines - 1];
+      while (last && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1);
+      lines[maxLines - 1] = `${last.trimEnd()}…`;
+      return lines;
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines.slice(0, maxLines);
+};
+
+const drawCenteredCaption = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  y: number,
+  maxWidth: number,
+  font: string,
+  lineHeight: number,
+  maxLines: number,
+) => {
+  ctx.font = font;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const lines = wrapCanvasText(ctx, text, maxWidth, maxLines);
+  lines.forEach((line, index) => ctx.fillText(line, 540, y + index * lineHeight));
+};
+
 // Render a 1080x1080 shareable badge image using canvas.
-const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+const generateBadgeImage = async (badge: Badge, daysSober: number, caption = ""): Promise<Blob | null> => {
   const size = 1080;
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -119,21 +187,32 @@ const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 78px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText(badge.name, size / 2, 800);
+  ctx.fillText(badge.name, size / 2, 735);
 
   ctx.fillStyle = c1;
   ctx.font = "bold 64px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText(`${daysSober} days sober`, size / 2, 890);
+  ctx.fillText(`${daysSober} days sober`, size / 2, 820);
+
+  ctx.fillStyle = "rgba(255,255,255,0.86)";
+  drawCenteredCaption(
+    ctx,
+    caption,
+    900,
+    900,
+    "500 34px system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    42,
+    3,
+  );
 
   ctx.fillStyle = "rgba(255,255,255,0.55)";
   ctx.font = "500 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText("sobable.app", size / 2, 990);
+  ctx.fillText("sobable.app", size / 2, 1040);
 
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
 
 // Render a 1080x1920 vertical "story" image for Instagram Stories / TikTok / Snapchat.
-const generateStoryImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+const generateStoryImage = async (badge: Badge, daysSober: number, caption = ""): Promise<Blob | null> => {
   const w = 1080;
   const h = 1920;
   const canvas = document.createElement("canvas");
@@ -201,9 +280,20 @@ const generateStoryImage = async (badge: Badge, daysSober: number): Promise<Blob
   ctx.font = "bold 68px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
   ctx.fillText(badge.name, cx, 1620);
 
+  ctx.fillStyle = "rgba(255,255,255,0.86)";
+  drawCenteredCaption(
+    ctx,
+    caption,
+    1705,
+    900,
+    "500 42px system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    54,
+    3,
+  );
+
   ctx.fillStyle = "rgba(255,255,255,0.55)";
   ctx.font = "500 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText("sobable.app", cx, 1820);
+  ctx.fillText("sobable.app", cx, 1870);
 
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
@@ -216,7 +306,7 @@ const shareStoryImage = async (
   msg: string,
   platform: "Instagram Stories" | "TikTok",
 ) => {
-  const blob = await generateStoryImage(badge, daysSober);
+  const blob = await generateStoryImage(badge, daysSober, msg);
   if (!blob) {
     toast.error("Couldn't generate story image");
     return;
@@ -275,7 +365,7 @@ const openShareWithCopy = async (
 //     the user can paste the text and drag the downloaded image in.
 const shareToFacebook = async (badge: Badge, daysSober: number, msg: string) => {
   const url = getShareUrl();
-  const blob = await generateBadgeImage(badge, daysSober);
+  const blob = await generateBadgeImage(badge, daysSober, msg);
   const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
 
@@ -346,7 +436,7 @@ const shareToSMS = (msg: string) => {
 // Native share — attaches the generated badge image when supported.
 const shareNative = async (badge: Badge, daysSober: number, msg: string) => {
   const url = getShareUrl();
-  const blob = await generateBadgeImage(badge, daysSober);
+  const blob = await generateBadgeImage(badge, daysSober, msg);
   const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
 
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
@@ -372,7 +462,7 @@ const shareNative = async (badge: Badge, daysSober: number, msg: string) => {
 };
 
 const downloadBadgeImage = async (badge: Badge, daysSober: number) => {
-  const blob = await generateBadgeImage(badge, daysSober);
+  const blob = await generateBadgeImage(badge, daysSober, getShareText(badge, daysSober));
   if (!blob) {
     toast.error("Couldn't generate badge image");
     return;
@@ -410,12 +500,12 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
     }
   }, [selectedBadge, daysSober]);
 
-  // Generate a preview image whenever an unlocked badge is selected
+  // Generate a preview image whenever the selected badge/message changes
   useEffect(() => {
     let revoke: string | null = null;
     let cancelled = false;
     if (selectedBadge && daysSober >= selectedBadge.daysRequired) {
-      generateBadgeImage(selectedBadge, daysSober).then((blob) => {
+      generateBadgeImage(selectedBadge, daysSober, shareMessage).then((blob) => {
         if (cancelled || !blob) return;
         const url = URL.createObjectURL(blob);
         revoke = url;
@@ -428,7 +518,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
       cancelled = true;
       if (revoke) URL.revokeObjectURL(revoke);
     };
-  }, [selectedBadge, daysSober]);
+  }, [selectedBadge, daysSober, shareMessage]);
 
   const unlockedBadges = badges.filter((b) => daysSober >= b.daysRequired);
   const lockedBadges = badges.filter((b) => daysSober < b.daysRequired);
@@ -670,7 +760,7 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
                       )}
                     </div>
                     <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-                      This image is attached when you tap "Share with badge image" or "Download Image".
+                      Your message is baked into the image because social apps may ignore shared text.
                     </p>
                   </div>
 
