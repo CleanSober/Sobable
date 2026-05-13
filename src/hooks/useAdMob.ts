@@ -13,6 +13,7 @@ interface UseAdMobReturn {
   refreshBanner: (position?: "top" | "bottom") => Promise<void>;
   loadInterstitial: () => Promise<void>;
   showInterstitial: () => Promise<boolean>;
+  showRewarded: () => Promise<boolean>;
   error: string | null;
 }
 
