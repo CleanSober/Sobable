@@ -247,6 +247,7 @@ export const useAdMob = (): UseAdMobReturn => {
 
   // Show banner ad
   const showBanner = useCallback(async (position: "top" | "bottom" = "bottom") => {
+    if (isPremiumRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
 
     const unitIdError = admobConfig.getUnitIdError("banner");
