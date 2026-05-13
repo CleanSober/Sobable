@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, InterstitialAdPluginEvents, RewardAdPluginEvents } from "@capacitor-community/admob";
 import { admobConfig } from "@/lib/admobConfig";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 interface UseAdMobReturn {
   isInitialized: boolean;
