@@ -306,7 +306,7 @@ const shareStoryImage = async (
   msg: string,
   platform: "Instagram Stories" | "TikTok",
 ) => {
-  const blob = await generateStoryImage(badge, daysSober);
+  const blob = await generateStoryImage(badge, daysSober, msg);
   if (!blob) {
     toast.error("Couldn't generate story image");
     return;
@@ -365,7 +365,7 @@ const openShareWithCopy = async (
 //     the user can paste the text and drag the downloaded image in.
 const shareToFacebook = async (badge: Badge, daysSober: number, msg: string) => {
   const url = getShareUrl();
-  const blob = await generateBadgeImage(badge, daysSober);
+  const blob = await generateBadgeImage(badge, daysSober, msg);
   const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
 
@@ -436,7 +436,7 @@ const shareToSMS = (msg: string) => {
 // Native share — attaches the generated badge image when supported.
 const shareNative = async (badge: Badge, daysSober: number, msg: string) => {
   const url = getShareUrl();
-  const blob = await generateBadgeImage(badge, daysSober);
+  const blob = await generateBadgeImage(badge, daysSober, msg);
   const file = blob ? new File([blob], `${badge.id}-badge.png`, { type: "image/png" }) : null;
 
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
@@ -462,7 +462,7 @@ const shareNative = async (badge: Badge, daysSober: number, msg: string) => {
 };
 
 const downloadBadgeImage = async (badge: Badge, daysSober: number) => {
-  const blob = await generateBadgeImage(badge, daysSober);
+  const blob = await generateBadgeImage(badge, daysSober, getShareText(badge, daysSober));
   if (!blob) {
     toast.error("Couldn't generate badge image");
     return;
