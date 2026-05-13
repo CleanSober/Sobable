@@ -67,8 +67,76 @@ const parseGradient = (cls: string): [string, string] => {
   return [GRADIENT_HEX[from || ""] || "#6366f1", GRADIENT_HEX[to || ""] || "#a855f7"];
 };
 
+const normalizeCanvasText = (text: string) => text.replace(/\s+/g, " ").trim();
+
+const splitLongToken = (ctx: CanvasRenderingContext2D, token: string, maxWidth: number) => {
+  const parts: string[] = [];
+  let part = "";
+  for (const char of token) {
+    const next = part + char;
+    if (ctx.measureText(next).width <= maxWidth || !part) {
+      part = next;
+    } else {
+      parts.push(part);
+      part = char;
+    }
+  }
+  if (part) parts.push(part);
+  return parts;
+};
+
+const wrapCanvasText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number) => {
+  const normalized = normalizeCanvasText(text);
+  if (!normalized) return [];
+
+  const tokens = normalized
+    .split(" ")
+    .flatMap((token) =>
+      ctx.measureText(token).width > maxWidth ? splitLongToken(ctx, token, maxWidth) : [token],
+    );
+  const lines: string[] = [];
+  let line = "";
+
+  for (let i = 0; i < tokens.length; i++) {
+    const test = line ? `${line} ${tokens[i]}` : tokens[i];
+    if (ctx.measureText(test).width <= maxWidth) {
+      line = test;
+      continue;
+    }
+
+    if (line) lines.push(line);
+    line = tokens[i];
+
+    if (lines.length === maxLines) {
+      let last = lines[maxLines - 1];
+      while (last && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1);
+      lines[maxLines - 1] = `${last.trimEnd()}…`;
+      return lines;
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines.slice(0, maxLines);
+};
+
+const drawCenteredCaption = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  y: number,
+  maxWidth: number,
+  font: string,
+  lineHeight: number,
+  maxLines: number,
+) => {
+  ctx.font = font;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const lines = wrapCanvasText(ctx, text, maxWidth, maxLines);
+  lines.forEach((line, index) => ctx.fillText(line, 540, y + index * lineHeight));
+};
+
 // Render a 1080x1080 shareable badge image using canvas.
-const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+const generateBadgeImage = async (badge: Badge, daysSober: number, caption = ""): Promise<Blob | null> => {
   const size = 1080;
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -119,21 +187,32 @@ const generateBadgeImage = async (badge: Badge, daysSober: number): Promise<Blob
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 78px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText(badge.name, size / 2, 800);
+  ctx.fillText(badge.name, size / 2, 735);
 
   ctx.fillStyle = c1;
   ctx.font = "bold 64px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText(`${daysSober} days sober`, size / 2, 890);
+  ctx.fillText(`${daysSober} days sober`, size / 2, 820);
+
+  ctx.fillStyle = "rgba(255,255,255,0.86)";
+  drawCenteredCaption(
+    ctx,
+    caption,
+    900,
+    900,
+    "500 34px system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    42,
+    3,
+  );
 
   ctx.fillStyle = "rgba(255,255,255,0.55)";
   ctx.font = "500 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText("sobable.app", size / 2, 990);
+  ctx.fillText("sobable.app", size / 2, 1040);
 
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
 
 // Render a 1080x1920 vertical "story" image for Instagram Stories / TikTok / Snapchat.
-const generateStoryImage = async (badge: Badge, daysSober: number): Promise<Blob | null> => {
+const generateStoryImage = async (badge: Badge, daysSober: number, caption = ""): Promise<Blob | null> => {
   const w = 1080;
   const h = 1920;
   const canvas = document.createElement("canvas");
@@ -201,9 +280,20 @@ const generateStoryImage = async (badge: Badge, daysSober: number): Promise<Blob
   ctx.font = "bold 68px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
   ctx.fillText(badge.name, cx, 1620);
 
+  ctx.fillStyle = "rgba(255,255,255,0.86)";
+  drawCenteredCaption(
+    ctx,
+    caption,
+    1705,
+    900,
+    "500 42px system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    54,
+    3,
+  );
+
   ctx.fillStyle = "rgba(255,255,255,0.55)";
   ctx.font = "500 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText("sobable.app", cx, 1820);
+  ctx.fillText("sobable.app", cx, 1870);
 
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 };
