@@ -2,7 +2,7 @@ import { useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Award, Calendar, TrendingUp, Sparkles, Star, Flame } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getMilestones } from "@/lib/storage";
+import { getMilestones, formatMilestoneName } from "@/lib/storage";
 import { useGamification, getLevelTitle } from "@/hooks/useGamification";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 
