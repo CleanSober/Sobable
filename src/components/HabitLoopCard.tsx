@@ -94,9 +94,11 @@ export const HabitLoopCard = ({ onNavigateToCheckIn }: HabitLoopCardProps) => {
 
   useEffect(() => {
     if (user) {
+      // Reset local state at day rollover, then refetch fresh data for the new day
+      setTodayComplete(false);
       fetchStreakData();
     }
-  }, [user, fetchStreakData]);
+  }, [user, fetchStreakData, today]);
 
   const handleUseFreeze = async () => {
     if (!user || !canUseFreeze) return;
