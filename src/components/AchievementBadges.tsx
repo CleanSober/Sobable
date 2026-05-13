@@ -238,8 +238,18 @@ export const AchievementBadges = ({ daysSober, startDate }: AchievementBadgesPro
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string>("");
   const { showAd } = useInterstitialAd();
   const previousUnlockedCount = useRef<number | null>(null);
+
+  // Reset the editable share message whenever the selected badge changes
+  useEffect(() => {
+    if (selectedBadge && daysSober >= selectedBadge.daysRequired) {
+      setShareMessage(getShareText(selectedBadge, daysSober));
+    } else {
+      setShareMessage("");
+    }
+  }, [selectedBadge, daysSober]);
 
   // Generate a preview image whenever an unlocked badge is selected
   useEffect(() => {
