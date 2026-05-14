@@ -84,12 +84,25 @@ export const AIRecoveryCoach = ({ isOpen: controlledOpen, onOpenChange }: { isOp
   const isOpen = controlledOpen ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
 
+  const [freeUsedThisWeek, setFreeUsedThisWeek] = useState<boolean | null>(null);
+
+  // Check free-tier weekly usage when opening for non-premium users
+  useEffect(() => {
+    if (!isOpen || isPremium || !user) return;
+    (async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+      const { count } = await supabase
+        .from("analytics_events")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("event_type", "ai_coach_message")
+        .gte("created_at", sevenDaysAgo);
+      setFreeUsedThisWeek((count ?? 0) >= 1);
+    })();
+  }, [isOpen, isPremium, user]);
+
   const handleOpenChat = () => {
-    if (!isPremium && !premiumLoading) {
-      setShowUpgrade(true);
-    } else {
-      setIsOpen(true);
-    }
+    setIsOpen(true);
   };
 
   const daysSober = profile?.sobriety_start_date
@@ -158,6 +171,21 @@ How can I support you today?`;
       }
       if (response.status === 402) {
         toast.error("AI service temporarily unavailable. Please try again later.");
+        setMessages((prev) => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
+      }
+
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({} as { code?: string; error?: string }));
+        if (errorData.code === "weekly_limit_reached") {
+          setFreeUsedThisWeek(true);
+          setMessages((prev) => prev.slice(0, -1));
+          setIsLoading(false);
+          setShowUpgrade(true);
+          return;
+        }
+        toast.error(errorData.error || "Access denied");
         setMessages((prev) => prev.slice(0, -1));
         setIsLoading(false);
         return;
@@ -328,7 +356,23 @@ How can I support you today?`;
                   </div>
                 </div>
 
-                {/* Messages */}
+                {/* Free-tier soft paywall banner */}
+                {!isPremium && !premiumLoading && (
+                  <button
+                    type="button"
+                    onClick={() => setShowUpgrade(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500/15 to-amber-600/10 border-b border-amber-500/20 text-left hover:from-amber-500/20 hover:to-amber-600/15 transition-colors"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="text-xs text-foreground/90 flex-1">
+                      {freeUsedThisWeek
+                        ? "Weekly free message used. Upgrade for unlimited."
+                        : "Free preview: 1 message per week. Tap to upgrade."}
+                    </span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  </button>
+                )}
+
                 <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                   <div className="space-y-4">
                     {messages.map((msg, i) => (

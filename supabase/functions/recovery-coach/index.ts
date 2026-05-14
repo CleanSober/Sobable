@@ -87,12 +87,49 @@ serve(async (req) => {
     const userId = claimsData.claims.sub;
     console.log("Recovery coach — user:", userId);
 
-    // Premium gate
-    const { data: isPremium, error: premErr } = await supabase.rpc("is_premium_user", { check_user_id: userId });
-    if (premErr || !isPremium) {
-      return new Response(JSON.stringify({ error: "Premium subscription required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Soft paywall: premium users get unlimited; free users get 1 message per rolling 7 days.
+    const { data: isPremium } = await supabase.rpc("is_premium_user", { check_user_id: userId });
+    const sevenDaysAgoIso = new Date(Date.now() - 7 * 86400000).toISOString();
+
+    if (!isPremium) {
+      const { count: recentCount, error: countErr } = await supabase
+        .from("analytics_events")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("event_type", "ai_coach_message")
+        .gte("created_at", sevenDaysAgoIso);
+
+      if (countErr) {
+        console.error("Usage count error:", countErr);
+      } else if ((recentCount ?? 0) >= 1) {
+        // Find when the next message unlocks (oldest event in window + 7 days)
+        const { data: oldest } = await supabase
+          .from("analytics_events")
+          .select("created_at")
+          .eq("user_id", userId)
+          .eq("event_type", "ai_coach_message")
+          .gte("created_at", sevenDaysAgoIso)
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        const resetsAt = oldest?.created_at
+          ? new Date(new Date(oldest.created_at).getTime() + 7 * 86400000).toISOString()
+          : new Date(Date.now() + 7 * 86400000).toISOString();
+        return new Response(
+          JSON.stringify({
+            error: "Free weekly limit reached. Upgrade to Sober Club for unlimited Recovery Coach.",
+            code: "weekly_limit_reached",
+            resets_at: resetsAt,
+          }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Log the message before streaming so concurrent requests can't bypass the limit.
+      await supabase.from("analytics_events").insert({
+        user_id: userId,
+        event_type: "ai_coach_message",
+        event_data: { tier: "free" },
       });
     }
 
