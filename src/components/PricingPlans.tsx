@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
@@ -13,6 +13,7 @@ import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { markUpsellShown } from "@/lib/upsellCooldown";
 
 const features = [
   { icon: Bot, text: "AI Recovery Coach" },
@@ -34,6 +35,15 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
   const { isPremium, planName, openManageSubscription, checkSubscription } = useSubscription();
   const { refreshPremiumStatus } = usePremiumStatus();
   const navigate = useNavigate();
+
+  // Stamp the global 24h upsell cooldown whenever this modal mounts (any source:
+  // milestone prompt, locked card, manual upgrade tap). Skip for already-paying
+  // users so manage-subscription views don't suppress future prompts for free users.
+  useEffect(() => {
+    if (!isPremium) markUpsellShown();
+  }, [isPremium]);
+
+
   const {
     isNative,
     purchasing,
