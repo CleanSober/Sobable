@@ -1049,7 +1049,7 @@ const Profile = () => {
 
           {/* Version */}
           <p className="text-center text-[10px] text-muted-foreground/50 py-2">
-            Sober Club v1.0 · Made with 💚
+            Sobable v1.0 · Made with 💚
           </p>
         </div>
       </main>
