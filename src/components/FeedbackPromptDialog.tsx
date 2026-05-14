@@ -24,7 +24,7 @@ import { Capacitor } from "@capacitor/core";
 import { InAppReview } from "@capacitor-community/in-app-review";
 
 const APP_STORE_URL =
-  "https://apps.apple.com/app/sober-club/id0000000000?action=write-review";
+  "https://apps.apple.com/dk/app/sobable/id6761424507?l=da&action=write-review";
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=com.sober.club";
 
