@@ -113,6 +113,12 @@ const App = () => {
     if (!showSplash) prefetchHotRoutes();
   }, []);
 
+  // Drain any check-ins saved while offline. Auto-syncs when connection returns.
+  useEffect(() => {
+    const cleanup = registerCheckInSync();
+    return cleanup;
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
