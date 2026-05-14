@@ -42,6 +42,8 @@ import { applyThemePreference } from "@/lib/theme";
 import { readGuestProfile, patchGuestProfile, clearGuestProfile } from "@/lib/guestProfile";
 import cleanAndSoberLogo from "@/assets/clean-and-sober-logo.png";
 import { ProfileSkeleton } from "@/components/skeletons/HomeSkeleton";
+import { Download, FileJson, FileDown } from "lucide-react";
+import { exportUserData } from "@/lib/exportUserData";
 
 const Profile = () => {
   const { user, isGuest, signOut } = useAuth();
