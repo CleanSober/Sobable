@@ -184,29 +184,15 @@ export const MoodCheckIn = () => {
       .filter(Boolean)
       .join(" | ");
 
-    const { error } = await supabase.from("mood_entries").upsert(
-      {
-        user_id: user.id,
-        date: todayDate,
-        mood,
-        craving_level: craving,
-        note: fullNote || null,
-      },
-      { onConflict: "user_id,date" }
-    );
+    const { synced } = await saveCheckInOffline({
+      user_id: user.id,
+      date: todayDate,
+      mood,
+      craving_level: craving,
+      note: fullNote || null,
+    });
 
-    if (error) {
-      toast.error("Failed to save check-in");
-      setLoading(false);
-      return;
-    }
-
-    await supabase.from("daily_goals").upsert(
-      { user_id: user.id, date: todayDate, mood_logged: true },
-      { onConflict: "user_id,date" }
-    );
-
-    if (!wasAlreadyCompleted) {
+    if (synced && !wasAlreadyCompleted) {
       await addXP(XP_REWARDS.mood_log, "mood_log", "Daily mood check-in");
     }
 
@@ -214,11 +200,18 @@ export const MoodCheckIn = () => {
     setWasAlreadyCompleted(true);
     setIsExpanded(false);
     setLoading(false);
-    toast.success(
-      wasAlreadyCompleted
-        ? "Check-in updated!"
-        : `Check-in saved! +${XP_REWARDS.mood_log} XP 💪`
-    );
+
+    if (synced) {
+      toast.success(
+        wasAlreadyCompleted
+          ? "Check-in updated!"
+          : `Check-in saved! +${XP_REWARDS.mood_log} XP 💪`
+      );
+    } else {
+      toast.success("Check-in saved offline — we'll sync when you're back online", {
+        duration: 4000,
+      });
+    }
     emitFeedbackTrigger();
   };
 
