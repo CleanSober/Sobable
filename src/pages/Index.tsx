@@ -45,6 +45,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 const MoneySaved = lazy(() => import("@/components/MoneySaved").then(m => ({ default: m.MoneySaved })));
 const QuickActions = lazy(() => import("@/components/QuickActions").then(m => ({ default: m.QuickActions })));
 const NextBestAction = lazy(() => import("@/components/NextBestAction").then(m => ({ default: m.NextBestAction })));
+const ComebackWelcome = lazy(() => import("@/components/ComebackWelcome").then(m => ({ default: m.ComebackWelcome })));
 const MoodCheckIn = lazy(() => import("@/components/MoodCheckIn").then(m => ({ default: m.MoodCheckIn })));
 const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m => ({ default: m.AIRecoveryCoach })));
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
@@ -619,6 +620,19 @@ const Index = () => {
             }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={null}>
+              <ComebackWelcome
+                sobrietyStartDate={effectiveProfile?.sobriety_start_date ?? null}
+                displayName={effectiveProfile?.display_name ?? null}
+                onNavigateCheckIn={() => setActiveTab("checkin")}
+                onResetCounter={async () => {
+                  const today = new Date().toISOString().split("T")[0];
+                  if (user) {
+                    await updateProfile({ sobriety_start_date: today } as any);
+                  } else {
+                    patchGuestProfile({ sobriety_start_date: today });
+                  }
+                }}
+              />
               <NextBestAction
                 onNavigate={(tab) => setActiveTab(tab)}
                 onOpenSOS={() => setActiveTab("triggers")}
