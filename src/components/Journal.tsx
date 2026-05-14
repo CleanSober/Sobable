@@ -357,6 +357,11 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               Write Journal Entry
+              {draftSavedAt && (
+                <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+                  Draft saved
+                </span>
+              )}
             </DialogTitle>
           </DialogHeader>
 
