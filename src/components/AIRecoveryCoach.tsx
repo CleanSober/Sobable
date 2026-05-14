@@ -15,6 +15,7 @@ import { calculateDaysSober } from "@/lib/storage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PremiumGate } from "@/components/community/PremiumGate";
+import { canShowUpsell } from "@/lib/upsellCooldown";
 
 interface Message {
   role: "user" | "assistant";
@@ -182,7 +183,11 @@ How can I support you today?`;
           setFreeUsedThisWeek(true);
           setMessages((prev) => prev.slice(0, -1));
           setIsLoading(false);
-          setShowUpgrade(true);
+          if (canShowUpsell()) {
+            setShowUpgrade(true);
+          } else {
+            toast.info("You've reached your weekly free coach limit. Try again next week or upgrade anytime.");
+          }
           return;
         }
         toast.error(errorData.error || "Access denied");
