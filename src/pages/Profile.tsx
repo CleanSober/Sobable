@@ -902,6 +902,46 @@ const Profile = () => {
             {user ? (
               <>
                 <div className="h-px bg-border/30 mx-4" />
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Download className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground flex-1">Export My Data</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3 ml-8">
+                    Download your journal, mood, trigger and check-in history.
+                  </p>
+                  <div className="flex gap-2 ml-8">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExport("pdf")}
+                      disabled={exporting !== null}
+                      className="flex-1"
+                    >
+                      {exporting === "pdf" ? (
+                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                      ) : (
+                        <FileDown className="w-4 h-4 mr-1.5" />
+                      )}
+                      PDF
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExport("json")}
+                      disabled={exporting !== null}
+                      className="flex-1"
+                    >
+                      {exporting === "json" ? (
+                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                      ) : (
+                        <FileJson className="w-4 h-4 mr-1.5" />
+                      )}
+                      JSON
+                    </Button>
+                  </div>
+                </div>
+                <div className="h-px bg-border/30 mx-4" />
                 <button
                   onClick={handleSignOut}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
