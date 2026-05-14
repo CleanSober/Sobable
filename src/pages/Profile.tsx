@@ -42,6 +42,8 @@ import { applyThemePreference } from "@/lib/theme";
 import { readGuestProfile, patchGuestProfile, clearGuestProfile } from "@/lib/guestProfile";
 import cleanAndSoberLogo from "@/assets/clean-and-sober-logo.png";
 import { ProfileSkeleton } from "@/components/skeletons/HomeSkeleton";
+import { Download, FileJson, FileDown } from "lucide-react";
+import { exportUserData } from "@/lib/exportUserData";
 
 const Profile = () => {
   const { user, isGuest, signOut } = useAuth();
@@ -61,6 +63,7 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState<null | "json" | "pdf">(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("home");
 
@@ -139,6 +142,23 @@ const Profile = () => {
     await signOut();
     toast.success("Signed out successfully");
     navigate("/");
+  };
+
+  const handleExport = async (format: "json" | "pdf") => {
+    if (!user) {
+      toast.error("Sign in to export your data");
+      return;
+    }
+    setExporting(format);
+    try {
+      await exportUserData(user.id, format);
+      toast.success(`Exported your history as ${format.toUpperCase()}`);
+    } catch (err) {
+      console.error("Export error:", err);
+      toast.error("Couldn't export your data. Please try again.");
+    } finally {
+      setExporting(null);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -881,6 +901,46 @@ const Profile = () => {
 
             {user ? (
               <>
+                <div className="h-px bg-border/30 mx-4" />
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Download className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground flex-1">Export My Data</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3 ml-8">
+                    Download your journal, mood, trigger and check-in history.
+                  </p>
+                  <div className="flex gap-2 ml-8">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExport("pdf")}
+                      disabled={exporting !== null}
+                      className="flex-1"
+                    >
+                      {exporting === "pdf" ? (
+                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                      ) : (
+                        <FileDown className="w-4 h-4 mr-1.5" />
+                      )}
+                      PDF
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExport("json")}
+                      disabled={exporting !== null}
+                      className="flex-1"
+                    >
+                      {exporting === "json" ? (
+                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                      ) : (
+                        <FileJson className="w-4 h-4 mr-1.5" />
+                      )}
+                      JSON
+                    </Button>
+                  </div>
+                </div>
                 <div className="h-px bg-border/30 mx-4" />
                 <button
                   onClick={handleSignOut}
