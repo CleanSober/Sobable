@@ -47,6 +47,7 @@ const QuickActions = lazy(() => import("@/components/QuickActions").then(m => ({
 const NextBestAction = lazy(() => import("@/components/NextBestAction").then(m => ({ default: m.NextBestAction })));
 const ComebackWelcome = lazy(() => import("@/components/ComebackWelcome").then(m => ({ default: m.ComebackWelcome })));
 const OnboardingNudge = lazy(() => import("@/components/OnboardingNudge").then(m => ({ default: m.OnboardingNudge })));
+const NotificationPrePrompt = lazy(() => import("@/components/NotificationPrePrompt").then(m => ({ default: m.NotificationPrePrompt })));
 const MoodCheckIn = lazy(() => import("@/components/MoodCheckIn").then(m => ({ default: m.MoodCheckIn })));
 const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m => ({ default: m.AIRecoveryCoach })));
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
