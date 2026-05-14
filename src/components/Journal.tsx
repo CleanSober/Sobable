@@ -98,6 +98,45 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
   const [moodAnalysis, setMoodAnalysis] = useState<any>(null);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+
+  // Auto-save journal drafts to localStorage so a crash, tab close, or accidental
+  // dismiss doesn't lose a long entry. Keyed per-user.
+  const draftKey = user ? `sober_club_journal_draft_${user.id}` : null;
+
+  // Restore any saved draft when the editor opens.
+  useEffect(() => {
+    if (!isWriting || !draftKey) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { title?: string; content?: string; tags?: string[]; aiPrompt?: string };
+      // Only restore if user hasn't already started typing in this session
+      setNewEntry(prev => (prev.content || prev.title || prev.tags.length)
+        ? prev
+        : { title: draft.title ?? '', content: draft.content ?? '', tags: draft.tags ?? [] });
+      if (draft.aiPrompt) setAiPrompt(prev => prev || draft.aiPrompt!);
+    } catch { /* ignore */ }
+  }, [isWriting, draftKey]);
+
+  // Debounced persist while typing.
+  useEffect(() => {
+    if (!isWriting || !draftKey) return;
+    const hasContent = newEntry.title.trim() || newEntry.content.trim() || newEntry.tags.length;
+    const t = setTimeout(() => {
+      try {
+        if (hasContent) {
+          localStorage.setItem(draftKey, JSON.stringify({ ...newEntry, aiPrompt }));
+          setDraftSavedAt(Date.now());
+        } else {
+          localStorage.removeItem(draftKey);
+          setDraftSavedAt(null);
+        }
+      } catch { /* quota or disabled storage */ }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [newEntry, aiPrompt, isWriting, draftKey]);
+
 
   const handleGetPrompt = async (category: string) => {
     setLoadingPrompt(true);
