@@ -633,6 +633,11 @@ const Index = () => {
                 onOpenSOS={() => setActiveTab("triggers")}
                 onOpenCoach={() => setCoachOpen(true)}
               />
+              <NotificationPrePrompt
+                userId={user?.id}
+                enabled={!!user && !!profile?.onboarding_complete}
+                requestPermission={requestNotifPermission}
+              />
             </Suspense>
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
