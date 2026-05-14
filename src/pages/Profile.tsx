@@ -144,6 +144,23 @@ const Profile = () => {
     navigate("/");
   };
 
+  const handleExport = async (format: "json" | "pdf") => {
+    if (!user) {
+      toast.error("Sign in to export your data");
+      return;
+    }
+    setExporting(format);
+    try {
+      await exportUserData(user.id, format);
+      toast.success(`Exported your history as ${format.toUpperCase()}`);
+    } catch (err) {
+      console.error("Export error:", err);
+      toast.error("Couldn't export your data. Please try again.");
+    } finally {
+      setExporting(null);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== "DELETE") return;
     setDeleting(true);
