@@ -1,3 +1,4 @@
+import { canShowConfettiToday, markConfettiShown } from "@/lib/confettiCooldown";
 import { useState, useEffect } from "react";
 import { emitFeedbackTrigger } from "@/hooks/useFeedbackPrompt";
 import { motion, AnimatePresence } from "framer-motion";
