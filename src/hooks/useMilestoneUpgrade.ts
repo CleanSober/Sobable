@@ -89,6 +89,9 @@ export const useMilestoneUpgrade = () => {
 
   const triggerMilestone = useCallback((key: string, opts?: { delayMs?: number }) => {
     if (isPremium || !user) return;
+    // Respect global 24h upsell cooldown so milestone prompts don't pile on
+    // top of any other pricing modal the user just saw.
+    if (!canShowUpsell()) return;
     const shown = getShownMilestones();
     if (shown.has(key)) return;
 
