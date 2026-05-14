@@ -618,6 +618,13 @@ const Index = () => {
               toast.success("Savings reset undone! Your previous tracking has been restored.");
             }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            <Suspense fallback={null}>
+              <NextBestAction
+                onNavigate={(tab) => setActiveTab(tab)}
+                onOpenSOS={() => setActiveTab("triggers")}
+                onOpenCoach={() => setCoachOpen(true)}
+              />
+            </Suspense>
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
               <PremiumLockOverlay featureName="AI Recovery Coach">
