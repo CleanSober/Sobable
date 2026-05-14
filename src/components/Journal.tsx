@@ -321,7 +321,7 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
                             <Calendar className="h-2.5 w-2.5" />
-                            {format(new Date(entry.created_at), 'MMM d')}
+                            {format(new Date(entry.created_at), 'MMM d, h:mm a')}
                           </span>
                           {entry.mood_score && (
                             <Badge variant="outline" className={`${getMoodColor(entry.mood_score)} text-[9px] px-1 py-0 h-4`}>
