@@ -129,6 +129,18 @@ export const MoodCheckIn = () => {
   const checkExistingEntry = async () => {
     if (!user) return;
 
+    // Hydrate from offline cache first so it works without a network.
+    const cached = getCachedTodayCheckIn(user.id, today);
+    if (cached) {
+      setMood(cached.payload.mood);
+      setCraving(cached.payload.craving_level);
+      setNote(cached.payload.note || "");
+      setCompleted(true);
+      setWasAlreadyCompleted(true);
+    }
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
     const { data } = await supabase
       .from("mood_entries")
       .select("*")
