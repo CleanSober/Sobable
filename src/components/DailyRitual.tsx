@@ -1,3 +1,4 @@
+import { canShowConfettiToday, markConfettiShown } from "@/lib/confettiCooldown";
 import { useState, useEffect, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -148,9 +149,12 @@ export const DailyRitual = memo(({ onNavigateToCheckIn }: DailyRitualProps) => {
       );
 
       if (nowAllDone) {
-        setShowConfetti(true);
+        if (canShowConfettiToday()) {
+          markConfettiShown();
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 2500);
+        }
         updateStreak();
-        setTimeout(() => setShowConfetti(false), 2500);
         toast.success("Daily ritual complete! 🔥", { description: "See you tomorrow, champion." });
       }
     }

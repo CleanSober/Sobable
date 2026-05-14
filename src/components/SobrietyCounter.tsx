@@ -6,6 +6,7 @@ import { getMilestones, formatMilestoneName } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { cn } from "@/lib/utils";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
+import { canShowConfettiToday, markConfettiShown } from "@/lib/confettiCooldown";
 
 interface SobrietyCounterProps {
   daysSober: number;
@@ -34,7 +35,11 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
 
     // Celebrate the most advanced new milestone (in case multiple are crossed at once)
     const milestone = fresh[fresh.length - 1];
-    setCelebrating(milestone);
+    const allowConfetti = canShowConfettiToday();
+    if (allowConfetti) {
+      markConfettiShown();
+      setCelebrating(milestone);
+    }
     toast.success(`🎉 Milestone unlocked: ${formatMilestoneName(milestone, wording.statusWord)}!`, {
       description: "Look how far you've come. Keep going.",
       duration: 5000,
