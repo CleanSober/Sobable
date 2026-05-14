@@ -643,7 +643,7 @@ const Index = () => {
               <PremiumLockOverlay featureName="Weekly Recap">
                 <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
               </PremiumLockOverlay>
-              <AchievementBadges daysSober={daysSober} startDate={profile?.sobriety_start_date} />
+              <AchievementBadgesPreview daysSober={daysSober} startDate={profile?.sobriety_start_date} />
             </Suspense>
           </div>
         );
