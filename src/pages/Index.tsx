@@ -47,6 +47,7 @@ const QuickActions = lazy(() => import("@/components/QuickActions").then(m => ({
 const NextBestAction = lazy(() => import("@/components/NextBestAction").then(m => ({ default: m.NextBestAction })));
 const ComebackWelcome = lazy(() => import("@/components/ComebackWelcome").then(m => ({ default: m.ComebackWelcome })));
 const OnboardingNudge = lazy(() => import("@/components/OnboardingNudge").then(m => ({ default: m.OnboardingNudge })));
+const NotificationPrePrompt = lazy(() => import("@/components/NotificationPrePrompt").then(m => ({ default: m.NotificationPrePrompt })));
 const MoodCheckIn = lazy(() => import("@/components/MoodCheckIn").then(m => ({ default: m.MoodCheckIn })));
 const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m => ({ default: m.AIRecoveryCoach })));
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
@@ -128,23 +129,9 @@ const Index = () => {
   // Initialize smart notifications system - runs all notification checks periodically
   const { requestPermission: requestNotifPermission } = useSmartNotifications(profile?.sobriety_start_date || undefined);
 
-  // Prompt notification permission once after onboarding
-  useEffect(() => {
-    if (!user || !profile?.onboarding_complete) return;
-    const prompted = localStorage.getItem(`sober_club_notif_prompted_${user.id}`);
-    if (prompted) return;
-    
-    const timer = setTimeout(async () => {
-      if ("Notification" in window && Notification.permission === "default") {
-        const granted = await requestNotifPermission();
-        if (granted) {
-          toast.success("🔔 Notifications enabled!", { description: "You'll get smart reminders to stay on track." });
-        }
-      }
-      localStorage.setItem(`sober_club_notif_prompted_${user.id}`, "true");
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [user, profile?.onboarding_complete, requestNotifPermission]);
+  // Notification permission is requested via a soft pre-prompt (NotificationPrePrompt)
+  // rendered below — asking inside our own UI first dramatically improves opt-in rates.
+
 
   // Tour trigger logic lives in useWelcomeTourTrigger (see hook for details).
 
@@ -645,6 +632,11 @@ const Index = () => {
                 onNavigate={(tab) => setActiveTab(tab)}
                 onOpenSOS={() => setActiveTab("triggers")}
                 onOpenCoach={() => setCoachOpen(true)}
+              />
+              <NotificationPrePrompt
+                userId={user?.id}
+                enabled={!!user && !!profile?.onboarding_complete}
+                requestPermission={requestNotifPermission}
               />
             </Suspense>
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
