@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { canShowUpsell } from "@/lib/upsellCooldown";
 
 interface MilestonePrompt {
   title: string;
