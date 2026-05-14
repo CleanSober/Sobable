@@ -356,7 +356,23 @@ How can I support you today?`;
                   </div>
                 </div>
 
-                {/* Messages */}
+                {/* Free-tier soft paywall banner */}
+                {!isPremium && !premiumLoading && (
+                  <button
+                    type="button"
+                    onClick={() => setShowUpgrade(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500/15 to-amber-600/10 border-b border-amber-500/20 text-left hover:from-amber-500/20 hover:to-amber-600/15 transition-colors"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="text-xs text-foreground/90 flex-1">
+                      {freeUsedThisWeek
+                        ? "Weekly free message used. Upgrade for unlimited."
+                        : "Free preview: 1 message per week. Tap to upgrade."}
+                    </span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  </button>
+                )}
+
                 <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                   <div className="space-y-4">
                     {messages.map((msg, i) => (
