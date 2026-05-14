@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { cn } from "@/lib/utils";
 import { useTodayLocal, getLocalDateString } from "@/lib/dailyReset";
+import { saveCheckInOffline, getCachedTodayCheckIn } from "@/lib/offlineCheckIn";
 
 // ─── Data ──────────────────────────────────────────────
 const moodEmojis = ["😔", "😕", "😐", "🙂", "😊", "😄", "🤗", "😁", "🥳", "🌟"];
@@ -128,6 +129,18 @@ export const MoodCheckIn = () => {
   const checkExistingEntry = async () => {
     if (!user) return;
 
+    // Hydrate from offline cache first so it works without a network.
+    const cached = getCachedTodayCheckIn(user.id, today);
+    if (cached) {
+      setMood(cached.payload.mood);
+      setCraving(cached.payload.craving_level);
+      setNote(cached.payload.note || "");
+      setCompleted(true);
+      setWasAlreadyCompleted(true);
+    }
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
     const { data } = await supabase
       .from("mood_entries")
       .select("*")
@@ -183,29 +196,15 @@ export const MoodCheckIn = () => {
       .filter(Boolean)
       .join(" | ");
 
-    const { error } = await supabase.from("mood_entries").upsert(
-      {
-        user_id: user.id,
-        date: todayDate,
-        mood,
-        craving_level: craving,
-        note: fullNote || null,
-      },
-      { onConflict: "user_id,date" }
-    );
+    const { synced } = await saveCheckInOffline({
+      user_id: user.id,
+      date: todayDate,
+      mood,
+      craving_level: craving,
+      note: fullNote || null,
+    });
 
-    if (error) {
-      toast.error("Failed to save check-in");
-      setLoading(false);
-      return;
-    }
-
-    await supabase.from("daily_goals").upsert(
-      { user_id: user.id, date: todayDate, mood_logged: true },
-      { onConflict: "user_id,date" }
-    );
-
-    if (!wasAlreadyCompleted) {
+    if (synced && !wasAlreadyCompleted) {
       await addXP(XP_REWARDS.mood_log, "mood_log", "Daily mood check-in");
     }
 
@@ -213,11 +212,18 @@ export const MoodCheckIn = () => {
     setWasAlreadyCompleted(true);
     setIsExpanded(false);
     setLoading(false);
-    toast.success(
-      wasAlreadyCompleted
-        ? "Check-in updated!"
-        : `Check-in saved! +${XP_REWARDS.mood_log} XP 💪`
-    );
+
+    if (synced) {
+      toast.success(
+        wasAlreadyCompleted
+          ? "Check-in updated!"
+          : `Check-in saved! +${XP_REWARDS.mood_log} XP 💪`
+      );
+    } else {
+      toast.success("Check-in saved offline — we'll sync when you're back online", {
+        duration: 4000,
+      });
+    }
     emitFeedbackTrigger();
   };
 

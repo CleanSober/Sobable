@@ -11,6 +11,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PageSkeleton } from "@/components/skeletons/HomeSkeleton";
 import { applyThemePreference } from "@/lib/theme";
+import { registerCheckInSync } from "@/lib/offlineCheckIn";
 import { Capacitor } from "@capacitor/core";
 // Lazy load non-critical routes to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
@@ -110,6 +111,12 @@ const App = () => {
   // Also prefetch on mount when the splash was already shown this session
   useEffect(() => {
     if (!showSplash) prefetchHotRoutes();
+  }, []);
+
+  // Drain any check-ins saved while offline. Auto-syncs when connection returns.
+  useEffect(() => {
+    const cleanup = registerCheckInSync();
+    return cleanup;
   }, []);
 
   return (
