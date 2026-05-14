@@ -11,6 +11,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PageSkeleton } from "@/components/skeletons/HomeSkeleton";
 import { applyThemePreference } from "@/lib/theme";
+import { registerCheckInSync } from "@/lib/offlineCheckIn";
 import { Capacitor } from "@capacitor/core";
 // Lazy load non-critical routes to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
