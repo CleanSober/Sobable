@@ -45,28 +45,28 @@ const FEATURES: FeatureItem[] = [
     label: "Write a journal entry",
     description: "Reflect with AI-guided prompts",
     icon: BookOpen,
-    tab: "journal" as TabId,
+    tab: "checkin",
   },
   {
     key: "trigger",
     label: "Log a trigger",
     description: "Spot patterns before they spiral",
     icon: AlertTriangle,
-    tab: "triggers" as TabId,
+    tab: "triggers",
   },
   {
     key: "breathing",
     label: "Try a breathing exercise",
     description: "Reset in 90 seconds",
     icon: Wind,
-    tab: "tools" as TabId,
+    tab: "checkin",
   },
   {
     key: "prevention",
     label: "Build a prevention plan",
     description: "Your toolkit for hard moments",
     icon: Shield,
-    tab: "tools" as TabId,
+    tab: "triggers",
   },
 ];
 
