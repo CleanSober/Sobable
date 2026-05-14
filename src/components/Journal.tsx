@@ -183,11 +183,13 @@ export const Journal: React.FC<JournalProps> = ({ daysSober = 0 }) => {
     // Award XP for journaling
     await addXP(XP_REWARDS.journal, 'journal', 'Wrote a journal entry');
 
-    // Reset form
+    // Reset form + clear saved draft
     setNewEntry({ title: '', content: '', tags: [] });
     setAiPrompt('');
     setMoodAnalysis(null);
     setSuggestedTags([]);
+    if (draftKey) { try { localStorage.removeItem(draftKey); } catch { /* ignore */ } }
+    setDraftSavedAt(null);
     setIsWriting(false);
   };
 
