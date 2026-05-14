@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { motion } from "framer-motion";
 import {
@@ -13,6 +13,7 @@ import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { markUpsellShown } from "@/lib/upsellCooldown";
 
 const features = [
   { icon: Bot, text: "AI Recovery Coach" },
