@@ -1,5 +1,5 @@
 // Limits confetti animations to once per local day so celebrations stay special.
-import { getLocalDateString } from "@/lib/dateUtils";
+import { getLocalDateString } from "@/lib/dailyReset";
 
 const KEY = "sober_club_confetti_last_date";
 
