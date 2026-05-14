@@ -46,6 +46,7 @@ const MoneySaved = lazy(() => import("@/components/MoneySaved").then(m => ({ def
 const QuickActions = lazy(() => import("@/components/QuickActions").then(m => ({ default: m.QuickActions })));
 const NextBestAction = lazy(() => import("@/components/NextBestAction").then(m => ({ default: m.NextBestAction })));
 const ComebackWelcome = lazy(() => import("@/components/ComebackWelcome").then(m => ({ default: m.ComebackWelcome })));
+const OnboardingNudge = lazy(() => import("@/components/OnboardingNudge").then(m => ({ default: m.OnboardingNudge })));
 const MoodCheckIn = lazy(() => import("@/components/MoodCheckIn").then(m => ({ default: m.MoodCheckIn })));
 const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m => ({ default: m.AIRecoveryCoach })));
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
@@ -632,6 +633,10 @@ const Index = () => {
                     patchGuestProfile({ sobriety_start_date: today });
                   }
                 }}
+              />
+              <OnboardingNudge
+                profileCreatedAt={(effectiveProfile as any)?.created_at ?? null}
+                onNavigate={(tab) => setActiveTab(tab)}
               />
               <NextBestAction
                 onNavigate={(tab) => setActiveTab(tab)}
