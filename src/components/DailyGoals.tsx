@@ -114,12 +114,15 @@ export const DailyGoals = () => {
       );
       
       if (allCompleted) {
-        setShowConfetti(true);
+        if (canShowConfettiToday()) {
+          markConfettiShown();
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+        }
         updateStreak();
-        setTimeout(() => setShowConfetti(false), 3000);
         toast.success("All daily goals completed! Amazing work! 🏆");
         emitFeedbackTrigger();
-        
+
         // Show interstitial ad after completing all goals (natural break point)
         setTimeout(() => {
           showAd();
