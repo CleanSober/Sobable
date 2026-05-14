@@ -59,6 +59,7 @@ const WelcomeTour = lazy(() => import("@/components/WelcomeTour").then(m => ({ d
 const ProgressView = lazy(() => import("@/components/ProgressView").then(m => ({ default: m.ProgressView })));
 const TriggerLogger = lazy(() => import("@/components/TriggerLogger").then(m => ({ default: m.TriggerLogger })));
 const PatternAnalysis = lazy(() => import("@/components/PatternAnalysis").then(m => ({ default: m.PatternAnalysis })));
+const TriggerHeatmap = lazy(() => import("@/components/TriggerHeatmap").then(m => ({ default: m.TriggerHeatmap })));
 const AchievementBadgesPreview = lazy(() => import("@/components/AchievementBadgesPreview").then(m => ({ default: m.AchievementBadgesPreview })));
 const CravingTimer = lazy(() => import("@/components/CravingTimer").then(m => ({ default: m.CravingTimer })));
 const CalendarHeatmap = lazy(() => import("@/components/CalendarHeatmap").then(m => ({ default: m.CalendarHeatmap })));
