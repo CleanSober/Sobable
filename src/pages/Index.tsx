@@ -721,6 +721,7 @@ const Index = () => {
 
               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 px-1 pt-1">Track patterns</p>
               <TriggerLogger />
+              <TriggerHeatmap />
               <PremiumLockOverlay featureName="Pattern Analysis">
                 <PatternAnalysis />
               </PremiumLockOverlay>
