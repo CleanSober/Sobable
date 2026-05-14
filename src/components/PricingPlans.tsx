@@ -112,38 +112,55 @@ export const PricingPlans = memo(({ onClose, featureContext }: PricingPlansProps
         </p>
       </div>
 
-      {/* Plan selector */}
-      <div className="grid grid-cols-2 gap-2.5">
-        <button
-          onClick={() => setSelectedPlan("monthly")}
-          className={cn(
-            "rounded-xl border-2 p-3 text-left transition-all duration-200",
-            selectedPlan === "monthly"
-              ? "border-primary bg-primary/5 shadow-md"
-              : "border-border/50 bg-secondary/30 hover:border-border"
-          )}
-        >
-          <p className="text-xs font-semibold text-foreground">Monthly</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{monthlyPrice}</p>
-          <p className="text-[10px] text-muted-foreground">/month</p>
-        </button>
-
+      {/* Plan selector — lead with yearly (better LTV, lower churn) */}
+      <div className="space-y-2">
         <button
           onClick={() => setSelectedPlan("yearly")}
           className={cn(
-            "relative rounded-xl border-2 p-3 text-left transition-all duration-200",
+            "relative w-full rounded-xl border-2 p-4 text-left transition-all duration-200",
             selectedPlan === "yearly"
-              ? "border-amber-500 bg-amber-500/5 shadow-md shadow-amber-500/10"
+              ? "border-amber-500 bg-gradient-to-br from-amber-500/10 to-orange-500/5 shadow-md shadow-amber-500/20"
               : "border-border/50 bg-secondary/30 hover:border-border"
           )}
         >
-          <Badge className="absolute -top-2 right-2 bg-amber-500 text-white text-[9px] px-1.5 py-0 border-0">
-            BEST VALUE
+          <Badge className="absolute -top-2 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] px-2 py-0 border-0 shadow-sm">
+            MOST POPULAR · SAVE 60%
           </Badge>
-          <p className="text-xs font-semibold text-foreground">Yearly</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{yearlyPrice}</p>
-          <p className="text-[10px] text-muted-foreground">/year · {yearlyMonthlyEquivalent}/mo</p>
-          <p className="text-[10px] text-green-500 font-medium mt-0.5">Save over 60%</p>
+          <div className="flex items-end justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">Yearly</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Just <span className="text-foreground font-semibold">{yearlyMonthlyEquivalent}</span>/month, billed annually
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-2xl font-bold text-foreground leading-none">{yearlyPrice}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">/year</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-green-500 font-medium mt-2 flex items-center gap-1">
+            <Check className="w-3 h-3" />
+            Best for lasting recovery — commit to a full year
+          </p>
+        </button>
+
+        <button
+          onClick={() => setSelectedPlan("monthly")}
+          className={cn(
+            "w-full rounded-xl border p-2.5 text-left transition-all duration-200 flex items-center justify-between gap-2",
+            selectedPlan === "monthly"
+              ? "border-primary bg-primary/5"
+              : "border-border/40 bg-secondary/20 hover:border-border/60"
+          )}
+        >
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground">Monthly</p>
+            <p className="text-[10px] text-muted-foreground/80">Flexible, cancel anytime</p>
+          </div>
+          <div className="text-right">
+            <p className="text-base font-bold text-foreground leading-none">{monthlyPrice}</p>
+            <p className="text-[10px] text-muted-foreground">/month</p>
+          </div>
         </button>
       </div>
 
