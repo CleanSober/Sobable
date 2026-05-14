@@ -86,17 +86,18 @@ export const useMilestoneUpgrade = () => {
     localStorage.setItem(`${STORAGE_KEY}_${user.id}`, JSON.stringify([...shown]));
   }, [user, getShownMilestones]);
 
-  const triggerMilestone = useCallback((key: string) => {
+  const triggerMilestone = useCallback((key: string, opts?: { delayMs?: number }) => {
     if (isPremium || !user) return;
     const shown = getShownMilestones();
     if (shown.has(key)) return;
-    
+
     const prompt = MILESTONE_PROMPTS[key];
     if (!prompt) return;
 
     markShown(key);
-    // Small delay so it doesn't compete with other toasts
-    setTimeout(() => setPendingPrompt(prompt), 1500);
+    // Default 1.5s delay; callers can pass a longer delay so the prompt lands
+    // after celebration toasts/confetti at peak emotional moments.
+    setTimeout(() => setPendingPrompt(prompt), opts?.delayMs ?? 1500);
   }, [isPremium, user, getShownMilestones, markShown]);
 
   const dismissPrompt = useCallback(() => {

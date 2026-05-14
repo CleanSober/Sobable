@@ -421,10 +421,12 @@ const Index = () => {
     if (streak >= 14) triggerMilestone("streak_14");
     if (streak >= 30) triggerMilestone("streak_30");
 
-    // Sobriety milestones
-    if (daysSober >= 7) triggerMilestone("sober_7");
-    if (daysSober >= 30) triggerMilestone("sober_30");
-    if (daysSober >= 90) triggerMilestone("sober_90");
+    // Sobriety milestones — only at the peak emotional moment (within 2 days of crossing)
+    // so users who import a long-running count don't get a stale "7 days!" prompt.
+    const isFresh = (target: number) => daysSober >= target && daysSober <= target + 2;
+    if (isFresh(7)) triggerMilestone("sober_7", { delayMs: 4000 });
+    if (isFresh(30)) triggerMilestone("sober_30", { delayMs: 4000 });
+    if (isFresh(90)) triggerMilestone("sober_90", { delayMs: 4000 });
 
     // First-action milestones (check DB counts)
     const checkFirstActions = async () => {
