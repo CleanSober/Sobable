@@ -44,6 +44,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 // Lazy load components not needed on initial paint
 const MoneySaved = lazy(() => import("@/components/MoneySaved").then(m => ({ default: m.MoneySaved })));
 const QuickActions = lazy(() => import("@/components/QuickActions").then(m => ({ default: m.QuickActions })));
+const NextBestAction = lazy(() => import("@/components/NextBestAction").then(m => ({ default: m.NextBestAction })));
 const MoodCheckIn = lazy(() => import("@/components/MoodCheckIn").then(m => ({ default: m.MoodCheckIn })));
 const AIRecoveryCoach = lazy(() => import("@/components/AIRecoveryCoach").then(m => ({ default: m.AIRecoveryCoach })));
 const AdBanner = lazy(() => import("@/components/AdBanner").then(m => ({ default: m.AdBanner })));
@@ -617,6 +618,13 @@ const Index = () => {
               toast.success("Savings reset undone! Your previous tracking has been restored.");
             }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
+            <Suspense fallback={null}>
+              <NextBestAction
+                onNavigate={(tab) => setActiveTab(tab)}
+                onOpenSOS={() => setActiveTab("triggers")}
+                onOpenCoach={() => setCoachOpen(true)}
+              />
+            </Suspense>
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
               <PremiumLockOverlay featureName="AI Recovery Coach">
