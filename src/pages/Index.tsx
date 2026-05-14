@@ -620,6 +620,19 @@ const Index = () => {
             }} />}
             <DailyRitual onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={null}>
+              <ComebackWelcome
+                sobrietyStartDate={effectiveProfile?.sobriety_start_date ?? null}
+                displayName={effectiveProfile?.display_name ?? null}
+                onNavigateCheckIn={() => setActiveTab("checkin")}
+                onResetCounter={async () => {
+                  const today = new Date().toISOString().split("T")[0];
+                  if (user) {
+                    await updateProfile({ sobriety_start_date: today } as any);
+                  } else {
+                    patchGuestProfile({ sobriety_start_date: today });
+                  }
+                }}
+              />
               <NextBestAction
                 onNavigate={(tab) => setActiveTab(tab)}
                 onOpenSOS={() => setActiveTab("triggers")}
