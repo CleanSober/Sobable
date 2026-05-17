@@ -40,6 +40,7 @@ import { GuestMigrationConflictDialog } from "@/components/GuestMigrationConflic
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { SoberClubPill } from "@/components/SoberClubPill";
 
 // Lazy load components not needed on initial paint
 const MoneySaved = lazy(() => import("@/components/MoneySaved").then(m => ({ default: m.MoneySaved })));
