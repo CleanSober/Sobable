@@ -835,7 +835,8 @@ const Index = () => {
                 </motion.div>
               )}
             </div>
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <SoberClubPill />
               <NotificationCenter />
               <UserProfile />
             </div>
