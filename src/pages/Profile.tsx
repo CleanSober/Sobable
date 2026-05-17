@@ -312,6 +312,7 @@ const Profile = () => {
         <div className="container max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 py-2 flex items-center gap-3 relative">
           <button
             onClick={() => navigate("/")}
+            aria-label="Go back"
             className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-foreground" />
