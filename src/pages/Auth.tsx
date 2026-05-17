@@ -324,7 +324,7 @@ const Auth = () => {
             </motion.div>
           </motion.div>
 
-          <h1 className="text-2xl font-bold mb-1 text-gradient">Sober Club</h1>
+          <h1 className="text-2xl font-bold mb-1 text-gradient">Sober Club — Sign In</h1>
           <p className="text-sm text-muted-foreground">{header.title}</p>
         </div>
 
