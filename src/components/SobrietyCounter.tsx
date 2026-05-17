@@ -122,17 +122,12 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
     return { years: Math.max(0, years), months: Math.max(0, months), days: Math.max(0, days) };
   };
 
-  const { years, months, days } = computeExact();
-
-  const breakdown = [
-    { label: days === 1 ? "Day" : "Days", value: days, icon: "✨" },
-    { label: months === 1 ? "Month" : "Months", value: months, icon: "🌙" },
-    { label: years === 1 ? "Year" : "Years", value: years, icon: "🏆" },
-  ];
+  const { years, months } = computeExact();
 
   type Unit = "days" | "months" | "years";
   const [unit, setUnit] = useState<Unit>("days");
-  const totalMonths = years * 12 + months + (days >= 15 ? 1 : 0);
+  const { impact } = useHaptics();
+  const totalMonths = years * 12 + months + (computeExact().days >= 15 ? 1 : 0);
   const displayValue = unit === "days" ? daysSober : unit === "months" ? totalMonths : years;
   const displayLabel =
     unit === "days"
@@ -141,83 +136,134 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
       ? totalMonths === 1 ? "Month" : "Months"
       : years === 1 ? "Year" : "Years";
 
+  // Progress ring: completion toward next milestone (or 100% if all reached).
+  const prevMilestoneDays = useMemo(() => {
+    if (reached.length === 0) return 0;
+    // last reached milestone — getMilestones returns ordered list
+    const last = reached[reached.length - 1];
+    const all = getMilestones(Infinity).reached;
+    const found = all.find((m) => m === last);
+    // If we can't infer, fall back to 0.
+    return found ? daysSober - 1 : 0;
+  }, [reached, daysSober]);
+
+  const ringTarget = next
+    ? Math.max(0, Math.min(1, (daysSober - prevMilestoneDays) / Math.max(1, next.days - prevMilestoneDays)))
+    : 1;
+
+  // SVG ring geometry
+  const RING_SIZE = 232;
+  const STROKE = 6;
+  const R = (RING_SIZE - STROKE) / 2;
+  const C = 2 * Math.PI * R;
+
   return (
     <>
     {celebrating && <ConfettiCelebration />}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="card-enhanced relative overflow-hidden"
+      transition={{ type: "spring", stiffness: 180, damping: 22 }}
+      className="relative overflow-hidden rounded-2xl bg-card/60 border border-border/40"
+      aria-label="Sobriety counter"
     >
-      {/* Ambient glow effects */}
-      <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/15 blur-[60px] rounded-full" />
-        <div className="absolute bottom-0 right-0 w-40 h-40 bg-accent/10 blur-[60px] rounded-full" />
+      {/* Single, restrained ambient glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-72 h-72 bg-primary/10 blur-[80px] rounded-full" />
       </div>
 
-      <div className="relative z-10 p-4">
-        {/* Unit toggle */}
-        <div className="flex justify-center mb-3">
-          <div className="inline-flex items-center gap-1 p-1 rounded-full bg-muted/40 border border-border/40">
-            {(["days", "months", "years"] as const).map((u) => (
-              <button
-                key={u}
-                onClick={() => setUnit(u)}
-                className={cn(
-                  "px-3 py-1 text-xs font-medium rounded-full capitalize transition-colors",
-                  unit === u
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {u}
-              </button>
-            ))}
+      <div className="relative z-10 px-5 pt-6 pb-5 flex flex-col items-center">
+        {/* Eyebrow */}
+        <div className="flex items-center gap-1.5 mb-5">
+          <Flame className="w-3 h-3 text-primary/80" />
+          <span className="text-eyebrow text-muted-foreground">
+            {wording.counterLabel.replace(/\bdays?\b\s*/i, "").trim() || "Sober"}
+          </span>
+        </div>
+
+        {/* Hero ring + number */}
+        <div className="relative" style={{ width: RING_SIZE, height: RING_SIZE }}>
+          <svg
+            width={RING_SIZE}
+            height={RING_SIZE}
+            viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+            className="absolute inset-0 -rotate-90"
+            aria-hidden="true"
+          >
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={R}
+              fill="none"
+              stroke="hsl(var(--border))"
+              strokeWidth={STROKE}
+              opacity={0.5}
+            />
+            <motion.circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={R}
+              fill="none"
+              stroke="hsl(var(--primary))"
+              strokeWidth={STROKE}
+              strokeLinecap="round"
+              strokeDasharray={C}
+              initial={{ strokeDashoffset: C }}
+              animate={{ strokeDashoffset: C * (1 - ringTarget) }}
+              transition={{ type: "spring", stiffness: 60, damping: 18, delay: 0.15 }}
+              style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))" }}
+            />
+          </svg>
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <motion.span
+              key={`${unit}-${displayValue}`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 220, damping: 18 }}
+              className="text-display text-foreground"
+            >
+              {displayValue}
+            </motion.span>
+            <span className="text-eyebrow mt-2">
+              {displayLabel} {wording.statusWord}
+            </span>
           </div>
         </div>
 
-        {/* Main Counter */}
-        <div className="flex flex-col items-center justify-center text-center mb-4 py-4 relative">
-          <motion.span
-            key={`${unit}-${displayValue}`}
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="text-6xl font-bold text-gradient tracking-tight leading-none"
-          >
-            {displayValue}
-          </motion.span>
-          <span className="text-sm text-foreground/80 font-medium tracking-wide mt-2">
-            {displayLabel} {wording.counterLabel.replace(/^days?\s*/i, "")}
-          </span>
-          <p className="text-xs text-muted-foreground italic mt-3 px-4 max-w-xs">
-            {next
-              ? daysSober === 0 && next.days === 1
-                ? `Your first day ${wording.statusWord} is just around the corner 🌟`
-                : `${next.days - daysSober} ${next.days - daysSober === 1 ? "day" : "days"} until ${formatMilestoneName(next.name, wording.statusWord)} 🌟`
-              : "You've reached every milestone. Legendary. 👑"}
-          </p>
-          <Sparkles className="absolute top-2 right-6 w-4 h-4 text-accent animate-pulse" />
-        </div>
+        {/* Progress-to-next caption */}
+        <p className="text-body-lg text-muted-foreground mt-5 text-center max-w-[18rem]">
+          {next
+            ? daysSober === 0 && next.days === 1
+              ? `Day one ${wording.statusWord} starts tomorrow.`
+              : `${next.days - daysSober} ${next.days - daysSober === 1 ? "day" : "days"} to ${formatMilestoneName(next.name, wording.statusWord)}.`
+            : "Every milestone reached. Keep going."}
+        </p>
 
-        <div className="grid grid-cols-3 gap-2">
-          {breakdown.map((item, index) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              className="stat-box text-center group !p-3"
+        {/* Unit toggle — quiet segmented control */}
+        <div className="mt-5 inline-flex items-center gap-0.5 p-0.5 rounded-full bg-muted/40 border border-border/40">
+          {(["days", "months", "years"] as const).map((u) => (
+            <motion.button
+              key={u}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              onClick={() => {
+                impact("light");
+                setUnit(u);
+              }}
+              className={cn(
+                "px-3 py-1 text-[11px] font-medium rounded-full capitalize transition-colors",
+                unit === u
+                  ? "bg-foreground/[0.08] text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
-              <span className="text-base opacity-60 group-hover:opacity-100 transition-opacity">{item.icon}</span>
-              <p className="text-xl font-bold text-foreground mt-0.5">{item.value}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">{item.label}</p>
-            </motion.div>
+              {u}
+            </motion.button>
           ))}
         </div>
       </div>
-    </motion.div>
+    </motion.section>
     </>
   );
 });
