@@ -136,19 +136,9 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
       ? totalMonths === 1 ? "Month" : "Months"
       : years === 1 ? "Year" : "Years";
 
-  // Progress ring: completion toward next milestone (or 100% if all reached).
-  const prevMilestoneDays = useMemo(() => {
-    if (reached.length === 0) return 0;
-    // last reached milestone — getMilestones returns ordered list
-    const last = reached[reached.length - 1];
-    const all = getMilestones(Infinity).reached;
-    const found = all.find((m) => m === last);
-    // If we can't infer, fall back to 0.
-    return found ? daysSober - 1 : 0;
-  }, [reached, daysSober]);
-
+  // Progress ring: completion toward the next milestone (filling continuously).
   const ringTarget = next
-    ? Math.max(0, Math.min(1, (daysSober - prevMilestoneDays) / Math.max(1, next.days - prevMilestoneDays)))
+    ? Math.max(0.02, Math.min(1, daysSober / next.days))
     : 1;
 
   // SVG ring geometry
