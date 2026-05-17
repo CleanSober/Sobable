@@ -66,6 +66,21 @@ serve(async (req) => {
       );
     }
 
+    // Rate-limit: max 3 passes granted per 24h per user (mitigates lack of ad SSV)
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await admin
+      .from("ambient_music_passes")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("granted_at", dayAgo);
+
+    if ((recentCount ?? 0) >= 3) {
+      return new Response(
+        JSON.stringify({ error: "Daily ambient pass limit reached. Try again tomorrow." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
     const { data: inserted, error: insertError } = await admin
       .from("ambient_music_passes")
