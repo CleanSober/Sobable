@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo } from "react";
+import { memo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { toast } from "sonner";
