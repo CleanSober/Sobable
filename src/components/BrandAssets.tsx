@@ -67,6 +67,7 @@ const VideoCard = ({ title, duration, video, usage, poster }: VideoCardProps) =>
             size="sm"
             variant="outline"
             className="gap-2"
+            aria-label={`Download ${title} video`}
             onClick={() => {
               const link = document.createElement("a");
               link.href = video;
