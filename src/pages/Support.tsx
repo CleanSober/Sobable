@@ -48,78 +48,90 @@ const Support = () => {
           <p className="text-muted-foreground">We're here to help you on your recovery journey.</p>
         </div>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Mail className="w-5 h-5 text-primary" />
-              Contact Us
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              For any questions, issues, or feedback, reach out to our support team:
-            </p>
-            <a
-              href="mailto:support@soberclub.app"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              support@soberclub.app
-            </a>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              We typically respond within 24 hours.
-            </p>
-          </CardContent>
-        </Card>
+        <section aria-labelledby="contact-heading">
+          <h2 id="contact-heading" className="sr-only">Contact Us</h2>
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Mail className="w-5 h-5 text-primary" />
+                Contact Us
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                For any questions, issues, or feedback, reach out to our support team:
+              </p>
+              <a
+                href="mailto:support@soberclub.app"
+                className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+              >
+                support@soberclub.app
+              </a>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                We typically respond within 24 hours.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <HelpCircle className="w-5 h-5 text-primary" />
-              Frequently Asked Questions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {FAQS.map(({ q, a }) => (
-              <div key={q} className="space-y-1">
-                <p className="text-sm font-medium text-foreground">{q}</p>
-                <p className="text-sm text-muted-foreground">{a}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <section aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className="sr-only">Frequently Asked Questions</h2>
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <HelpCircle className="w-5 h-5 text-primary" />
+                Frequently Asked Questions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {FAQS.map(({ q, a }) => (
+                <div key={q} className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">{q}</p>
+                  <p className="text-sm text-muted-foreground">{a}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Shield className="w-5 h-5 text-primary" />
-              Crisis Resources
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              If you or someone you know is in crisis, please reach out to these free, confidential resources:
-            </p>
-            <ul className="space-y-2 text-sm">
-              <li><strong>SAMHSA Helpline:</strong> <a href="tel:1-800-662-4357" className="text-primary hover:underline">1-800-662-4357</a> (24/7)</li>
-              <li><strong>Crisis Text Line:</strong> Text HOME to <a href="sms:741741" className="text-primary hover:underline">741741</a></li>
-              <li><strong>988 Suicide & Crisis Lifeline:</strong> Call or text <a href="tel:988" className="text-primary hover:underline">988</a></li>
-            </ul>
-          </CardContent>
-        </Card>
+        <section aria-labelledby="crisis-heading">
+          <h2 id="crisis-heading" className="sr-only">Crisis Resources</h2>
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Shield className="w-5 h-5 text-primary" />
+                Crisis Resources
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                If you or someone you know is in crisis, please reach out to these free, confidential resources:
+              </p>
+              <ul className="space-y-2 text-sm">
+                <li><strong>SAMHSA Helpline:</strong> <a href="tel:1-800-662-4357" className="text-primary hover:underline">1-800-662-4357</a> (24/7)</li>
+                <li><strong>Crisis Text Line:</strong> Text HOME to <a href="sms:741741" className="text-primary hover:underline">741741</a></li>
+                <li><strong>988 Suicide & Crisis Lifeline:</strong> Call or text <a href="tel:988" className="text-primary hover:underline">988</a></li>
+              </ul>
+            </CardContent>
+          </Card>
+        </section>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="w-5 h-5 text-primary" />
-              Legal
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <a href="/terms" className="block text-sm text-primary hover:underline">Terms of Service</a>
-            <a href="/privacy" className="block text-sm text-primary hover:underline">Privacy Policy</a>
-          </CardContent>
-        </Card>
+        <section aria-labelledby="legal-heading">
+          <h2 id="legal-heading" className="sr-only">Legal</h2>
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FileText className="w-5 h-5 text-primary" />
+                Legal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <a href="/terms" className="block text-sm text-primary hover:underline">Terms of Service</a>
+              <a href="/privacy" className="block text-sm text-primary hover:underline">Privacy Policy</a>
+            </CardContent>
+          </Card>
+        </section>
 
         <p className="text-center text-xs text-muted-foreground pt-4">
           © {new Date().getFullYear()} Sober Club. All rights reserved.

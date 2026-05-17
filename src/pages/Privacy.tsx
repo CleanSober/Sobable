@@ -217,7 +217,7 @@ LEGAL REQUIREMENTS: We may retain certain data as required by applicable laws, r
       />
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" asChild aria-label="Go back to home">
             <Link to="/">
               <ArrowLeft className="w-5 h-5" />
             </Link>
