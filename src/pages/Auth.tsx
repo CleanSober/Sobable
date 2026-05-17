@@ -589,6 +589,45 @@ const Auth = () => {
                         </>
                       )}
                     </Button>
+
+                    {mode === "signup" && (
+                      <p className="text-[11px] leading-relaxed text-muted-foreground text-center pt-1">
+                        By creating an account, you agree to our{" "}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Privacy Policy
+                        </a>
+                        . Your recovery data is encrypted, never sold, and you can export or delete it anytime.
+                      </p>
+                    )}
+
+                    {mode === "login" && (
+                      <p className="text-[11px] leading-relaxed text-muted-foreground text-center pt-1">
+                        Protected by encryption. Read our{" "}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          Privacy Policy
+                        </a>
+                        .
+                      </p>
+                    )}
                   </form>
 
                   {/* Toggle login/signup */}
