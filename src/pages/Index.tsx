@@ -115,6 +115,7 @@ const Index = () => {
     onboardingComplete: profile?.onboarding_complete,
   });
   const navigate = useNavigate();
+  const { impact: hapticsImpact } = useHaptics();
 
   const handleTabChange = useCallback((tab: TabId) => {
     setActiveTab(prev => {
