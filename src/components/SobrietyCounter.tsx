@@ -192,7 +192,9 @@ export const SobrietyCounter = memo(({ daysSober, startDate, substances, compact
           </span>
           <p className="text-xs text-muted-foreground italic mt-3 px-4 max-w-xs">
             {next
-              ? `${next.days - daysSober} ${next.days - daysSober === 1 ? "day" : "days"} until ${formatMilestoneName(next.name, wording.statusWord)} 🌟`
+              ? daysSober === 0 && next.days === 1
+                ? `Your first day ${wording.statusWord} is just around the corner 🌟`
+                : `${next.days - daysSober} ${next.days - daysSober === 1 ? "day" : "days"} until ${formatMilestoneName(next.name, wording.statusWord)} 🌟`
               : "You've reached every milestone. Legendary. 👑"}
           </p>
           <Sparkles className="absolute top-2 right-6 w-4 h-4 text-accent animate-pulse" />
