@@ -681,8 +681,8 @@ const Auth = () => {
             <UserX className="w-4 h-4" />
             Continue as Guest
           </button>
-          <p className="text-center text-[10px] text-muted-foreground/60 mt-1">
-            Basic features only · Data stored on this device
+          <p className="text-center text-[10px] text-muted-foreground/70 mt-1">
+            Basic features only · Data stays on this device · No account or email required
           </p>
         </motion.div>
 
