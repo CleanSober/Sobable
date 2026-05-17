@@ -26,6 +26,7 @@ import { useMilestoneUpgrade } from "@/hooks/useMilestoneUpgrade";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
+import { useHaptics } from "@/hooks/useHaptics";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { useWelcomeTourTrigger } from "@/hooks/useWelcomeTourTrigger";
 import {
@@ -647,7 +648,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                onClick={() => setCoachOpen(true)}
+                onClick={() => { hapticsImpact("light"); setCoachOpen(true); }}
                 className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
               >
                 <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
