@@ -589,6 +589,45 @@ const Auth = () => {
                         </>
                       )}
                     </Button>
+
+                    {mode === "signup" && (
+                      <p className="text-[11px] leading-relaxed text-muted-foreground text-center pt-1">
+                        By creating an account, you agree to our{" "}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Privacy Policy
+                        </a>
+                        . Your recovery data is encrypted, never sold, and you can export or delete it anytime.
+                      </p>
+                    )}
+
+                    {mode === "login" && (
+                      <p className="text-[11px] leading-relaxed text-muted-foreground text-center pt-1">
+                        Protected by encryption. Read our{" "}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          Privacy Policy
+                        </a>
+                        .
+                      </p>
+                    )}
                   </form>
 
                   {/* Toggle login/signup */}
@@ -642,8 +681,8 @@ const Auth = () => {
             <UserX className="w-4 h-4" />
             Continue as Guest
           </button>
-          <p className="text-center text-[10px] text-muted-foreground/60 mt-1">
-            Basic features only · Data stored on this device
+          <p className="text-center text-[10px] text-muted-foreground/70 mt-1">
+            Basic features only · Data stays on this device · No account or email required
           </p>
         </motion.div>
 
