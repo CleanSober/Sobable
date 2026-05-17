@@ -1,10 +1,11 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 import { toast } from "sonner";
 import { getMilestones, formatMilestoneName } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { cn } from "@/lib/utils";
+import { useHaptics } from "@/hooks/useHaptics";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { canShowConfettiToday, markConfettiShown } from "@/lib/confettiCooldown";
 
