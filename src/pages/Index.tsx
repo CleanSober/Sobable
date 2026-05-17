@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useGamification } from "@/hooks/useGamification";
-import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { Loader2, Flame, Bot, ChevronRight, Sparkles } from "lucide-react";
 import { getLatestBadge } from "@/lib/badges";
 import { Button } from "@/components/ui/button";
 
@@ -80,7 +80,7 @@ const Journal = lazy(() => import("@/components/Journal").then(m => ({ default: 
 const RiskPrediction = lazy(() => import("@/components/RiskPrediction").then(m => ({ default: m.RiskPrediction })));
 
 const PremiumProgressInsights = lazy(() => import("@/components/progress/PremiumProgressInsights").then(m => ({ default: m.PremiumProgressInsights })));
-const WeeklyRecap = lazy(() => import("@/components/premium/WeeklyRecap").then(m => ({ default: m.WeeklyRecap })));
+
 const GuidedPathways = lazy(() => import("@/components/premium/GuidedPathways").then(m => ({ default: m.GuidedPathways })));
 const AccountabilityPartner = lazy(() => import("@/components/premium/AccountabilityPartner").then(m => ({ default: m.AccountabilityPartner })));
 const PredictiveInsights = lazy(() => import("@/components/premium/PredictiveInsights").then(m => ({ default: m.PredictiveInsights })));
