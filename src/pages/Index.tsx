@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useGamification } from "@/hooks/useGamification";
-import { Loader2, Flame, Bot, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { Loader2, Flame, Bot, ChevronRight, Sparkles } from "lucide-react";
 import { getLatestBadge } from "@/lib/badges";
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +26,7 @@ import { useMilestoneUpgrade } from "@/hooks/useMilestoneUpgrade";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserData } from "@/hooks/useUserData";
 import { useCapacitor } from "@/hooks/useCapacitor";
+import { useHaptics } from "@/hooks/useHaptics";
 import { useSmartNotifications } from "@/hooks/useSmartNotifications";
 import { useWelcomeTourTrigger } from "@/hooks/useWelcomeTourTrigger";
 import {
@@ -40,6 +41,7 @@ import { GuestMigrationConflictDialog } from "@/components/GuestMigrationConflic
 import { calculateDaysSober, calculateMoneySaved } from "@/lib/storage";
 import { getPersonalizedWording } from "@/lib/substanceConfig";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { SoberClubPill } from "@/components/SoberClubPill";
 
 // Lazy load components not needed on initial paint
 const MoneySaved = lazy(() => import("@/components/MoneySaved").then(m => ({ default: m.MoneySaved })));
@@ -79,7 +81,7 @@ const Journal = lazy(() => import("@/components/Journal").then(m => ({ default: 
 const RiskPrediction = lazy(() => import("@/components/RiskPrediction").then(m => ({ default: m.RiskPrediction })));
 
 const PremiumProgressInsights = lazy(() => import("@/components/progress/PremiumProgressInsights").then(m => ({ default: m.PremiumProgressInsights })));
-const WeeklyRecap = lazy(() => import("@/components/premium/WeeklyRecap").then(m => ({ default: m.WeeklyRecap })));
+
 const GuidedPathways = lazy(() => import("@/components/premium/GuidedPathways").then(m => ({ default: m.GuidedPathways })));
 const AccountabilityPartner = lazy(() => import("@/components/premium/AccountabilityPartner").then(m => ({ default: m.AccountabilityPartner })));
 const PredictiveInsights = lazy(() => import("@/components/premium/PredictiveInsights").then(m => ({ default: m.PredictiveInsights })));
@@ -113,6 +115,7 @@ const Index = () => {
     onboardingComplete: profile?.onboarding_complete,
   });
   const navigate = useNavigate();
+  const { impact: hapticsImpact } = useHaptics();
 
   const handleTabChange = useCallback((tab: TabId) => {
     setActiveTab(prev => {
@@ -641,30 +644,23 @@ const Index = () => {
             </Suspense>
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
-              <PremiumLockOverlay featureName="AI Recovery Coach">
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setCoachOpen(true)}
-                  className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
-                >
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 border border-accent/30">
-                    <Bot className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
-                      <Crown className="w-3 h-3 text-accent" />
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">Personalized insights from your recovery data</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                </motion.button>
-              </PremiumLockOverlay>
-              <PremiumLockOverlay featureName="Weekly Recap">
-                <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
-              </PremiumLockOverlay>
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                onClick={() => { hapticsImpact("light"); setCoachOpen(true); }}
+                className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
+              >
+                <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                  <Bot className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
+                  <p className="text-[11px] text-muted-foreground">Personalized insights from your recovery data</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </motion.button>
               <AchievementBadgesPreview daysSober={daysSober} startDate={profile?.sobriety_start_date} />
             </Suspense>
           </div>
@@ -842,7 +838,8 @@ const Index = () => {
                 </motion.div>
               )}
             </div>
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <SoberClubPill />
               <NotificationCenter />
               <UserProfile />
             </div>
