@@ -133,7 +133,32 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages: rawMessages } = await req.json();
+
+    // Validate messages array to prevent token abuse / prompt injection
+    if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid messages payload" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (rawMessages.length > 20) {
+      return new Response(JSON.stringify({ error: "Too many messages (max 20)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const messages = rawMessages
+      .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .map((m: any) => ({ role: m.role, content: String(m.content).slice(0, 2000) }));
+
+    if (messages.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid messages" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
