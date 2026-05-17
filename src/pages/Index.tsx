@@ -641,30 +641,23 @@ const Index = () => {
             </Suspense>
             <QuickActions onNavigateToCheckIn={() => setActiveTab("checkin")} />
             <Suspense fallback={<TabLoader />}>
-              <PremiumLockOverlay featureName="AI Recovery Coach">
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setCoachOpen(true)}
-                  className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
-                >
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 border border-accent/30">
-                    <Bot className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
-                      <Crown className="w-3 h-3 text-accent" />
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">Personalized insights from your recovery data</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                </motion.button>
-              </PremiumLockOverlay>
-              <PremiumLockOverlay featureName="Weekly Recap">
-                <WeeklyRecap daysSober={daysSober} moneySaved={moneySaved} />
-              </PremiumLockOverlay>
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                onClick={() => setCoachOpen(true)}
+                className="w-full card-enhanced p-3 flex items-center gap-3 text-left"
+              >
+                <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                  <Bot className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-foreground">AI Recovery Coach</h3>
+                  <p className="text-[11px] text-muted-foreground">Personalized insights from your recovery data</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </motion.button>
               <AchievementBadgesPreview daysSober={daysSober} startDate={profile?.sobriety_start_date} />
             </Suspense>
           </div>
