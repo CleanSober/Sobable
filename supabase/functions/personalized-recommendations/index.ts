@@ -255,7 +255,7 @@ Provide your analysis as JSON.`;
 
   } catch (error) {
     console.error("Recommendations error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
