@@ -573,13 +573,13 @@ const Index = () => {
               <p className="text-muted-foreground text-[10px] mb-0.5 font-medium">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
-              <h1 className="text-lg font-bold text-foreground">
+              <p className="text-lg font-bold text-foreground">
                 {effectiveProfile?.display_name ? (
                   <>Keep going, <span className="text-gradient">{effectiveProfile.display_name}</span>!</>
                 ) : (
                   "You're doing amazing!"
                 )} 🌟
-              </h1>
+              </p>
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} substances={userData.substances} />
             <CheckInProgress />
