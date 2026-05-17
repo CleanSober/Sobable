@@ -404,9 +404,11 @@ serve(async (req) => {
     const appUrl = Deno.env.get("APP_URL") || "https://sobable.com";
 
     let targetUserId: string | null = null;
+    let forceOverride = false;
     try {
       const body = await req.json();
       targetUserId = body?.userId || null;
+      forceOverride = body?.forceOverride === true;
     } catch {
       // No body = send to all opted-in users
     }
@@ -441,9 +443,13 @@ serve(async (req) => {
       .eq("weekly_digest_enabled", false);
 
     const optedOutIds = new Set((optedOutSettings || []).map((s: any) => s.user_id));
-    const eligibleProfiles = targetUserId
-      ? profiles // Always send if targeting specific user
+    // Always honor opt-out preference unless admin explicitly passes forceOverride
+    const eligibleProfiles = (targetUserId && forceOverride)
+      ? profiles
       : profiles.filter((p: any) => !optedOutIds.has(p.user_id));
+    if (targetUserId && forceOverride) {
+      console.warn("weekly-digest: forceOverride used for targetUserId", targetUserId);
+    }
 
     if (eligibleProfiles.length === 0) {
       return new Response(JSON.stringify({ message: "All users opted out" }), {
