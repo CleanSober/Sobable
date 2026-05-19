@@ -419,7 +419,8 @@ const Index = () => {
     if (isFresh(30)) triggerMilestone("sober_30", { delayMs: 4000 });
     if (isFresh(90)) triggerMilestone("sober_90", { delayMs: 4000 });
 
-    // First-action milestones (check DB counts)
+    // First-action milestones (check DB counts) — deferred to idle time so the
+    // 3 count queries never block initial paint of the home screen.
     const checkFirstActions = async () => {
       const [moodRes, journalRes, triggerRes] = await Promise.all([
         supabase.from("mood_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
@@ -430,7 +431,16 @@ const Index = () => {
       if ((journalRes.count ?? 0) >= 1) triggerMilestone("first_journal");
       if ((triggerRes.count ?? 0) >= 1) triggerMilestone("first_trigger");
     };
-    checkFirstActions();
+    const ric = (window as any).requestIdleCallback as
+      | ((cb: () => void, opts?: { timeout: number }) => number)
+      | undefined;
+    const handle = ric
+      ? ric(() => { void checkFirstActions(); }, { timeout: 4000 })
+      : (setTimeout(() => { void checkFirstActions(); }, 2000) as unknown as number);
+    return () => {
+      const cic = (window as any).cancelIdleCallback as ((h: number) => void) | undefined;
+      if (ric && cic) cic(handle); else clearTimeout(handle as unknown as ReturnType<typeof setTimeout>);
+    };
   }, [user, profile?.onboarding_complete, userXP?.daily_login_streak, profile?.sobriety_start_date, triggerMilestone]);
 
   if (authLoading || (!isGuest && profileLoading)) {
