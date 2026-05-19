@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 export interface UserProfile {
   id: string;
@@ -19,57 +19,58 @@ export interface UserProfile {
   created_at?: string | null;
 }
 
+// Centralized React Query key so every consumer reads from the same cache.
+// Without this, useUserData was firing one network request per mounted
+// component (10+ on the home tab) which dominated TTI.
+export const profileQueryKey = (userId: string | undefined) => ["profile", userId] as const;
+
 export const useUserData = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
 
-  const fetchProfile = useCallback(async () => {
-    if (!user) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
+  const { data: profile = null, isLoading, refetch } = useQuery({
+    queryKey: profileQueryKey(user?.id),
+    enabled: !!user,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    queryFn: async () => {
+      if (!user) return null;
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
-
       if (error) throw error;
-      setProfile(data ?? null);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+      return (data as UserProfile | null) ?? null;
+    },
+  });
 
-  const updateProfile = async (updates: Partial<UserProfile>) => {
+  const updateProfile = useCallback(async (updates: Partial<UserProfile>) => {
     if (!user) return { error: new Error("Not authenticated") };
-
     try {
       const { error } = await supabase
         .from("profiles")
         .update(updates)
         .eq("user_id", user.id);
-
       if (error) throw error;
-      await fetchProfile();
+      // Optimistically merge so UI updates instantly, then refetch in bg.
+      qc.setQueryData(profileQueryKey(user.id), (prev: UserProfile | null) =>
+        prev ? { ...prev, ...updates } as UserProfile : prev
+      );
+      qc.invalidateQueries({ queryKey: profileQueryKey(user.id) });
       return { error: null };
     } catch (error) {
       console.error("Error updating profile:", error);
       return { error: error as Error };
     }
+  }, [user, qc]);
+
+  return {
+    profile,
+    loading: !!user && isLoading,
+    updateProfile,
+    refetch,
   };
-
-  useEffect(() => {
-    fetchProfile();
-  }, [user]);
-
-  return { profile, loading, updateProfile, refetch: fetchProfile };
 };
 
 export const useMoodEntries = () => {

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -68,73 +69,65 @@ export const getXPForNextLevel = (level: number): number => {
   return getXPForLevel(level + 1);
 };
 
+const xpQueryKey = (userId: string | undefined) => ["user_xp", userId] as const;
+const xpHistoryQueryKey = (userId: string | undefined) => ["xp_history", userId] as const;
+
 export const useGamification = () => {
   const { user } = useAuth();
-  const [userXP, setUserXP] = useState<UserXP | null>(null);
-  const [xpHistory, setXpHistory] = useState<XPHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
   const [claiming, setClaiming] = useState(false);
 
-  const fetchUserXP = useCallback(async () => {
-    if (!user) return;
-
-    try {
+  // Shared React Query cache so the 10+ components on the home tab that
+  // call useGamification() only hit the network once.
+  const { data: userXP = null, isLoading: xpLoading, refetch: refetchXP } = useQuery({
+    queryKey: xpQueryKey(user?.id),
+    enabled: !!user,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    queryFn: async () => {
+      if (!user) return null;
       const { data, error } = await supabase
         .from("user_xp")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
-
       if (error) throw error;
+      if (data) return data as UserXP;
+      const { error: initError } = await supabase.rpc("initialize_user_xp", {
+        p_user_id: user.id,
+      });
+      if (initError) throw initError;
+      const { data: newData } = await supabase
+        .from("user_xp")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return (newData as UserXP | null) ?? null;
+    },
+  });
 
-      if (data) {
-        setUserXP(data);
-      } else {
-        // Create initial XP record via secure RPC
-        const { data: initResult, error: initError } = await supabase.rpc("initialize_user_xp", {
-          p_user_id: user.id,
-        });
-
-        if (initError) throw initError;
-
-        // Re-fetch the record after initialization
-        const { data: newData } = await supabase
-          .from("user_xp")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (newData) setUserXP(newData);
-      }
-    } catch (error) {
-      console.error("Error fetching user XP:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchXPHistory = useCallback(async () => {
-    if (!user) return;
-
-    try {
+  const { data: xpHistory = [] } = useQuery({
+    queryKey: xpHistoryQueryKey(user?.id),
+    enabled: !!user,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    queryFn: async () => {
+      if (!user) return [] as XPHistoryEntry[];
       const { data, error } = await supabase
         .from("xp_history")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20);
-
       if (error) throw error;
-      setXpHistory(data || []);
-    } catch (error) {
-      console.error("Error fetching XP history:", error);
-    }
-  }, [user]);
+      return (data || []) as XPHistoryEntry[];
+    },
+  });
 
-  useEffect(() => {
-    fetchUserXP();
-    fetchXPHistory();
-  }, [fetchUserXP, fetchXPHistory]);
+  const invalidateXP = useCallback(() => {
+    qc.invalidateQueries({ queryKey: xpQueryKey(user?.id) });
+    qc.invalidateQueries({ queryKey: xpHistoryQueryKey(user?.id) });
+  }, [qc, user?.id]);
 
   const claimDailyReward = useCallback(async () => {
     if (!user || claiming) return null;
@@ -163,8 +156,7 @@ export const useGamification = () => {
             ? `🎉 Level up! You're now level ${result.new_level}!`
             : `Day ${result.new_streak} streak bonus!`,
         });
-        fetchUserXP();
-        fetchXPHistory();
+        invalidateXP();
         return result;
       } else {
         return result;
@@ -176,7 +168,7 @@ export const useGamification = () => {
     } finally {
       setClaiming(false);
     }
-  }, [user, claiming, fetchUserXP, fetchXPHistory]);
+  }, [user, claiming, invalidateXP]);
 
   const addXP = useCallback(
     async (
@@ -209,8 +201,7 @@ export const useGamification = () => {
               description: `You reached level ${result.new_level}!`,
             });
           }
-          fetchUserXP();
-          fetchXPHistory();
+          invalidateXP();
           return { leveled_up: result.leveled_up, new_level: result.new_level };
         }
         return null;
@@ -219,7 +210,7 @@ export const useGamification = () => {
         return null;
       }
     },
-    [user, fetchUserXP, fetchXPHistory]
+    [user, invalidateXP]
   );
 
   const canClaimDailyReward = userXP
@@ -250,11 +241,11 @@ export const useGamification = () => {
     userXP,
     xpHistory,
     xpProgress,
-    loading,
+    loading: !!user && xpLoading,
     claiming,
     claimDailyReward,
     addXP,
     canClaimDailyReward,
-    refetch: fetchUserXP,
+    refetch: refetchXP,
   };
 };
