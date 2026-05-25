@@ -42,7 +42,7 @@ const Support = () => {
           })),
         }}
       />
-      <div className="max-w-2xl mx-auto px-4 py-12 space-y-8">
+      <main className="max-w-2xl mx-auto px-4 py-12 space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Sober Club Support</h1>
           <p className="text-muted-foreground">We're here to help you on your recovery journey.</p>
@@ -136,7 +136,7 @@ const Support = () => {
         <p className="text-center text-xs text-muted-foreground pt-4">
           © {new Date().getFullYear()} Sober Club. All rights reserved.
         </p>
-      </div>
+      </main>
     </div>
   );
 };
