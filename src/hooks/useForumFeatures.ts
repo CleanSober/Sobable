@@ -536,13 +536,10 @@ export const useLeaderboard = (limit = 10) => {
     const fetchLeaderboard = async () => {
       try {
         const { data, error } = await supabase
-          .from("user_karma")
-          .select("*")
-          .order("total_karma", { ascending: false })
-          .limit(limit);
+          .rpc("get_karma_leaderboard", { p_limit: limit });
 
         if (error) throw error;
-        setLeaders(data || []);
+        setLeaders((data as any) || []);
       } catch {
         // Ignore
       } finally {
