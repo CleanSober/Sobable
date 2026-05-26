@@ -1584,6 +1584,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_karma_leaderboard: {
+        Args: { p_limit?: number }
+        Returns: {
+          display_name: string
+          helpful_votes: number
+          posts_count: number
+          reactions_received: number
+          replies_count: number
+          total_karma: number
+          user_id: string
+        }[]
+      }
       get_poll_vote_counts: { Args: { p_poll_id: string }; Returns: Json }
       get_public_profile: {
         Args: { profile_user_id: string }
