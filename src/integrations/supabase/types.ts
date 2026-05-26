@@ -1580,7 +1580,7 @@ export type Database = {
         Returns: {
           display_name: string
           sobriety_start_date: string
-          substances: string[]
+          substance_overlap: number
           user_id: string
         }[]
       }
