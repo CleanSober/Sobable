@@ -70,7 +70,7 @@ export const AccountabilityPartner = () => {
 
     try {
       // Find users with similar sobriety stage - use own profile (RLS allows)
-      const { data: myProfile } = await supabase.from("profiles").select("sobriety_start_date, substances").eq("user_id", user.id).maybeSingle();
+      const { data: myProfile } = await supabase.from("profiles").select("sobriety_start_date").eq("user_id", user.id).maybeSingle();
       const myDays = myProfile?.sobriety_start_date ? Math.floor((Date.now() - new Date(myProfile.sobriety_start_date).getTime()) / 86400000) : 0;
 
       // Find potential matches (users not already matched)
@@ -90,11 +90,11 @@ export const AccountabilityPartner = () => {
         return;
       }
 
-      // Score candidates by similarity
+      // Score candidates by similarity (substance overlap computed server-side, no PII exposed)
       const scored = candidates.map(c => {
         const cDays = c.sobriety_start_date ? Math.floor((Date.now() - new Date(c.sobriety_start_date).getTime()) / 86400000) : 0;
         const daysDiff = Math.abs(myDays - cDays);
-        const substanceOverlap = (myProfile?.substances || []).filter((s: string) => (c.substances || []).includes(s)).length;
+        const substanceOverlap = c.substance_overlap ?? 0;
         const score = Math.max(0, 100 - daysDiff) + substanceOverlap * 20;
         const sharedGoals = substanceOverlap > 0 ? ["Shared substance recovery"] : ["Recovery support"];
         return { ...c, score, sharedGoals };
