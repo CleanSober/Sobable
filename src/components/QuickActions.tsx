@@ -164,7 +164,7 @@ export const QuickActions = ({ onNavigateToCheckIn }: QuickActionsProps) => {
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground leading-tight text-center w-full break-words">
+              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground leading-tight text-center w-full whitespace-normal hyphens-none">
                 {action.label}
               </span>
             </motion.button>
