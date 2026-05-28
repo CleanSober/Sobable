@@ -32,10 +32,10 @@ export const SoberClubPill = () => {
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
         onClick={handleOpen}
         aria-label="Open Sober Club membership"
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/25 bg-amber-500/[0.06] hover:bg-amber-500/[0.1] transition-colors"
+        className="flex items-center gap-1.5 px-2 py-1 min-[360px]:px-2.5 rounded-full border border-amber-500/25 bg-amber-500/[0.06] hover:bg-amber-500/[0.1] transition-colors shrink-0"
       >
-        <Crown className="w-3 h-3 text-amber-400" />
-        <span className="text-[11px] font-medium tracking-[0.04em] text-amber-300/90">
+        <Crown className="w-3 h-3 text-amber-400 shrink-0" />
+        <span className="hidden min-[360px]:inline text-[11px] font-medium tracking-[0.04em] text-amber-300/90 whitespace-nowrap">
           Sober Club
         </span>
       </motion.button>
