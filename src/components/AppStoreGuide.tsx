@@ -830,7 +830,7 @@ export const AppStoreGuide = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="aspect-[1024/500] bg-muted rounded-lg overflow-hidden">
-                      <img src={socialHero} alt="Feature Graphic" className="w-full h-full object-cover" />
+                      <img src={socialHero} alt="Sober Club Play Store feature graphic — recovery companion banner with phoenix branding" className="w-full h-full object-cover" />
                     </div>
                     <Button variant="outline" asChild>
                       <a href={socialHero} download="feature-graphic.png" className="gap-2">
