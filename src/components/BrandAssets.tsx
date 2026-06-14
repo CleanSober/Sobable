@@ -93,7 +93,7 @@ const AssetCard = ({ title, dimensions, image, usage }: AssetCardProps) => (
       <div className="aspect-video relative overflow-hidden bg-muted">
         <img
           src={image}
-          alt={title}
+          alt={`${title} — Sober Club brand asset preview`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">

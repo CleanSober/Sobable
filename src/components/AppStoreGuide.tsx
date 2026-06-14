@@ -718,7 +718,7 @@ export const AppStoreGuide = () => {
                     <CardDescription>1024 × 1024px PNG, no alpha/transparency</CardDescription>
                   </CardHeader>
                   <CardContent className="flex items-center gap-4">
-                    <img src={appIcon} alt="App Icon" className="w-20 h-20 rounded-2xl shadow-lg" />
+                    <img src={appIcon} alt="Sober Club app icon — teal and gold phoenix mark on dark background, 1024x1024" className="w-20 h-20 rounded-2xl shadow-lg" />
                     <Button variant="outline" asChild>
                       <a href={appIcon} download="app-icon-1024.png" className="gap-2">
                         <Download className="w-4 h-4" />
@@ -813,7 +813,7 @@ export const AppStoreGuide = () => {
                     <CardDescription>512 × 512px PNG, 32-bit with alpha</CardDescription>
                   </CardHeader>
                   <CardContent className="flex items-center gap-4">
-                    <img src={appIcon} alt="App Icon" className="w-20 h-20 rounded-xl shadow-lg" />
+                    <img src={appIcon} alt="Sober Club app icon for Google Play — 512x512 phoenix mark" className="w-20 h-20 rounded-xl shadow-lg" />
                     <Button variant="outline" asChild>
                       <a href={appIcon} download="app-icon-512.png" className="gap-2">
                         <Download className="w-4 h-4" />
@@ -830,7 +830,7 @@ export const AppStoreGuide = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="aspect-[1024/500] bg-muted rounded-lg overflow-hidden">
-                      <img src={socialHero} alt="Feature Graphic" className="w-full h-full object-cover" />
+                      <img src={socialHero} alt="Sober Club Play Store feature graphic — recovery companion banner with phoenix branding" className="w-full h-full object-cover" />
                     </div>
                     <Button variant="outline" asChild>
                       <a href={socialHero} download="feature-graphic.png" className="gap-2">
