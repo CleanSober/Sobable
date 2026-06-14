@@ -813,7 +813,7 @@ export const AppStoreGuide = () => {
                     <CardDescription>512 × 512px PNG, 32-bit with alpha</CardDescription>
                   </CardHeader>
                   <CardContent className="flex items-center gap-4">
-                    <img src={appIcon} alt="App Icon" className="w-20 h-20 rounded-xl shadow-lg" />
+                    <img src={appIcon} alt="Sober Club app icon for Google Play — 512x512 phoenix mark" className="w-20 h-20 rounded-xl shadow-lg" />
                     <Button variant="outline" asChild>
                       <a href={appIcon} download="app-icon-512.png" className="gap-2">
                         <Download className="w-4 h-4" />
