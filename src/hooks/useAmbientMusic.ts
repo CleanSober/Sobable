@@ -152,6 +152,7 @@ export const useAmbientMusic = () => {
   );
 
   const generateAndPlay = useCallback(async (type: string, duration: number = 30) => {
+    if (!isMusicGloballyEnabled()) return null; // global mute from Profile
     setIsLoading(true);
     try {
       await unlockNativeAudioPlayback();
