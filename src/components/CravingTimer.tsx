@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2, Mic, MicOff } from "lucide-react";
+import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2, Mic, MicOff, ShieldAlert, Phone, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,9 +8,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { useTTSNarration } from "@/hooks/useTTSNarration";
+import { useUserData } from "@/hooks/useUserData";
 import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
 import { claimExerciseSession, releaseExerciseSession, subscribeExerciseSession } from "@/lib/exerciseSession";
 import { toast } from "sonner";
+
+const RELAPSE_PROMPT_THRESHOLD = 30; // seconds remaining when the prevention prompt appears
+
+const COPING_STEPS = [
+  "Pause. Name the feeling out loud — \"this is a craving.\"",
+  "Take 3 slow belly breaths. In through nose, out through mouth.",
+  "Sip cold water or step outside for fresh air.",
+  "Text one person who knows you're in recovery.",
+  "Remind yourself: \"I don't have to act on this.\"",
+];
 
 const CRAVING_DURATION = 20 * 60; // 20 minutes in seconds
 const MESSAGE_INTERVAL_MS = 20_000; // 20s between motivational lines (so voice can finish)
@@ -42,6 +53,7 @@ const VOICE_ENABLED_KEY = "craving_timer_voice_enabled";
 
 export const CravingTimer = () => {
   const { addXP } = useGamification();
+  const { profile } = useUserData();
   const {
     isLoading: musicLoading,
     isPlaying: musicPlaying,
@@ -353,6 +365,59 @@ export const CravingTimer = () => {
                     </p>
                   )}
                 </motion.div>
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {isActive && timeRemaining > 0 && timeRemaining <= RELAPSE_PROMPT_THRESHOLD && (
+                  <motion.div
+                    key="relapse-prevention"
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 space-y-2"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <ShieldAlert className="w-4 h-4 text-red-500" />
+                      <p className="text-xs font-semibold text-red-500">
+                        Final {timeRemaining}s — Relapse Prevention
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      You're almost through. If the urge is still strong, work these steps and reach out.
+                    </p>
+                    <ol className="text-[11px] space-y-1 list-decimal list-inside">
+                      {COPING_STEPS.map((step) => (
+                        <li key={step} className="leading-snug">{step}</li>
+                      ))}
+                    </ol>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {profile?.sponsor_phone && (
+                        <Button asChild size="sm" variant="secondary" className="text-[11px] h-7">
+                          <a href={`tel:${profile.sponsor_phone}`}>
+                            <Phone className="w-3 h-3 mr-1" /> Sponsor
+                          </a>
+                        </Button>
+                      )}
+                      {profile?.emergency_contact && (
+                        <Button asChild size="sm" variant="secondary" className="text-[11px] h-7">
+                          <a href={`tel:${profile.emergency_contact}`}>
+                            <Phone className="w-3 h-3 mr-1" /> Contact
+                          </a>
+                        </Button>
+                      )}
+                      <Button asChild size="sm" variant="outline" className="text-[11px] h-7">
+                        <a href="tel:1-800-662-4357">
+                          <Phone className="w-3 h-3 mr-1" /> SAMHSA Helpline
+                        </a>
+                      </Button>
+                      <Button asChild size="sm" variant="outline" className="text-[11px] h-7">
+                        <a href="sms:741741?body=HOME">
+                          <MessageSquare className="w-3 h-3 mr-1" /> Crisis Text
+                        </a>
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
               </AnimatePresence>
 
               {voicePickerRow}
