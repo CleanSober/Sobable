@@ -153,9 +153,15 @@ export const CravingTimer = () => {
     cleanupVoice();
   };
   useEffect(() => {
-    return subscribeExerciseSession((owner) => {
+    const unsub = subscribeExerciseSession((owner) => {
       if (owner !== "craving") stopAllRef.current();
     });
+    // Stop everything and release the lock if the user navigates away.
+    return () => {
+      unsub();
+      stopAllRef.current();
+      releaseExerciseSession("craving");
+    };
   }, []);
 
   const startTimer = useCallback(() => {

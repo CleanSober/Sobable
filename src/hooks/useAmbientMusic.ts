@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { AdMob, RewardAdPluginEvents } from "@capacitor-community/admob";
 import { toast } from "sonner";
@@ -274,6 +274,23 @@ export const useAmbientMusic = () => {
       URL.revokeObjectURL(audioUrlRef.current);
       audioUrlRef.current = null;
     }
+  }, []);
+
+  // Stop audio and release blob URL if the consumer unmounts (e.g. user
+  // navigates to another page). Without this, audio keeps playing in the
+  // background after leaving the screen that started it.
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    };
   }, []);
 
   const setVolume = useCallback((volume: number) => {

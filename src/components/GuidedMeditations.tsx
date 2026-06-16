@@ -333,9 +333,14 @@ export const GuidedMeditations = () => {
 
   // If the other exercise (breathing) starts, stop this one.
   useEffect(() => {
-    return subscribeExerciseSession((owner) => {
+    const unsub = subscribeExerciseSession((owner) => {
       if (owner !== "meditation") handleEndRef.current();
     });
+    return () => {
+      unsub();
+      handleEndRef.current();
+      releaseExerciseSession("meditation");
+    };
   }, []);
 
   const handleChangeVoice = (newVoiceId: string) => {
