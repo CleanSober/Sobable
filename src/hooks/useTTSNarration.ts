@@ -91,6 +91,16 @@ export const useTTSNarration = () => {
     }
   }, []);
 
+  // If the user globally disables voiceovers from the Profile page, stop
+  // any in-flight narration immediately.
+  useEffect(() => subscribeAudioPrefs(() => {
+    if (!isVoiceoverGloballyEnabled() && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }), []);
+
+
   const setMuted = useCallback((muted: boolean) => {
     mutedRef.current = muted;
     if (audioRef.current) audioRef.current.muted = muted;
