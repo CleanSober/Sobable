@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check } from "lucide-react";
+import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { toast } from "sonner";
 
 const CRAVING_DURATION = 20 * 60; // 20 minutes in seconds
@@ -28,6 +29,14 @@ const motivationalMessages = [
 
 export const CravingTimer = () => {
   const { addXP } = useGamification();
+  const {
+    isLoading: musicLoading,
+    isPlaying: musicPlaying,
+    generateAndPlay,
+    pause: pauseMusic,
+    play: playMusic,
+    stop: stopMusic,
+  } = useAmbientMusic();
   const [isActive, setIsActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(CRAVING_DURATION);
   const [currentExercise, setCurrentExercise] = useState(0);
@@ -47,6 +56,7 @@ export const CravingTimer = () => {
     } else if (timeRemaining === 0 && !cravingSurvived) {
       setCravingSurvived(true);
       setIsActive(false);
+      stopMusic();
       addXP(XP_REWARDS.trigger_log, 'craving_survived', 'Survived a 20-min craving timer');
       toast.success("You survived the craving! +XP 💪", { duration: 5000 });
     }
@@ -84,17 +94,22 @@ export const CravingTimer = () => {
   const startTimer = useCallback(() => {
     setIsActive(true);
     setCravingSurvived(false);
-  }, []);
+    generateAndPlay("urge-surfing", 120).catch(() => {
+      // Silently continue if music generation fails
+    });
+  }, [generateAndPlay]);
 
   const pauseTimer = useCallback(() => {
     setIsActive(false);
-  }, []);
+    pauseMusic();
+  }, [pauseMusic]);
 
   const resetTimer = useCallback(() => {
     setIsActive(false);
     setTimeRemaining(CRAVING_DURATION);
     setCravingSurvived(false);
-  }, []);
+    stopMusic();
+  }, [stopMusic]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -212,6 +227,22 @@ export const CravingTimer = () => {
                 <Button onClick={pauseTimer} variant="outline" size="sm" className="text-xs h-8">
                   <Pause className="w-3.5 h-3.5 mr-1" />
                   Pause
+                </Button>
+                <Button
+                  onClick={() => (musicPlaying ? pauseMusic() : playMusic())}
+                  variant={musicPlaying ? "secondary" : "ghost"}
+                  size="sm"
+                  className="text-xs h-8"
+                  disabled={musicLoading}
+                  aria-label={musicPlaying ? "Mute calming music" : "Play calming music"}
+                >
+                  {musicLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : musicPlaying ? (
+                    <Volume2 className="w-3.5 h-3.5" />
+                  ) : (
+                    <VolumeX className="w-3.5 h-3.5" />
+                  )}
                 </Button>
                 <Button onClick={resetTimer} variant="ghost" size="sm" className="text-xs h-8">
                   <RotateCcw className="w-3.5 h-3.5 mr-1" />
