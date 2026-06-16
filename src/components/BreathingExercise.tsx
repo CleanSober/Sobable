@@ -127,6 +127,19 @@ export const BreathingExercise = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const VOICE_PREFS_KEY = "breathing_voice_prefs";
+  const [voicePrefs, setVoicePrefs] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(VOICE_PREFS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+  const currentVoiceId = selectedTechnique
+    ? voicePrefs[selectedTechnique.id] ?? DEFAULT_NARRATOR_VOICE_ID
+    : DEFAULT_NARRATOR_VOICE_ID;
 
   const { isLoading: musicLoading, isPlaying: musicPlaying, isMuted: musicMuted, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic, setMuted: setMusicMuted } = useAmbientMusic();
   const { preload: preloadVoice, playIndex: playVoice, stop: stopVoice, cleanup: cleanupVoice, isLoading: voiceLoading, isReady: voiceReady, setMuted: setVoiceMuted } = useTTSNarration();
