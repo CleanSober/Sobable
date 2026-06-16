@@ -174,9 +174,14 @@ export const BreathingExercise = () => {
     setSelectedTechnique(null);
   };
   useEffect(() => {
-    return subscribeExerciseSession((owner) => {
+    const unsub = subscribeExerciseSession((owner) => {
       if (owner !== "breathing") fullStopRef.current();
     });
+    return () => {
+      unsub();
+      fullStopRef.current();
+      releaseExerciseSession("breathing");
+    };
   }, []);
 
   const startExercise = async (technique: Technique) => {
