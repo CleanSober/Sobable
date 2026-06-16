@@ -461,20 +461,39 @@ export const GuidedMeditations = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-2 gap-2"
+              className="space-y-3"
             >
-              {meditations.map((med) => (
-                <motion.button
-                  key={med.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => startMeditation(med)}
-                  className={`p-3 rounded-xl bg-gradient-to-br ${med.color} text-white text-left`}
-                >
-                  <med.icon className="w-4 h-4 mb-1.5" />
-                  <h4 className="font-semibold text-xs">{med.name}</h4>
-                  <p className="text-[10px] opacity-80">{Math.floor(med.duration / 60)} min</p>
-                </motion.button>
-              ))}
+              <div className="flex items-center gap-2">
+                <Mic className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <label className="text-[10px] text-muted-foreground shrink-0">Narrator</label>
+                <Select value={voiceId} onValueChange={setVoiceId}>
+                  <SelectTrigger className="h-8 text-xs flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NARRATOR_VOICES.map((v) => (
+                      <SelectItem key={v.id} value={v.id} className="text-xs">
+                        <span className="font-medium">{v.label}</span>
+                        <span className="text-muted-foreground ml-1.5">— {v.description}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {meditations.map((med) => (
+                  <motion.button
+                    key={med.id}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => startMeditation(med)}
+                    className={`p-3 rounded-xl bg-gradient-to-br ${med.color} text-white text-left`}
+                  >
+                    <med.icon className="w-4 h-4 mb-1.5" />
+                    <h4 className="font-semibold text-xs">{med.name}</h4>
+                    <p className="text-[10px] opacity-80">{Math.floor(med.duration / 60)} min</p>
+                  </motion.button>
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
