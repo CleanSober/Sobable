@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -12,7 +11,7 @@ const corsHeaders = {
 // in the private `ambient-music` Supabase Storage bucket. Each track is
 // sonically tailored to the experience (e.g. bell tones for mindfulness,
 // ocean waves for urge-surfing, warm choir pad for loving-kindness).
-const FALLBACK_TRACKS: Record<string, string> = {
+const TRACKS: Record<string, string> = {
   // Breathing exercises
   breathing: "breathing.mp3",
   "478": "calm.mp3",
@@ -31,20 +30,6 @@ const FALLBACK_TRACKS: Record<string, string> = {
   "urge-surfing": "urge-surfing.mp3",
   default: "calm.mp3",
 };
-
-async function signFallbackTrack(adminClient: any, type: string) {
-  const track = FALLBACK_TRACKS[type] || FALLBACK_TRACKS.default;
-  // 1 hour signed URL — long enough for an exercise session.
-  const { data, error } = await adminClient
-    .storage
-    .from("ambient-music")
-    .createSignedUrl(track, 60 * 60);
-  if (error || !data?.signedUrl) {
-    console.error("Failed to sign fallback track", track, error);
-    return null;
-  }
-  return data.signedUrl;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -74,96 +59,31 @@ serve(async (req) => {
       });
     }
 
-    const userId = user.id;
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Premium gate. AI-generated ElevenLabs music is a Sober Club perk.
-    // Free / non-premium users still get the curated royalty-free fallback
-    // from the `ambient-music` Storage bucket — so the feature never
-    // silently produces nothing.
-    const { data: isPremium } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
-
-    const { type = "default", duration } = await req.json().catch(() => ({}));
+    const { type = "default" } = await req.json().catch(() => ({}));
     const safeType = typeof type === "string" ? type : "default";
 
-    const useCuratedFallback = async (reason: string) => {
-      console.log(`Using curated ambient fallback (${reason})`);
-      const trackUrl = await signFallbackTrack(adminClient, safeType);
-      if (!trackUrl) {
-        return new Response(
-          JSON.stringify({ error: "Fallback track unavailable" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+    const track = TRACKS[safeType] || TRACKS.default;
+    const { data, error } = await adminClient
+      .storage
+      .from("ambient-music")
+      .createSignedUrl(track, 60 * 60);
+
+    if (error || !data?.signedUrl) {
+      console.error("Failed to sign ambient track", track, error);
       return new Response(
-        JSON.stringify({ trackUrl, fallback: true, source: "curated" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ error: "Ambient track unavailable" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
-    };
-
-    if (!isPremium) {
-      return await useCuratedFallback("non_premium");
     }
-
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-
-    const musicPrompts: Record<string, string> = {
-      breathing: "Gentle ambient meditation music with soft piano and flowing synth pads, calming and serene, perfect for breathing exercises, slow tempo, peaceful atmosphere",
-      "478": "Deeply relaxing ambient soundscape with soft wind chimes and gentle ocean waves, perfect for 4-7-8 breathing technique, calming and anxiety-reducing",
-      "box": "Focused ambient music with steady, grounding rhythm, soft electronic pads, clear and centered feeling, ideal for box breathing concentration",
-      "calm": "Ultra-calming ambient music with soft strings and gentle nature sounds, peaceful piano notes, soothing and tranquil atmosphere",
-      "energize": "Uplifting ambient music with gentle awakening tones, soft morning vibes, refreshing and invigorating yet peaceful soundscape",
-      "physiological-sigh": "Calming ambient music with gentle wave-like rhythm, soft ocean sounds and airy synths, ideal for physiological sigh breathing",
-      "resonant": "Deep resonant ambient music with warm bass tones and gentle harmonic overtones, hypnotic and meditative, ideal for resonant breathing",
-      "diaphragmatic": "Warm grounding ambient music with soft earthen tones, gentle acoustic guitar and nature sounds, calming belly breathing atmosphere",
-      "body-scan": "Warm, enveloping ambient music with soft harmonics and gentle flowing melodies, perfect for body awareness meditation",
-      "mindfulness": "Minimalist ambient soundscape with subtle bell tones and soft breathing space, open and present moment awareness music",
-      "sleep": "Deeply calming sleep music with soft delta wave frequencies, gentle lullaby tones, dreamy and restful atmosphere for sleep preparation",
-      "grounding": "Earthy ambient music with gentle rain sounds and soft piano, grounding and centering, perfect for 5-4-3-2-1 sensory awareness",
-      "loving-kindness": "Warm, heart-centered ambient music with gentle strings and soft choral harmonics, compassionate and loving atmosphere",
-      "urge-surfing": "Oceanic ambient soundscape with gentle wave rhythms and soft flowing synths, calm strength and resilience, perfect for riding out cravings",
-      default: "Peaceful meditation ambient music with soft synth pads and gentle nature sounds, calming and centered atmosphere",
-    };
-
-    if (!ELEVENLABS_API_KEY) {
-      return await useCuratedFallback("missing_api_key");
-    }
-
-
-    const prompt = musicPrompts[safeType] || musicPrompts.default;
-    const musicDuration = Math.min(duration || 30, 120);
-
-    let response: Response;
-    try {
-      response = await fetch("https://api.elevenlabs.io/v1/music", {
-        method: "POST",
-        headers: {
-          "xi-api-key": ELEVENLABS_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt, duration_seconds: musicDuration }),
-      });
-    } catch (err) {
-      console.error("ElevenLabs fetch failed:", err);
-      return await useCuratedFallback("network_error");
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("ElevenLabs error:", response.status, errorText);
-      // Free tier / quota / auth / any non-OK → curated fallback.
-      return await useCuratedFallback(`elevenlabs_${response.status}`);
-    }
-
-    const audioBuffer = await response.arrayBuffer();
-    const base64Audio = base64Encode(audioBuffer);
 
     return new Response(
-      JSON.stringify({ audioContent: base64Audio, source: "elevenlabs" }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ trackUrl: data.signedUrl, source: "curated" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("Ambient music error:", error);
