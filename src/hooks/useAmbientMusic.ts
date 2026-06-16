@@ -15,6 +15,42 @@ export const useAmbientMusic = () => {
   const audioUrlRef = useRef<string | null>(null);
   const audioUnlockedRef = useRef(false);
   const mutedRef = useRef(false);
+  // Target volume the user/feature picked. The actual audio.volume tweens
+  // toward this value (fade-in, fade-out, duck under voice).
+  const baseVolumeRef = useRef(0.4);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isDuckedRef = useRef(false);
+
+  const stopFade = () => {
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+  };
+
+  // Tween audio.volume from current → target over `durationMs`.
+  const tweenVolume = useCallback((target: number, durationMs: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    stopFade();
+    const clamped = Math.max(0, Math.min(1, target));
+    const start = audio.volume;
+    const delta = clamped - start;
+    if (Math.abs(delta) < 0.005 || durationMs <= 0) {
+      audio.volume = clamped;
+      return;
+    }
+    const stepMs = 40;
+    const steps = Math.max(1, Math.round(durationMs / stepMs));
+    let i = 0;
+    fadeIntervalRef.current = setInterval(() => {
+      i += 1;
+      const a = audioRef.current;
+      if (!a) { stopFade(); return; }
+      a.volume = Math.max(0, Math.min(1, start + (delta * i) / steps));
+      if (i >= steps) stopFade();
+    }, stepMs);
+  }, []);
 
   const createNativeAudioUrl = useCallback((base64Audio: string) => {
     const binary = atob(base64Audio);
