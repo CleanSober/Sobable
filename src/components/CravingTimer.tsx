@@ -53,6 +53,7 @@ const VOICE_ENABLED_KEY = "craving_timer_voice_enabled";
 
 export const CravingTimer = () => {
   const { addXP } = useGamification();
+  const { profile } = useUserData();
   const {
     isLoading: musicLoading,
     isPlaying: musicPlaying,
