@@ -187,7 +187,8 @@ export const BreathingExercise = () => {
     if (voiceEnabled) {
       // Preload one short cue per phase (e.g. "Breathe in", "Hold", "Exhale")
       const cues = technique.phases.map((p) => phaseLabels[p.phase]);
-      preloadVoice(cues).then(() => {
+      const techVoiceId = voicePrefs[technique.id] ?? DEFAULT_NARRATOR_VOICE_ID;
+      preloadVoice(cues, techVoiceId).then(() => {
         // When preload finishes the user may already have advanced past phase 0.
         // Play whichever phase is current so narration stays aligned with the timer.
         if (isActiveRef.current) {
@@ -195,6 +196,27 @@ export const BreathingExercise = () => {
         }
       }).catch(() => undefined);
     }
+  };
+
+  const handleChangeVoice = (newVoiceId: string) => {
+    if (!selectedTechnique) return;
+    setVoicePrefs((prev) => {
+      const next = { ...prev, [selectedTechnique.id]: newVoiceId };
+      try {
+        localStorage.setItem(VOICE_PREFS_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+    if (!voiceEnabled) return;
+    stopVoice();
+    const cues = selectedTechnique.phases.map((p) => phaseLabels[p.phase]);
+    preloadVoice(cues, newVoiceId).then(() => {
+      if (isActiveRef.current) {
+        playVoice(currentPhaseIndexRef.current, 1);
+      }
+    }).catch(() => undefined);
   };
 
   useEffect(() => {
