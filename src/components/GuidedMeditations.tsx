@@ -184,10 +184,12 @@ export const GuidedMeditations = () => {
   const {
     isLoading: musicLoading,
     isPlaying: musicPlaying,
+    isMuted: musicMuted,
     generateAndPlay,
     pause: pauseMusic,
     play: playMusic,
-    stop: stopMusic
+    stop: stopMusic,
+    setMuted: setMusicMuted,
   } = useAmbientMusic();
 
   const {
@@ -197,6 +199,7 @@ export const GuidedMeditations = () => {
     cleanup: cleanupVoice,
     isLoading: voiceLoading,
     isReady: voiceReady,
+    setMuted: setVoiceMuted,
   } = useTTSNarration();
 
   const { addXP } = useGamification();
@@ -376,19 +379,24 @@ export const GuidedMeditations = () => {
                 <Button onClick={handlePauseResume} variant="outline" size="sm" className="text-xs h-8">
                   {isPlaying ? <><Pause className="w-3.5 h-3.5 mr-1" />Pause</> : <><Play className="w-3.5 h-3.5 mr-1" />Resume</>}
                 </Button>
-                <Button 
-                  onClick={() => musicPlaying ? pauseMusic() : playMusic()} 
-                  variant={musicPlaying ? "secondary" : "ghost"}
+                <Button
+                  onClick={() => {
+                    const next = !musicMuted;
+                    setMusicMuted(next);
+                    setVoiceMuted(next);
+                  }}
+                  variant={musicMuted ? "ghost" : "secondary"}
                   disabled={musicLoading}
                   size="sm"
                   className="text-xs h-8"
+                  aria-label={musicMuted ? "Unmute audio" : "Mute audio"}
                 >
                   {musicLoading ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : musicPlaying ? (
-                    <Volume2 className="w-3.5 h-3.5" />
-                  ) : (
+                  ) : musicMuted ? (
                     <VolumeX className="w-3.5 h-3.5" />
+                  ) : (
+                    <Volume2 className="w-3.5 h-3.5" />
                   )}
                 </Button>
                 <Button
