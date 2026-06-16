@@ -43,7 +43,7 @@ export const useTTSNarration = () => {
         return;
       }
       const { data, error } = await supabase.functions.invoke("tts-narration", {
-        body: { texts, voiceId },
+        body: { texts, voiceId, voiceSettings: voiceId ? getVoiceSettings(voiceId) : undefined },
       });
       if (error || !data?.audio) {
         console.warn("TTS narration error", error);
