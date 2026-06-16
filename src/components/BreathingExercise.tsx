@@ -385,6 +385,29 @@ export const BreathingExercise = () => {
                 </Button>
 
                 <Button
+                  variant={voiceEnabled ? "secondary" : "ghost"}
+                  size="icon"
+                  onClick={() => {
+                    setVoiceEnabled((v) => {
+                      if (v) stopVoice();
+                      return !v;
+                    });
+                  }}
+                  disabled={voiceLoading}
+                  aria-label={voiceEnabled ? "Mute voice cues" : "Enable voice cues"}
+                >
+                  {voiceLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : voiceEnabled ? (
+                    <Mic className="w-4 h-4" />
+                  ) : (
+                    <MicOff className="w-4 h-4" />
+                  )}
+                </Button>
+
+
+
+                <Button
                   variant={showInfo ? "secondary" : "ghost"}
                   size="icon"
                   onClick={() => setShowInfo(!showInfo)}
