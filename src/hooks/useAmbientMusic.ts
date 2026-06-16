@@ -8,9 +8,11 @@ import { admobConfig } from "@/lib/admobConfig";
 export const useAmbientMusic = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const audioUnlockedRef = useRef(false);
+  const mutedRef = useRef(false);
 
   const createNativeAudioUrl = useCallback((base64Audio: string) => {
     const binary = atob(base64Audio);
@@ -213,6 +215,7 @@ export const useAmbientMusic = () => {
       const audio = new Audio(audioUrl);
       audio.loop = true;
       audio.volume = 0.4;
+      audio.muted = mutedRef.current;
       audio.preload = "auto";
       (audio as any).playsInline = true;
       audioRef.current = audio;
@@ -267,13 +270,32 @@ export const useAmbientMusic = () => {
     }
   }, []);
 
+  // Synchronous mute toggle — must be called directly from a user gesture.
+  // Mutating audio.muted directly is allowed by browsers even mid-playback.
+  const toggleMute = useCallback(() => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    if (audioRef.current) audioRef.current.muted = next;
+    setIsMuted(next);
+    return next;
+  }, []);
+
+  const setMuted = useCallback((muted: boolean) => {
+    mutedRef.current = muted;
+    if (audioRef.current) audioRef.current.muted = muted;
+    setIsMuted(muted);
+  }, []);
+
   return {
     isLoading,
     isPlaying,
+    isMuted,
     generateAndPlay,
     play,
     pause,
     stop,
     setVolume,
+    toggleMute,
+    setMuted,
   };
 };

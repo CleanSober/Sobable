@@ -9,8 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const useTTSNarration = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const urlsRef = useRef<(string | null)[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mutedRef = useRef(false);
 
   const cleanup = useCallback(() => {
     if (audioRef.current) {
@@ -74,6 +76,7 @@ export const useTTSNarration = () => {
     }
     const audio = new Audio(url);
     audio.volume = volume;
+    audio.muted = mutedRef.current;
     audioRef.current = audio;
     audio.play().catch(() => undefined);
   }, []);
@@ -85,5 +88,11 @@ export const useTTSNarration = () => {
     }
   }, []);
 
-  return { preload, playIndex, stop, cleanup, isLoading, isReady };
+  const setMuted = useCallback((muted: boolean) => {
+    mutedRef.current = muted;
+    if (audioRef.current) audioRef.current.muted = muted;
+    setIsMuted(muted);
+  }, []);
+
+  return { preload, playIndex, stop, cleanup, isLoading, isReady, isMuted, setMuted };
 };
