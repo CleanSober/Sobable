@@ -545,6 +545,12 @@
     100% { background-position: 200% 0; }
   }
 
+  /* Skeleton shimmer sweep — used by the base Skeleton primitive. */
+  @keyframes shimmer-sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
   /* Noise texture overlay */
   .noise-overlay::before {
     content: "";
