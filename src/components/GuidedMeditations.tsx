@@ -179,7 +179,19 @@ export const GuidedMeditations = () => {
   const [stepTimeRemaining, setStepTimeRemaining] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceId, setVoiceId] = useState<string>(DEFAULT_NARRATOR_VOICE_ID);
+  const VOICE_PREFS_KEY = "meditation_voice_prefs";
+  const [voicePrefs, setVoicePrefs] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(VOICE_PREFS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+  const currentVoiceId = activeMeditation
+    ? voicePrefs[activeMeditation.id] ?? DEFAULT_NARRATOR_VOICE_ID
+    : DEFAULT_NARRATOR_VOICE_ID;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentStepIndexRef = useRef(0);
   const isPlayingRef = useRef(false);
