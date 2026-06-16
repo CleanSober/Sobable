@@ -304,20 +304,33 @@ export const BreathingExercise = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-2 gap-2"
+              className="space-y-2"
             >
-              {techniques.map((tech) => (
-                <motion.button
-                  key={tech.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => startExercise(tech)}
-                  className={`p-3 rounded-xl bg-gradient-to-br ${tech.color} text-white text-left transition-shadow active:shadow-lg`}
-                >
-                  <Wind className="w-4 h-4 mb-1.5" />
-                  <h4 className="font-semibold text-xs">{tech.name}</h4>
-                  <p className="text-[10px] opacity-80 mt-0.5">{tech.description}</p>
-                </motion.button>
-              ))}
+              <p className="text-[10px] text-muted-foreground text-center">
+                Each technique remembers its own narrator voice. Change it from the player.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {techniques.map((tech) => {
+                  const savedId = voicePrefs[tech.id] ?? DEFAULT_NARRATOR_VOICE_ID;
+                  const savedVoice = NARRATOR_VOICES.find((v) => v.id === savedId);
+                  return (
+                    <motion.button
+                      key={tech.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => startExercise(tech)}
+                      className={`p-3 rounded-xl bg-gradient-to-br ${tech.color} text-white text-left transition-shadow active:shadow-lg`}
+                    >
+                      <Wind className="w-4 h-4 mb-1.5" />
+                      <h4 className="font-semibold text-xs">{tech.name}</h4>
+                      <p className="text-[10px] opacity-80 mt-0.5">{tech.description}</p>
+                      <p className="text-[9px] opacity-70 mt-1 flex items-center gap-1">
+                        <Mic className="w-2.5 h-2.5" />
+                        {savedVoice?.label ?? "Default"}
+                      </p>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </motion.div>
           ) : (
             <motion.div
