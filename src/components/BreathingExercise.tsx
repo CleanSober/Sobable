@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wind, Play, Pause, RotateCcw, Check, X, Music, Volume2, VolumeX, Loader2, Info } from "lucide-react";
+import { Wind, Play, Pause, RotateCcw, Check, X, Music, Volume2, VolumeX, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,8 +124,10 @@ export const BreathingExercise = () => {
   const [completed, setCompleted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
-  
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+
   const { isLoading: musicLoading, isPlaying: musicPlaying, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic } = useAmbientMusic();
+  const { preload: preloadVoice, playIndex: playVoice, stop: stopVoice, cleanup: cleanupVoice, isLoading: voiceLoading, isReady: voiceReady } = useTTSNarration();
 
   const currentPhase = selectedTechnique?.phases[currentPhaseIndex];
   const totalCycles = selectedTechnique?.cycles || 0;
