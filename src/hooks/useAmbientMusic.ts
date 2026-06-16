@@ -197,7 +197,7 @@ export const useAmbientMusic = () => {
       }
 
       const data = payload;
-      
+
       // Clean up previous audio
       if (audioRef.current) {
         audioRef.current.pause();
@@ -205,13 +205,25 @@ export const useAmbientMusic = () => {
       }
       if (audioUrlRef.current) {
         URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
       }
 
-      const audioUrl = Capacitor.isNativePlatform()
-        ? createNativeAudioUrl(data.audioContent)
-        : `data:audio/mpeg;base64,${data.audioContent}`;
-      audioUrlRef.current = audioUrl;
-      
+      // Edge function returns one of:
+      //  • { audioContent: base64 }  — fresh ElevenLabs generation
+      //  • { trackUrl: signedUrl, fallback: true } — curated royalty-free
+      //    track from the private `ambient-music` storage bucket.
+      let audioUrl: string;
+      if (data?.trackUrl) {
+        audioUrl = data.trackUrl as string;
+      } else if (data?.audioContent) {
+        audioUrl = Capacitor.isNativePlatform()
+          ? createNativeAudioUrl(data.audioContent)
+          : `data:audio/mpeg;base64,${data.audioContent}`;
+        audioUrlRef.current = audioUrl;
+      } else {
+        throw new Error("No audio in response");
+      }
+
       const audio = new Audio(audioUrl);
       audio.loop = true;
       audio.volume = 0.4;
