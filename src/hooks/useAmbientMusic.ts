@@ -362,6 +362,7 @@ export const useAmbientMusic = () => {
   // background after leaving the screen that started it.
   useEffect(() => {
     return () => {
+      stopFade();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = "";
