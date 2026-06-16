@@ -8,8 +8,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Calm female voice — Sarah
-const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
+// Warm, natural female voice — Matilda. Best for meditation narration.
+const DEFAULT_VOICE_ID = "XrExE9yKIg1WjnnlVkGX";
 const MAX_TEXTS = 20;
 const MAX_TEXT_LENGTH = 400;
 
