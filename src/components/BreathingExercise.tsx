@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wind, Play, Pause, RotateCcw, Check, X, Music, Volume2, VolumeX, Loader2, Info } from "lucide-react";
+import { Wind, Play, Pause, RotateCcw, Check, X, Music, Volume2, VolumeX, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,8 +124,10 @@ export const BreathingExercise = () => {
   const [completed, setCompleted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
-  
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+
   const { isLoading: musicLoading, isPlaying: musicPlaying, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic } = useAmbientMusic();
+  const { preload: preloadVoice, playIndex: playVoice, stop: stopVoice, cleanup: cleanupVoice, isLoading: voiceLoading, isReady: voiceReady } = useTTSNarration();
 
   const currentPhase = selectedTechnique?.phases[currentPhaseIndex];
   const totalCycles = selectedTechnique?.cycles || 0;
@@ -136,7 +139,9 @@ export const BreathingExercise = () => {
     setCountdown(0);
     setCompleted(false);
     stopMusic();
-  }, [stopMusic]);
+    stopVoice();
+    cleanupVoice();
+  }, [stopMusic, stopVoice, cleanupVoice]);
 
   const startExercise = async (technique: Technique) => {
     setSelectedTechnique(technique);
@@ -150,11 +155,20 @@ export const BreathingExercise = () => {
     if ("vibrate" in navigator) {
       navigator.vibrate(50);
     }
-    
+
     if (musicEnabled) {
       generateAndPlay(technique.id, 60).catch(() => {
         // Silently continue without music if generation fails
       });
+    }
+
+    if (voiceEnabled) {
+      // Preload one short cue per phase (e.g. "Breathe in", "Hold", "Exhale")
+      const cues = technique.phases.map((p) => phaseLabels[p.phase]);
+      preloadVoice(cues).then(() => {
+        // Speak the first phase immediately once ready
+        playVoice(0, 1);
+      }).catch(() => undefined);
     }
   };
 
@@ -193,6 +207,9 @@ export const BreathingExercise = () => {
           if ("vibrate" in navigator) {
             navigator.vibrate(30);
           }
+          if (voiceEnabled && voiceReady) {
+            playVoice(nextPhaseIndex, 1);
+          }
           return selectedTechnique.phases[nextPhaseIndex].duration;
         }
         return prev - 1;
@@ -200,7 +217,7 @@ export const BreathingExercise = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isActive, selectedTechnique, currentPhaseIndex, currentCycle, completed]);
+  }, [isActive, selectedTechnique, currentPhaseIndex, currentCycle, completed, voiceEnabled, voiceReady, playVoice]);
 
   const phaseProgress = currentPhase
     ? ((currentPhase.duration - countdown) / currentPhase.duration) * 100
@@ -366,6 +383,29 @@ export const BreathingExercise = () => {
                     <VolumeX className="w-4 h-4" />
                   )}
                 </Button>
+
+                <Button
+                  variant={voiceEnabled ? "secondary" : "ghost"}
+                  size="icon"
+                  onClick={() => {
+                    setVoiceEnabled((v) => {
+                      if (v) stopVoice();
+                      return !v;
+                    });
+                  }}
+                  disabled={voiceLoading}
+                  aria-label={voiceEnabled ? "Mute voice cues" : "Enable voice cues"}
+                >
+                  {voiceLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : voiceEnabled ? (
+                    <Mic className="w-4 h-4" />
+                  ) : (
+                    <MicOff className="w-4 h-4" />
+                  )}
+                </Button>
+
+
 
                 <Button
                   variant={showInfo ? "secondary" : "ghost"}

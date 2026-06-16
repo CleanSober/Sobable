@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon, Leaf, Eye, Volume2, VolumeX, Loader2, Info } from "lucide-react";
+import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon, Leaf, Eye, Volume2, VolumeX, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 
@@ -175,16 +176,26 @@ export const GuidedMeditations = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepTimeRemaining, setStepTimeRemaining] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  
-  const { 
-    isLoading: musicLoading, 
-    isPlaying: musicPlaying, 
-    generateAndPlay, 
-    pause: pauseMusic, 
-    play: playMusic, 
-    stop: stopMusic 
+
+  const {
+    isLoading: musicLoading,
+    isPlaying: musicPlaying,
+    generateAndPlay,
+    pause: pauseMusic,
+    play: playMusic,
+    stop: stopMusic
   } = useAmbientMusic();
+
+  const {
+    preload: preloadVoice,
+    playIndex: playVoice,
+    stop: stopVoice,
+    cleanup: cleanupVoice,
+    isLoading: voiceLoading,
+    isReady: voiceReady,
+  } = useTTSNarration();
 
   const { addXP } = useGamification();
 
@@ -209,6 +220,9 @@ export const GuidedMeditations = () => {
               const nextIdx = stepIdx + 1;
               if (nextIdx < activeMeditation.steps.length) {
                 setStepTimeRemaining(activeMeditation.steps[nextIdx].duration);
+                if (voiceEnabled && voiceReady) {
+                  playVoice(nextIdx, 1);
+                }
                 return nextIdx;
               }
               // Loop back to last step if time remains
@@ -224,7 +238,7 @@ export const GuidedMeditations = () => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPlaying, timeRemaining, activeMeditation, stopMusic]);
+  }, [isPlaying, timeRemaining, activeMeditation, stopMusic, voiceEnabled, voiceReady, playVoice]);
 
   const completeMeditation = async () => {
     if (!user) return;
@@ -251,14 +265,22 @@ export const GuidedMeditations = () => {
     setCurrentStepIndex(0);
     setStepTimeRemaining(meditation.steps[0].duration);
     setShowInfo(false);
-    
-    await generateAndPlay(meditation.id, 60);
+
+    generateAndPlay(meditation.id, 60).catch(() => undefined);
+
+    if (voiceEnabled) {
+      const texts = meditation.steps.map((s) => s.instruction);
+      preloadVoice(texts).then(() => {
+        playVoice(0, 1);
+      }).catch(() => undefined);
+    }
   };
 
   const handlePauseResume = () => {
     setIsPlaying(!isPlaying);
     if (isPlaying) {
       pauseMusic();
+      stopVoice();
     } else {
       playMusic();
     }
@@ -269,6 +291,8 @@ export const GuidedMeditations = () => {
     setIsPlaying(false);
     setCurrentStepIndex(0);
     stopMusic();
+    stopVoice();
+    cleanupVoice();
   };
 
   const formatTime = (seconds: number) => {
@@ -353,6 +377,27 @@ export const GuidedMeditations = () => {
                     <Volume2 className="w-3.5 h-3.5" />
                   ) : (
                     <VolumeX className="w-3.5 h-3.5" />
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setVoiceEnabled((v) => {
+                      if (v) stopVoice();
+                      return !v;
+                    });
+                  }}
+                  variant={voiceEnabled ? "secondary" : "ghost"}
+                  disabled={voiceLoading}
+                  size="sm"
+                  className="text-xs h-8"
+                  aria-label={voiceEnabled ? "Mute voice narration" : "Enable voice narration"}
+                >
+                  {voiceLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : voiceEnabled ? (
+                    <Mic className="w-3.5 h-3.5" />
+                  ) : (
+                    <MicOff className="w-3.5 h-3.5" />
                   )}
                 </Button>
                 <Button 
