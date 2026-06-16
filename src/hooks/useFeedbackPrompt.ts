@@ -8,10 +8,11 @@ export function emitFeedbackTrigger() {
   window.dispatchEvent(new CustomEvent(FEEDBACK_TRIGGER_EVENT));
 }
 
-const FEEDBACK_DISMISSED_KEY = "feedback_prompt_dismissed";
+const FEEDBACK_LAST_SHOWN_KEY = "feedback_prompt_last_shown";
+const FEEDBACK_COMPLETED_KEY = "feedback_prompt_completed"; // user left a review OR sent feedback → never again
 const FEEDBACK_TRIGGERS_KEY = "feedback_trigger_count";
-const MIN_TRIGGERS_BEFORE_PROMPT = 3; // Need at least 3 meaningful actions before prompting
-const DISMISS_COOLDOWN_DAYS = 30; // Don't show again for 30 days after dismissal
+const MIN_TRIGGERS_BEFORE_PROMPT = 3; // Need at least 3 meaningful actions before the FIRST prompt
+const PROMPT_COOLDOWN_DAYS = 5; // Show at most once every 5 days
 
 export function useFeedbackPrompt() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export function useFeedbackPrompt() {
   const hasCheckedRef = useRef(false);
   const hasSubmittedRef = useRef<boolean | null>(null);
 
-  // Check if user has already submitted feedback (from DB)
+  // Check if user has already submitted feedback (from DB) — survives device changes
   useEffect(() => {
     if (!user || hasCheckedRef.current) return;
     hasCheckedRef.current = true;
@@ -29,15 +30,18 @@ export function useFeedbackPrompt() {
         .select("id")
         .eq("user_id", user.id)
         .limit(1);
-      hasSubmittedRef.current = !!(data && data.length > 0);
+      const submittedRemote = !!(data && data.length > 0);
+      const submittedLocal = localStorage.getItem(FEEDBACK_COMPLETED_KEY) === "1";
+      hasSubmittedRef.current = submittedRemote || submittedLocal;
+      if (submittedRemote) localStorage.setItem(FEEDBACK_COMPLETED_KEY, "1");
     })();
   }, [user]);
 
-  const isDismissedRecently = useCallback(() => {
-    const dismissed = localStorage.getItem(FEEDBACK_DISMISSED_KEY);
-    if (!dismissed) return false;
-    const elapsed = Date.now() - parseInt(dismissed, 10);
-    return elapsed < DISMISS_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+  const isWithinCooldown = useCallback(() => {
+    const last = localStorage.getItem(FEEDBACK_LAST_SHOWN_KEY);
+    if (!last) return false;
+    const elapsed = Date.now() - parseInt(last, 10);
+    return elapsed < PROMPT_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
   }, []);
 
   const incrementTrigger = useCallback(() => {
@@ -47,23 +51,27 @@ export function useFeedbackPrompt() {
   }, []);
 
   // Call this after meaningful actions (mood check-in, journal, milestone, etc.)
-  const triggerFeedback = useCallback((reason?: string) => {
+  const triggerFeedback = useCallback((_reason?: string) => {
     if (!user) return;
-    // Already submitted → never show
+    // Permanently suppressed — user already left a review or sent feedback
     if (hasSubmittedRef.current === true) return;
-    // Still loading check → skip
+    if (localStorage.getItem(FEEDBACK_COMPLETED_KEY) === "1") return;
+    // Still loading remote check → skip this round
     if (hasSubmittedRef.current === null) return;
-    // Already dismissed recently
-    if (isDismissedRecently()) return;
+    // Within 5-day cooldown from the last time we showed the prompt
+    if (isWithinCooldown()) return;
     // Already showing
     if (showPrompt) return;
 
     const count = incrementTrigger();
     if (count >= MIN_TRIGGERS_BEFORE_PROMPT) {
       // Show with a slight delay so it doesn't interrupt the current action
-      setTimeout(() => setShowPrompt(true), 1500);
+      setTimeout(() => {
+        setShowPrompt(true);
+        localStorage.setItem(FEEDBACK_LAST_SHOWN_KEY, Date.now().toString());
+      }, 1500);
     }
-  }, [user, showPrompt, isDismissedRecently, incrementTrigger]);
+  }, [user, showPrompt, isWithinCooldown, incrementTrigger]);
 
   // Listen for global trigger events from child components
   useEffect(() => {
@@ -72,14 +80,18 @@ export function useFeedbackPrompt() {
     return () => window.removeEventListener(FEEDBACK_TRIGGER_EVENT, handler);
   }, [triggerFeedback]);
 
+  // "Not now" → close & restart the 5-day cooldown (already stamped on show, restamp here too)
   const dismiss = useCallback(() => {
     setShowPrompt(false);
-    localStorage.setItem(FEEDBACK_DISMISSED_KEY, Date.now().toString());
+    localStorage.setItem(FEEDBACK_LAST_SHOWN_KEY, Date.now().toString());
   }, []);
 
+  // Called when user taps "Leave a Review" OR successfully submits in-app feedback.
+  // In both cases we never prompt again.
   const markSubmitted = useCallback(() => {
     hasSubmittedRef.current = true;
     setShowPrompt(false);
+    localStorage.setItem(FEEDBACK_COMPLETED_KEY, "1");
     localStorage.removeItem(FEEDBACK_TRIGGERS_KEY);
   }, []);
 
