@@ -919,7 +919,8 @@ const Index = () => {
         <Suspense fallback={null}>
           {coachOpen && <AIRecoveryCoach isOpen={coachOpen} onOpenChange={setCoachOpen} />}
           {showPremiumOnboarding && <PremiumOnboarding open={showPremiumOnboarding} onClose={() => setShowPremiumOnboarding(false)} />}
-          {showFeedback && <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />}
+          {/* Review/feedback prompt disabled per request */}
+          {false && showFeedback && <FeedbackPromptDialog open={showFeedback} onDismiss={dismissFeedback} onSubmitted={feedbackSubmitted} />}
           <AdBanner position="bottom" />
           <MilestoneUpgradePrompt
             prompt={pendingPrompt}
