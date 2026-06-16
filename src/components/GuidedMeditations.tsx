@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
 import { toast } from "sonner";
 
 interface MeditationStep {
