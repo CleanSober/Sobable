@@ -21,7 +21,7 @@ const browser = await openBrowser("chrome", {
 // Render video silently first (Nix ffmpeg lacks libfdk_aac), then mux audio externally.
 const composition = await selectComposition({
   serveUrl: bundled,
-  id: "main_vo",
+  id: "mainvo",
   puppeteerInstance: browser,
 });
 

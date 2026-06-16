@@ -14,7 +14,7 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
     />
     <Composition
-      id="main_vo"
+      id="mainvo"
       component={MainVideoVO}
       durationInFrames={610}
       fps={30}
