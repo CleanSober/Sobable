@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wind, Play, Pause, RotateCcw, Check, X, Music, Volume2, VolumeX, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,6 +132,13 @@ export const BreathingExercise = () => {
   const currentPhase = selectedTechnique?.phases[currentPhaseIndex];
   const totalCycles = selectedTechnique?.cycles || 0;
 
+  // Refs so async callbacks (preload completion, intervals) always see the
+  // latest phase index without re-creating the interval.
+  const currentPhaseIndexRef = useRef(0);
+  const isActiveRef = useRef(false);
+  useEffect(() => { currentPhaseIndexRef.current = currentPhaseIndex; }, [currentPhaseIndex]);
+  useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
+
   const resetExercise = useCallback(() => {
     setIsActive(false);
     setCurrentPhaseIndex(0);
@@ -166,8 +173,11 @@ export const BreathingExercise = () => {
       // Preload one short cue per phase (e.g. "Breathe in", "Hold", "Exhale")
       const cues = technique.phases.map((p) => phaseLabels[p.phase]);
       preloadVoice(cues).then(() => {
-        // Speak the first phase immediately once ready
-        playVoice(0, 1);
+        // When preload finishes the user may already have advanced past phase 0.
+        // Play whichever phase is current so narration stays aligned with the timer.
+        if (isActiveRef.current) {
+          playVoice(currentPhaseIndexRef.current, 1);
+        }
       }).catch(() => undefined);
     }
   };
@@ -207,7 +217,8 @@ export const BreathingExercise = () => {
           if ("vibrate" in navigator) {
             navigator.vibrate(30);
           }
-          if (voiceEnabled && voiceReady) {
+          if (voiceEnabled) {
+            // playVoice no-ops if the cue URL isn't ready yet — safe to call without a gate
             playVoice(nextPhaseIndex, 1);
           }
           return selectedTechnique.phases[nextPhaseIndex].duration;
@@ -217,7 +228,7 @@ export const BreathingExercise = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isActive, selectedTechnique, currentPhaseIndex, currentCycle, completed, voiceEnabled, voiceReady, playVoice]);
+  }, [isActive, selectedTechnique, currentPhaseIndex, currentCycle, completed, voiceEnabled, playVoice]);
 
   const phaseProgress = currentPhase
     ? ((currentPhase.duration - countdown) / currentPhase.duration) * 100
@@ -359,8 +370,14 @@ export const BreathingExercise = () => {
                   size="icon"
                   onClick={() => {
                     setIsActive(!isActive);
-                    if (isActive) pauseMusic();
-                    else playMusic();
+                    if (isActive) {
+                      pauseMusic();
+                      stopVoice();
+                    } else {
+                      playMusic();
+                      // Re-cue the current phase on resume so the user hears where they are
+                      if (voiceEnabled) playVoice(currentPhaseIndexRef.current, 1);
+                    }
                   }}
                 >
                   {isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
