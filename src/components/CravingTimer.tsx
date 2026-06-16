@@ -152,7 +152,7 @@ export const CravingTimer = () => {
     if (!isActive) return;
     const messageInterval = setInterval(() => {
       setMessageIndex((prev) => {
-        const next = (prev + 1) % motivationalMessages.length;
+        const next = (prev + 1) % messagesRef.current.length;
         if (voiceEnabled) playVoice(next, 1);
         return next;
       });
@@ -207,7 +207,7 @@ export const CravingTimer = () => {
     generateAndPlay("urge-surfing", 120).catch(() => undefined);
 
     if (voiceEnabled) {
-      preloadVoice(motivationalMessages, voiceId)
+      preloadVoice(messagesRef.current, voiceId)
         .then(() => {
           if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
         })
@@ -243,7 +243,7 @@ export const CravingTimer = () => {
     try { localStorage.setItem(VOICE_KEY, newVoiceId); } catch { /* ignore */ }
     if (!isActiveRef.current || !voiceEnabled) return;
     stopVoice();
-    preloadVoice(motivationalMessages, newVoiceId)
+    preloadVoice(messagesRef.current, newVoiceId)
       .then(() => {
         if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
       })
@@ -258,7 +258,7 @@ export const CravingTimer = () => {
       if (!next) {
         stopVoice();
       } else if (isActiveRef.current) {
-        preloadVoice(motivationalMessages, voiceId)
+        preloadVoice(messagesRef.current, voiceId)
           .then(() => {
             if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
           })
@@ -398,7 +398,7 @@ export const CravingTimer = () => {
                   className="text-center p-3 rounded-xl bg-primary/10"
                 >
                   <Heart className="w-4 h-4 mx-auto mb-1 text-primary" />
-                  <p className="text-xs font-medium">{motivationalMessages[messageIndex]}</p>
+                  <p className="text-xs font-medium">{messagesRef.current[messageIndex]}</p>
                   {voiceEnabled && (
                     <p className="text-[9px] text-muted-foreground mt-1 flex items-center justify-center gap-1">
                       <Mic className="w-2.5 h-2.5" />
