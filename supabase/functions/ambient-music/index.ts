@@ -77,41 +77,34 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Premium gate (with rewarded-ad pass fallback)
+    // Premium gate. AI-generated ElevenLabs music is a Sober Club perk.
+    // Free / non-premium users still get the curated royalty-free fallback
+    // from the `ambient-music` Storage bucket — so the feature never
+    // silently produces nothing.
     const { data: isPremium } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
 
+    const { type = "default", duration } = await req.json().catch(() => ({}));
+    const safeType = typeof type === "string" ? type : "default";
+
+    const useCuratedFallback = async (reason: string) => {
+      console.log(`Using curated ambient fallback (${reason})`);
+      const trackUrl = await signFallbackTrack(adminClient, safeType);
+      if (!trackUrl) {
+        return new Response(
+          JSON.stringify({ error: "Fallback track unavailable" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({ trackUrl, fallback: true, source: "curated" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    };
+
     if (!isPremium) {
-      const { data: passes } = await adminClient
-        .from("ambient_music_passes")
-        .select("id, expires_at")
-        .eq("user_id", userId)
-        .is("consumed_at", null)
-        .gt("expires_at", new Date().toISOString())
-        .order("granted_at", { ascending: false })
-        .limit(1);
-
-      const activePass = passes?.[0];
-      if (!activePass) {
-        return new Response(
-          JSON.stringify({ locked: true, code: "PREMIUM_REQUIRED" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      const { data: consumed } = await adminClient
-        .from("ambient_music_passes")
-        .update({ consumed_at: new Date().toISOString() })
-        .eq("id", activePass.id)
-        .is("consumed_at", null)
-        .select("id");
-
-      if (!consumed || consumed.length === 0) {
-        return new Response(
-          JSON.stringify({ locked: true, code: "PREMIUM_REQUIRED" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+      return await useCuratedFallback("non_premium");
     }
+
 
     const { type = "default", duration } = await req.json().catch(() => ({}));
     const safeType = typeof type === "string" ? type : "default";
