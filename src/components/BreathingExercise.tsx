@@ -497,6 +497,26 @@ export const BreathingExercise = () => {
                 </Button>
               </div>
 
+              {/* Per-technique narrator voice picker (remembered for this technique) */}
+              <div className="flex items-center gap-2">
+                <Mic className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <label className="text-[10px] text-muted-foreground shrink-0">Narrator</label>
+                <Select value={currentVoiceId} onValueChange={handleChangeVoice} disabled={voiceLoading}>
+                  <SelectTrigger className="h-8 text-xs flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NARRATOR_VOICES.map((v) => (
+                      <SelectItem key={v.id} value={v.id} className="text-xs">
+                        <span className="font-medium">{v.label}</span>
+                        <span className="text-muted-foreground ml-1.5">— {v.description}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+
               {/* Technique info & source */}
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground">{selectedTechnique.name}</p>
