@@ -11,6 +11,7 @@ import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
+import { claimExerciseSession, releaseExerciseSession, subscribeExerciseSession } from "@/lib/exerciseSession";
 import { toast } from "sonner";
 
 interface MeditationStep {
