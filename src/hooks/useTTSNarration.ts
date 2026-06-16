@@ -83,7 +83,15 @@ export const useTTSNarration = () => {
     audio.muted = mutedRef.current;
     audio.loop = false;
     audioRef.current = audio;
-    audio.play().catch(() => undefined);
+    // Broadcast to the ambient-music hook so it can duck under the voice.
+    const handleEnd = () => emitVoiceEnd();
+    audio.addEventListener("ended", handleEnd, { once: true });
+    audio.addEventListener("pause", handleEnd, { once: true });
+    audio.addEventListener("error", handleEnd, { once: true });
+    emitVoiceStart();
+    audio.play().catch(() => {
+      emitVoiceEnd();
+    });
   }, []);
 
   const stop = useCallback(() => {
@@ -91,6 +99,7 @@ export const useTTSNarration = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+    emitVoiceEnd();
   }, []);
 
   // If the user globally disables voiceovers from the Profile page, stop
