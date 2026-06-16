@@ -614,3 +614,67 @@
     display: none;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Global Type Scale — tokens + utility classes
+ * Use these everywhere instead of ad-hoc text-* sizes.
+ * Scale: 11 → 13 → 14 → 15 → 17 → 20 → 24 → 30 → 38 → 48 → 72
+ * ────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Font sizes */
+    --fs-eyebrow: 0.6875rem;   /* 11px — labels, eyebrows */
+    --fs-caption: 0.75rem;     /* 12px — captions, meta  */
+    --fs-xs:      0.8125rem;   /* 13px — fine print, badges */
+    --fs-sm:      0.875rem;    /* 14px — secondary body */
+    --fs-base:    0.9375rem;   /* 15px — body default */
+    --fs-md:      1.0625rem;   /* 17px — emphasized body */
+    --fs-lg:      1.25rem;     /* 20px — h4 / section title */
+    --fs-xl:      1.5rem;      /* 24px — h3 */
+    --fs-2xl:     1.875rem;    /* 30px — h2 */
+    --fs-3xl:     2.375rem;    /* 38px — h1 / page title */
+    --fs-4xl:     3rem;        /* 48px — display sm */
+    --fs-5xl:     4.5rem;      /* 72px — display hero */
+
+    /* Line heights */
+    --lh-tight:    1.05;       /* hero numerals */
+    --lh-snug:     1.15;       /* headings */
+    --lh-normal:   1.35;       /* compact body */
+    --lh-relaxed:  1.55;       /* long-form body */
+    --lh-loose:    1.7;        /* paragraphs */
+
+    /* Letter spacing */
+    --ls-tightest: -0.04em;    /* display numerals */
+    --ls-tight:    -0.022em;   /* headings */
+    --ls-snug:     -0.012em;   /* subheads */
+    --ls-normal:   -0.005em;   /* body */
+    --ls-wide:     0.08em;     /* small caps small */
+    --ls-widest:   0.18em;     /* eyebrows / overlines */
+  }
+}
+
+@layer components {
+  /* Headings — serif via global h1/h2/h3 rule, sized via tokens */
+  .t-display     { font-family: "Fraunces", ui-serif, Georgia, serif; font-size: var(--fs-5xl); line-height: var(--lh-tight); letter-spacing: var(--ls-tightest); font-weight: 600; font-optical-sizing: auto; font-variant-numeric: tabular-nums lining-nums; }
+  .t-display-sm  { font-family: "Fraunces", ui-serif, Georgia, serif; font-size: var(--fs-4xl); line-height: var(--lh-tight); letter-spacing: var(--ls-tightest); font-weight: 600; font-optical-sizing: auto; font-variant-numeric: tabular-nums lining-nums; }
+  .t-h1          { font-family: "Fraunces", ui-serif, Georgia, serif; font-size: var(--fs-3xl); line-height: var(--lh-snug);   letter-spacing: var(--ls-tight);    font-weight: 600; font-optical-sizing: auto; }
+  .t-h2          { font-family: "Fraunces", ui-serif, Georgia, serif; font-size: var(--fs-2xl); line-height: var(--lh-snug);   letter-spacing: var(--ls-tight);    font-weight: 600; font-optical-sizing: auto; }
+  .t-h3          { font-family: "Fraunces", ui-serif, Georgia, serif; font-size: var(--fs-xl);  line-height: var(--lh-snug);   letter-spacing: var(--ls-tight);    font-weight: 600; font-optical-sizing: auto; }
+  .t-h4          { font-size: var(--fs-lg);  line-height: var(--lh-snug);    letter-spacing: var(--ls-snug);   font-weight: 600; }
+  /* Body */
+  .t-body-lg     { font-size: var(--fs-md);   line-height: var(--lh-relaxed); letter-spacing: var(--ls-normal); font-weight: 400; }
+  .t-body        { font-size: var(--fs-base); line-height: var(--lh-relaxed); letter-spacing: var(--ls-normal); font-weight: 400; }
+  .t-body-sm     { font-size: var(--fs-sm);   line-height: var(--lh-normal);  letter-spacing: var(--ls-normal); font-weight: 400; }
+  /* Labels & meta */
+  .t-label       { font-size: var(--fs-sm); line-height: 1.2; letter-spacing: 0; font-weight: 600; }
+  .t-caption     { font-size: var(--fs-caption); line-height: 1.35; letter-spacing: 0; font-weight: 400; color: hsl(var(--muted-foreground)); }
+  .t-eyebrow     { font-size: var(--fs-eyebrow); line-height: 1.2; letter-spacing: var(--ls-widest); font-weight: 600; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+  .t-mono-stat   { font-family: "Fraunces", ui-serif, Georgia, serif; font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1; letter-spacing: var(--ls-tight); }
+}
+
+/* Align legacy utilities to the new tokens */
+@layer components {
+  .text-display { font-size: var(--fs-5xl); line-height: var(--lh-tight); letter-spacing: var(--ls-tightest); }
+  .text-eyebrow { font-size: var(--fs-eyebrow); letter-spacing: var(--ls-widest); }
+  .text-body-lg { font-size: var(--fs-md); line-height: var(--lh-relaxed); }
+}
