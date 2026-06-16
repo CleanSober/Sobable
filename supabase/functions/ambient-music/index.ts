@@ -77,44 +77,33 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Premium gate (with rewarded-ad pass fallback)
+    // Premium gate. AI-generated ElevenLabs music is a Sober Club perk.
+    // Free / non-premium users still get the curated royalty-free fallback
+    // from the `ambient-music` Storage bucket — so the feature never
+    // silently produces nothing.
     const { data: isPremium } = await supabaseClient.rpc("is_premium_user", { check_user_id: userId });
-
-    if (!isPremium) {
-      const { data: passes } = await adminClient
-        .from("ambient_music_passes")
-        .select("id, expires_at")
-        .eq("user_id", userId)
-        .is("consumed_at", null)
-        .gt("expires_at", new Date().toISOString())
-        .order("granted_at", { ascending: false })
-        .limit(1);
-
-      const activePass = passes?.[0];
-      if (!activePass) {
-        return new Response(
-          JSON.stringify({ locked: true, code: "PREMIUM_REQUIRED" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      const { data: consumed } = await adminClient
-        .from("ambient_music_passes")
-        .update({ consumed_at: new Date().toISOString() })
-        .eq("id", activePass.id)
-        .is("consumed_at", null)
-        .select("id");
-
-      if (!consumed || consumed.length === 0) {
-        return new Response(
-          JSON.stringify({ locked: true, code: "PREMIUM_REQUIRED" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-    }
 
     const { type = "default", duration } = await req.json().catch(() => ({}));
     const safeType = typeof type === "string" ? type : "default";
+
+    const useCuratedFallback = async (reason: string) => {
+      console.log(`Using curated ambient fallback (${reason})`);
+      const trackUrl = await signFallbackTrack(adminClient, safeType);
+      if (!trackUrl) {
+        return new Response(
+          JSON.stringify({ error: "Fallback track unavailable" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({ trackUrl, fallback: true, source: "curated" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    };
+
+    if (!isPremium) {
+      return await useCuratedFallback("non_premium");
+    }
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
@@ -136,24 +125,10 @@ serve(async (req) => {
       default: "Peaceful meditation ambient music with soft synth pads and gentle nature sounds, calming and centered atmosphere",
     };
 
-    const useCuratedFallback = async (reason: string) => {
-      console.log(`Using curated ambient fallback (${reason})`);
-      const trackUrl = await signFallbackTrack(adminClient, safeType);
-      if (!trackUrl) {
-        return new Response(
-          JSON.stringify({ error: "Fallback track unavailable" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-      return new Response(
-        JSON.stringify({ trackUrl, fallback: true, source: "curated" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    };
-
     if (!ELEVENLABS_API_KEY) {
       return await useCuratedFallback("missing_api_key");
     }
+
 
     const prompt = musicPrompts[safeType] || musicPrompts.default;
     const musicDuration = Math.min(duration || 30, 120);
