@@ -29,7 +29,7 @@ export const useTTSNarration = () => {
 
   useEffect(() => () => cleanup(), [cleanup]);
 
-  const preload = useCallback(async (texts: string[]) => {
+  const preload = useCallback(async (texts: string[], voiceId?: string) => {
     cleanup();
     if (!texts.length) return;
     setIsLoading(true);
@@ -40,7 +40,7 @@ export const useTTSNarration = () => {
         return;
       }
       const { data, error } = await supabase.functions.invoke("tts-narration", {
-        body: { texts },
+        body: { texts, voiceId },
       });
       if (error || !data?.audio) {
         console.warn("TTS narration error", error);
