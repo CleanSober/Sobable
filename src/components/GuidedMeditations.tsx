@@ -321,6 +321,7 @@ export const GuidedMeditations = () => {
   };
 
   const handleEnd = () => {
+    releaseExerciseSession("meditation");
     setActiveMeditation(null);
     setIsPlaying(false);
     setCurrentStepIndex(0);
@@ -328,6 +329,14 @@ export const GuidedMeditations = () => {
     stopVoice();
     cleanupVoice();
   };
+  handleEndRef.current = handleEnd;
+
+  // If the other exercise (breathing) starts, stop this one.
+  useEffect(() => {
+    return subscribeExerciseSession((owner) => {
+      if (owner !== "meditation") handleEndRef.current();
+    });
+  }, []);
 
   const handleChangeVoice = (newVoiceId: string) => {
     if (!activeMeditation) return;
