@@ -105,10 +105,6 @@ serve(async (req) => {
       return await useCuratedFallback("non_premium");
     }
 
-
-    const { type = "default", duration } = await req.json().catch(() => ({}));
-    const safeType = typeof type === "string" ? type : "default";
-
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     const musicPrompts: Record<string, string> = {
@@ -129,24 +125,10 @@ serve(async (req) => {
       default: "Peaceful meditation ambient music with soft synth pads and gentle nature sounds, calming and centered atmosphere",
     };
 
-    const useCuratedFallback = async (reason: string) => {
-      console.log(`Using curated ambient fallback (${reason})`);
-      const trackUrl = await signFallbackTrack(adminClient, safeType);
-      if (!trackUrl) {
-        return new Response(
-          JSON.stringify({ error: "Fallback track unavailable" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-      return new Response(
-        JSON.stringify({ trackUrl, fallback: true, source: "curated" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    };
-
     if (!ELEVENLABS_API_KEY) {
       return await useCuratedFallback("missing_api_key");
     }
+
 
     const prompt = musicPrompts[safeType] || musicPrompts.default;
     const musicDuration = Math.min(duration || 30, 120);
