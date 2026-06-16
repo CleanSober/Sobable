@@ -469,6 +469,25 @@ export const GuidedMeditations = () => {
                 </Button>
               </div>
 
+              {/* Per-meditation narrator voice picker (remembered for this meditation) */}
+              <div className="flex items-center gap-2">
+                <Mic className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <label className="text-[10px] text-muted-foreground shrink-0">Narrator</label>
+                <Select value={currentVoiceId} onValueChange={handleChangeVoice} disabled={voiceLoading}>
+                  <SelectTrigger className="h-8 text-xs flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NARRATOR_VOICES.map((v) => (
+                      <SelectItem key={v.id} value={v.id} className="text-xs">
+                        <span className="font-medium">{v.label}</span>
+                        <span className="text-muted-foreground ml-1.5">— {v.description}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Source info */}
               <AnimatePresence>
                 {showInfo && (
