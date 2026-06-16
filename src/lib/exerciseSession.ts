@@ -1,7 +1,7 @@
 // Tiny pub/sub so only one wellness exercise (meditation or breathing) runs at a time.
 // When one component claims the session, others receive the new owner and stop themselves.
 
-export type ExerciseSessionType = "meditation" | "breathing";
+export type ExerciseSessionType = "meditation" | "breathing" | "craving";
 
 type Listener = (owner: ExerciseSessionType) => void;
 
