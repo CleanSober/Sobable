@@ -325,6 +325,27 @@ export const GuidedMeditations = () => {
     cleanupVoice();
   };
 
+  const handleChangeVoice = (newVoiceId: string) => {
+    if (!activeMeditation) return;
+    setVoicePrefs((prev) => {
+      const next = { ...prev, [activeMeditation.id]: newVoiceId };
+      try {
+        localStorage.setItem(VOICE_PREFS_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+    if (!voiceEnabled) return;
+    stopVoice();
+    const texts = activeMeditation.steps.map((s) => s.instruction);
+    preloadVoice(texts, newVoiceId).then(() => {
+      if (isPlayingRef.current) {
+        playVoice(currentStepIndexRef.current, 1);
+      }
+    }).catch(() => undefined);
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
