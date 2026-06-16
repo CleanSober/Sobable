@@ -179,6 +179,7 @@ export const GuidedMeditations = () => {
   const [stepTimeRemaining, setStepTimeRemaining] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceId, setVoiceId] = useState<string>(DEFAULT_NARRATOR_VOICE_ID);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentStepIndexRef = useRef(0);
   const isPlayingRef = useRef(false);
