@@ -69,6 +69,7 @@ export const useTTSNarration = () => {
   }, [cleanup]);
 
   const playIndex = useCallback((index: number, volume = 1) => {
+    if (!isVoiceoverGloballyEnabled()) return; // global mute from Profile
     const url = urlsRef.current[index];
     if (!url) return;
     if (audioRef.current) {
