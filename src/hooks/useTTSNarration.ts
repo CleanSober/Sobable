@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isVoiceoverGloballyEnabled, subscribeAudioPrefs } from "@/lib/audioPreferences";
+import { getVoiceSettings } from "@/lib/narratorVoices";
+import { emitVoiceEnd, emitVoiceStart } from "@/lib/audioBus";
 
 /**
  * Hook to generate + play sequential ElevenLabs TTS narration on top of
