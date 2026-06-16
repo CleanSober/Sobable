@@ -296,36 +296,66 @@ export const useAmbientMusic = () => {
     if (audioRef.current) {
       audioRef.current.play();
       setIsPlaying(true);
+      tweenVolume(isDuckedRef.current ? baseVolumeRef.current * 0.3 : baseVolumeRef.current, 600);
     }
-  }, []);
+  }, [tweenVolume]);
 
   // React to global music toggle changes — pause immediately if disabled.
   useEffect(() => subscribeAudioPrefs(() => {
     if (!isMusicGloballyEnabled() && audioRef.current) {
+      stopFade();
       audioRef.current.pause();
       setIsPlaying(false);
     }
   }), []);
 
+  // Duck the music while the coach is speaking, restore when they stop.
+  useEffect(() => {
+    const offStart = onVoiceStart(() => {
+      isDuckedRef.current = true;
+      if (audioRef.current && !audioRef.current.paused) {
+        tweenVolume(baseVolumeRef.current * 0.3, 250);
+      }
+    });
+    const offEnd = onVoiceEnd(() => {
+      isDuckedRef.current = false;
+      if (audioRef.current && !audioRef.current.paused) {
+        tweenVolume(baseVolumeRef.current, 500);
+      }
+    });
+    return () => { offStart(); offEnd(); };
+  }, [tweenVolume]);
+
   const pause = useCallback(() => {
     if (audioRef.current) {
+      stopFade();
       audioRef.current.pause();
       setIsPlaying(false);
     }
   }, []);
 
   const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-      setIsPlaying(false);
-    }
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current);
-      audioUrlRef.current = null;
-    }
-  }, []);
+    const audio = audioRef.current;
+    if (!audio) return;
+    // Fade out quickly, then halt + release.
+    const FADE_MS = 400;
+    tweenVolume(0, FADE_MS);
+    const handle = audio;
+    setTimeout(() => {
+      try {
+        handle.pause();
+        handle.currentTime = 0;
+      } catch { /* ignore */ }
+      if (audioRef.current === handle) {
+        audioRef.current = null;
+        setIsPlaying(false);
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    }, FADE_MS + 30);
+  }, [tweenVolume]);
 
   // Stop audio and release blob URL if the consumer unmounts (e.g. user
   // navigates to another page). Without this, audio keeps playing in the
