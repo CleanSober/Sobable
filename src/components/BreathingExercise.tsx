@@ -126,8 +126,8 @@ export const BreathingExercise = () => {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 
-  const { isLoading: musicLoading, isPlaying: musicPlaying, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic } = useAmbientMusic();
-  const { preload: preloadVoice, playIndex: playVoice, stop: stopVoice, cleanup: cleanupVoice, isLoading: voiceLoading, isReady: voiceReady } = useTTSNarration();
+  const { isLoading: musicLoading, isPlaying: musicPlaying, isMuted: musicMuted, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic, setMuted: setMusicMuted } = useAmbientMusic();
+  const { preload: preloadVoice, playIndex: playVoice, stop: stopVoice, cleanup: cleanupVoice, isLoading: voiceLoading, isReady: voiceReady, setMuted: setVoiceMuted } = useTTSNarration();
 
   const currentPhase = selectedTechnique?.phases[currentPhaseIndex];
   const totalCycles = selectedTechnique?.cycles || 0;
@@ -384,20 +384,23 @@ export const BreathingExercise = () => {
                 </Button>
                 
                 <Button
-                  variant={musicPlaying ? "secondary" : "ghost"}
+                  variant={musicMuted ? "ghost" : "secondary"}
                   size="icon"
                   onClick={() => {
-                    if (musicPlaying) pauseMusic();
-                    else if (musicEnabled) playMusic();
+                    // Synchronous mute toggle — works even when audio hasn't loaded yet
+                    const next = !musicMuted;
+                    setMusicMuted(next);
+                    setVoiceMuted(next);
                   }}
                   disabled={musicLoading}
+                  aria-label={musicMuted ? "Unmute audio" : "Mute audio"}
                 >
                   {musicLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : musicPlaying ? (
-                    <Volume2 className="w-4 h-4" />
-                  ) : (
+                  ) : musicMuted ? (
                     <VolumeX className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
                   )}
                 </Button>
 
