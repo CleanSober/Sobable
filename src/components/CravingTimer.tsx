@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2, Mic, MicOff } from "lucide-react";
+import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2, Mic, MicOff, ShieldAlert, Phone, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,9 +8,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { useTTSNarration } from "@/hooks/useTTSNarration";
+import { useUserData } from "@/hooks/useUserData";
 import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
 import { claimExerciseSession, releaseExerciseSession, subscribeExerciseSession } from "@/lib/exerciseSession";
 import { toast } from "sonner";
+
+const RELAPSE_PROMPT_THRESHOLD = 30; // seconds remaining when the prevention prompt appears
+
+const COPING_STEPS = [
+  "Pause. Name the feeling out loud — \"this is a craving.\"",
+  "Take 3 slow belly breaths. In through nose, out through mouth.",
+  "Sip cold water or step outside for fresh air.",
+  "Text one person who knows you're in recovery.",
+  "Remind yourself: \"I don't have to act on this.\"",
+];
 
 const CRAVING_DURATION = 20 * 60; // 20 minutes in seconds
 const MESSAGE_INTERVAL_MS = 20_000; // 20s between motivational lines (so voice can finish)
