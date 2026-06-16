@@ -11,6 +11,7 @@ import { Leaderboard } from "./Leaderboard";
 import { BookmarkedPosts } from "./BookmarkedPosts";
 import { CreateForumModal } from "./CreateForumModal";
 import { CommunityGuidelines, hasAcceptedGuidelines } from "./CommunityGuidelines";
+import { CommunityHubSkeleton } from "@/components/skeletons/HomeSkeleton";
 
 interface Forum {
   id: string;
@@ -33,14 +34,9 @@ export const CommunityHub = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]" role="status" aria-label="Loading">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">Loading community...</p>
-        </div>
-      </div>
-    );
+    // Layout-matching skeleton instead of a centered spinner — no shift when
+    // the real tabs render.
+    return <CommunityHubSkeleton />;
   }
 
   if (!isPremium) {

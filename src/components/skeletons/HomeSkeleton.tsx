@@ -185,6 +185,48 @@ export const ProgressSkeleton = () => (
   </div>
 );
 
+/**
+ * Mini skeleton used as the Suspense fallback for the *late* part of the
+ * home tab (AI Coach pill + Achievement Badges preview). Matches the exact
+ * layout so there is zero shift when the lazy chunks resolve.
+ */
+export const HomeLateSkeleton = () => (
+  <div className={SKELETON_GAP.md}>
+    <div className={cn("flex items-center gap-3 p-3", SKELETON_RADIUS.card, "border border-border/30 bg-card/40")}>
+      <Skeleton className={cn("w-10 h-10", SKELETON_RADIUS.lg)} />
+      <div className="flex-1 space-y-1.5 min-w-0">
+        <SkeletonLine height="title" width="w-32" />
+        <SkeletonLine height="caption" width="w-48" />
+      </div>
+      <SkeletonCircle size="w-4 h-4" />
+    </div>
+    <SkeletonBlock height="cardXl" radius="card" />
+  </div>
+);
+
+/** Community tab skeleton — segmented tabs row + 4 forum/chat rows. */
+export const CommunityHubSkeleton = () => (
+  <div className={SKELETON_GAP.md}>
+    <div className={cn("grid grid-cols-6 gap-1 p-1", SKELETON_RADIUS.lg, "border border-border/30 bg-card/40")}>
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <Skeleton key={i} className={cn("h-8", SKELETON_RADIUS.md)} />
+      ))}
+    </div>
+    {[0, 1, 2, 3].map((i) => (
+      <div
+        key={i}
+        className={cn("flex items-center gap-3 p-3", SKELETON_RADIUS.card, "border border-border/30 bg-card/40")}
+      >
+        <SkeletonCircle size="w-10 h-10" />
+        <div className="flex-1 space-y-1.5 min-w-0">
+          <SkeletonLine height="title" width="w-2/5" />
+          <SkeletonLine height="caption" width="w-3/5" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 /* ------------------------------------------------------------------ */
 /* Profile skeleton                                                    */
 /* ------------------------------------------------------------------ */
