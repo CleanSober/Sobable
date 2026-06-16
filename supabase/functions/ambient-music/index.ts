@@ -8,10 +8,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Curated royalty-free ambient track fallback (stored in the private
-// `ambient-music` Supabase Storage bucket). Used whenever the ElevenLabs
-// Music API is unavailable (e.g. free-tier 402, network error, missing key).
+// Curated royalty-free ambient track per exercise/meditation type, stored
+// in the private `ambient-music` Supabase Storage bucket. Each track is
+// sonically tailored to the experience (e.g. bell tones for mindfulness,
+// ocean waves for urge-surfing, warm choir pad for loving-kindness).
 const FALLBACK_TRACKS: Record<string, string> = {
+  // Breathing exercises
   breathing: "breathing.mp3",
   "478": "calm.mp3",
   box: "focus.mp3",
@@ -20,12 +22,13 @@ const FALLBACK_TRACKS: Record<string, string> = {
   "physiological-sigh": "ocean.mp3",
   resonant: "calm.mp3",
   diaphragmatic: "grounding.mp3",
-  "body-scan": "calm.mp3",
-  mindfulness: "focus.mp3",
+  // Guided meditations — dedicated track per meditation
+  "body-scan": "body-scan.mp3",
+  mindfulness: "mindfulness.mp3",
   sleep: "sleep.mp3",
   grounding: "grounding.mp3",
-  "loving-kindness": "loving.mp3",
-  "urge-surfing": "ocean.mp3",
+  "loving-kindness": "loving-kindness.mp3",
+  "urge-surfing": "urge-surfing.mp3",
   default: "calm.mp3",
 };
 
