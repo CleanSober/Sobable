@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { admobConfig } from "@/lib/admobConfig";
 import { isMusicGloballyEnabled, subscribeAudioPrefs } from "@/lib/audioPreferences";
+import { onVoiceEnd, onVoiceStart } from "@/lib/audioBus";
 
 export const useAmbientMusic = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +15,42 @@ export const useAmbientMusic = () => {
   const audioUrlRef = useRef<string | null>(null);
   const audioUnlockedRef = useRef(false);
   const mutedRef = useRef(false);
+  // Target volume the user/feature picked. The actual audio.volume tweens
+  // toward this value (fade-in, fade-out, duck under voice).
+  const baseVolumeRef = useRef(0.4);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isDuckedRef = useRef(false);
+
+  const stopFade = () => {
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+  };
+
+  // Tween audio.volume from current → target over `durationMs`.
+  const tweenVolume = useCallback((target: number, durationMs: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    stopFade();
+    const clamped = Math.max(0, Math.min(1, target));
+    const start = audio.volume;
+    const delta = clamped - start;
+    if (Math.abs(delta) < 0.005 || durationMs <= 0) {
+      audio.volume = clamped;
+      return;
+    }
+    const stepMs = 40;
+    const steps = Math.max(1, Math.round(durationMs / stepMs));
+    let i = 0;
+    fadeIntervalRef.current = setInterval(() => {
+      i += 1;
+      const a = audioRef.current;
+      if (!a) { stopFade(); return; }
+      a.volume = Math.max(0, Math.min(1, start + (delta * i) / steps));
+      if (i >= steps) stopFade();
+    }, stepMs);
+  }, []);
 
   const createNativeAudioUrl = useCallback((base64Audio: string) => {
     const binary = atob(base64Audio);
@@ -228,7 +265,8 @@ export const useAmbientMusic = () => {
 
       const audio = new Audio(audioUrl);
       audio.loop = true;
-      audio.volume = 0.4;
+      baseVolumeRef.current = 0.4;
+      audio.volume = 0; // fade in from silence
       audio.muted = mutedRef.current;
       audio.preload = "auto";
       (audio as any).playsInline = true;
@@ -240,7 +278,9 @@ export const useAmbientMusic = () => {
 
       await audio.play();
       setIsPlaying(true);
-      
+      // Smooth fade-in so the track doesn't slam in at full volume.
+      tweenVolume(isDuckedRef.current ? baseVolumeRef.current * 0.3 : baseVolumeRef.current, 1200);
+
       return audio;
     } catch (error) {
       console.error("Ambient music error:", error);
@@ -256,42 +296,73 @@ export const useAmbientMusic = () => {
     if (audioRef.current) {
       audioRef.current.play();
       setIsPlaying(true);
+      tweenVolume(isDuckedRef.current ? baseVolumeRef.current * 0.3 : baseVolumeRef.current, 600);
     }
-  }, []);
+  }, [tweenVolume]);
 
   // React to global music toggle changes — pause immediately if disabled.
   useEffect(() => subscribeAudioPrefs(() => {
     if (!isMusicGloballyEnabled() && audioRef.current) {
+      stopFade();
       audioRef.current.pause();
       setIsPlaying(false);
     }
   }), []);
 
+  // Duck the music while the coach is speaking, restore when they stop.
+  useEffect(() => {
+    const offStart = onVoiceStart(() => {
+      isDuckedRef.current = true;
+      if (audioRef.current && !audioRef.current.paused) {
+        tweenVolume(baseVolumeRef.current * 0.3, 250);
+      }
+    });
+    const offEnd = onVoiceEnd(() => {
+      isDuckedRef.current = false;
+      if (audioRef.current && !audioRef.current.paused) {
+        tweenVolume(baseVolumeRef.current, 500);
+      }
+    });
+    return () => { offStart(); offEnd(); };
+  }, [tweenVolume]);
+
   const pause = useCallback(() => {
     if (audioRef.current) {
+      stopFade();
       audioRef.current.pause();
       setIsPlaying(false);
     }
   }, []);
 
   const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-      setIsPlaying(false);
-    }
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current);
-      audioUrlRef.current = null;
-    }
-  }, []);
+    const audio = audioRef.current;
+    if (!audio) return;
+    // Fade out quickly, then halt + release.
+    const FADE_MS = 400;
+    tweenVolume(0, FADE_MS);
+    const handle = audio;
+    setTimeout(() => {
+      try {
+        handle.pause();
+        handle.currentTime = 0;
+      } catch { /* ignore */ }
+      if (audioRef.current === handle) {
+        audioRef.current = null;
+        setIsPlaying(false);
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    }, FADE_MS + 30);
+  }, [tweenVolume]);
 
   // Stop audio and release blob URL if the consumer unmounts (e.g. user
   // navigates to another page). Without this, audio keeps playing in the
   // background after leaving the screen that started it.
   useEffect(() => {
     return () => {
+      stopFade();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = "";
@@ -305,10 +376,12 @@ export const useAmbientMusic = () => {
   }, []);
 
   const setVolume = useCallback((volume: number) => {
+    const v = Math.max(0, Math.min(1, volume));
+    baseVolumeRef.current = v;
     if (audioRef.current) {
-      audioRef.current.volume = Math.max(0, Math.min(1, volume));
+      tweenVolume(isDuckedRef.current ? v * 0.3 : v, 200);
     }
-  }, []);
+  }, [tweenVolume]);
 
   // Synchronous mute toggle — must be called directly from a user gesture.
   // Mutating audio.muted directly is allowed by browsers even mid-playback.

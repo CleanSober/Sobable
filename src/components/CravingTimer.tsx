@@ -33,20 +33,42 @@ const breathingExercises = [
 ];
 
 // Spoken motivational lines. Kept short so they read naturally as voiceover.
+// `{name}` and `{days}` are replaced with the user's first name and current
+// sober-day count so the coach feels personal, not generic.
 const motivationalMessages = [
-  "This craving will pass. You are stronger than it.",
-  "Breathe in slowly. Breathe out. You are safe right now.",
+  "{name}, this craving will pass. You are stronger than it.",
+  "Breathe in slowly{nameComma} Breathe out. You are safe right now.",
   "Every second you resist, you grow stronger.",
-  "Remember why you started this journey. That reason still matters.",
-  "You've made it this far. Don't give up on yourself now.",
+  "Remember why you started{nameComma} That reason still matters.",
+  "You've made it {daysPhrase}. Don't give up on yourself now.",
   "This feeling is temporary. Your recovery is permanent.",
-  "You are rewriting your story with every breath.",
+  "You are rewriting your story with every breath{nameComma2}",
   "The wave is rising. Ride it. It will fall again.",
-  "You don't have to fight the urge. Just watch it pass.",
+  "You don't have to fight the urge{nameComma} Just watch it pass.",
   "You are not your craving. You are the calm beneath it.",
   "One more minute. You can always do one more minute.",
-  "You are choosing the life you actually want. Keep choosing.",
+  "You are choosing the life you actually want{nameComma} Keep choosing.",
 ];
+
+const personalizeMessages = (firstName: string | null, sobrietyStart: string | null) => {
+  const name = (firstName ?? "").trim().split(/\s+/)[0] || "";
+  const nameVoc = name ? name : "friend";
+  const nameComma = name ? `, ${name}.` : ".";
+  const nameComma2 = name ? `, ${name}.` : ".";
+  let daysPhrase = "this far";
+  if (sobrietyStart) {
+    const ms = Date.now() - new Date(sobrietyStart).getTime();
+    const days = Math.max(0, Math.floor(ms / 86_400_000));
+    if (days >= 1) daysPhrase = `${days} ${days === 1 ? "day" : "days"} already`;
+  }
+  return motivationalMessages.map((m) =>
+    m
+      .replace(/\{name\}/g, nameVoc.charAt(0).toUpperCase() + nameVoc.slice(1))
+      .replace(/\{nameComma2\}/g, nameComma2)
+      .replace(/\{nameComma\}/g, nameComma)
+      .replace(/\{daysPhrase\}/g, daysPhrase),
+  );
+};
 
 const VOICE_KEY = "craving_timer_voice";
 const VOICE_ENABLED_KEY = "craving_timer_voice_enabled";
@@ -92,6 +114,19 @@ export const CravingTimer = () => {
   useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
   useEffect(() => { messageIndexRef.current = messageIndex; }, [messageIndex]);
 
+  // Personalized lines — first name + current sober-day count baked in so
+  // the spoken coach feels like it actually knows the user.
+  const personalizedMessages = useState(() =>
+    personalizeMessages(profile?.display_name ?? null, profile?.sobriety_start_date ?? null),
+  )[0];
+  const messagesRef = useRef(personalizedMessages);
+  useEffect(() => {
+    messagesRef.current = personalizeMessages(
+      profile?.display_name ?? null,
+      profile?.sobriety_start_date ?? null,
+    );
+  }, [profile?.display_name, profile?.sobriety_start_date]);
+
   const progress = ((CRAVING_DURATION - timeRemaining) / CRAVING_DURATION) * 100;
 
   // Countdown
@@ -117,7 +152,7 @@ export const CravingTimer = () => {
     if (!isActive) return;
     const messageInterval = setInterval(() => {
       setMessageIndex((prev) => {
-        const next = (prev + 1) % motivationalMessages.length;
+        const next = (prev + 1) % messagesRef.current.length;
         if (voiceEnabled) playVoice(next, 1);
         return next;
       });
@@ -172,7 +207,7 @@ export const CravingTimer = () => {
     generateAndPlay("urge-surfing", 120).catch(() => undefined);
 
     if (voiceEnabled) {
-      preloadVoice(motivationalMessages, voiceId)
+      preloadVoice(messagesRef.current, voiceId)
         .then(() => {
           if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
         })
@@ -208,7 +243,7 @@ export const CravingTimer = () => {
     try { localStorage.setItem(VOICE_KEY, newVoiceId); } catch { /* ignore */ }
     if (!isActiveRef.current || !voiceEnabled) return;
     stopVoice();
-    preloadVoice(motivationalMessages, newVoiceId)
+    preloadVoice(messagesRef.current, newVoiceId)
       .then(() => {
         if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
       })
@@ -223,7 +258,7 @@ export const CravingTimer = () => {
       if (!next) {
         stopVoice();
       } else if (isActiveRef.current) {
-        preloadVoice(motivationalMessages, voiceId)
+        preloadVoice(messagesRef.current, voiceId)
           .then(() => {
             if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
           })
@@ -363,7 +398,7 @@ export const CravingTimer = () => {
                   className="text-center p-3 rounded-xl bg-primary/10"
                 >
                   <Heart className="w-4 h-4 mx-auto mb-1 text-primary" />
-                  <p className="text-xs font-medium">{motivationalMessages[messageIndex]}</p>
+                  <p className="text-xs font-medium">{messagesRef.current[messageIndex]}</p>
                   {voiceEnabled && (
                     <p className="text-[9px] text-muted-foreground mt-1 flex items-center justify-center gap-1">
                       <Mic className="w-2.5 h-2.5" />

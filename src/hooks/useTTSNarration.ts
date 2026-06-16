@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isVoiceoverGloballyEnabled, subscribeAudioPrefs } from "@/lib/audioPreferences";
+import { getVoiceSettings } from "@/lib/narratorVoices";
+import { emitVoiceEnd, emitVoiceStart } from "@/lib/audioBus";
 
 /**
  * Hook to generate + play sequential ElevenLabs TTS narration on top of
@@ -41,7 +43,7 @@ export const useTTSNarration = () => {
         return;
       }
       const { data, error } = await supabase.functions.invoke("tts-narration", {
-        body: { texts, voiceId },
+        body: { texts, voiceId, voiceSettings: voiceId ? getVoiceSettings(voiceId) : undefined },
       });
       if (error || !data?.audio) {
         console.warn("TTS narration error", error);
@@ -81,7 +83,15 @@ export const useTTSNarration = () => {
     audio.muted = mutedRef.current;
     audio.loop = false;
     audioRef.current = audio;
-    audio.play().catch(() => undefined);
+    // Broadcast to the ambient-music hook so it can duck under the voice.
+    const handleEnd = () => emitVoiceEnd();
+    audio.addEventListener("ended", handleEnd, { once: true });
+    audio.addEventListener("pause", handleEnd, { once: true });
+    audio.addEventListener("error", handleEnd, { once: true });
+    emitVoiceStart();
+    audio.play().catch(() => {
+      emitVoiceEnd();
+    });
   }, []);
 
   const stop = useCallback(() => {
@@ -89,6 +99,7 @@ export const useTTSNarration = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+    emitVoiceEnd();
   }, []);
 
   // If the user globally disables voiceovers from the Profile page, stop

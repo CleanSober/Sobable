@@ -44,6 +44,18 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const texts: unknown = body?.texts;
     const voiceId: string = typeof body?.voiceId === "string" ? body.voiceId : DEFAULT_VOICE_ID;
+    const clientSettings = (body?.voiceSettings && typeof body.voiceSettings === "object")
+      ? body.voiceSettings as Record<string, unknown>
+      : null;
+    const voiceSettings = {
+      stability: typeof clientSettings?.stability === "number" ? clientSettings.stability : 0.5,
+      similarity_boost: typeof clientSettings?.similarity_boost === "number" ? clientSettings.similarity_boost : 0.82,
+      style: typeof clientSettings?.style === "number" ? clientSettings.style : 0.3,
+      use_speaker_boost: clientSettings?.use_speaker_boost !== false,
+      speed: typeof clientSettings?.speed === "number"
+        ? Math.min(Math.max(clientSettings.speed, 0.7), 1.2)
+        : 0.92,
+    };
 
     if (!Array.isArray(texts) || texts.length === 0) {
       return new Response(
@@ -87,13 +99,7 @@ serve(async (req) => {
           body: JSON.stringify({
             text,
             model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.45,
-              similarity_boost: 0.8,
-              style: 0.35,
-              use_speaker_boost: true,
-              speed: 0.92,
-            },
+            voice_settings: voiceSettings,
           }),
         },
       );
