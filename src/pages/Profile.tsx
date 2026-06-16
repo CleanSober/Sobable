@@ -32,6 +32,7 @@ import { useGamification, getLevelTitle } from "@/hooks/useGamification";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationSettings from "@/components/NotificationSettings";
+import { AudioSettings } from "@/components/AudioSettings";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { FeedbackRating } from "@/components/FeedbackRating";
 import { AdBanner } from "@/components/AdBanner";
