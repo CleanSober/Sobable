@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isVoiceoverGloballyEnabled, subscribeAudioPrefs } from "@/lib/audioPreferences";
 
 /**
  * Hook to generate + play sequential ElevenLabs TTS narration on top of
@@ -68,6 +69,7 @@ export const useTTSNarration = () => {
   }, [cleanup]);
 
   const playIndex = useCallback((index: number, volume = 1) => {
+    if (!isVoiceoverGloballyEnabled()) return; // global mute from Profile
     const url = urlsRef.current[index];
     if (!url) return;
     if (audioRef.current) {
@@ -88,6 +90,16 @@ export const useTTSNarration = () => {
       audioRef.current.currentTime = 0;
     }
   }, []);
+
+  // If the user globally disables voiceovers from the Profile page, stop
+  // any in-flight narration immediately.
+  useEffect(() => subscribeAudioPrefs(() => {
+    if (!isVoiceoverGloballyEnabled() && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }), []);
+
 
   const setMuted = useCallback((muted: boolean) => {
     mutedRef.current = muted;

@@ -4,6 +4,7 @@ import { AdMob, RewardAdPluginEvents } from "@capacitor-community/admob";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { admobConfig } from "@/lib/admobConfig";
+import { isMusicGloballyEnabled, subscribeAudioPrefs } from "@/lib/audioPreferences";
 
 export const useAmbientMusic = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -151,6 +152,7 @@ export const useAmbientMusic = () => {
   );
 
   const generateAndPlay = useCallback(async (type: string, duration: number = 30) => {
+    if (!isMusicGloballyEnabled()) return null; // global mute from Profile
     setIsLoading(true);
     try {
       await unlockNativeAudioPlayback();
@@ -250,11 +252,20 @@ export const useAmbientMusic = () => {
   }, [claimAdPass, createNativeAudioUrl, requestMusic, unlockNativeAudioPlayback, waitForAudioReady, watchRewardedAd]);
 
   const play = useCallback(() => {
+    if (!isMusicGloballyEnabled()) return; // global mute from Profile
     if (audioRef.current) {
       audioRef.current.play();
       setIsPlaying(true);
     }
   }, []);
+
+  // React to global music toggle changes — pause immediately if disabled.
+  useEffect(() => subscribeAudioPrefs(() => {
+    if (!isMusicGloballyEnabled() && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }), []);
 
   const pause = useCallback(() => {
     if (audioRef.current) {
