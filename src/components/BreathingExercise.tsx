@@ -9,6 +9,8 @@ import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
 
 type BreathingPhase = "inhale" | "hold" | "exhale" | "rest" | "inhale2";
 type BreathingTechnique = "478" | "box" | "physiological-sigh" | "resonant" | "diaphragmatic" | "calm";
@@ -125,6 +127,19 @@ export const BreathingExercise = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const VOICE_PREFS_KEY = "breathing_voice_prefs";
+  const [voicePrefs, setVoicePrefs] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(VOICE_PREFS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+  const currentVoiceId = selectedTechnique
+    ? voicePrefs[selectedTechnique.id] ?? DEFAULT_NARRATOR_VOICE_ID
+    : DEFAULT_NARRATOR_VOICE_ID;
 
   const { isLoading: musicLoading, isPlaying: musicPlaying, isMuted: musicMuted, generateAndPlay, pause: pauseMusic, play: playMusic, stop: stopMusic, setMuted: setMusicMuted } = useAmbientMusic();
   const { preload: preloadVoice, playIndex: playVoice, stop: stopVoice, cleanup: cleanupVoice, isLoading: voiceLoading, isReady: voiceReady, setMuted: setVoiceMuted } = useTTSNarration();
@@ -172,7 +187,8 @@ export const BreathingExercise = () => {
     if (voiceEnabled) {
       // Preload one short cue per phase (e.g. "Breathe in", "Hold", "Exhale")
       const cues = technique.phases.map((p) => phaseLabels[p.phase]);
-      preloadVoice(cues).then(() => {
+      const techVoiceId = voicePrefs[technique.id] ?? DEFAULT_NARRATOR_VOICE_ID;
+      preloadVoice(cues, techVoiceId).then(() => {
         // When preload finishes the user may already have advanced past phase 0.
         // Play whichever phase is current so narration stays aligned with the timer.
         if (isActiveRef.current) {
@@ -180,6 +196,27 @@ export const BreathingExercise = () => {
         }
       }).catch(() => undefined);
     }
+  };
+
+  const handleChangeVoice = (newVoiceId: string) => {
+    if (!selectedTechnique) return;
+    setVoicePrefs((prev) => {
+      const next = { ...prev, [selectedTechnique.id]: newVoiceId };
+      try {
+        localStorage.setItem(VOICE_PREFS_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+    if (!voiceEnabled) return;
+    stopVoice();
+    const cues = selectedTechnique.phases.map((p) => phaseLabels[p.phase]);
+    preloadVoice(cues, newVoiceId).then(() => {
+      if (isActiveRef.current) {
+        playVoice(currentPhaseIndexRef.current, 1);
+      }
+    }).catch(() => undefined);
   };
 
   useEffect(() => {
@@ -267,20 +304,33 @@ export const BreathingExercise = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-2 gap-2"
+              className="space-y-2"
             >
-              {techniques.map((tech) => (
-                <motion.button
-                  key={tech.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => startExercise(tech)}
-                  className={`p-3 rounded-xl bg-gradient-to-br ${tech.color} text-white text-left transition-shadow active:shadow-lg`}
-                >
-                  <Wind className="w-4 h-4 mb-1.5" />
-                  <h4 className="font-semibold text-xs">{tech.name}</h4>
-                  <p className="text-[10px] opacity-80 mt-0.5">{tech.description}</p>
-                </motion.button>
-              ))}
+              <p className="text-[10px] text-muted-foreground text-center">
+                Each technique remembers its own narrator voice. Change it from the player.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {techniques.map((tech) => {
+                  const savedId = voicePrefs[tech.id] ?? DEFAULT_NARRATOR_VOICE_ID;
+                  const savedVoice = NARRATOR_VOICES.find((v) => v.id === savedId);
+                  return (
+                    <motion.button
+                      key={tech.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => startExercise(tech)}
+                      className={`p-3 rounded-xl bg-gradient-to-br ${tech.color} text-white text-left transition-shadow active:shadow-lg`}
+                    >
+                      <Wind className="w-4 h-4 mb-1.5" />
+                      <h4 className="font-semibold text-xs">{tech.name}</h4>
+                      <p className="text-[10px] opacity-80 mt-0.5">{tech.description}</p>
+                      <p className="text-[9px] opacity-70 mt-1 flex items-center gap-1">
+                        <Mic className="w-2.5 h-2.5" />
+                        {savedVoice?.label ?? "Default"}
+                      </p>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -446,6 +496,26 @@ export const BreathingExercise = () => {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
+
+              {/* Per-technique narrator voice picker (remembered for this technique) */}
+              <div className="flex items-center gap-2">
+                <Mic className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <label className="text-[10px] text-muted-foreground shrink-0">Narrator</label>
+                <Select value={currentVoiceId} onValueChange={handleChangeVoice} disabled={voiceLoading}>
+                  <SelectTrigger className="h-8 text-xs flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NARRATOR_VOICES.map((v) => (
+                      <SelectItem key={v.id} value={v.id} className="text-xs">
+                        <span className="font-medium">{v.label}</span>
+                        <span className="text-muted-foreground ml-1.5">— {v.description}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
 
               {/* Technique info & source */}
               <div className="text-center">
