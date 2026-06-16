@@ -276,6 +276,23 @@ export const useAmbientMusic = () => {
     }
   }, []);
 
+  // Stop audio and release blob URL if the consumer unmounts (e.g. user
+  // navigates to another page). Without this, audio keeps playing in the
+  // background after leaving the screen that started it.
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    };
+  }, []);
+
   const setVolume = useCallback((volume: number) => {
     if (audioRef.current) {
       audioRef.current.volume = Math.max(0, Math.min(1, volume));
