@@ -379,6 +379,27 @@ export const GuidedMeditations = () => {
                     <VolumeX className="w-3.5 h-3.5" />
                   )}
                 </Button>
+                <Button
+                  onClick={() => {
+                    setVoiceEnabled((v) => {
+                      if (v) stopVoice();
+                      return !v;
+                    });
+                  }}
+                  variant={voiceEnabled ? "secondary" : "ghost"}
+                  disabled={voiceLoading}
+                  size="sm"
+                  className="text-xs h-8"
+                  aria-label={voiceEnabled ? "Mute voice narration" : "Enable voice narration"}
+                >
+                  {voiceLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : voiceEnabled ? (
+                    <Mic className="w-3.5 h-3.5" />
+                  ) : (
+                    <MicOff className="w-3.5 h-3.5" />
+                  )}
+                </Button>
                 <Button 
                   onClick={() => setShowInfo(!showInfo)} 
                   variant={showInfo ? "secondary" : "ghost"} 
