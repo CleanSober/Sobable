@@ -283,7 +283,7 @@ export const GuidedMeditations = () => {
 
     if (voiceEnabled) {
       const texts = meditation.steps.map((s) => s.instruction);
-      preloadVoice(texts).then(() => {
+      preloadVoice(texts, voiceId).then(() => {
         // Play whichever step the user is actually on when preload completes
         if (isPlayingRef.current) {
           playVoice(currentStepIndexRef.current, 1);
