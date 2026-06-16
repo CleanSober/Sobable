@@ -265,7 +265,8 @@ export const useAmbientMusic = () => {
 
       const audio = new Audio(audioUrl);
       audio.loop = true;
-      audio.volume = 0.4;
+      baseVolumeRef.current = 0.4;
+      audio.volume = 0; // fade in from silence
       audio.muted = mutedRef.current;
       audio.preload = "auto";
       (audio as any).playsInline = true;
@@ -277,7 +278,9 @@ export const useAmbientMusic = () => {
 
       await audio.play();
       setIsPlaying(true);
-      
+      // Smooth fade-in so the track doesn't slam in at full volume.
+      tweenVolume(isDuckedRef.current ? baseVolumeRef.current * 0.3 : baseVolumeRef.current, 1200);
+
       return audio;
     } catch (error) {
       console.error("Ambient music error:", error);
