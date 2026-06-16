@@ -114,6 +114,19 @@ export const CravingTimer = () => {
   useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
   useEffect(() => { messageIndexRef.current = messageIndex; }, [messageIndex]);
 
+  // Personalized lines — first name + current sober-day count baked in so
+  // the spoken coach feels like it actually knows the user.
+  const personalizedMessages = useState(() =>
+    personalizeMessages(profile?.display_name ?? null, profile?.sobriety_start_date ?? null),
+  )[0];
+  const messagesRef = useRef(personalizedMessages);
+  useEffect(() => {
+    messagesRef.current = personalizeMessages(
+      profile?.display_name ?? null,
+      profile?.sobriety_start_date ?? null,
+    );
+  }, [profile?.display_name, profile?.sobriety_start_date]);
+
   const progress = ((CRAVING_DURATION - timeRemaining) / CRAVING_DURATION) * 100;
 
   // Countdown
