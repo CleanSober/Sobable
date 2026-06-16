@@ -70,39 +70,56 @@ serve(async (req) => {
       throw new Error("ELEVENLABS_API_KEY is not configured");
     }
 
-    // Generate audio for each text in parallel
-    const results = await Promise.all(
-      cleaned.map(async (text) => {
-        const res = await fetch(
-          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
-          {
-            method: "POST",
-            headers: {
-              "xi-api-key": ELEVENLABS_API_KEY,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              text,
-              model_id: "eleven_multilingual_v2",
-              voice_settings: {
-                stability: 0.45,
-                similarity_boost: 0.8,
-                style: 0.35,
-                use_speaker_boost: true,
-                speed: 0.92,
-              },
-            }),
+    // Generate audio with limited concurrency to respect ElevenLabs plan limits
+    // (free/basic plans allow only 2 concurrent requests). Retry on 429.
+    const CONCURRENCY = 2;
+    const results: (string | null)[] = new Array(cleaned.length).fill(null);
+
+    const synthesize = async (text: string, attempt = 0): Promise<string | null> => {
+      const res = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
           },
-        );
-        if (!res.ok) {
-          const err = await res.text();
-          console.error("ElevenLabs TTS error:", res.status, err);
-          return null;
-        }
-        const buf = await res.arrayBuffer();
-        return base64Encode(buf);
-      }),
-    );
+          body: JSON.stringify({
+            text,
+            model_id: "eleven_multilingual_v2",
+            voice_settings: {
+              stability: 0.45,
+              similarity_boost: 0.8,
+              style: 0.35,
+              use_speaker_boost: true,
+              speed: 0.92,
+            },
+          }),
+        },
+      );
+      if (res.status === 429 && attempt < 3) {
+        const wait = 800 * (attempt + 1);
+        await new Promise((r) => setTimeout(r, wait));
+        return synthesize(text, attempt + 1);
+      }
+      if (!res.ok) {
+        const err = await res.text();
+        console.error("ElevenLabs TTS error:", res.status, err);
+        return null;
+      }
+      const buf = await res.arrayBuffer();
+      return base64Encode(buf);
+    };
+
+    let cursor = 0;
+    const workers = Array.from({ length: Math.min(CONCURRENCY, cleaned.length) }, async () => {
+      while (true) {
+        const i = cursor++;
+        if (i >= cleaned.length) return;
+        results[i] = await synthesize(cleaned[i]);
+      }
+    });
+    await Promise.all(workers);
 
     return new Response(
       JSON.stringify({ audio: results }),
