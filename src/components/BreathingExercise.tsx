@@ -139,7 +139,9 @@ export const BreathingExercise = () => {
     setCountdown(0);
     setCompleted(false);
     stopMusic();
-  }, [stopMusic]);
+    stopVoice();
+    cleanupVoice();
+  }, [stopMusic, stopVoice, cleanupVoice]);
 
   const startExercise = async (technique: Technique) => {
     setSelectedTechnique(technique);
@@ -153,11 +155,20 @@ export const BreathingExercise = () => {
     if ("vibrate" in navigator) {
       navigator.vibrate(50);
     }
-    
+
     if (musicEnabled) {
       generateAndPlay(technique.id, 60).catch(() => {
         // Silently continue without music if generation fails
       });
+    }
+
+    if (voiceEnabled) {
+      // Preload one short cue per phase (e.g. "Breathe in", "Hold", "Exhale")
+      const cues = technique.phases.map((p) => phaseLabels[p.phase]);
+      preloadVoice(cues).then(() => {
+        // Speak the first phase immediately once ready
+        playVoice(0, 1);
+      }).catch(() => undefined);
     }
   };
 
@@ -196,6 +207,9 @@ export const BreathingExercise = () => {
           if ("vibrate" in navigator) {
             navigator.vibrate(30);
           }
+          if (voiceEnabled && voiceReady) {
+            playVoice(nextPhaseIndex, 1);
+          }
           return selectedTechnique.phases[nextPhaseIndex].duration;
         }
         return prev - 1;
@@ -203,7 +217,7 @@ export const BreathingExercise = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isActive, selectedTechnique, currentPhaseIndex, currentCycle, completed]);
+  }, [isActive, selectedTechnique, currentPhaseIndex, currentCycle, completed, voiceEnabled, voiceReady, playVoice]);
 
   const phaseProgress = currentPhase
     ? ((currentPhase.duration - countdown) / currentPhase.duration) * 100
