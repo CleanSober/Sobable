@@ -11,6 +11,7 @@ import { Leaderboard } from "./Leaderboard";
 import { BookmarkedPosts } from "./BookmarkedPosts";
 import { CreateForumModal } from "./CreateForumModal";
 import { CommunityGuidelines, hasAcceptedGuidelines } from "./CommunityGuidelines";
+import { CommunityHubSkeleton } from "@/components/skeletons/HomeSkeleton";
 
 interface Forum {
   id: string;
@@ -35,7 +36,6 @@ export const CommunityHub = () => {
   if (loading) {
     // Layout-matching skeleton instead of a centered spinner — no shift when
     // the real tabs render.
-    const { CommunityHubSkeleton } = require("@/components/skeletons/HomeSkeleton");
     return <CommunityHubSkeleton />;
   }
 
