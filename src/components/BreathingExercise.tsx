@@ -11,6 +11,7 @@ import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
+import { claimExerciseSession, releaseExerciseSession, subscribeExerciseSession } from "@/lib/exerciseSession";
 
 type BreathingPhase = "inhale" | "hold" | "exhale" | "rest" | "inhale2";
 type BreathingTechnique = "478" | "box" | "physiological-sigh" | "resonant" | "diaphragmatic" | "calm";
@@ -155,6 +156,7 @@ export const BreathingExercise = () => {
   useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
 
   const resetExercise = useCallback(() => {
+    releaseExerciseSession("breathing");
     setIsActive(false);
     setCurrentPhaseIndex(0);
     setCurrentCycle(1);
@@ -165,7 +167,20 @@ export const BreathingExercise = () => {
     cleanupVoice();
   }, [stopMusic, stopVoice, cleanupVoice]);
 
+  // If a meditation starts elsewhere, stop the breathing exercise.
+  const fullStopRef = useRef<() => void>(() => undefined);
+  fullStopRef.current = () => {
+    resetExercise();
+    setSelectedTechnique(null);
+  };
+  useEffect(() => {
+    return subscribeExerciseSession((owner) => {
+      if (owner !== "breathing") fullStopRef.current();
+    });
+  }, []);
+
   const startExercise = async (technique: Technique) => {
+    claimExerciseSession("breathing");
     setSelectedTechnique(technique);
     setCurrentPhaseIndex(0);
     setCurrentCycle(1);

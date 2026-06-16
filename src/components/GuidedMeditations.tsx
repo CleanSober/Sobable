@@ -11,6 +11,7 @@ import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
+import { claimExerciseSession, releaseExerciseSession, subscribeExerciseSession } from "@/lib/exerciseSession";
 import { toast } from "sonner";
 
 interface MeditationStep {
@@ -283,7 +284,10 @@ export const GuidedMeditations = () => {
     toast.success("Meditation complete! Great job taking care of yourself 🧘");
   };
 
+  const handleEndRef = useRef<() => void>(() => undefined);
+
   const startMeditation = async (meditation: Meditation) => {
+    claimExerciseSession("meditation");
     setActiveMeditation(meditation);
     setTimeRemaining(meditation.duration);
     setIsPlaying(true);
@@ -317,6 +321,7 @@ export const GuidedMeditations = () => {
   };
 
   const handleEnd = () => {
+    releaseExerciseSession("meditation");
     setActiveMeditation(null);
     setIsPlaying(false);
     setCurrentStepIndex(0);
@@ -324,6 +329,14 @@ export const GuidedMeditations = () => {
     stopVoice();
     cleanupVoice();
   };
+  handleEndRef.current = handleEnd;
+
+  // If the other exercise (breathing) starts, stop this one.
+  useEffect(() => {
+    return subscribeExerciseSession((owner) => {
+      if (owner !== "meditation") handleEndRef.current();
+    });
+  }, []);
 
   const handleChangeVoice = (newVoiceId: string) => {
     if (!activeMeditation) return;
