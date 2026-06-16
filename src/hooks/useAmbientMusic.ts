@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { AdMob, RewardAdPluginEvents } from "@capacitor-community/admob";
 import { toast } from "sonner";
