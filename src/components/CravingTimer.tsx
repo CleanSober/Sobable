@@ -367,6 +367,59 @@ export const CravingTimer = () => {
                 </motion.div>
               </AnimatePresence>
 
+              <AnimatePresence>
+                {isActive && timeRemaining > 0 && timeRemaining <= RELAPSE_PROMPT_THRESHOLD && (
+                  <motion.div
+                    key="relapse-prevention"
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 space-y-2"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <ShieldAlert className="w-4 h-4 text-red-500" />
+                      <p className="text-xs font-semibold text-red-500">
+                        Final {timeRemaining}s — Relapse Prevention
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      You're almost through. If the urge is still strong, work these steps and reach out.
+                    </p>
+                    <ol className="text-[11px] space-y-1 list-decimal list-inside">
+                      {COPING_STEPS.map((step) => (
+                        <li key={step} className="leading-snug">{step}</li>
+                      ))}
+                    </ol>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {profile?.sponsor_phone && (
+                        <Button asChild size="sm" variant="secondary" className="text-[11px] h-7">
+                          <a href={`tel:${profile.sponsor_phone}`}>
+                            <Phone className="w-3 h-3 mr-1" /> Sponsor
+                          </a>
+                        </Button>
+                      )}
+                      {profile?.emergency_contact && (
+                        <Button asChild size="sm" variant="secondary" className="text-[11px] h-7">
+                          <a href={`tel:${profile.emergency_contact}`}>
+                            <Phone className="w-3 h-3 mr-1" /> Contact
+                          </a>
+                        </Button>
+                      )}
+                      <Button asChild size="sm" variant="outline" className="text-[11px] h-7">
+                        <a href="tel:1-800-662-4357">
+                          <Phone className="w-3 h-3 mr-1" /> SAMHSA Helpline
+                        </a>
+                      </Button>
+                      <Button asChild size="sm" variant="outline" className="text-[11px] h-7">
+                        <a href="sms:741741?body=HOME">
+                          <MessageSquare className="w-3 h-3 mr-1" /> Crisis Text
+                        </a>
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {voicePickerRow}
 
               <div className="flex gap-2 justify-center flex-wrap">
