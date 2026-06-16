@@ -900,14 +900,14 @@ const Index = () => {
               </motion.div>
             )}
           </AnimatePresence>
-          <AnimatePresence mode="wait" custom={swipeDirection}>
+          <AnimatePresence mode="wait" custom={swipeDirection} initial={false}>
             <motion.div
               key={activeTab}
               custom={swipeDirection}
-              initial={{ opacity: 0, x: swipeDirection * 60 }}
+              initial={{ opacity: 0, x: swipeDirection * 40 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: swipeDirection * -60 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              exit={{ opacity: 0, x: swipeDirection * -40 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             >
               {renderTabContent()}
             </motion.div>
