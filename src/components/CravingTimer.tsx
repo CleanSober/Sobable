@@ -1,14 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { Timer, Play, Pause, RotateCcw, Wind, Heart, Check, Volume2, VolumeX, Loader2, Mic, MicOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useTTSNarration } from "@/hooks/useTTSNarration";
+import { NARRATOR_VOICES, DEFAULT_NARRATOR_VOICE_ID } from "@/lib/narratorVoices";
+import { claimExerciseSession, releaseExerciseSession, subscribeExerciseSession } from "@/lib/exerciseSession";
 import { toast } from "sonner";
 
 const CRAVING_DURATION = 20 * 60; // 20 minutes in seconds
+const MESSAGE_INTERVAL_MS = 20_000; // 20s between motivational lines (so voice can finish)
 
 const breathingExercises = [
   { name: "Box Breathing", pattern: "Inhale 4s → Hold 4s → Exhale 4s → Hold 4s", duration: 16 },
@@ -16,16 +21,24 @@ const breathingExercises = [
   { name: "Deep Belly Breath", pattern: "Inhale 5s → Exhale 5s", duration: 10 },
 ];
 
+// Spoken motivational lines. Kept short so they read naturally as voiceover.
 const motivationalMessages = [
   "This craving will pass. You are stronger than it.",
+  "Breathe in slowly. Breathe out. You are safe right now.",
   "Every second you resist, you grow stronger.",
-  "Remember why you started this journey.",
-  "You've made it this far. Don't give up now.",
+  "Remember why you started this journey. That reason still matters.",
+  "You've made it this far. Don't give up on yourself now.",
   "This feeling is temporary. Your recovery is permanent.",
-  "You are rewriting your story right now.",
-  "Breathe. You've got this.",
-  "The urge to quit quitting is temporary.",
+  "You are rewriting your story with every breath.",
+  "The wave is rising. Ride it. It will fall again.",
+  "You don't have to fight the urge. Just watch it pass.",
+  "You are not your craving. You are the calm beneath it.",
+  "One more minute. You can always do one more minute.",
+  "You are choosing the life you actually want. Keep choosing.",
 ];
+
+const VOICE_KEY = "craving_timer_voice";
+const VOICE_ENABLED_KEY = "craving_timer_voice_enabled";
 
 export const CravingTimer = () => {
   const { addXP } = useGamification();
@@ -37,79 +50,170 @@ export const CravingTimer = () => {
     play: playMusic,
     stop: stopMusic,
   } = useAmbientMusic();
+  const {
+    preload: preloadVoice,
+    playIndex: playVoice,
+    stop: stopVoice,
+    cleanup: cleanupVoice,
+    isLoading: voiceLoading,
+    setMuted: setVoiceMuted,
+  } = useTTSNarration();
+
   const [isActive, setIsActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(CRAVING_DURATION);
-  const [currentExercise, setCurrentExercise] = useState(0);
+  const [currentExercise] = useState(0);
   const [breathPhase, setBreathPhase] = useState<"inhale" | "hold" | "exhale" | "rest">("inhale");
   const [messageIndex, setMessageIndex] = useState(0);
   const [cravingSurvived, setCravingSurvived] = useState(false);
 
+  const [voiceId, setVoiceId] = useState<string>(() => {
+    if (typeof window === "undefined") return DEFAULT_NARRATOR_VOICE_ID;
+    return localStorage.getItem(VOICE_KEY) ?? DEFAULT_NARRATOR_VOICE_ID;
+  });
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem(VOICE_ENABLED_KEY) !== "false";
+  });
+
+  const isActiveRef = useRef(false);
+  const messageIndexRef = useRef(0);
+  useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
+  useEffect(() => { messageIndexRef.current = messageIndex; }, [messageIndex]);
+
   const progress = ((CRAVING_DURATION - timeRemaining) / CRAVING_DURATION) * 100;
 
+  // Countdown
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
-
     if (isActive && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining((prev) => prev - 1);
-      }, 1000);
+      interval = setInterval(() => setTimeRemaining((prev) => prev - 1), 1000);
     } else if (timeRemaining === 0 && !cravingSurvived) {
       setCravingSurvived(true);
       setIsActive(false);
       stopMusic();
-      addXP(XP_REWARDS.trigger_log, 'craving_survived', 'Survived a 20-min craving timer');
+      stopVoice();
+      releaseExerciseSession("craving");
+      addXP(XP_REWARDS.trigger_log, "craving_survived", "Survived a 20-min craving timer");
       toast.success("You survived the craving! +XP 💪", { duration: 5000 });
     }
-
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, timeRemaining]);
 
+  // Rotate motivational messages and speak each one as it changes
   useEffect(() => {
-    if (isActive) {
-      const messageInterval = setInterval(() => {
-        setMessageIndex((prev) => (prev + 1) % motivationalMessages.length);
-      }, 15000);
+    if (!isActive) return;
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => {
+        const next = (prev + 1) % motivationalMessages.length;
+        if (voiceEnabled) playVoice(next, 1);
+        return next;
+      });
+    }, MESSAGE_INTERVAL_MS);
+    return () => clearInterval(messageInterval);
+  }, [isActive, voiceEnabled, playVoice]);
 
-      return () => clearInterval(messageInterval);
-    }
+  // Breathing phase cycle
+  useEffect(() => {
+    if (!isActive) return;
+    const breathInterval = setInterval(() => {
+      setBreathPhase((prev) => {
+        switch (prev) {
+          case "inhale": return "hold";
+          case "hold": return "exhale";
+          case "exhale": return "rest";
+          case "rest": return "inhale";
+        }
+      });
+    }, 4000);
+    return () => clearInterval(breathInterval);
   }, [isActive]);
 
+  // Mutual exclusion with meditation/breathing
+  const stopAllRef = useRef<() => void>(() => undefined);
+  stopAllRef.current = () => {
+    setIsActive(false);
+    setTimeRemaining(CRAVING_DURATION);
+    setCravingSurvived(false);
+    setMessageIndex(0);
+    stopMusic();
+    stopVoice();
+    cleanupVoice();
+  };
   useEffect(() => {
-    if (isActive) {
-      const breathInterval = setInterval(() => {
-        setBreathPhase((prev) => {
-          switch (prev) {
-            case "inhale": return "hold";
-            case "hold": return "exhale";
-            case "exhale": return "rest";
-            case "rest": return "inhale";
-          }
-        });
-      }, 4000);
-
-      return () => clearInterval(breathInterval);
-    }
-  }, [isActive]);
+    return subscribeExerciseSession((owner) => {
+      if (owner !== "craving") stopAllRef.current();
+    });
+  }, []);
 
   const startTimer = useCallback(() => {
+    claimExerciseSession("craving");
     setIsActive(true);
     setCravingSurvived(false);
-    generateAndPlay("urge-surfing", 120).catch(() => {
-      // Silently continue if music generation fails
-    });
-  }, [generateAndPlay]);
+    setMessageIndex(0);
+    generateAndPlay("urge-surfing", 120).catch(() => undefined);
+
+    if (voiceEnabled) {
+      preloadVoice(motivationalMessages, voiceId)
+        .then(() => {
+          if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
+        })
+        .catch(() => undefined);
+    }
+  }, [generateAndPlay, preloadVoice, playVoice, voiceEnabled, voiceId]);
 
   const pauseTimer = useCallback(() => {
     setIsActive(false);
     pauseMusic();
-  }, [pauseMusic]);
+    stopVoice();
+  }, [pauseMusic, stopVoice]);
+
+  const resumeTimer = useCallback(() => {
+    setIsActive(true);
+    playMusic();
+    if (voiceEnabled) playVoice(messageIndexRef.current, 1);
+  }, [playMusic, playVoice, voiceEnabled]);
 
   const resetTimer = useCallback(() => {
+    releaseExerciseSession("craving");
     setIsActive(false);
     setTimeRemaining(CRAVING_DURATION);
     setCravingSurvived(false);
+    setMessageIndex(0);
     stopMusic();
-  }, [stopMusic]);
+    stopVoice();
+    cleanupVoice();
+  }, [stopMusic, stopVoice, cleanupVoice]);
+
+  const handleChangeVoice = (newVoiceId: string) => {
+    setVoiceId(newVoiceId);
+    try { localStorage.setItem(VOICE_KEY, newVoiceId); } catch { /* ignore */ }
+    if (!isActiveRef.current || !voiceEnabled) return;
+    stopVoice();
+    preloadVoice(motivationalMessages, newVoiceId)
+      .then(() => {
+        if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
+      })
+      .catch(() => undefined);
+  };
+
+  const handleToggleVoice = () => {
+    setVoiceEnabled((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(VOICE_ENABLED_KEY, String(next)); } catch { /* ignore */ }
+      setVoiceMuted(!next);
+      if (!next) {
+        stopVoice();
+      } else if (isActiveRef.current) {
+        preloadVoice(motivationalMessages, voiceId)
+          .then(() => {
+            if (isActiveRef.current) playVoice(messageIndexRef.current, 1);
+          })
+          .catch(() => undefined);
+      }
+      return next;
+    });
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -135,6 +239,28 @@ export const CravingTimer = () => {
     }
   };
 
+  const currentVoice = NARRATOR_VOICES.find((v) => v.id === voiceId);
+
+  const voicePickerRow = (
+    <div className="flex items-center gap-2">
+      <Mic className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+      <label className="text-[10px] text-muted-foreground shrink-0">Coach voice</label>
+      <Select value={voiceId} onValueChange={handleChangeVoice} disabled={voiceLoading}>
+        <SelectTrigger className="h-8 text-xs flex-1">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {NARRATOR_VOICES.map((v) => (
+            <SelectItem key={v.id} value={v.id} className="text-xs">
+              <span className="font-medium">{v.label}</span>
+              <span className="text-muted-foreground ml-1.5">— {v.description}</span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   return (
     <Card className="gradient-card border-border/50">
       <CardHeader className="pb-2 pt-3 px-3">
@@ -143,7 +269,7 @@ export const CravingTimer = () => {
           Craving Timer
         </CardTitle>
         <p className="text-[10px] text-muted-foreground">
-          Cravings typically pass within 15-20 minutes
+          Cravings typically pass within 15–20 minutes. A motivational coach will guide you.
         </p>
       </CardHeader>
       <CardContent className="space-y-4 px-3 pb-3" data-craving-timer>
@@ -220,10 +346,18 @@ export const CravingTimer = () => {
                 >
                   <Heart className="w-4 h-4 mx-auto mb-1 text-primary" />
                   <p className="text-xs font-medium">{motivationalMessages[messageIndex]}</p>
+                  {voiceEnabled && (
+                    <p className="text-[9px] text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                      <Mic className="w-2.5 h-2.5" />
+                      Spoken by {currentVoice?.label ?? "Coach"}
+                    </p>
+                  )}
                 </motion.div>
               </AnimatePresence>
 
-              <div className="flex gap-2 justify-center">
+              {voicePickerRow}
+
+              <div className="flex gap-2 justify-center flex-wrap">
                 <Button onClick={pauseTimer} variant="outline" size="sm" className="text-xs h-8">
                   <Pause className="w-3.5 h-3.5 mr-1" />
                   Pause
@@ -244,6 +378,22 @@ export const CravingTimer = () => {
                     <VolumeX className="w-3.5 h-3.5" />
                   )}
                 </Button>
+                <Button
+                  onClick={handleToggleVoice}
+                  variant={voiceEnabled ? "secondary" : "ghost"}
+                  size="sm"
+                  className="text-xs h-8"
+                  disabled={voiceLoading}
+                  aria-label={voiceEnabled ? "Mute coach voice" : "Enable coach voice"}
+                >
+                  {voiceLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : voiceEnabled ? (
+                    <Mic className="w-3.5 h-3.5" />
+                  ) : (
+                    <MicOff className="w-3.5 h-3.5" />
+                  )}
+                </Button>
                 <Button onClick={resetTimer} variant="ghost" size="sm" className="text-xs h-8">
                   <RotateCcw className="w-3.5 h-3.5 mr-1" />
                   Reset
@@ -255,22 +405,34 @@ export const CravingTimer = () => {
               key="idle"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-4"
+              className="space-y-3 py-2"
             >
-              <p className="text-xs text-muted-foreground mb-4">
-                Feeling a craving? Start the timer and follow the breathing exercises.
+              <p className="text-xs text-muted-foreground text-center">
+                Feeling a craving? Start the timer. A motivational coach will breathe with you and remind you why you're doing this.
               </p>
-              <Button onClick={startTimer} size="sm" className="gradient-primary h-9 text-xs">
-                <Play className="w-4 h-4 mr-1.5" />
-                Start Urge Surfing
-              </Button>
 
-              {timeRemaining < CRAVING_DURATION && (
-                <Button onClick={resetTimer} variant="ghost" size="sm" className="mt-2 w-full text-xs h-8">
-                  <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-                  Reset Timer
-                </Button>
-              )}
+              {voicePickerRow}
+
+              <div className="text-center">
+                {timeRemaining < CRAVING_DURATION ? (
+                  <Button onClick={resumeTimer} size="sm" className="gradient-primary h-9 text-xs">
+                    <Play className="w-4 h-4 mr-1.5" />
+                    Resume
+                  </Button>
+                ) : (
+                  <Button onClick={startTimer} size="sm" className="gradient-primary h-9 text-xs">
+                    <Play className="w-4 h-4 mr-1.5" />
+                    Start Urge Surfing
+                  </Button>
+                )}
+
+                {timeRemaining < CRAVING_DURATION && (
+                  <Button onClick={resetTimer} variant="ghost" size="sm" className="mt-2 w-full text-xs h-8">
+                    <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                    Reset Timer
+                  </Button>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
