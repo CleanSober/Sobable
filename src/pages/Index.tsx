@@ -554,11 +554,8 @@ const Index = () => {
       case "home":
         return (
           <div className="space-y-4">
-            {/* Page title — matches Check-In/Triggers/Progress heading layout */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-1">
-              <h1 className="text-lg font-bold text-foreground mb-0.5">Home — Your Recovery Home</h1>
-              <p className="text-xs text-muted-foreground">Your daily snapshot — streak, milestones, and quick actions.</p>
-            </motion.div>
+            {/* SEO heading — visually hidden, kept for accessibility & search engines */}
+            <h1 className="sr-only">Home — Your Recovery Home. Your daily snapshot of streak, milestones, and quick actions.</h1>
             {/* Guest sign-up banner */}
             {isGuest && !user && (
               <motion.div
