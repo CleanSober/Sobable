@@ -284,7 +284,10 @@ export const GuidedMeditations = () => {
     toast.success("Meditation complete! Great job taking care of yourself 🧘");
   };
 
+  const handleEndRef = useRef<() => void>(() => undefined);
+
   const startMeditation = async (meditation: Meditation) => {
+    claimExerciseSession("meditation");
     setActiveMeditation(meditation);
     setTimeRemaining(meditation.duration);
     setIsPlaying(true);
