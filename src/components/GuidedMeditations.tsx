@@ -178,6 +178,8 @@ export const GuidedMeditations = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentStepIndexRef = useRef(0);
+  const isPlayingRef = useRef(false);
 
   const {
     isLoading: musicLoading,
@@ -198,6 +200,10 @@ export const GuidedMeditations = () => {
   } = useTTSNarration();
 
   const { addXP } = useGamification();
+
+  // Keep refs in sync with state so async callbacks see live values
+  useEffect(() => { currentStepIndexRef.current = currentStepIndex; }, [currentStepIndex]);
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
 
   // Main timer: decrements total time and manages step progression
   useEffect(() => {
@@ -220,7 +226,8 @@ export const GuidedMeditations = () => {
               const nextIdx = stepIdx + 1;
               if (nextIdx < activeMeditation.steps.length) {
                 setStepTimeRemaining(activeMeditation.steps[nextIdx].duration);
-                if (voiceEnabled && voiceReady) {
+                if (voiceEnabled) {
+                  // playVoice no-ops until the URL is preloaded — safe without a ready gate
                   playVoice(nextIdx, 1);
                 }
                 return nextIdx;
@@ -238,7 +245,7 @@ export const GuidedMeditations = () => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPlaying, timeRemaining, activeMeditation, stopMusic, voiceEnabled, voiceReady, playVoice]);
+  }, [isPlaying, timeRemaining, activeMeditation, stopMusic, voiceEnabled, playVoice]);
 
   const completeMeditation = async () => {
     if (!user) return;
@@ -271,7 +278,10 @@ export const GuidedMeditations = () => {
     if (voiceEnabled) {
       const texts = meditation.steps.map((s) => s.instruction);
       preloadVoice(texts).then(() => {
-        playVoice(0, 1);
+        // Play whichever step the user is actually on when preload completes
+        if (isPlayingRef.current) {
+          playVoice(currentStepIndexRef.current, 1);
+        }
       }).catch(() => undefined);
     }
   };
@@ -283,6 +293,8 @@ export const GuidedMeditations = () => {
       stopVoice();
     } else {
       playMusic();
+      // Re-cue current step on resume so user re-anchors
+      if (voiceEnabled) playVoice(currentStepIndexRef.current, 1);
     }
   };
 
