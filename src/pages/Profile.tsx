@@ -856,6 +856,15 @@ const Profile = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.32 }}
+            className="card-enhanced p-4"
+          >
+            <AudioSettings />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
             className="card-enhanced p-4"
           >
@@ -866,6 +875,7 @@ const Profile = () => {
             <p className="text-xs text-muted-foreground mb-4">Terms of Service, Privacy Policy, and disclaimers.</p>
             <TermsAndConditions />
           </motion.div>
+
 
           {/* Account Actions — full set for authed users; guest-friendly variant for guests */}
           <motion.div
