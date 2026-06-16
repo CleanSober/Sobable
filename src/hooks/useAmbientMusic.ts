@@ -375,10 +375,12 @@ export const useAmbientMusic = () => {
   }, []);
 
   const setVolume = useCallback((volume: number) => {
+    const v = Math.max(0, Math.min(1, volume));
+    baseVolumeRef.current = v;
     if (audioRef.current) {
-      audioRef.current.volume = Math.max(0, Math.min(1, volume));
+      tweenVolume(isDuckedRef.current ? v * 0.3 : v, 200);
     }
-  }, []);
+  }, [tweenVolume]);
 
   // Synchronous mute toggle — must be called directly from a user gesture.
   // Mutating audio.muted directly is allowed by browsers even mid-playback.
