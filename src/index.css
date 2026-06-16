@@ -241,6 +241,25 @@
     background-attachment: fixed;
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
+    letter-spacing: -0.005em;
+  }
+
+  /* Global editorial headings — Fraunces serif on every page */
+  h1, h2, h3, .h-display {
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    font-optical-sizing: auto;
+    line-height: 1.15;
+  }
+  h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.012em;
+  }
+  /* Numerals get tabular + lining figures app-wide so counters/stats align */
+  .tabular-nums, [class*="text-display"], .stat-num {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1, "ss01" 1;
   }
 
   /* Prevent pull-to-refresh on mobile */
