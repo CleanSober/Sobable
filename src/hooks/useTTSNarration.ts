@@ -77,6 +77,7 @@ export const useTTSNarration = () => {
     const audio = new Audio(url);
     audio.volume = volume;
     audio.muted = mutedRef.current;
+    audio.loop = true;
     audioRef.current = audio;
     audio.play().catch(() => undefined);
   }, []);
