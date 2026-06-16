@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon, Leaf, Eye, Volume2, VolumeX, Loader2, Info } from "lucide-react";
+import { Headphones, Play, Pause, RotateCcw, Wind, Heart, Brain, Moon, Leaf, Eye, Volume2, VolumeX, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useTTSNarration } from "@/hooks/useTTSNarration";
 import { useGamification, XP_REWARDS } from "@/hooks/useGamification";
 import { toast } from "sonner";
 
