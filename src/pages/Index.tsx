@@ -553,7 +553,7 @@ const Index = () => {
     switch (activeTab) {
       case "home":
         return (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* SEO heading — visually hidden, kept for accessibility & search engines */}
             <h1 className="sr-only">Home — Your Recovery Home. Your daily snapshot of streak, milestones, and quick actions.</h1>
             {/* Guest sign-up banner */}
@@ -578,17 +578,18 @@ const Index = () => {
             <motion.div 
               initial={{ opacity: 0, y: -10 }} 
               animate={{ opacity: 1, y: 0 }} 
-              className="glass-card rounded-2xl p-3 text-center"
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="glass-card rounded-2xl px-5 py-4 text-center"
             >
-              <p className="text-muted-foreground text-[10px] mb-0.5 font-medium">
+              <p className="text-eyebrow mb-1.5">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </p>
-              <p className="text-lg font-bold text-foreground">
+              <p className="text-headline text-[22px] leading-tight text-foreground">
                 {effectiveProfile?.display_name ? (
-                  <>Keep going, <span className="text-gradient">{effectiveProfile.display_name}</span>!</>
+                  <>Keep going, <span className="text-gradient italic">{effectiveProfile.display_name}</span></>
                 ) : (
-                  "You're doing amazing!"
-                )} 🌟
+                  "You're doing amazing"
+                )}
               </p>
             </motion.div>
             <SobrietyCounter daysSober={daysSober} startDate={userData.sobrietyStartDate} substances={userData.substances} />

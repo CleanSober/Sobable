@@ -412,25 +412,34 @@
    * Use these on hero surfaces instead of ad-hoc text-* classes.
    * ──────────────────────────────────────────────────────────────────── */
   .text-display {
-    font-size: 72px;
-    line-height: 0.95;
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-size: 84px;
+    line-height: 0.92;
     font-weight: 600;
-    letter-spacing: -0.035em;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1, "ss01" 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1, "ss01" 1;
+    font-optical-sizing: auto;
+  }
+  .text-headline {
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-optical-sizing: auto;
   }
   .text-eyebrow {
-    font-size: 11px;
+    font-size: 10.5px;
     line-height: 1.2;
-    font-weight: 500;
-    letter-spacing: 0.14em;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: hsl(var(--muted-foreground));
   }
   .text-body-lg {
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.55;
     font-weight: 400;
+    letter-spacing: -0.005em;
   }
 
   .gradient-primary {
