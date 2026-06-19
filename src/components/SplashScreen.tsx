@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import soberClubLogo from "@/assets/sober-club-logo.webp";
+import sobableIcon from "@/assets/sobable-icon-new.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -70,10 +70,10 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
               </div>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight mb-3 text-gradient">
+            <h1 className="text-4xl font-bold tracking-tight mb-3 text-white drop-shadow-lg">
               Sobable
             </h1>
-            <p className="text-muted-foreground text-base font-medium">
+            <p className="text-white/85 text-base font-medium">
               Rise. Recover. Renew.
             </p>
           </motion.div>
@@ -83,7 +83,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="w-2 h-2 rounded-full bg-primary/70"
+                className="w-2 h-2 rounded-full bg-white/80"
                 style={{
                   animation: "splash-dot 1.2s ease-in-out infinite",
                   animationDelay: `${i * 0.18}s`,
