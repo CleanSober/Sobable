@@ -62,13 +62,13 @@ const syncNativeThemePreference = async (theme: ThemePreference, isDark: boolean
 
 const applyThemePreference = (themeOverride?: ThemePreference | null) => {
   if (typeof window === "undefined") {
-    return { theme: "dark" as ThemePreference, isDark: true };
+    return { theme: "light" as ThemePreference, isDark: false };
   }
 
   const { theme, isDark } = resolveThemePreference(themeOverride);
   const root = document.documentElement;
 
-  root.classList.toggle("light", !isDark);
+  root.classList.toggle("dark", isDark);
   updateThemeColorMeta(isDark);
   void syncNativeThemePreference(theme, isDark);
 
