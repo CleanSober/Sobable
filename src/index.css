@@ -7,37 +7,37 @@
 
 @layer base {
   :root {
-    /* Premium Nature-Tech Dark Theme — inspired by app icon (sky blue → emerald) */
-    --background: 200 35% 6%;
+    /* Premium Nature-Tech Theme — inspired by app icon (sky blue → teal → emerald) */
+    --background: 195 45% 12%;
     --foreground: 180 30% 98%;
 
-    --card: 200 28% 9%;
+    --card: 198 40% 16%;
     --card-foreground: 180 30% 98%;
 
-    --popover: 200 28% 10%;
+    --popover: 198 40% 17%;
     --popover-foreground: 180 30% 98%;
 
     /* Emerald Primary — growth, bottom of icon gradient */
-    --primary: 152 72% 42%;
-    --primary-foreground: 200 35% 6%;
+    --primary: 152 72% 46%;
+    --primary-foreground: 200 45% 8%;
 
-    /* Deep slate secondary with blue undertone */
-    --secondary: 205 22% 14%;
-    --secondary-foreground: 180 30% 92%;
+    /* Teal secondary with blue undertone */
+    --secondary: 195 38% 22%;
+    --secondary-foreground: 180 30% 95%;
 
-    --muted: 205 20% 12%;
-    --muted-foreground: 200 15% 62%;
+    --muted: 198 32% 20%;
+    --muted-foreground: 195 20% 72%;
 
     /* Sky Blue Accent — top of icon gradient */
-    --accent: 198 88% 58%;
-    --accent-foreground: 200 35% 6%;
+    --accent: 198 88% 60%;
+    --accent-foreground: 200 45% 8%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 75% 58%;
     --destructive-foreground: 180 30% 98%;
 
-    --border: 200 18% 18%;
-    --input: 205 20% 14%;
-    --ring: 152 72% 42%;
+    --border: 195 30% 28%;
+    --input: 198 32% 22%;
+    --ring: 152 72% 46%;
 
     --radius: 1.25rem;
 
@@ -54,40 +54,41 @@
     --border-hairline: 1px solid hsl(var(--border) / 0.6);
 
     /* Premium tokens */
-    --success: 152 72% 42%;
-    --success-foreground: 200 35% 6%;
+    --success: 152 72% 46%;
+    --success-foreground: 200 45% 8%;
     
-    --warning: 38 95% 55%;
-    --warning-foreground: 200 35% 6%;
+    --warning: 38 95% 58%;
+    --warning-foreground: 200 45% 8%;
 
     /* Nature-tech gradients — sky blue → teal → emerald (matches icon) */
-    --gradient-primary: linear-gradient(180deg, hsl(198 88% 58%), hsl(168 78% 46%), hsl(152 72% 42%));
-    --gradient-premium: linear-gradient(135deg, hsl(168 78% 50%), hsl(152 72% 42%));
-    --gradient-glass: linear-gradient(135deg, hsl(205 22% 14% / 0.8), hsl(200 28% 10% / 0.6));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(168 78% 46% / 0.18), transparent 70%);
-    --gradient-mesh: radial-gradient(at 40% 20%, hsl(198 88% 58% / 0.08) 0px, transparent 50%),
-                     radial-gradient(at 80% 0%, hsl(168 78% 46% / 0.07) 0px, transparent 50%),
-                     radial-gradient(at 0% 80%, hsl(152 72% 42% / 0.08) 0px, transparent 50%);
+    --gradient-primary: linear-gradient(180deg, hsl(198 88% 60%), hsl(168 78% 48%), hsl(152 72% 46%));
+    --gradient-premium: linear-gradient(135deg, hsl(168 78% 52%), hsl(152 72% 46%));
+    --gradient-glass: linear-gradient(135deg, hsl(198 40% 20% / 0.8), hsl(195 45% 14% / 0.6));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(168 78% 50% / 0.28), transparent 70%);
+    --gradient-mesh: radial-gradient(at 30% 10%, hsl(198 88% 60% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 80% 0%, hsl(168 78% 50% / 0.18) 0px, transparent 50%),
+                     radial-gradient(at 10% 90%, hsl(152 72% 46% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 90% 80%, hsl(168 78% 48% / 0.14) 0px, transparent 50%);
 
     /* Premium shadows */
-    --shadow-glow: 0 0 60px hsl(168 78% 46% / 0.14);
-    --shadow-glow-accent: 0 0 40px hsl(198 88% 58% / 0.18);
-    --shadow-elevated: 0 20px 50px -12px hsl(200 35% 3% / 0.6), 0 0 0 1px hsl(200 18% 18% / 0.5);
-    --shadow-card: 0 8px 32px hsl(200 35% 3% / 0.4), 0 0 0 1px hsl(200 18% 20% / 0.3);
-    --shadow-float: 0 25px 60px -15px hsl(200 35% 3% / 0.5);
+    --shadow-glow: 0 0 60px hsl(168 78% 50% / 0.25);
+    --shadow-glow-accent: 0 0 40px hsl(198 88% 60% / 0.28);
+    --shadow-elevated: 0 20px 50px -12px hsl(195 60% 4% / 0.6), 0 0 0 1px hsl(195 30% 28% / 0.5);
+    --shadow-card: 0 8px 32px hsl(195 60% 4% / 0.4), 0 0 0 1px hsl(195 30% 28% / 0.3);
+    --shadow-float: 0 25px 60px -15px hsl(195 60% 4% / 0.5);
 
     /* Glass effect */
-    --glass-bg: hsl(200 28% 12% / 0.7);
-    --glass-border: hsl(200 18% 25% / 0.4);
+    --glass-bg: hsl(198 40% 18% / 0.7);
+    --glass-border: hsl(195 30% 32% / 0.5);
 
-    --sidebar-background: 200 35% 6%;
+    --sidebar-background: 195 45% 12%;
     --sidebar-foreground: 180 30% 98%;
-    --sidebar-primary: 152 72% 42%;
-    --sidebar-primary-foreground: 200 35% 6%;
-    --sidebar-accent: 205 22% 14%;
-    --sidebar-accent-foreground: 180 30% 92%;
-    --sidebar-border: 200 18% 18%;
-    --sidebar-ring: 152 72% 42%;
+    --sidebar-primary: 152 72% 46%;
+    --sidebar-primary-foreground: 200 45% 8%;
+    --sidebar-accent: 195 38% 22%;
+    --sidebar-accent-foreground: 180 30% 95%;
+    --sidebar-border: 195 30% 28%;
+    --sidebar-ring: 152 72% 46%;
 
   }
 
