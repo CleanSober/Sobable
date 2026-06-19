@@ -19,13 +19,13 @@ const resolveThemePreference = (themeOverride?: ThemePreference | null) => {
     (typeof window !== "undefined"
       ? (localStorage.getItem("theme") as ThemePreference | null)
       : null) ??
-    "dark";
+    "light";
 
   const isDark =
     theme === "system"
       ? typeof window !== "undefined" &&
         window.matchMedia("(prefers-color-scheme: dark)").matches
-      : theme !== "light";
+      : theme === "dark";
 
   return { theme, isDark };
 };
@@ -62,13 +62,13 @@ const syncNativeThemePreference = async (theme: ThemePreference, isDark: boolean
 
 const applyThemePreference = (themeOverride?: ThemePreference | null) => {
   if (typeof window === "undefined") {
-    return { theme: "dark" as ThemePreference, isDark: true };
+    return { theme: "light" as ThemePreference, isDark: false };
   }
 
   const { theme, isDark } = resolveThemePreference(themeOverride);
   const root = document.documentElement;
 
-  root.classList.toggle("light", !isDark);
+  root.classList.toggle("dark", isDark);
   updateThemeColorMeta(isDark);
   void syncNativeThemePreference(theme, isDark);
 
