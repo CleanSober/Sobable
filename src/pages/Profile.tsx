@@ -77,7 +77,7 @@ const Profile = () => {
   const [personalReminder, setPersonalReminder] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return !document.documentElement.classList.contains("light");
+    return document.documentElement.classList.contains("dark");
   });
   const [isColorblind, setIsColorblind] = useState(() => {
     return document.documentElement.classList.contains("colorblind");
