@@ -145,7 +145,7 @@ export const BottomTabs = memo(({ activeTab, onTabChange }: BottomTabsProps) => 
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className={`absolute inset-0 blur-lg ${isTabPremium ? "bg-accent/30" : "bg-primary/30"}`}
+                      className={`absolute inset-0 blur-lg ${isTabPremium ? "bg-amber-400/30" : "bg-primary/30"}`}
                     />
                   )}
                 </div>
@@ -154,7 +154,7 @@ export const BottomTabs = memo(({ activeTab, onTabChange }: BottomTabsProps) => 
                 <span
                   className={`text-[10px] mt-1 font-medium relative z-10 transition-all duration-300 leading-tight ${
                     isTabPremium
-                      ? isActive ? "text-accent" : "text-accent/60"
+                      ? isActive ? "text-amber-500" : "text-amber-500/60"
                       : isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
