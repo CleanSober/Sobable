@@ -190,28 +190,62 @@ export const useAmbientMusic = () => {
 
   const generateAndPlay = useCallback(async (type: string, duration: number = 30) => {
     if (!isMusicGloballyEnabled()) return null; // global mute from Profile
+
+    // CRITICAL (iOS): Create the audio element and call play() SYNCHRONOUSLY,
+    // inside the user gesture that triggered this function. Without this, by
+    // the time the edge function fetch resolves the gesture has expired and
+    // iOS WKWebView silently rejects play(). We start with a tiny silent
+    // source, then swap to the real track once the URL is ready.
+    const SILENT_WAV =
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+
+    // Clean up any previous audio first.
+    if (audioRef.current) {
+      try { audioRef.current.pause(); } catch { /* ignore */ }
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+
+    const audio = new Audio();
+    audio.loop = true;
+    audio.preload = "auto";
+    (audio as any).playsInline = true;
+    audio.crossOrigin = "anonymous";
+    audio.muted = mutedRef.current;
+    baseVolumeRef.current = 0.4;
+    audio.volume = 0;
+    audio.src = SILENT_WAV;
+    audioRef.current = audio;
+
+    // Kick play() synchronously — this is what "unlocks" THIS element on iOS.
+    const primingPlay = audio.play().catch((err) => {
+      console.warn("Ambient music priming play failed:", err);
+    });
+
     setIsLoading(true);
     try {
-      await unlockNativeAudioPlayback();
-
       // Get the user's session token for authentication
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         toast.error("Please sign in to use ambient music");
+        try { audio.pause(); } catch { /* ignore */ }
+        if (audioRef.current === audio) audioRef.current = null;
         return null;
       }
 
       let response = await requestMusic(type, duration, session.access_token);
       let payload: any = await response.clone().json().catch(() => ({}));
 
-      // Locked: edge function returns 200 with { locked: true, code: "PREMIUM_REQUIRED" }
-      // (legacy 403 also handled defensively)
       const isLocked =
         payload?.code === "PREMIUM_REQUIRED" || payload?.locked === true;
 
       if (isLocked) {
         if (!Capacitor.isNativePlatform()) {
-          // Silent on web: ambient music is a Sober Club perk; exercise still runs without audio.
+          try { audio.pause(); } catch { /* ignore */ }
+          if (audioRef.current === audio) audioRef.current = null;
           return null;
         }
 
@@ -219,11 +253,15 @@ export const useAmbientMusic = () => {
         const earned = await watchRewardedAd();
         if (!earned) {
           toast.error("Ad wasn't completed. Ambient music stays locked.");
+          try { audio.pause(); } catch { /* ignore */ }
+          if (audioRef.current === audio) audioRef.current = null;
           return null;
         }
         const granted = await claimAdPass("rewarded_ad");
         if (!granted) {
           toast.error("Couldn't activate your unlock. Try again in a moment.");
+          try { audio.pause(); } catch { /* ignore */ }
+          if (audioRef.current === audio) audioRef.current = null;
           return null;
         }
         toast.success("Unlocked! Loading ambient music…");
@@ -237,20 +275,7 @@ export const useAmbientMusic = () => {
 
       const data = payload;
 
-      // Clean up previous audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-        audioUrlRef.current = null;
-      }
-
-      // Edge function returns one of:
-      //  • { audioContent: base64 }  — fresh ElevenLabs generation
-      //  • { trackUrl: signedUrl, fallback: true } — curated royalty-free
-      //    track from the private `ambient-music` storage bucket.
+      // Resolve the real audio URL.
       let audioUrl: string;
       if (data?.trackUrl) {
         audioUrl = data.trackUrl as string;
@@ -263,33 +288,40 @@ export const useAmbientMusic = () => {
         throw new Error("No audio in response");
       }
 
-      const audio = new Audio(audioUrl);
-      audio.loop = true;
-      baseVolumeRef.current = 0.4;
-      audio.volume = 0; // fade in from silence
-      audio.muted = mutedRef.current;
-      audio.preload = "auto";
-      (audio as any).playsInline = true;
-      audioRef.current = audio;
+      // Wait for the priming play to settle so iOS keeps the element unlocked.
+      await primingPlay;
 
-      if (Capacitor.isNativePlatform()) {
-        await waitForAudioReady(audio);
+      // If the user navigated away while loading, this audio was nulled out.
+      if (audioRef.current !== audio) {
+        try { audio.pause(); } catch { /* ignore */ }
+        return null;
       }
 
-      await audio.play();
+      // Swap to the real track on the SAME element — keeps the iOS unlock.
+      audio.src = audioUrl;
+      audio.load();
+      await audio.play().catch(async (err) => {
+        console.warn("Ambient music play after src swap failed, retrying:", err);
+        // One retry — sometimes the first play() after src change throws on iOS.
+        await new Promise((r) => setTimeout(r, 100));
+        await audio.play();
+      });
+
       setIsPlaying(true);
-      // Smooth fade-in so the track doesn't slam in at full volume.
       tweenVolume(isDuckedRef.current ? baseVolumeRef.current * 0.3 : baseVolumeRef.current, 1200);
 
       return audio;
     } catch (error) {
       console.error("Ambient music error:", error);
+      try { audio.pause(); } catch { /* ignore */ }
+      if (audioRef.current === audio) audioRef.current = null;
       toast.error("Couldn't load ambient music. Continuing without music.");
       return null;
     } finally {
       setIsLoading(false);
     }
-  }, [claimAdPass, createNativeAudioUrl, requestMusic, unlockNativeAudioPlayback, waitForAudioReady, watchRewardedAd]);
+  }, [claimAdPass, createNativeAudioUrl, requestMusic, tweenVolume, watchRewardedAd]);
+
 
   const play = useCallback(() => {
     if (!isMusicGloballyEnabled()) return; // global mute from Profile
