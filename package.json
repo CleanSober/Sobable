@@ -9,6 +9,14 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "setup:web": "npm install && npm run build",
+    "setup:native": "npm install && npm run build && npx cap add ios && npx cap add android && npx cap sync",
+    "setup:ios:archive": "sh scripts/setup-ios-archive.sh",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:sync:ios": "npm run build && npx cap sync ios",
+    "cap:sync:android": "npm run build && npx cap sync android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
     "sync:admob": "node scripts/sync-admob-config.mjs"
   },
   "dependencies": {

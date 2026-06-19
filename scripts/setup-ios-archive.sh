@@ -63,11 +63,23 @@ fi
 log "Using Node: $(node --version)"
 log "Using npm: $(npm --version)"
 
-log "Installing dependencies"
-npm install
+if [ -d "node_modules" ]; then
+  log "Dependencies already installed"
+else
+  log "Installing dependencies"
+  if [ -f "package-lock.json" ]; then
+    npm ci --cache /tmp/sobable-npm-cache --no-audit --no-fund
+  else
+    npm install --cache /tmp/sobable-npm-cache --no-audit --no-fund
+  fi
+fi
 
-log "Building web bundle"
-npm run build
+if [ -f "dist/index.html" ]; then
+  log "Web bundle already exists"
+else
+  log "Building web bundle"
+  npm run build
+fi
 
 if [ ! -d "ios" ]; then
   log "Creating Capacitor iOS project"
@@ -87,8 +99,11 @@ fi
 if [ -d "ios/App/App.xcworkspace" ]; then
   log "Opening iOS workspace"
   open "ios/App/App.xcworkspace"
+elif [ -d "ios/App/App.xcodeproj" ]; then
+  log "Opening iOS project"
+  open "ios/App/App.xcodeproj"
 else
-  log "iOS workspace is ready at ios/App/App.xcworkspace"
+  log "iOS project should be ready under ios/App"
 fi
 
 cat <<'NEXT_STEPS'
