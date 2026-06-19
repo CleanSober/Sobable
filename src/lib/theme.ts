@@ -19,13 +19,13 @@ const resolveThemePreference = (themeOverride?: ThemePreference | null) => {
     (typeof window !== "undefined"
       ? (localStorage.getItem("theme") as ThemePreference | null)
       : null) ??
-    "dark";
+    "light";
 
   const isDark =
     theme === "system"
       ? typeof window !== "undefined" &&
         window.matchMedia("(prefers-color-scheme: dark)").matches
-      : theme !== "light";
+      : theme === "dark";
 
   return { theme, isDark };
 };
