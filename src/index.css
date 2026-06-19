@@ -7,92 +7,7 @@
 
 @layer base {
   :root {
-    /* Premium Nature-Tech Theme — inspired by app icon (sky blue → teal → emerald) */
-    --background: 195 45% 12%;
-    --foreground: 180 30% 98%;
-
-    --card: 198 40% 16%;
-    --card-foreground: 180 30% 98%;
-
-    --popover: 198 40% 17%;
-    --popover-foreground: 180 30% 98%;
-
-    /* Emerald Primary — growth, bottom of icon gradient */
-    --primary: 152 72% 46%;
-    --primary-foreground: 200 45% 8%;
-
-    /* Teal secondary with blue undertone */
-    --secondary: 195 38% 22%;
-    --secondary-foreground: 180 30% 95%;
-
-    --muted: 198 32% 20%;
-    --muted-foreground: 195 20% 72%;
-
-    /* Sky Blue Accent — top of icon gradient */
-    --accent: 198 88% 60%;
-    --accent-foreground: 200 45% 8%;
-
-    --destructive: 0 75% 58%;
-    --destructive-foreground: 180 30% 98%;
-
-    --border: 195 30% 28%;
-    --input: 198 32% 22%;
-    --ring: 152 72% 46%;
-
-    --radius: 1.25rem;
-
-    /* Shape scale — unified corner radii */
-    --radius-xs: 0.5rem;     /* 8px  — chips, tiny tags */
-    --radius-sm: 0.75rem;    /* 12px — inputs, small buttons */
-    --radius-md: 1rem;       /* 16px — buttons, small cards */
-    --radius-lg: 1.25rem;    /* 20px — cards */
-    --radius-xl: 1.75rem;    /* 28px — hero cards, sheets */
-    --radius-2xl: 2.25rem;   /* 36px — hero medallions */
-    --radius-pill: 999px;    /* fully rounded */
-
-    /* Hairline border */
-    --border-hairline: 1px solid hsl(var(--border) / 0.6);
-
-    /* Premium tokens */
-    --success: 152 72% 46%;
-    --success-foreground: 200 45% 8%;
-    
-    --warning: 38 95% 58%;
-    --warning-foreground: 200 45% 8%;
-
-    /* Nature-tech gradients — sky blue → teal → emerald (matches icon) */
-    --gradient-primary: linear-gradient(180deg, hsl(198 88% 60%), hsl(168 78% 48%), hsl(152 72% 46%));
-    --gradient-premium: linear-gradient(135deg, hsl(168 78% 52%), hsl(152 72% 46%));
-    --gradient-glass: linear-gradient(135deg, hsl(198 40% 20% / 0.8), hsl(195 45% 14% / 0.6));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(168 78% 50% / 0.28), transparent 70%);
-    --gradient-mesh: radial-gradient(at 30% 10%, hsl(198 88% 60% / 0.22) 0px, transparent 55%),
-                     radial-gradient(at 80% 0%, hsl(168 78% 50% / 0.18) 0px, transparent 50%),
-                     radial-gradient(at 10% 90%, hsl(152 72% 46% / 0.22) 0px, transparent 55%),
-                     radial-gradient(at 90% 80%, hsl(168 78% 48% / 0.14) 0px, transparent 50%);
-
-    /* Premium shadows */
-    --shadow-glow: 0 0 60px hsl(168 78% 50% / 0.25);
-    --shadow-glow-accent: 0 0 40px hsl(198 88% 60% / 0.28);
-    --shadow-elevated: 0 20px 50px -12px hsl(195 60% 4% / 0.6), 0 0 0 1px hsl(195 30% 28% / 0.5);
-    --shadow-card: 0 8px 32px hsl(195 60% 4% / 0.4), 0 0 0 1px hsl(195 30% 28% / 0.3);
-    --shadow-float: 0 25px 60px -15px hsl(195 60% 4% / 0.5);
-
-    /* Glass effect */
-    --glass-bg: hsl(198 40% 18% / 0.7);
-    --glass-border: hsl(195 30% 32% / 0.5);
-
-    --sidebar-background: 195 45% 12%;
-    --sidebar-foreground: 180 30% 98%;
-    --sidebar-primary: 152 72% 46%;
-    --sidebar-primary-foreground: 200 45% 8%;
-    --sidebar-accent: 195 38% 22%;
-    --sidebar-accent-foreground: 180 30% 95%;
-    --sidebar-border: 195 30% 28%;
-    --sidebar-ring: 152 72% 46%;
-
-  }
-
-  .light {
+    /* Light Nature-Tech Theme — white base with sky blue, teal, emerald accents */
     --background: 210 20% 97%;
     --foreground: 225 25% 12%;
 
@@ -121,13 +36,25 @@
     --input: 200 22% 88%;
     --ring: 152 68% 32%;
 
+    --radius: 1.25rem;
+
+    /* Shape scale */
+    --radius-xs: 0.5rem;
+    --radius-sm: 0.75rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 1.75rem;
+    --radius-2xl: 2.25rem;
+    --radius-pill: 999px;
+
+    --border-hairline: 1px solid hsl(var(--border) / 0.6);
+
     --success: 152 68% 32%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 90% 48%;
     --warning-foreground: 0 0% 100%;
 
-    /* Light theme gradients — icon-inspired */
     --gradient-primary: linear-gradient(180deg, hsl(198 82% 48%), hsl(168 72% 38%), hsl(152 68% 32%));
     --gradient-premium: linear-gradient(135deg, hsl(168 72% 40%), hsl(152 68% 32%));
     --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.9), hsl(195 30% 97% / 0.8));
@@ -136,14 +63,12 @@
                      radial-gradient(at 80% 0%, hsl(168 72% 38% / 0.04) 0px, transparent 50%),
                      radial-gradient(at 0% 80%, hsl(152 68% 32% / 0.04) 0px, transparent 50%);
 
-    /* Light shadows */
     --shadow-glow: 0 0 40px hsl(168 72% 38% / 0.1);
     --shadow-glow-accent: 0 0 30px hsl(198 82% 48% / 0.12);
     --shadow-elevated: 0 10px 30px -8px hsl(200 30% 20% / 0.1), 0 0 0 1px hsl(200 22% 86% / 0.6);
     --shadow-card: 0 4px 16px hsl(200 30% 20% / 0.06), 0 0 0 1px hsl(200 22% 90% / 0.5);
     --shadow-float: 0 15px 40px -10px hsl(200 30% 20% / 0.12);
 
-    /* Glass effect */
     --glass-bg: hsl(0 0% 100% / 0.8);
     --glass-border: hsl(200 22% 86% / 0.6);
 
@@ -155,32 +80,74 @@
     --sidebar-accent-foreground: 200 30% 15%;
     --sidebar-border: 200 22% 86%;
     --sidebar-ring: 152 68% 32%;
-
   }
 
-  /* Colorblind-friendly overrides — dark */
-  .colorblind {
-    --primary: 210 80% 50%;
-    --primary-foreground: 210 40% 98%;
-    --accent: 45 100% 50%;
-    --accent-foreground: 225 30% 6%;
-    --success: 210 80% 50%;
-    --success-foreground: 210 40% 98%;
-    --destructive: 30 100% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --warning: 60 100% 45%;
-    --warning-foreground: 225 30% 6%;
-    --ring: 210 80% 50%;
+  .dark {
+    /* Dark Nature-Tech Theme — inspired by app icon (sky blue → teal → emerald) */
+    --background: 195 45% 12%;
+    --foreground: 180 30% 98%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(210 80% 50%), hsl(210 80% 42%));
-    --gradient-premium: linear-gradient(135deg, hsl(45 100% 50%), hsl(45 95% 44%));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(210 80% 50% / 0.15), transparent 70%);
-    --shadow-glow: 0 0 60px hsl(210 80% 50% / 0.12);
-    --shadow-glow-accent: 0 0 40px hsl(45 100% 50% / 0.15);
+    --card: 198 40% 16%;
+    --card-foreground: 180 30% 98%;
+
+    --popover: 198 40% 17%;
+    --popover-foreground: 180 30% 98%;
+
+    --primary: 152 72% 46%;
+    --primary-foreground: 200 45% 8%;
+
+    --secondary: 195 38% 22%;
+    --secondary-foreground: 180 30% 95%;
+
+    --muted: 198 32% 20%;
+    --muted-foreground: 195 20% 72%;
+
+    --accent: 198 88% 60%;
+    --accent-foreground: 200 45% 8%;
+
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 180 30% 98%;
+
+    --border: 195 30% 28%;
+    --input: 198 32% 22%;
+    --ring: 152 72% 46%;
+
+    --success: 152 72% 46%;
+    --success-foreground: 200 45% 8%;
+
+    --warning: 38 95% 58%;
+    --warning-foreground: 200 45% 8%;
+
+    --gradient-primary: linear-gradient(180deg, hsl(198 88% 60%), hsl(168 78% 48%), hsl(152 72% 46%));
+    --gradient-premium: linear-gradient(135deg, hsl(168 78% 52%), hsl(152 72% 46%));
+    --gradient-glass: linear-gradient(135deg, hsl(198 40% 20% / 0.8), hsl(195 45% 14% / 0.6));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(168 78% 50% / 0.28), transparent 70%);
+    --gradient-mesh: radial-gradient(at 30% 10%, hsl(198 88% 60% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 80% 0%, hsl(168 78% 50% / 0.18) 0px, transparent 50%),
+                     radial-gradient(at 10% 90%, hsl(152 72% 46% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 90% 80%, hsl(168 78% 48% / 0.14) 0px, transparent 50%);
+
+    --shadow-glow: 0 0 60px hsl(168 78% 50% / 0.25);
+    --shadow-glow-accent: 0 0 40px hsl(198 88% 60% / 0.28);
+    --shadow-elevated: 0 20px 50px -12px hsl(195 60% 4% / 0.6), 0 0 0 1px hsl(195 30% 28% / 0.5);
+    --shadow-card: 0 8px 32px hsl(195 60% 4% / 0.4), 0 0 0 1px hsl(195 30% 28% / 0.3);
+    --shadow-float: 0 25px 60px -15px hsl(195 60% 4% / 0.5);
+
+    --glass-bg: hsl(198 40% 18% / 0.7);
+    --glass-border: hsl(195 30% 32% / 0.5);
+
+    --sidebar-background: 195 45% 12%;
+    --sidebar-foreground: 180 30% 98%;
+    --sidebar-primary: 152 72% 46%;
+    --sidebar-primary-foreground: 200 45% 8%;
+    --sidebar-accent: 195 38% 22%;
+    --sidebar-accent-foreground: 180 30% 95%;
+    --sidebar-border: 195 30% 28%;
+    --sidebar-ring: 152 72% 46%;
   }
 
   /* Colorblind-friendly overrides — light */
-  .colorblind.light {
+  .colorblind {
     --primary: 210 75% 40%;
     --primary-foreground: 0 0% 100%;
     --accent: 45 90% 44%;
@@ -198,6 +165,27 @@
     --gradient-glow: radial-gradient(ellipse at center, hsl(210 75% 40% / 0.08), transparent 70%);
     --shadow-glow: 0 0 40px hsl(210 75% 40% / 0.08);
     --shadow-glow-accent: 0 0 30px hsl(45 90% 44% / 0.1);
+  }
+
+  /* Colorblind-friendly overrides — dark */
+  .dark.colorblind {
+    --primary: 210 80% 50%;
+    --primary-foreground: 210 40% 98%;
+    --accent: 45 100% 50%;
+    --accent-foreground: 225 30% 6%;
+    --success: 210 80% 50%;
+    --success-foreground: 210 40% 98%;
+    --destructive: 30 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --warning: 60 100% 45%;
+    --warning-foreground: 225 30% 6%;
+    --ring: 210 80% 50%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(210 80% 50%), hsl(210 80% 42%));
+    --gradient-premium: linear-gradient(135deg, hsl(45 100% 50%), hsl(45 95% 44%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(210 80% 50% / 0.15), transparent 70%);
+    --shadow-glow: 0 0 60px hsl(210 80% 50% / 0.12);
+    --shadow-glow-accent: 0 0 40px hsl(45 100% 50% / 0.15);
   }
 
 
