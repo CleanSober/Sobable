@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import soberClubLogo from "@/assets/sober-club-logo.webp";
+import sobableIcon from "@/assets/sobable-icon-new.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -15,7 +15,6 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
     return () => clearTimeout(timer);
   }, [minDisplayTime]);
 
-  // Fallback in case exit animation doesn't fire
   useEffect(() => {
     if (!isVisible) {
       const fallback = setTimeout(onComplete, 600);
@@ -30,18 +29,21 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
+          style={{
+            background:
+              "linear-gradient(180deg, hsl(198 88% 58%) 0%, hsl(168 78% 46%) 50%, hsl(152 72% 42%) 100%)",
+          }}
         >
-          {/* Static gradient backdrop — no animation, no blur */}
+          {/* Soft glow wash */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse at 30% 35%, hsl(var(--primary) / 0.22), transparent 60%), radial-gradient(ellipse at 75% 70%, hsl(var(--accent) / 0.18), transparent 60%)",
+                "radial-gradient(ellipse at 50% 40%, hsl(0 0% 100% / 0.18), transparent 65%)",
             }}
           />
 
-          {/* Logo + text — single fade/scale */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -51,17 +53,17 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
           >
             <div className="relative mb-8">
               <div
-                className="absolute inset-0 rounded-3xl pointer-events-none"
+                className="absolute inset-0 rounded-[2rem] pointer-events-none"
                 style={{
                   background:
-                    "linear-gradient(135deg, hsl(var(--primary) / 0.35), hsl(var(--accent) / 0.28))",
-                  transform: "scale(1.2)",
-                  filter: "blur(20px)",
+                    "radial-gradient(ellipse at center, hsl(0 0% 100% / 0.45), transparent 70%)",
+                  transform: "scale(1.45)",
+                  filter: "blur(30px)",
                 }}
               />
-              <div className="relative w-32 h-32 rounded-3xl overflow-hidden shadow-elevated tech-border">
+              <div className="relative w-36 h-36 rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-white/30">
                 <img
-                  src={soberClubLogo}
+                  src={sobableIcon}
                   alt="Sobable"
                   className="w-full h-full object-cover"
                   decoding="sync"
@@ -70,20 +72,19 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
               </div>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight mb-3 text-gradient">
+            <h1 className="text-4xl font-bold tracking-tight mb-3 text-white drop-shadow-lg">
               Sobable
             </h1>
-            <p className="text-muted-foreground text-base font-medium">
+            <p className="text-white/85 text-base font-medium">
               Rise. Recover. Renew.
             </p>
           </motion.div>
 
-          {/* Lightweight loading dots — CSS animation, GPU-cheap */}
           <div className="absolute bottom-24 flex gap-2">
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="w-2 h-2 rounded-full bg-primary/70"
+                className="w-2 h-2 rounded-full bg-white/80"
                 style={{
                   animation: "splash-dot 1.2s ease-in-out infinite",
                   animationDelay: `${i * 0.18}s`,
@@ -94,7 +95,7 @@ export const SplashScreen = ({ onComplete, minDisplayTime = 1600 }: SplashScreen
 
           <style>{`
             @keyframes splash-dot {
-              0%, 100% { opacity: 0.35; transform: scale(1); }
+              0%, 100% { opacity: 0.4; transform: scale(1); }
               50% { opacity: 1; transform: scale(1.3); }
             }
           `}</style>
